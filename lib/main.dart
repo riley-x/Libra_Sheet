@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 void main() {
   runApp(const LibraApp());
@@ -21,28 +21,19 @@ class LibraApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: libraDarkColorScheme,
         ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: const MyHomePage(),
       ),
     );
   }
 }
 
-class SalesData {
-  late DateTime year;
-  final double sales;
-
-  SalesData(int year, this.sales) {
-    this.year = DateTime(year);
-  }
-}
-
 class LibraAppState extends ChangeNotifier {
-  final List<SalesData> chartData = [
-    SalesData(2010, 35),
-    SalesData(2011, 28),
-    SalesData(2012, 34),
-    SalesData(2013, 32),
-    SalesData(2014, 40)
+  final List<TimeValue> chartData = [
+    TimeValue.monthEnd(2010, 1, 35),
+    TimeValue.monthEnd(2011, 2, 28),
+    TimeValue.monthEnd(2012, 3, 34),
+    TimeValue.monthEnd(2013, 4, 32),
+    TimeValue.monthEnd(2014, 5, 40)
   ];
 
   void increment() {
@@ -51,41 +42,68 @@ class LibraAppState extends ChangeNotifier {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  var selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<LibraAppState>();
-    return Scaffold(
-      body: Center(
-        child: SfCartesianChart(
-          primaryXAxis: DateTimeCategoryAxis(
-            dateFormat: DateFormat.y(),
-          ),
-          series: <ChartSeries>[
-            LineSeries<SalesData, DateTime>(
-              dataSource: appState.chartData,
-              xValueMapper: (SalesData sales, _) => sales.year,
-              yValueMapper: (SalesData sales, _) => sales.sales,
+    var chartData = appState.chartData;
+
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = TestGraph(
+          chartData: chartData,
+        );
+        break;
+      case 1:
+        page = const Placeholder();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SafeArea(
+              child: NavigationRail(
+                extended: constraints.maxWidth >= 600,
+                destinations: const [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home),
+                    label: Text('Home'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.favorite),
+                    label: Text('Favorites'),
+                  ),
+                ],
+                selectedIndex: selectedIndex,
+                onDestinationSelected: (value) {
+                  setState(() {
+                    selectedIndex = value;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: Container(
+                // color: Theme.of(context).colorScheme.primaryContainer,
+                child: page,
+              ),
             ),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
