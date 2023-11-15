@@ -10,35 +10,30 @@ class AccountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    return Center(
-      child: Container(
-        height: 100,
-        // width: 200,
-        constraints: const BoxConstraints(maxWidth: 200),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  account.name,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  account.number,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [Text(account.balance.dollarString())],
-            )
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                account.name,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text(
+                account.number,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [Text(account.balance.dollarString())],
+          )
+        ],
       ),
     );
   }
