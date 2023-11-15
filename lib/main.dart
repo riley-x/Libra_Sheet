@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/graphing/line.dart';
-import 'package:libra_sheet/libra_nav.dart';
+import 'package:libra_sheet/tabs/home/home_tab.dart';
+import 'package:libra_sheet/tabs/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:provider/provider.dart';
 
@@ -40,18 +41,13 @@ class _LibraHomePageState extends State<LibraHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<LibraAppState>();
-    var chartData = appState.chartData;
-
     Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = TestGraph(
-          chartData: chartData,
-        );
+    switch (LibraNavDestination.values[selectedIndex]) {
+      case LibraNavDestination.home:
+        page = HomeTab();
         break;
-      case 1:
-        page = const Placeholder();
+      case LibraNavDestination.balances:
+        page = TestGraph();
         break;
       default:
         page = const Placeholder();

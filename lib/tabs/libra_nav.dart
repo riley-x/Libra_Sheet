@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum LibraNavDestination {
   home(icon: Icons.home, label: 'Home'),
-  balances(icon: Icons.account_balance, label: 'Balances');
+  balances(icon: Icons.request_quote, label: 'Balances');
 
   const LibraNavDestination({
     required this.icon,
