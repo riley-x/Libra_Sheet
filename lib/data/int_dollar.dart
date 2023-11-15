@@ -7,7 +7,7 @@ extension IntDollar on int {
 
   String dollarString([int decimals = 2]) {
     final formatter = NumberFormat('\$#,###');
-    final integer = formatter.format(this / 10000);
+    final integer = formatter.format(this ~/ 10000);
     final int fraction;
     switch (decimals) {
       case 0:

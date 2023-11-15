@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
@@ -73,6 +72,7 @@ class _LibraHomePageState extends State<LibraHomePage> {
                 },
               ),
             ),
+            const SizedBox(width: 15),
             Expanded(
               child: Container(
                 // color: Theme.of(context).colorScheme.primaryContainer,

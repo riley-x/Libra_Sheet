@@ -8,7 +8,12 @@ class LibraAppState extends ChangeNotifier {
     TimeValue.monthEnd(2011, 2, 28),
     TimeValue.monthEnd(2012, 3, 34),
     TimeValue.monthEnd(2013, 4, 32),
-    TimeValue.monthEnd(2014, 5, 40)
+    TimeValue.monthEnd(2014, 5, 40),
+    TimeValue.monthEnd(2015, 1, 35),
+    TimeValue.monthEnd(2016, 2, 28),
+    TimeValue.monthEnd(2017, 3, 34),
+    TimeValue.monthEnd(2018, 4, 32),
+    TimeValue.monthEnd(2019, 5, 40)
   ];
 
   final List<Account> accounts = [
@@ -17,7 +22,12 @@ class LibraAppState extends ChangeNotifier {
         number: 'xxx-1234',
         balance: 13451200,
         lastUpdated: DateTime(2023, 11, 15)),
-    const Account(name: 'Virgo', number: 'xxx-1234', balance: -221100),
+    Account(
+      name: 'Virgo',
+      number: 'xxx-1234',
+      balance: -221100,
+      lastUpdated: DateTime(2023, 10, 15),
+    ),
   ];
 
   void increment() {

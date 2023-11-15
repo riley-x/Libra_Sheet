@@ -35,9 +35,19 @@ class LibraNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return NavigationRail(
+      backgroundColor: colorScheme.secondary,
+      indicatorColor: colorScheme.surfaceVariant,
+      unselectedLabelTextStyle:
+          textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
+      selectedLabelTextStyle:
+          textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
+      unselectedIconTheme:
+          Theme.of(context).iconTheme.copyWith(color: colorScheme.onSecondary),
       extended: extended,
-      minExtendedWidth: 150,
+      minExtendedWidth: 180,
       destinations: libraNavDestinations,
       selectedIndex: selectedIndex,
       onDestinationSelected: onDestinationSelected,

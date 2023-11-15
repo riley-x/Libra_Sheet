@@ -16,6 +16,7 @@ class TestGraph extends StatelessWidget {
       primaryXAxis: DateTimeCategoryAxis(
         // dateFormat: DateFormat.y(),
         dateFormat: DateFormat.yMMMd(),
+        majorGridLines: const MajorGridLines(width: 0),
       ),
       series: <ChartSeries>[
         LineSeries<TimeValue, DateTime>(
