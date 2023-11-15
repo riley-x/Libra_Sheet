@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/graphing/line.dart';
+import 'package:libra_sheet/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:provider/provider.dart';
 
@@ -21,34 +22,20 @@ class LibraApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: libraDarkColorScheme,
         ),
-        home: const MyHomePage(),
+        home: const LibraHomePage(),
       ),
     );
   }
 }
 
-class LibraAppState extends ChangeNotifier {
-  final List<TimeValue> chartData = [
-    TimeValue.monthEnd(2010, 1, 35),
-    TimeValue.monthEnd(2011, 2, 28),
-    TimeValue.monthEnd(2012, 3, 34),
-    TimeValue.monthEnd(2013, 4, 32),
-    TimeValue.monthEnd(2014, 5, 40)
-  ];
-
-  void increment() {
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class LibraHomePage extends StatefulWidget {
+  const LibraHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<LibraHomePage> createState() => _LibraHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _LibraHomePageState extends State<LibraHomePage> {
   var selectedIndex = 0;
 
   @override
@@ -67,7 +54,9 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const Placeholder();
         break;
       default:
-        throw UnimplementedError('no widget for $selectedIndex');
+        page = const Placeholder();
+        break;
+      // throw UnimplementedError('no widget for $selectedIndex');
     }
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -75,19 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Row(
           children: [
             SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: const [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
+              child: LibraNav(
                 selectedIndex: selectedIndex,
+                extended: constraints.maxWidth >= 600,
                 onDestinationSelected: (value) {
                   setState(() {
                     selectedIndex = value;

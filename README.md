@@ -1,4 +1,4 @@
-# libra_sheet
+# Libra Sheet
 
 A new Flutter project.
 
