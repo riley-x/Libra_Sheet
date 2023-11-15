@@ -12,7 +12,11 @@ class LibraAppState extends ChangeNotifier {
   ];
 
   final List<Account> accounts = [
-    const Account(name: 'Robinhood', number: 'xxx-1234', balance: 13451200),
+    Account(
+        name: 'Robinhood',
+        number: 'xxx-1234',
+        balance: 13451200,
+        lastUpdated: DateTime(2023, 11, 15)),
     const Account(name: 'Virgo', number: 'xxx-1234', balance: -221100),
   ];
 

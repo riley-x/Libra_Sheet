@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:libra_sheet/tabs/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
+import 'package:libra_sheet/theme/text_theme.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -22,6 +24,7 @@ class LibraApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: libraDarkColorScheme,
+          textTheme: libraTextTheme,
         ),
         home: const LibraHomePage(),
       ),

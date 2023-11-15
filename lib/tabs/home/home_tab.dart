@@ -13,12 +13,15 @@ class HomeTab extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 250,
+          width: 300,
           child: ListView(
             children: [
+              Text(
+                "Bank Accounts:",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
               for (final account in appState.accounts)
                 AccountRow(account: account),
-              Text("Next to hell"),
             ],
           ),
         ),
