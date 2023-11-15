@@ -13,11 +13,29 @@ class TestGraph extends StatelessWidget {
     var appState = context.watch<LibraAppState>();
 
     return SfCartesianChart(
-      primaryXAxis: DateTimeCategoryAxis(
+      primaryXAxis: DateTimeAxis(
         // dateFormat: DateFormat.y(),
-        dateFormat: DateFormat.yMMMd(),
-        majorGridLines: const MajorGridLines(width: 0),
+        dateFormat: DateFormat.yMMM(),
+        // interactiveTooltip: InteractiveTooltip(
+        //   enable: true,
+        //   borderColor: Colors.red,
+        //   borderWidth: 2,
+        // ),
+        // majorGridLines: const MajorGridLines(width: 0),
       ),
+      trackballBehavior: TrackballBehavior(
+        enable: true,
+        activationMode: ActivationMode.singleTap,
+        tooltipSettings: const InteractiveTooltip(
+          format: 'point.x: \$point.y',
+        ),
+      ),
+      // zoomPanBehavior: ZoomPanBehavior( // this needs to elevate to a StatefulWidget I think
+      //   enableSelectionZooming: true,
+      //   selectionRectBorderColor: Colors.red,
+      //   selectionRectBorderWidth: 1,
+      //   selectionRectColor: Colors.grey,
+      // ),
       series: <ChartSeries>[
         LineSeries<TimeValue, DateTime>(
           dataSource: appState.chartData,
@@ -25,10 +43,6 @@ class TestGraph extends StatelessWidget {
           yValueMapper: (TimeValue sales, _) => sales.value,
         ),
       ],
-      trackballBehavior: TrackballBehavior(
-        enable: true,
-        activationMode: ActivationMode.singleTap,
-      ),
     );
   }
 }

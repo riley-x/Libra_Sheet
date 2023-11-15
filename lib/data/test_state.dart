@@ -4,16 +4,16 @@ import 'package:libra_sheet/data/time_value.dart';
 
 class LibraAppState extends ChangeNotifier {
   final List<TimeValue> chartData = [
-    TimeValue.monthEnd(2010, 1, 35),
-    TimeValue.monthEnd(2011, 2, 28),
-    TimeValue.monthEnd(2012, 3, 34),
-    TimeValue.monthEnd(2013, 4, 32),
-    TimeValue.monthEnd(2014, 5, 40),
-    TimeValue.monthEnd(2015, 1, 35),
-    TimeValue.monthEnd(2016, 2, 28),
-    TimeValue.monthEnd(2017, 3, 34),
-    TimeValue.monthEnd(2018, 4, 32),
-    TimeValue.monthEnd(2019, 5, 40)
+    TimeValue.monthEnd(2019, 1, 35),
+    TimeValue.monthEnd(2019, 2, 28),
+    TimeValue.monthEnd(2019, 3, 34),
+    TimeValue.monthEnd(2019, 4, 32),
+    TimeValue.monthEnd(2019, 5, 40),
+    TimeValue.monthEnd(2019, 6, 35),
+    TimeValue.monthEnd(2019, 7, 28),
+    TimeValue.monthEnd(2019, 8, 34.140001),
+    TimeValue.monthEnd(2019, 9, 32.01),
+    TimeValue.monthEnd(2019, 10, 40.10)
   ];
 
   final List<Account> accounts = [

@@ -47,13 +47,10 @@ class _LibraHomePageState extends State<LibraHomePage> {
     switch (LibraNavDestination.values[selectedIndex]) {
       case LibraNavDestination.home:
         page = HomeTab();
-        break;
-      case LibraNavDestination.balances:
-        page = TestGraph();
-        break;
+      case LibraNavDestination.cashFlows:
+        page = Placeholder();
       default:
         page = const Placeholder();
-        break;
       // throw UnimplementedError('no widget for $selectedIndex');
     }
 
@@ -64,7 +61,7 @@ class _LibraHomePageState extends State<LibraHomePage> {
             SafeArea(
               child: LibraNav(
                 selectedIndex: selectedIndex,
-                extended: constraints.maxWidth >= 600,
+                extended: constraints.maxWidth >= 800,
                 onDestinationSelected: (value) {
                   setState(() {
                     selectedIndex = value;

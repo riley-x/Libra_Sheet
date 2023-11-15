@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 enum LibraNavDestination {
   home(icon: Icons.home, label: 'Home'),
-  balances(icon: Icons.request_quote, label: 'Balances');
+  cashFlows(icon: Icons.swap_horiz, label: 'Cash Flows'),
+  categories(icon: Icons.category, label: 'Categories'),
+  transactions(icon: Icons.request_quote, label: 'Transactions');
 
   const LibraNavDestination({
     required this.icon,
@@ -13,7 +15,7 @@ enum LibraNavDestination {
   final String label;
 }
 
-var libraNavDestinations = [
+final libraNavDestinations = [
   for (var dest in LibraNavDestination.values)
     NavigationRailDestination(
       icon: Icon(dest.icon),

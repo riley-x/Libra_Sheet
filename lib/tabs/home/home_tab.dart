@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
-import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
-import 'package:provider/provider.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
