@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/data/test_data.dart';
 
 class LibraAppState extends ChangeNotifier {
   final List<TimeValue> chartData = [
@@ -16,29 +17,7 @@ class LibraAppState extends ChangeNotifier {
     TimeValue.monthEnd(2019, 10, 40.10)
   ];
 
-  final List<Account> accounts = [
-    Account(
-      name: 'Robinhood',
-      number: 'xxx-1234',
-      balance: 13451200,
-      lastUpdated: DateTime(2023, 11, 15),
-      color: Colors.green,
-    ),
-    Account(
-      name: 'Virgo',
-      number: 'xxx-1234',
-      balance: 4221100,
-      lastUpdated: DateTime(2023, 10, 15),
-      color: Colors.red,
-    ),
-    Account(
-      name: 'TD',
-      number: 'xxx-1234',
-      balance: 124221100,
-      lastUpdated: DateTime(2023, 10, 15),
-      color: Colors.lightBlue,
-    ),
-  ];
+  final List<Account> accounts = testAccounts;
 
   void increment() {
     notifyListeners();

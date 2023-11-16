@@ -28,10 +28,11 @@ class TransactionCard extends StatelessWidget {
                       trans.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      // style: theme.textTheme.titleMedium,
                     ),
                     Text(
                       trans.account?.name ?? "",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: theme.colorScheme.outline),
                     ),
@@ -44,7 +45,10 @@ class TransactionCard extends StatelessWidget {
                 children: [
                   Text(
                     trans.value.dollarString(),
-                    style: theme.textTheme.titleMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        color: (trans.value < 0)
+                            ? theme.colorScheme.error
+                            : Colors.green),
                   ),
                   Text(
                     dtFormat.format(trans.date),
