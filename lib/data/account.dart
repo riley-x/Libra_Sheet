@@ -7,6 +7,8 @@ class Account {
     required this.number,
     this.lastUpdated,
     this.color,
+    this.key = -1,
+    this.csvFormat = "",
   });
 
   final String name;
@@ -14,4 +16,7 @@ class Account {
   final String number;
   final DateTime? lastUpdated;
   final Color? color;
+
+  final int key;
+  final String csvFormat;
 }

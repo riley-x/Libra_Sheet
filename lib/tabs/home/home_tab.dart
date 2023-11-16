@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/transaction.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
 import 'package:libra_sheet/tabs/home/account_screen.dart';
@@ -8,9 +9,22 @@ import 'package:provider/provider.dart';
 
 class HomeTabState extends ChangeNotifier {
   Account? accountFocused;
+  List<Transaction>? accountFocusedTransactions = [
+    Transaction(
+        name: "TARGET abbey is awesome",
+        date: DateTime(2023, 11, 16),
+        value: -502300),
+    Transaction(
+        name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
+        date: DateTime(2023, 11, 15),
+        value: 502300),
+    Transaction(
+        name: "test test", date: DateTime(2023, 11, 12), value: 12322300),
+  ];
 
   void focusAccount(Account? account) {
     accountFocused = account;
+    // load accountFocusedTransactions
     notifyListeners();
   }
 }
