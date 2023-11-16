@@ -18,21 +18,25 @@ class LibraAppState extends ChangeNotifier {
 
   final List<Account> accounts = [
     Account(
-        name: 'Robinhood',
-        number: 'xxx-1234',
-        balance: 13451200,
-        lastUpdated: DateTime(2023, 11, 15)),
+      name: 'Robinhood',
+      number: 'xxx-1234',
+      balance: 13451200,
+      lastUpdated: DateTime(2023, 11, 15),
+      color: Colors.green,
+    ),
     Account(
       name: 'Virgo',
       number: 'xxx-1234',
       balance: 4221100,
       lastUpdated: DateTime(2023, 10, 15),
+      color: Colors.red,
     ),
     Account(
       name: 'TD',
       number: 'xxx-1234',
       balance: 124221100,
       lastUpdated: DateTime(2023, 10, 15),
+      color: Colors.lightBlue,
     ),
   ];
 

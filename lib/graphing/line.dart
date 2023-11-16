@@ -1,4 +1,5 @@
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +58,7 @@ class TestPie extends StatelessWidget {
     var appState = context.watch<LibraAppState>();
 
     return SfCircularChart(
-      margin: const EdgeInsets.all(0),
+      margin: const EdgeInsets.only(top: 5),
       tooltipBehavior: TooltipBehavior(
         enable: true,
         activationMode: ActivationMode.singleTap,
@@ -69,11 +70,23 @@ class TestPie extends StatelessWidget {
           dataSource: appState.accounts,
           xValueMapper: (Account data, _) => data.name,
           yValueMapper: (Account data, _) => data.balance / 10000,
-          // pointColorMapper: (Account data, _) => account.color,
+          pointColorMapper: (Account account, _) => account.color,
+          dataLabelMapper: (Account account, _) => account.name,
+          // account.balance.dollarString(),
           radius: '100%',
+          innerRadius: '60%',
           enableTooltip: true,
           // explode: true,
           // explodeGesture: ActivationMode.singleTap,
+          dataLabelSettings: DataLabelSettings(
+            isVisible: true,
+            textStyle: Theme.of(context).textTheme.labelLarge,
+            labelIntersectAction:
+                LabelIntersectAction.shift, // Avoid labels intersection
+            labelPosition: ChartDataLabelPosition.outside,
+            // connectorLineSettings:
+            // ConnectorLineSettings(type: ConnectorType.curve, length: '25%'),
+          ),
         ),
       ],
     );
