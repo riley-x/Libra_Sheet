@@ -4,6 +4,10 @@ class TimeValue {
 
   const TimeValue({required this.time, required this.value});
 
+  factory TimeValue.monthStart(int year, int month, double value) {
+    return TimeValue(time: DateTime(year, month, 1), value: value);
+  }
+
   factory TimeValue.monthEnd(int year, int month, double value) {
     return TimeValue(time: DateTime(year, month + 1, 0), value: value);
   }

@@ -11,7 +11,7 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    final dtFormat = DateFormat.yMMMd();
+    final dtFormat = DateFormat("M/d/yy");
 
     return GestureDetector(
       child: Card(

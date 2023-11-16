@@ -37,18 +37,50 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
           ],
         ),
         Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 400,
-              childAspectRatio: 5,
-            ),
-            itemCount: widget.transactions.length,
-            itemBuilder: (context, index) {
-              return TransactionCard(trans: widget.transactions[index]);
-            },
-          ),
+          child: TransactionGrid(widget.transactions),
         ),
       ],
+    );
+  }
+}
+
+class TransactionGrid extends StatelessWidget {
+  const TransactionGrid(
+    this.transactions, {
+    super.key,
+  });
+
+  final List<Transaction> transactions;
+
+  @override
+  Widget build(BuildContext context) {
+    // Don't use GridLayout here because it has to fix the aspect ratio on the items instead
+    // of using the instrinsic height.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const minWidth = 300;
+        final numCols = (constraints.maxWidth / minWidth).floor();
+        final numRows = (transactions.length + numCols - 1) ~/ numCols;
+        return ListView.builder(
+          itemCount: numRows,
+          itemBuilder: (context, index) {
+            final startIndex = index * numCols;
+            if (startIndex >= transactions.length) return null;
+            return Row(
+              children: [
+                for (int i = startIndex; i < startIndex + numCols; i++)
+                  (i >= transactions.length)
+                      ? const Spacer()
+                      : Expanded(
+                          child: TransactionCard(
+                            trans: transactions[i],
+                          ),
+                        ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
