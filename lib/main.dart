@@ -67,7 +67,7 @@ class _LibraHomePageState extends State<LibraHomePage> {
             SafeArea(
               child: LibraNav(
                 selectedIndex: selectedIndex,
-                extended: constraints.maxWidth >= 800,
+                extended: constraints.maxWidth >= 900,
                 onDestinationSelected: (value) {
                   setState(() {
                     selectedIndex = value;
