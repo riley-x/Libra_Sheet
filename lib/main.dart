@@ -48,7 +48,13 @@ class _LibraHomePageState extends State<LibraHomePage> {
       case LibraNavDestination.home:
         page = HomeTab();
       case LibraNavDestination.cashFlows:
-        page = Placeholder();
+        page = Center(
+          child: Container(
+            width: 1000,
+            height: 1000,
+            child: TestPie(),
+          ),
+        );
       default:
         page = const Placeholder();
       // throw UnimplementedError('no widget for $selectedIndex');

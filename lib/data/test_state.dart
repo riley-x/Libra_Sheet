@@ -25,7 +25,13 @@ class LibraAppState extends ChangeNotifier {
     Account(
       name: 'Virgo',
       number: 'xxx-1234',
-      balance: -221100,
+      balance: 4221100,
+      lastUpdated: DateTime(2023, 10, 15),
+    ),
+    Account(
+      name: 'TD',
+      number: 'xxx-1234',
+      balance: 124221100,
       lastUpdated: DateTime(2023, 10, 15),
     ),
   ];

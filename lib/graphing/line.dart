@@ -1,3 +1,4 @@
+import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:provider/provider.dart';
@@ -38,9 +39,41 @@ class TestGraph extends StatelessWidget {
       // ),
       series: <ChartSeries>[
         LineSeries<TimeValue, DateTime>(
+          animationDuration: 300,
           dataSource: appState.chartData,
           xValueMapper: (TimeValue sales, _) => sales.time,
           yValueMapper: (TimeValue sales, _) => sales.value,
+        ),
+      ],
+    );
+  }
+}
+
+class TestPie extends StatelessWidget {
+  const TestPie({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<LibraAppState>();
+
+    return SfCircularChart(
+      margin: const EdgeInsets.all(0),
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        activationMode: ActivationMode.singleTap,
+        format: 'point.x: \$point.y',
+      ),
+      series: <CircularSeries>[
+        DoughnutSeries<Account, String>(
+          animationDuration: 300,
+          dataSource: appState.accounts,
+          xValueMapper: (Account data, _) => data.name,
+          yValueMapper: (Account data, _) => data.balance / 10000,
+          // pointColorMapper: (Account data, _) => account.color,
+          radius: '100%',
+          enableTooltip: true,
+          // explode: true,
+          // explodeGesture: ActivationMode.singleTap,
         ),
       ],
     );

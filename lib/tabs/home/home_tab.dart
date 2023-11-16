@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -42,6 +44,13 @@ class HomeTab extends StatelessWidget {
                 ],
               ),
               const TestGraph(),
+              Center(
+                child: Container(
+                  // width: 500,
+                  // height: 500,
+                  child: TestPie(),
+                ),
+              ),
             ],
           ),
         ),
