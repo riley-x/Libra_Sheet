@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -21,7 +23,15 @@ class HeatMapPainter<T> extends CustomPainter {
 
   /// _reverseCumValues[i] = sum(data.values[i:]), with 0 appended at end
   late List<double> _reverseCumValues;
+
+  /// Common brush used to paint all the rectangles
   final Paint _brush;
+
+  /// List of the positions of each entry, in parallel order to [data]. This is replaced every call
+  /// to [paint]. Used for hit testing.
+  final List<Rect> _positions = [];
+
+  final ParagraphBuilder _paragraphBuilder;
 
   /// The minimum ratio between an entry value and the max value in the current
   /// row/column to align it with the row.
@@ -34,7 +44,9 @@ class HeatMapPainter<T> extends CustomPainter {
     this.labelMapper,
     this.minSameAxisRatio = 0.6,
     bool dataAlreadySorted = false,
-  }) : _brush = Paint() {
+    ParagraphStyle? style,
+  })  : _brush = Paint(),
+        _paragraphBuilder = ParagraphBuilder(style ?? ParagraphStyle()) {
     /// Sort largest to smallest.
     if (!dataAlreadySorted) {
       this.data.sort((a, b) {
@@ -55,9 +67,9 @@ class HeatMapPainter<T> extends CustomPainter {
       _reverseCumValues.insert(0, val + _reverseCumValues.first);
     }
 
-    _brush
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
+    // _brush
+    //   ..strokeWidth = 5
+    //   ..strokeCap = StrokeCap.round;
   }
 
   /// Returns the end index (exclusive) of the entry last large enough to be in the same as
@@ -73,10 +85,12 @@ class HeatMapPainter<T> extends CustomPainter {
     return end;
   }
 
-  /// Paints a single entry (rectangle)
+  /// Paints a single entry (rectangle). MAKE SURE this is called in index order, since we simply
+  /// append to the [_positions] list.
   void _paintEntry(Canvas canvas, int index, Rect rect) {
     _brush.color = colorMapper?.call(data[index]) ?? Colors.teal;
     canvas.drawRect(rect, _brush);
+    canvas._positions.add(rect);
   }
 
   /// Paints a group indexed by [start, end) along the larger axis. The boxes will use the full
@@ -161,6 +175,7 @@ class HeatMapPainter<T> extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    _positions.clear();
     _paintGroup(canvas, 0, size, Offset.zero);
   }
 

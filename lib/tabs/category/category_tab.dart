@@ -17,19 +17,20 @@ class CategoryTab extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                Expanded(child: HeatMap()),
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [],
-                ),
+                Expanded(child: HeatMap()),
                 const SizedBox(height: 10),
               ],
             ),
           ),
-          SizedBox(width: 10),
+          SizedBox(width: 20),
+          Container(
+            width: 1,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+          SizedBox(width: 20),
           CategoryTabFilters(),
-          SizedBox(width: 10),
+          SizedBox(width: 20),
         ],
       ),
     );

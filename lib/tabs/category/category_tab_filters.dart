@@ -10,9 +10,9 @@ class CategoryTabFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<CategoryTabState>();
     return Column(
       children: [
+        const SizedBox(height: 10),
         Text(
           "Options",
           style: Theme.of(context).textTheme.headlineMedium,
