@@ -6,7 +6,8 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CategoryStackChart extends StatelessWidget {
   final List<CategoryHistory> data;
-  const CategoryStackChart(this.data, {super.key});
+  final (int, int) range;
+  const CategoryStackChart(this.data, this.range, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +28,10 @@ class CategoryStackChart extends StatelessWidget {
       series: <ChartSeries>[
         for (final categoryHistory in chartData1)
           StackedColumnSeries<TimeValue, String>(
-            dataSource: categoryHistory.values,
+            animationDuration: 300,
+            dataSource: categoryHistory.values.sublist(range.$1, range.$2),
             name: categoryHistory.category.name,
+            color: categoryHistory.category.color,
             xValueMapper: (TimeValue data, _) => format.format(data.time),
             yValueMapper: (TimeValue data, _) => data.value,
           ),
@@ -44,14 +47,12 @@ final chartData1 = [
       TimeValue(time: DateTime(2010), value: 100),
       TimeValue(time: DateTime(2011), value: 200),
       TimeValue(time: DateTime(2012), value: 300),
-      TimeValue(time: DateTime(2013), value: 300),
-      TimeValue(time: DateTime(2014), value: 300),
     ],
   ),
   CategoryHistory(
     Category(name: "category2"),
     [
-      TimeValue(time: DateTime(2010), value: 100),
+      TimeValue(time: DateTime(2010), value: 500),
       TimeValue(time: DateTime(2011), value: 200),
       TimeValue(time: DateTime(2012), value: 300),
     ],
@@ -59,7 +60,7 @@ final chartData1 = [
   CategoryHistory(
     Category(name: "category3"),
     [
-      TimeValue(time: DateTime(2010), value: 100),
+      TimeValue(time: DateTime(2010), value: 400),
       TimeValue(time: DateTime(2011), value: 200),
       TimeValue(time: DateTime(2012), value: 300),
     ],
