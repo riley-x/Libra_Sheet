@@ -93,6 +93,7 @@ class HeatMapPainter<T> extends CustomPainter {
   void _paintEntry(Canvas canvas, int index, Rect rect) {
     _brush.color = colorMapper?.call(data[index]) ?? Colors.teal;
     canvas.drawRect(rect, _brush);
+    assert(_positions.length == index);
     _positions.add(rect);
 
     /// Draw label
