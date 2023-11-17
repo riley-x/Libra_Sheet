@@ -31,7 +31,7 @@ class HeatMapPainter<T> extends CustomPainter {
   /// to [paint]. Used for hit testing.
   final List<Rect> _positions = [];
 
-  final ParagraphBuilder _paragraphBuilder;
+  final TextStyle? textStyle;
 
   /// The minimum ratio between an entry value and the max value in the current
   /// row/column to align it with the row.
@@ -39,14 +39,13 @@ class HeatMapPainter<T> extends CustomPainter {
 
   HeatMapPainter(
     this.data, {
-    this.colorMapper,
     required this.valueMapper,
+    this.colorMapper,
     this.labelMapper,
     this.minSameAxisRatio = 0.6,
     bool dataAlreadySorted = false,
-    ParagraphStyle? style,
-  })  : _brush = Paint(),
-        _paragraphBuilder = ParagraphBuilder(style ?? ParagraphStyle()) {
+    this.textStyle,
+  }) : _brush = Paint() {
     /// Sort largest to smallest.
     if (!dataAlreadySorted) {
       this.data.sort((a, b) {
@@ -61,15 +60,12 @@ class HeatMapPainter<T> extends CustomPainter {
       });
     }
 
+    /// Calculate cumulative values
     _reverseCumValues = [0];
     for (var i = data.length - 1; i >= 0; i--) {
       final val = valueMapper(data[i]);
       _reverseCumValues.insert(0, val + _reverseCumValues.first);
     }
-
-    // _brush
-    //   ..strokeWidth = 5
-    //   ..strokeCap = StrokeCap.round;
   }
 
   /// Returns the end index (exclusive) of the entry last large enough to be in the same as
@@ -85,12 +81,36 @@ class HeatMapPainter<T> extends CustomPainter {
     return end;
   }
 
+  /// Chooses the label text color based on the background color
+  /// https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
+  Color _textColor(Color bkg) {
+    if (bkg.red * 0.299 + bkg.green * 0.587 + bkg.blue * 0.114 > 186) return Colors.black;
+    return Colors.white;
+  }
+
   /// Paints a single entry (rectangle). MAKE SURE this is called in index order, since we simply
   /// append to the [_positions] list.
   void _paintEntry(Canvas canvas, int index, Rect rect) {
     _brush.color = colorMapper?.call(data[index]) ?? Colors.teal;
     canvas.drawRect(rect, _brush);
-    canvas._positions.add(rect);
+    _positions.add(rect);
+
+    /// Draw label
+    if (labelMapper != null) {
+      final TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: labelMapper!.call(data[index]),
+          style: textStyle?.copyWith(color: _textColor(_brush.color)),
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      final textSize = Offset(textPainter.width, textPainter.height);
+      if (textSize.dx < rect.width && textSize.dy < rect.height) {
+        textPainter.paint(canvas, rect.center - textSize / 2);
+      }
+    }
   }
 
   /// Paints a group indexed by [start, end) along the larger axis. The boxes will use the full
@@ -203,6 +223,7 @@ class _HeatMapState extends State<HeatMap> {
         testCategoryValues.entries.toList(),
         valueMapper: (it) => it.value.asDollarDouble(),
         colorMapper: (it) => it.key.color,
+        labelMapper: (it) => "${it.key.name}\n${it.value.dollarString()}",
       ),
       size: Size.infinite,
     );
