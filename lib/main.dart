@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/graphing/line.dart';
+import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:libra_sheet/tabs/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
@@ -46,15 +47,9 @@ class _LibraHomePageState extends State<LibraHomePage> {
     Widget page;
     switch (LibraNavDestination.values[selectedIndex]) {
       case LibraNavDestination.home:
-        page = HomeTab();
+        page = const HomeTab();
       case LibraNavDestination.cashFlows:
-        page = Center(
-          child: Container(
-            width: 1000,
-            height: 1000,
-            child: TestPie(),
-          ),
-        );
+        page = const CashFlowTab();
       default:
         page = const Placeholder();
       // throw UnimplementedError('no widget for $selectedIndex');

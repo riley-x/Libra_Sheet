@@ -13,6 +13,7 @@ class TransactionFilterGrid extends StatefulWidget {
 }
 
 class _TransactionFilterGridState extends State<TransactionFilterGrid> {
+  // TODO put current filter state here, do the actual filtering
   var myInt = 0;
 
   @override
@@ -21,15 +22,17 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
       children: [
         Row(
           children: [
-            Text(
-              "Recent Transactions",
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            (widget.title != null)
+                ? widget.title!
+                : Text(
+                    "Recent Transactions",
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
             const Spacer(),
             IconButton(
               onPressed: null,
               icon: Icon(
-                Icons.filter_alt,
+                Icons.filter_list,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
