@@ -59,7 +59,7 @@ class _CashFlowTabState extends State<CashFlowTab> {
             });
           },
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
       ],
     );
   }

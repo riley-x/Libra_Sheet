@@ -1,8 +1,8 @@
 import 'package:intl/intl.dart';
 
 extension IntDollar on int {
-  double asDouble() {
-    return toDouble() / 10000;
+  double asDollarDouble() {
+    return (this ~/ 100).toDouble() / 100;
   }
 
   String dollarString([int decimals = 2]) {
