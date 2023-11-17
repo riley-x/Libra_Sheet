@@ -73,6 +73,12 @@ class HeatMapPainter<T> extends CustomPainter {
     return end;
   }
 
+  /// Paints a single entry (rectangle)
+  void _paintEntry(Canvas canvas, int index, Rect rect) {
+    _brush.color = colorMapper?.call(data[index]) ?? Colors.teal;
+    canvas.drawRect(rect, _brush);
+  }
+
   /// Paints a group indexed by [start, end) along the larger axis. The boxes will use the full
   /// width of the cross axis.
   Offset _paintGroupAlongLargeAxis(Canvas canvas, int start, int end, Size size, Offset topLeft) {
@@ -86,8 +92,7 @@ class HeatMapPainter<T> extends CustomPainter {
       for (var i = start; i < end; i++) {
         final thisWidth = width * valueMapper(data[i]) / total;
         final rect = Rect.fromLTWH(x, topLeft.dy, thisWidth, height);
-        _brush.color = colorMapper?.call(data[i]) ?? Colors.teal;
-        canvas.drawRect(rect, _brush);
+        _paintEntry(canvas, i, rect);
         x += thisWidth;
       }
       return Offset(x, topLeft.dy);
@@ -97,8 +102,7 @@ class HeatMapPainter<T> extends CustomPainter {
       for (var i = start; i < end; i++) {
         final thisHeight = height * valueMapper(data[i]) / total;
         final rect = Rect.fromLTWH(topLeft.dx, y, width, thisHeight);
-        _brush.color = colorMapper?.call(data[i]) ?? Colors.teal;
-        canvas.drawRect(rect, _brush);
+        _paintEntry(canvas, i, rect);
         y += thisHeight;
       }
       return Offset(topLeft.dx, y);
@@ -120,8 +124,7 @@ class HeatMapPainter<T> extends CustomPainter {
       for (var i = start; i < end; i++) {
         final thisWidth = width * valueMapper(data[i]) / groupTotal;
         final rect = Rect.fromLTWH(x, topLeft.dy, thisWidth, groupHeight);
-        _brush.color = colorMapper?.call(data[i]) ?? Colors.teal;
-        canvas.drawRect(rect, _brush);
+        _paintEntry(canvas, i, rect);
         x += thisWidth;
       }
       return Offset(topLeft.dx, topLeft.dy + groupHeight);
@@ -132,8 +135,7 @@ class HeatMapPainter<T> extends CustomPainter {
       for (var i = start; i < end; i++) {
         final thisHeight = height * valueMapper(data[i]) / groupTotal;
         final rect = Rect.fromLTWH(topLeft.dx, y, groupWidth, thisHeight);
-        _brush.color = colorMapper?.call(data[i]) ?? Colors.teal;
-        canvas.drawRect(rect, _brush);
+        _paintEntry(canvas, i, rect);
         y += thisHeight;
       }
       return Offset(topLeft.dx + groupWidth, topLeft.dy);
