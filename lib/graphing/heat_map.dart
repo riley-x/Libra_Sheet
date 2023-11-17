@@ -224,6 +224,7 @@ class _HeatMapState extends State<HeatMap> {
         valueMapper: (it) => it.value.asDollarDouble(),
         colorMapper: (it) => it.key.color,
         labelMapper: (it) => "${it.key.name}\n${it.value.dollarString()}",
+        textStyle: Theme.of(context).textTheme.labelLarge,
       ),
       size: Size.infinite,
     );
