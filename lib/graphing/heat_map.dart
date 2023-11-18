@@ -29,7 +29,7 @@ class HeatMapPainter<T> extends CustomPainter {
 
   /// List of the positions of each entry, in parallel order to [data]. This is replaced every call
   /// to [paint]. Used for hit testing.
-  final List<Rect> _positions = [];
+  final List<Rect> positions = [];
 
   final TextStyle? textStyle;
 
@@ -89,12 +89,12 @@ class HeatMapPainter<T> extends CustomPainter {
   }
 
   /// Paints a single entry (rectangle). MAKE SURE this is called in index order, since we simply
-  /// append to the [_positions] list.
+  /// append to the [positions] list.
   void _paintEntry(Canvas canvas, int index, Rect rect) {
     _brush.color = colorMapper?.call(data[index]) ?? Colors.teal;
     canvas.drawRect(rect, _brush);
-    assert(_positions.length == index);
-    _positions.add(rect);
+    assert(positions.length == index);
+    positions.add(rect);
 
     /// Draw label
     if (labelMapper != null) {
@@ -196,7 +196,7 @@ class HeatMapPainter<T> extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _positions.clear();
+    positions.clear();
     _paintGroup(canvas, 0, size, Offset.zero);
   }
 
@@ -207,27 +207,50 @@ class HeatMapPainter<T> extends CustomPainter {
         valueMapper != oldDelegate.valueMapper ||
         labelMapper != oldDelegate.labelMapper;
   }
+
+  @override
+  bool hitTest(Offset position) {
+    return true;
+  }
 }
 
 class HeatMap extends StatefulWidget {
-  const HeatMap({super.key});
+  final Function(Category)? onSelect;
+
+  const HeatMap({super.key, this.onSelect});
 
   @override
   State<HeatMap> createState() => _HeatMapState();
 }
 
 class _HeatMapState extends State<HeatMap> {
+  void _onTapUp(HeatMapPainter<MapEntry<Category, int>> painter, TapUpDetails details) {
+    if (widget.onSelect == null) return;
+    for (int i = 0; i < painter.positions.length; i++) {
+      if (painter.positions[i].contains(details.localPosition)) {
+        if (i >= painter.data.length) return; // shouldn't happen
+        widget.onSelect!(painter.data[i].key);
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: HeatMapPainter<MapEntry<Category, int>>(
-        testCategoryValues.entries.toList(),
-        valueMapper: (it) => it.value.asDollarDouble(),
-        colorMapper: (it) => it.key.color,
-        labelMapper: (it) => "${it.key.name}\n${it.value.dollarString()}",
-        textStyle: Theme.of(context).textTheme.labelLarge,
+    final painter = HeatMapPainter<MapEntry<Category, int>>(
+      testCategoryValues.entries.toList(),
+      valueMapper: (it) => it.value.asDollarDouble(),
+      colorMapper: (it) => it.key.color,
+      labelMapper: (it) => "${it.key.name}\n${it.value.dollarString()}",
+      textStyle: Theme.of(context).textTheme.labelLarge,
+    );
+    return GestureDetector(
+      onTapUp: (it) => _onTapUp(painter, it),
+      child: CustomPaint(
+        painter: painter,
+        // foregroundPainter: ,
+        size: Size.infinite,
       ),
-      size: Size.infinite,
     );
   }
 }

@@ -18,7 +18,11 @@ class CategoryTab extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                Expanded(child: HeatMap()),
+                Expanded(
+                  child: HeatMap(
+                    onSelect: (it) => print(it.name),
+                  ),
+                ),
                 const SizedBox(height: 10),
               ],
             ),
