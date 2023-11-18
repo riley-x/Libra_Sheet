@@ -150,8 +150,8 @@ class HeatMapPainter<T> extends CustomPainter {
   /// _reverseCumValues[i] = sum(data.values[i:]), with 0 appended at end
   late List<double> _reverseCumValues;
 
-  /// Common brush used to paint all the rectangles
-  final Paint _brush;
+  /// Brush used to draw the rectangle borders
+  final Paint _borderBrush;
 
   /// List of the positions of each entry, in parallel order to [data]. This is replaced every call
   /// to [paint]. Used for hit testing.
@@ -171,7 +171,7 @@ class HeatMapPainter<T> extends CustomPainter {
     this.minSameAxisRatio = 0.6,
     bool dataAlreadySorted = false,
     this.textStyle,
-  }) : _brush = Paint() {
+  }) : _borderBrush = Paint() {
     /// Sort largest to smallest.
     if (!dataAlreadySorted) {
       this.data.sort((a, b) {
@@ -188,6 +188,11 @@ class HeatMapPainter<T> extends CustomPainter {
 
     /// Calculate cumulative values
     _reverseCumValues = reverseCumSum(data, valueMapper);
+
+    _borderBrush
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = Colors.white;
   }
 
   /// Chooses the label text color based on the background color
@@ -200,8 +205,9 @@ class HeatMapPainter<T> extends CustomPainter {
   /// Paints a single entry (rectangle). MAKE SURE this is called in index order, since we simply
   /// append to the [positions] list.
   void _paintEntry(Canvas canvas, int index, Rect rect) {
-    _brush.color = colorMapper?.call(data[index]) ?? Colors.teal;
-    canvas.drawRect(rect, _brush);
+    Paint brush = Paint()..color = colorMapper?.call(data[index]) ?? Colors.teal;
+    canvas.drawRect(rect, brush);
+    canvas.drawRect(rect, _borderBrush);
     positions.add(rect);
 
     /// Draw label
@@ -209,7 +215,7 @@ class HeatMapPainter<T> extends CustomPainter {
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: labelMapper!.call(data[index]),
-          style: textStyle?.copyWith(color: _textColor(_brush.color)),
+          style: textStyle?.copyWith(color: _textColor(brush.color)),
         ),
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
