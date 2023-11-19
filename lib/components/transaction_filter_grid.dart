@@ -33,7 +33,7 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
                   ),
             const Spacer(),
             IconButton(
-              onPressed: null,
+              onPressed: () => print('TODO filter transactions'), // TODO
               icon: Icon(
                 Icons.filter_list,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

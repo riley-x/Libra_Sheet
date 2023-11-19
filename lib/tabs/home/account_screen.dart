@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/line.dart';
+import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:provider/provider.dart';
 
@@ -67,9 +68,15 @@ class AccountScreen extends StatelessWidget {
                 width: 1,
                 color: Theme.of(context).colorScheme.outlineVariant,
               ),
-              const SizedBox(width: 5),
-              const Expanded(child: TestGraph()),
-              const SizedBox(width: 10),
+              Expanded(
+                child: ChartWithTitle(
+                  /// this empircally matches the extra height caused by the icon button in the transaction filter grid
+                  padding: const EdgeInsets.only(top: 7),
+                  textLeft: 'Balance History',
+                  textStyle: Theme.of(context).textTheme.headlineSmall,
+                  child: TestGraph(),
+                ),
+              ),
             ],
           ),
         ),

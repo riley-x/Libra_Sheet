@@ -8,14 +8,15 @@ class ChartWithTitle extends StatelessWidget {
   final EdgeInsets padding;
   final Widget? child;
 
-  const ChartWithTitle(
-      {super.key,
-      this.height,
-      this.textLeft,
-      this.textRight,
-      this.textStyle,
-      this.padding = EdgeInsets.zero,
-      this.child});
+  const ChartWithTitle({
+    super.key,
+    this.height,
+    this.textLeft,
+    this.textRight,
+    this.textStyle,
+    this.padding = EdgeInsets.zero,
+    this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
