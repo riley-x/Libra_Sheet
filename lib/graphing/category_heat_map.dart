@@ -4,7 +4,7 @@ import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/heat_map_painter.dart';
 
 class CategoryHeatMap extends StatefulWidget {
-  final Function(Category)? onSelect;
+  final Function(CategoryValue)? onSelect;
   final bool showSubCategories;
   // final List<CategoryValue> categories;
 
