@@ -13,9 +13,9 @@ class HomeCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       const minChartHeight = 400.0;
-      final pieChartsAligned = constraints.maxWidth > 2 * minChartHeight + 50;
-      if (pieChartsAligned && constraints.maxHeight > 2 * minChartHeight + 50) {
-        return Placeholder();
+      final pieChartsAligned = constraints.maxWidth > 2 * minChartHeight + 16;
+      if (pieChartsAligned && constraints.maxHeight > 2 * minChartHeight + 16) {
+        return const _ExpandedCharts();
       } else {
         return _ListCharts(
           chartHeight: minChartHeight,
@@ -34,15 +34,13 @@ class _ExpandedCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Expanded(child: _NetWorthGraph(null)),
+        Container(
+          height: 1,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
         Expanded(
-          child: ChartWithTitle(
-            height: 300,
-            textLeft: 'Net Worth',
-            textRight: 13413418374.dollarString(),
-            textStyle: Theme.of(context).textTheme.headlineMedium,
-            padding: const EdgeInsets.only(top: 10),
-            child: TestGraph(),
-          ),
+          child: _alignedPies(null, context)[0],
         ),
       ],
     );
@@ -63,77 +61,9 @@ class _ListCharts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> pieChildren = (pieChartsAligned)
-        ? [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: ChartWithTitle(
-                    height: chartHeight,
-                    textLeft: 'Assets',
-                    textRight: '\$123.00',
-                    textStyle: Theme.of(context).textTheme.headlineMedium,
-                    padding: const EdgeInsets.only(top: 10),
-                    child: TestPie(),
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  height: chartHeight,
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ChartWithTitle(
-                    height: chartHeight,
-                    textLeft: 'Assets',
-                    textRight: '\$123.00',
-                    textStyle: Theme.of(context).textTheme.headlineMedium,
-                    padding: const EdgeInsets.only(top: 10),
-                    child: TestPie(),
-                  ),
-                ),
-              ],
-            ),
-          ]
-        : [
-            Center(
-              child: ChartWithTitle(
-                height: chartHeight,
-                textLeft: 'Assets',
-                textRight: '\$123.00',
-                textStyle: Theme.of(context).textTheme.headlineMedium,
-                padding: const EdgeInsets.only(top: 10),
-                child: TestPie(),
-              ),
-            ),
-            Container(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            Center(
-              child: ChartWithTitle(
-                height: chartHeight,
-                textLeft: 'Assets',
-                textRight: '\$123.00',
-                textStyle: Theme.of(context).textTheme.headlineMedium,
-                padding: const EdgeInsets.only(top: 10),
-                child: TestPie(),
-              ),
-            ),
-          ];
-
     return ListView(
       children: [
-        ChartWithTitle(
-          height: chartHeight,
-          textLeft: 'Net Worth',
-          textRight: 13413418374.dollarString(),
-          textStyle: Theme.of(context).textTheme.headlineMedium,
-          padding: const EdgeInsets.only(top: 10),
-          child: TestGraph(),
-        ),
+        _NetWorthGraph(chartHeight),
         const SizedBox(height: 5),
         Container(
           height: 1,
@@ -141,8 +71,93 @@ class _ListCharts extends StatelessWidget {
         ),
 
         /// Don't add padding here or else the vertical grid lines won't be tight
-        ...pieChildren,
+        if (pieChartsAligned) ..._alignedPies(chartHeight, context),
+        if (!pieChartsAligned) ..._verticalPies(chartHeight, context),
       ],
+    );
+  }
+}
+
+List<Widget> _alignedPies(double? height, BuildContext context) {
+  return [
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Expanded(child: _AssetsPie(height)),
+        Container(
+          width: 1,
+          height: height,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+        const SizedBox(height: 10),
+        Expanded(child: _LiabilitiesPie(height)),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _verticalPies(double height, BuildContext context) {
+  return [
+    Center(child: _AssetsPie(height)),
+    Container(
+      height: 1,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    ),
+    Center(child: _LiabilitiesPie(height)),
+  ];
+}
+
+class _NetWorthGraph extends StatelessWidget {
+  const _NetWorthGraph(
+    this.height, {
+    super.key,
+  });
+
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChartWithTitle(
+      height: height,
+      textLeft: 'Net Worth',
+      textRight: 13413418374.dollarString(),
+      textStyle: Theme.of(context).textTheme.headlineMedium,
+      padding: const EdgeInsets.only(top: 10),
+      child: TestGraph(),
+    );
+  }
+}
+
+class _AssetsPie extends StatelessWidget {
+  final double? height;
+  const _AssetsPie(this.height, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChartWithTitle(
+      height: height,
+      textLeft: 'Assets',
+      textRight: '\$123.00',
+      textStyle: Theme.of(context).textTheme.headlineMedium,
+      padding: const EdgeInsets.only(top: 10),
+      child: TestPie(),
+    );
+  }
+}
+
+class _LiabilitiesPie extends StatelessWidget {
+  final double? height;
+  const _LiabilitiesPie(this.height, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChartWithTitle(
+      height: height,
+      textLeft: 'Liabilities',
+      textRight: '\$123.00',
+      textStyle: Theme.of(context).textTheme.headlineMedium,
+      padding: const EdgeInsets.only(top: 10),
+      child: TestPie(),
     );
   }
 }
