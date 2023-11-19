@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/graphing/heat_map.dart';
+import 'package:libra_sheet/graphing/category_heat_map.dart';
+import 'package:libra_sheet/graphing/heat_map_painter.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +20,7 @@ class CategoryTab extends StatelessWidget {
               children: [
                 const SizedBox(height: 10),
                 Expanded(
-                  child: HeatMap(
+                  child: CategoryHeatMap(
                     onSelect: (it) => print(it.name),
                   ),
                 ),

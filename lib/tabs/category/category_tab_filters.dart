@@ -29,6 +29,8 @@ class CategoryTabFilters extends StatelessWidget {
         const Text("Account"),
         const SizedBox(height: 5),
         const _AccountFilterMenu(),
+
+        // TODO add Tag filter
       ],
     );
   }

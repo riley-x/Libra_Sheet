@@ -44,6 +44,7 @@ class _HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO change this to LayoutBuilder to expand height with minimum size
     final state = context.watch<HomeTabState>();
     if (state.accountFocused != null) {
       return const Placeholder();

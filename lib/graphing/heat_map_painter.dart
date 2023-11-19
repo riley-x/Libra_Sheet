@@ -1,8 +1,6 @@
-import 'dart:ui';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
 
 /// Finds the reverse cumulative sum of [data].
 /// `out[i] = sum(data.values[i:])` with 0 appended at the end.
@@ -13,6 +11,42 @@ List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
     out.insert(0, val + out.first);
   }
   return out;
+}
+
+/// Represents a single group in the heatmap algorithm below.
+class _Group {
+  final int start;
+  final int end;
+  final bool isXAxis;
+  Offset topLeft;
+  Offset topLeftChild;
+
+  _Group(
+    this.start,
+    this.end,
+    this.isXAxis,
+    this.topLeft,
+    this.topLeftChild,
+  );
+
+  int n() => end - start;
+
+  /// Width of the entire group + child
+  double width(Size size) {
+    return size.width - topLeft.dx;
+  }
+
+  /// Height of the entire group + child
+  double height(Size size) {
+    return size.height - topLeft.dy;
+  }
+}
+
+class _MSize {
+  double width;
+  double height;
+
+  _MSize(this.width, this.height);
 }
 
 /// Returns a list of [Rect] positions for a heatmap. Each entry in [data] is given a rectangular
@@ -27,17 +61,54 @@ List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
 /// full width of the cross axis. In the opposite case, the group is laid out along the full length
 /// of the smaller axis.
 ///
+/// The algorithm does a reverse pass to calculate the padding if [padding] is not 0. It adjusts the
+/// rectangle sizes to fit the required padding, but won't change the layout order as defined above.
+/// Each group passes back the amount of padding it currently uses as a tuple (x, y) as a fraction
+/// of its alloted volume.
+/// Keep in mind that y padding is constant with height but increases with width and vice versa.
+/// This allows the parent
+/// group to recalculate the child's position including the amount of volume lost to white space.
+///
 /// [data] should be sorted by decreasing value already. You can optionally pass in [reverseCumValues]
 /// if they are precalculated.
+///
+/// [padding] is the amount of pixel padding to space between the boxes. It is a dumb padding that
+/// simply removes space from the interior sides of each rectangle. As such for large values of
+/// padding, the visible areas of the rectangles won't exactly be proportional to each side.
 List<Rect> layoutHeatMapGrid<T>({
+  Offset offset = Offset.zero,
   required Size size,
   required List<T> data,
   required double Function(T) valueMapper,
   double minSameAxisRatio = 0.6,
+  double padding = 0,
+  double paddingX = 0,
+  double paddingY = 0,
   List<double>? reverseCumValues,
 }) {
-  final cumValues = reverseCumValues ?? reverseCumSum(data, valueMapper);
+  if (data.isEmpty) return [];
+  if (padding != 0) {
+    paddingX = padding;
+    paddingY = padding;
+  }
   final output = <Rect>[];
+
+  // data = List.from(data);
+
+  final cumValues = reverseCumValues ?? reverseCumSum(data, valueMapper);
+
+  bool aprEq(double x, double y) {
+    return (x - y).abs() < 1;
+  }
+
+  void add(Rect rect) {
+    output.add(Rect.fromLTRB(
+      offset.dx + ((rect.left == 0) ? 0 : rect.left + paddingX),
+      offset.dy + ((rect.top == 0) ? 0 : rect.top + paddingY),
+      offset.dx + ((aprEq(rect.right, size.width)) ? rect.right : rect.right - paddingX),
+      offset.dy + ((aprEq(rect.bottom, size.height)) ? rect.bottom : rect.bottom - paddingY),
+    ));
+  }
 
   /// Returns the end index (exclusive) of the entry last large enough to be in the same as
   /// [start]. Assumes [data] is sorted by decreasing value.
@@ -65,7 +136,7 @@ List<Rect> layoutHeatMapGrid<T>({
       for (var i = start; i < end; i++) {
         final thisWidth = width * valueMapper(data[i]) / total;
         final rect = Rect.fromLTWH(x, topLeft.dy, thisWidth, height);
-        output.add(rect);
+        add(rect);
         x += thisWidth;
       }
       return Offset(x, topLeft.dy);
@@ -75,7 +146,7 @@ List<Rect> layoutHeatMapGrid<T>({
       for (var i = start; i < end; i++) {
         final thisHeight = height * valueMapper(data[i]) / total;
         final rect = Rect.fromLTWH(topLeft.dx, y, width, thisHeight);
-        output.add(rect);
+        add(rect);
         y += thisHeight;
       }
       return Offset(topLeft.dx, y);
@@ -97,7 +168,7 @@ List<Rect> layoutHeatMapGrid<T>({
       for (var i = start; i < end; i++) {
         final thisWidth = width * valueMapper(data[i]) / groupTotal;
         final rect = Rect.fromLTWH(x, topLeft.dy, thisWidth, groupHeight);
-        output.add(rect);
+        add(rect);
         x += thisWidth;
       }
       return Offset(topLeft.dx, topLeft.dy + groupHeight);
@@ -108,7 +179,7 @@ List<Rect> layoutHeatMapGrid<T>({
       for (var i = start; i < end; i++) {
         final thisHeight = height * valueMapper(data[i]) / groupTotal;
         final rect = Rect.fromLTWH(topLeft.dx, y, groupWidth, thisHeight);
-        output.add(rect);
+        add(rect);
         y += thisHeight;
       }
       return Offset(topLeft.dx + groupWidth, topLeft.dy);
@@ -119,7 +190,6 @@ List<Rect> layoutHeatMapGrid<T>({
   void layoutGroup(int start, Offset topLeft) {
     if (start >= data.length) return;
     final end = getGroupEnd(start);
-    if (end == start) return;
 
     final remainingTotal = cumValues[end];
     final groupTotal = cumValues[start] - remainingTotal;
@@ -137,25 +207,13 @@ List<Rect> layoutHeatMapGrid<T>({
   return output;
 }
 
-/// This painter class draw a heat map of values. Each entry is shown as a filled rectangle, where
-/// the size of the rectangle is proportional to its value in the series.
-///
-
+/// This painter class draw a heat map of values. See [layoutHeatMapGrid].
 class HeatMapPainter<T> extends CustomPainter {
-  final List<T> data;
+  late final List<T> data;
   final Color? Function(T)? colorMapper;
   final double Function(T) valueMapper;
   final String Function(T)? labelMapper;
-
-  /// _reverseCumValues[i] = sum(data.values[i:]), with 0 appended at end
-  late List<double> _reverseCumValues;
-
-  /// Brush used to draw the rectangle borders
-  final Paint _borderBrush;
-
-  /// List of the positions of each entry, in parallel order to [data]. This is replaced every call
-  /// to [paint]. Used for hit testing.
-  List<Rect> positions = [];
+  final List<T>? Function(T)? nestedData;
 
   final TextStyle? textStyle;
 
@@ -163,16 +221,37 @@ class HeatMapPainter<T> extends CustomPainter {
   /// row/column to align it with the row.
   final double minSameAxisRatio;
 
+  /// The pixel (width, height) of the border around each rectangle, indexed by the series level.
+  late final (double, double) Function(int series) paddingMapper;
+
+  /// List of the positions of each entry, in parallel order to [data]. This is replaced every call
+  /// to [paint]. Used for hit testing.
+  List<Rect> positions = [];
+
   HeatMapPainter(
-    this.data, {
+    List<T> data, {
     required this.valueMapper,
     this.colorMapper,
     this.labelMapper,
+    this.nestedData,
+    double padding = 0,
+    double paddingX = 0,
+    double paddingY = 0,
+    (double, double) Function(int depth)? paddingMapper,
     this.minSameAxisRatio = 0.6,
     bool dataAlreadySorted = false,
     this.textStyle,
-  }) : _borderBrush = Paint() {
+  }) {
+    if (paddingMapper != null) {
+      this.paddingMapper = paddingMapper;
+    } else if (padding != 0) {
+      this.paddingMapper = (_) => (padding, padding);
+    } else {
+      this.paddingMapper = (_) => (paddingX, paddingY);
+    }
+
     /// Sort largest to smallest.
+    this.data = List.from(data);
     if (!dataAlreadySorted) {
       this.data.sort((a, b) {
         final diff = valueMapper(b) - valueMapper(a);
@@ -185,14 +264,6 @@ class HeatMapPainter<T> extends CustomPainter {
         }
       });
     }
-
-    /// Calculate cumulative values
-    _reverseCumValues = reverseCumSum(data, valueMapper);
-
-    _borderBrush
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = Colors.white;
   }
 
   /// Chooses the label text color based on the background color
@@ -207,7 +278,6 @@ class HeatMapPainter<T> extends CustomPainter {
   void _paintEntry(Canvas canvas, int index, Rect rect) {
     Paint brush = Paint()..color = colorMapper?.call(data[index]) ?? Colors.teal;
     canvas.drawRect(rect, brush);
-    canvas.drawRect(rect, _borderBrush);
     positions.add(rect);
 
     /// Draw label
@@ -228,18 +298,31 @@ class HeatMapPainter<T> extends CustomPainter {
     }
   }
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    positions = layoutHeatMapGrid(
-      size: size,
-      data: data,
+  /// Paints a single series in the given [rect].
+  void _paintSeries(List<T> seriesData, int seriesDepth, Canvas canvas, Rect rect) {
+    final padding = paddingMapper(seriesDepth);
+    final positions = layoutHeatMapGrid(
+      offset: rect.topLeft,
+      size: rect.size,
+      data: seriesData,
       valueMapper: valueMapper,
       minSameAxisRatio: minSameAxisRatio,
-      reverseCumValues: _reverseCumValues,
+      paddingX: padding.$1,
+      paddingY: padding.$2,
     );
-    for (int i = 0; i < data.length; i++) {
-      _paintEntry(canvas, i, positions[i]);
+    for (int i = 0; i < seriesData.length; i++) {
+      final childData = nestedData?.call(seriesData[i]);
+      if (childData != null) {
+        _paintSeries(childData, seriesDepth + 1, canvas, positions[i]);
+      } else {
+        _paintEntry(canvas, i, positions[i]);
+      }
     }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _paintSeries(data, 0, canvas, Offset.zero & size);
   }
 
   @override
@@ -255,52 +338,3 @@ class HeatMapPainter<T> extends CustomPainter {
     return true;
   }
 }
-
-class HeatMap extends StatefulWidget {
-  final Function(Category)? onSelect;
-
-  const HeatMap({super.key, this.onSelect});
-
-  @override
-  State<HeatMap> createState() => _HeatMapState();
-}
-
-class _HeatMapState extends State<HeatMap> {
-  void _onTapUp(HeatMapPainter<MapEntry<Category, int>> painter, TapUpDetails details) {
-    if (widget.onSelect == null) return;
-    for (int i = 0; i < painter.positions.length; i++) {
-      if (painter.positions[i].contains(details.localPosition)) {
-        if (i >= painter.data.length) return; // shouldn't happen
-        widget.onSelect!(painter.data[i].key);
-        return;
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final painter = HeatMapPainter<MapEntry<Category, int>>(
-      testCategoryValues.entries.toList(),
-      valueMapper: (it) => it.value.asDollarDouble(),
-      colorMapper: (it) => it.key.color,
-      labelMapper: (it) => "${it.key.name}\n${it.value.dollarString()}",
-      textStyle: Theme.of(context).textTheme.labelLarge,
-    );
-    return GestureDetector(
-      onTapUp: (it) => _onTapUp(painter, it),
-      child: CustomPaint(
-        painter: painter,
-        // foregroundPainter: ,
-        size: Size.infinite,
-      ),
-    );
-  }
-}
-
-final testCategoryValues = {
-  Category(name: 'cat 1', color: Colors.amber): 357000,
-  Category(name: 'cat 2', color: Colors.blue): 23000,
-  Category(name: 'cat 3', color: Colors.green): 1012200,
-  Category(name: 'cat 4', color: Colors.red): 223000,
-  Category(name: 'cat 5', color: Colors.purple): 43000,
-};
