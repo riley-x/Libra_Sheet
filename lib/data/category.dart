@@ -15,6 +15,10 @@ class Category<T extends Category<dynamic>> {
         name = other.name,
         color = other.color,
         subCats = other.subCats;
+
+  bool hasSubCats() {
+    return subCats != null && subCats!.isNotEmpty;
+  }
 }
 
 class CategoryValue extends Category<CategoryValue> {

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/data/test_data.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/transaction.dart';
-
-enum ExpenseType { income, expense }
 
 enum CategoryTabTimeFrame { current, oneYear, all }
 
@@ -24,7 +22,7 @@ class CategoryTabState extends ChangeNotifier {
     if (categoriesFocused.isEmpty) {
       categoryFocusedTransactions.clear();
     } else {
-// TODO load transactions
+      // TODO load transactions and history
     }
 
     notifyListeners();
@@ -32,7 +30,7 @@ class CategoryTabState extends ChangeNotifier {
 
   void focusCategory(CategoryValue category) {
     categoriesFocused.add(category);
-    // TODO load transactions
+    // TODO load transactions and history
     notifyListeners();
   }
 

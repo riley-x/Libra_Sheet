@@ -1,0 +1,1 @@
+enum ExpenseType { income, expense }

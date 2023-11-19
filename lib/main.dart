@@ -4,6 +4,7 @@ import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/category/category_tab.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:libra_sheet/tabs/libra_nav.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_tab.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:libra_sheet/theme/text_theme.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +53,8 @@ class _LibraHomePageState extends State<LibraHomePage> {
         page = const CashFlowTab();
       case LibraNavDestination.categories:
         page = const CategoryTab();
+      case LibraNavDestination.transactions:
+        page = const TransactionTab();
       default:
         page = const Placeholder();
     }

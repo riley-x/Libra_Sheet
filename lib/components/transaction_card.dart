@@ -27,12 +27,12 @@ class TransactionCard extends StatelessWidget {
                   children: [
                     Text(
                       trans.name,
-                      maxLines: 1,
+                      maxLines: maxRowsForName,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       trans.account?.name ?? "",
-                      maxLines: maxRowsForName,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                     ),

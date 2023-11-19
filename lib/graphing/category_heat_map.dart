@@ -6,11 +6,11 @@ import 'package:libra_sheet/graphing/heat_map_painter.dart';
 class CategoryHeatMap extends StatefulWidget {
   final Function(CategoryValue)? onSelect;
   final bool showSubCategories;
-  // final List<CategoryValue> categories;
+  final List<CategoryValue> categories;
 
-  const CategoryHeatMap({
+  const CategoryHeatMap(
+    this.categories, {
     super.key,
-    // required this.categories,
     this.onSelect,
     this.showSubCategories = false,
   });
@@ -33,7 +33,7 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
   @override
   Widget build(BuildContext context) {
     final painter = HeatMapPainter<CategoryValue>(
-      testCategoryValues,
+      widget.categories,
       valueMapper: (it) => it.value.asDollarDouble(),
       colorMapper: (it) => it.color,
       labelMapper: (it) => "${it.name}\n${it.value.dollarString()}",
