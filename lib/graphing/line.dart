@@ -57,6 +57,11 @@ class TestPie extends StatelessWidget {
     var appState = context.watch<LibraAppState>();
 
     return SfCircularChart(
+      // title: ChartTitle(
+      //   text: 'Assets',
+      //   textStyle: Theme.of(context).textTheme.headlineSmall,
+      //   alignment: ChartAlignment.near,
+      // ),
       margin: const EdgeInsets.only(top: 5),
       tooltipBehavior: TooltipBehavior(
         enable: true,
@@ -72,7 +77,7 @@ class TestPie extends StatelessWidget {
           pointColorMapper: (Account account, _) => account.color,
           dataLabelMapper: (Account account, _) => account.name,
           // account.balance.dollarString(),
-          radius: '100%',
+          radius: '80%',
           innerRadius: '60%',
           enableTooltip: true,
           // explode: true,
@@ -80,8 +85,7 @@ class TestPie extends StatelessWidget {
           dataLabelSettings: DataLabelSettings(
             isVisible: true,
             textStyle: Theme.of(context).textTheme.labelLarge,
-            labelIntersectAction:
-                LabelIntersectAction.shift, // Avoid labels intersection
+            labelIntersectAction: LabelIntersectAction.shift, // Avoid labels intersection
             labelPosition: ChartDataLabelPosition.outside,
             // connectorLineSettings:
             // ConnectorLineSettings(type: ConnectorType.curve, length: '25%'),

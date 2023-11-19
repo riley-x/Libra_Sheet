@@ -15,10 +15,11 @@ class CategoryTab extends StatelessWidget {
       create: (context) => CategoryTabState(),
       child: Row(
         children: [
+          const SizedBox(width: 10),
           const Expanded(
             child: Column(
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Expanded(
                   child: _HeatMap(),
                 ),

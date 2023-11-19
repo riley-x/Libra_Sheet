@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
-import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
 import 'package:libra_sheet/tabs/home/account_screen.dart';
+import 'package:libra_sheet/tabs/home/home_charts.dart';
 import 'package:provider/provider.dart';
 
 class HomeTabState extends ChangeNotifier {
@@ -44,7 +43,6 @@ class _HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO change this to LayoutBuilder to expand height with minimum size
     final state = context.watch<HomeTabState>();
     if (state.accountFocused != null) {
       return const Placeholder();
@@ -65,37 +63,7 @@ class _HomeTab extends StatelessWidget {
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
-          Expanded(
-            child: ListView(
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      "Net Worth",
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const Spacer(),
-                    Text(
-                      13413418374.dollarString(),
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(width: 5)
-                  ],
-                ),
-                const SizedBox(
-                  height: 300,
-                  child: TestGraph(),
-                ),
-                const SizedBox(height: 25),
-                const Center(
-                  child: SizedBox(
-                    height: 300,
-                    child: TestPie(),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const Expanded(child: HomeCharts()),
         ],
       );
     }
