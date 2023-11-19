@@ -18,12 +18,11 @@ class CategoryHeatMap extends StatefulWidget {
 }
 
 class _CategoryHeatMapState extends State<CategoryHeatMap> {
-  void _onTapUp(HeatMapPainter<MapEntry<Category, int>> painter, TapUpDetails details) {
+  void _onTapUp(HeatMapPainter<CategoryValue> painter, TapUpDetails details) {
     if (widget.onSelect == null) return;
     for (int i = 0; i < painter.positions.length; i++) {
-      if (painter.positions[i].contains(details.localPosition)) {
-        if (i >= painter.data.length) return; // shouldn't happen
-        widget.onSelect!(painter.data[i].key);
+      if (painter.positions[i].$1.contains(details.localPosition)) {
+        widget.onSelect!(painter.positions[i].$2);
         return;
       }
     }
@@ -31,11 +30,12 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
 
   @override
   Widget build(BuildContext context) {
-    final painter = HeatMapPainter<MapEntry<Category, int>>(
-      testCategoryValues.entries.toList(),
+    final painter = HeatMapPainter<CategoryValue>(
+      testCategoryValues,
       valueMapper: (it) => it.value.asDollarDouble(),
-      colorMapper: (it) => it.key.color,
-      labelMapper: (it) => "${it.key.name}\n${it.value.dollarString()}",
+      colorMapper: (it) => it.color,
+      labelMapper: (it) => "${it.name}\n${it.value.dollarString()}",
+      nestedData: (it) => it.subCats,
       textStyle: Theme.of(context).textTheme.labelLarge,
       paddingMapper: (depth) => (depth == 0) ? (10, 10) : (2, 2),
     );
@@ -50,10 +50,16 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
   }
 }
 
-final testCategoryValues = {
-  Category(name: 'cat 1', color: Colors.amber): 357000,
-  Category(name: 'cat 2', color: Colors.blue): 23000,
-  Category(name: 'cat 3', color: Colors.green): 1012200,
-  Category(name: 'cat 4', color: Colors.red): 223000,
-  Category(name: 'cat 5', color: Colors.purple): 43000,
-};
+final testCategoryValues = [
+  CategoryValue(name: 'cat 1', color: Colors.amber, value: 357000),
+  CategoryValue(name: 'cat 2', color: Colors.blue, value: 23000),
+  CategoryValue(name: 'cat 3', color: Colors.green, value: 1000000, subCats: [
+    CategoryValue(name: 'subcat 1', color: Colors.grey, value: 200000),
+    CategoryValue(name: 'subcat 2', color: Colors.greenAccent, value: 200000),
+    CategoryValue(name: 'subcat 3', color: Colors.lightGreen, value: 200000),
+    CategoryValue(name: 'subcat 4', color: Colors.lightGreenAccent, value: 200000),
+    CategoryValue(name: 'subcat 5', color: Colors.green, value: 200000),
+  ]),
+  CategoryValue(name: 'cat 4', color: Colors.red, value: 223000),
+  CategoryValue(name: 'cat 5', color: Colors.purple, value: 43000),
+];

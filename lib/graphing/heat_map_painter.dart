@@ -224,9 +224,8 @@ class HeatMapPainter<T> extends CustomPainter {
   /// The pixel (width, height) of the border around each rectangle, indexed by the series level.
   late final (double, double) Function(int series) paddingMapper;
 
-  /// List of the positions of each entry, in parallel order to [data]. This is replaced every call
-  /// to [paint]. Used for hit testing.
-  List<Rect> positions = [];
+  /// Position of each entry, used for hit testing. This is replaced every call to [paint].
+  List<(Rect, T)> positions = [];
 
   HeatMapPainter(
     List<T> data, {
@@ -273,18 +272,17 @@ class HeatMapPainter<T> extends CustomPainter {
     return Colors.white;
   }
 
-  /// Paints a single entry (rectangle). MAKE SURE this is called in index order, since we simply
-  /// append to the [positions] list.
-  void _paintEntry(Canvas canvas, int index, Rect rect) {
-    Paint brush = Paint()..color = colorMapper?.call(data[index]) ?? Colors.teal;
+  /// Paints a single entry (rectangle).
+  void _paintEntry(T entry, Canvas canvas, Rect rect) {
+    Paint brush = Paint()..color = colorMapper?.call(entry) ?? Colors.teal;
     canvas.drawRect(rect, brush);
-    positions.add(rect);
+    positions.add((rect, entry));
 
     /// Draw label
     if (labelMapper != null) {
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
-          text: labelMapper!.call(data[index]),
+          text: labelMapper!.call(entry),
           style: textStyle?.copyWith(color: _textColor(brush.color)),
         ),
         textAlign: TextAlign.center,
@@ -315,13 +313,14 @@ class HeatMapPainter<T> extends CustomPainter {
       if (childData != null) {
         _paintSeries(childData, seriesDepth + 1, canvas, positions[i]);
       } else {
-        _paintEntry(canvas, i, positions[i]);
+        _paintEntry(seriesData[i], canvas, positions[i]);
       }
     }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
+    positions.clear();
     _paintSeries(data, 0, canvas, Offset.zero & size);
   }
 
