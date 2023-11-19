@@ -21,16 +21,23 @@ class CategoryTabFilters extends StatelessWidget {
         const Text("Type"),
         const SizedBox(height: 5),
         const _ExpenseTypeSelector(),
+
         const SizedBox(height: 15),
         const Text("Time Frame"),
         const SizedBox(height: 5),
         const _TimeFrameSelector(),
+
         const SizedBox(height: 15),
         const Text("Account"),
         const SizedBox(height: 5),
         const _AccountFilterMenu(),
 
         // TODO add Tag filter
+
+        const SizedBox(height: 15),
+        const Text("Sub-Categories"),
+        const SizedBox(height: 5),
+        const _SubCategoryChip(),
       ],
     );
   }
@@ -132,6 +139,21 @@ class _AccountFilterMenu extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SubCategoryChip extends StatelessWidget {
+  const _SubCategoryChip({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryTabState = context.watch<CategoryTabState>();
+    return FilterChip(
+      label: const Text('Show'),
+      selected: categoryTabState.showSubCategories,
+      onSelected: categoryTabState.shouldShowSubCategories,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 }

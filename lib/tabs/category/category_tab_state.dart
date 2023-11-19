@@ -13,6 +13,7 @@ class CategoryTabState extends ChangeNotifier {
   CategoryTabTimeFrame timeFrame = CategoryTabTimeFrame.all;
   ExpenseType expenseType = ExpenseType.expense;
   Account? account;
+  bool showSubCategories = false;
 
   void focusCategory(Category? category) {
     categoryFocused = category;
@@ -32,6 +33,11 @@ class CategoryTabState extends ChangeNotifier {
 
   void setAccount(Account? x) {
     account = x;
+    notifyListeners();
+  }
+
+  void shouldShowSubCategories(bool x) {
+    showSubCategories = x;
     notifyListeners();
   }
 }

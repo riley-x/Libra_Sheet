@@ -5,12 +5,14 @@ import 'package:libra_sheet/graphing/heat_map_painter.dart';
 
 class CategoryHeatMap extends StatefulWidget {
   final Function(Category)? onSelect;
+  final bool showSubCategories;
   // final List<CategoryValue> categories;
 
   const CategoryHeatMap({
     super.key,
     // required this.categories,
     this.onSelect,
+    this.showSubCategories = false,
   });
 
   @override
@@ -35,9 +37,9 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
       valueMapper: (it) => it.value.asDollarDouble(),
       colorMapper: (it) => it.color,
       labelMapper: (it) => "${it.name}\n${it.value.dollarString()}",
-      nestedData: (it) => it.subCats,
+      nestedData: (widget.showSubCategories) ? (it) => it.subCats : null,
       textStyle: Theme.of(context).textTheme.labelLarge,
-      paddingMapper: (depth) => (depth == 0) ? (10, 10) : (2, 2),
+      paddingMapper: (depth) => (widget.showSubCategories && depth == 0) ? (10, 10) : (2, 2),
     );
     return GestureDetector(
       onTapUp: (it) => _onTapUp(painter, it),

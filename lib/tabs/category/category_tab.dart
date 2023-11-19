@@ -15,29 +15,40 @@ class CategoryTab extends StatelessWidget {
       create: (context) => CategoryTabState(),
       child: Row(
         children: [
-          Expanded(
+          const Expanded(
             child: Column(
               children: [
                 const SizedBox(height: 10),
                 Expanded(
-                  child: CategoryHeatMap(
-                    onSelect: (it) => print(it.name),
-                  ),
+                  child: _HeatMap(),
                 ),
                 const SizedBox(height: 10),
               ],
             ),
           ),
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           Container(
             width: 1,
             color: Theme.of(context).colorScheme.outlineVariant,
           ),
-          SizedBox(width: 20),
-          CategoryTabFilters(),
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
+          const CategoryTabFilters(),
+          const SizedBox(width: 20),
         ],
       ),
+    );
+  }
+}
+
+class _HeatMap extends StatelessWidget {
+  const _HeatMap({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<CategoryTabState>();
+    return CategoryHeatMap(
+      onSelect: (it) => print(it.name),
+      showSubCategories: state.showSubCategories,
     );
   }
 }
