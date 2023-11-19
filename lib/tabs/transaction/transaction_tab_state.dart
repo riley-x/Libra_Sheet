@@ -1,34 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 class TransactionTabState extends ChangeNotifier {
-  TransactionTabState(this.accounts) : accountFilterSelected = List.filled(accounts.length, false);
-
-  final List<Account> accounts;
-  final List<bool> accountFilterSelected;
-
   Set<ExpenseType> expenseFilterSelected = {};
+  Set<int> accountFilterSelected = {};
+  Set<int> categoryFilterSelected = {};
 
   List<Transaction> transactions = testTransactions;
   Transaction? focusedTransaction;
-
-  bool showSubCategories = false;
 
   void focus(Transaction? trans) {
     focusedTransaction = trans;
     notifyListeners();
   }
 
-  void setAccountFilter(int i, bool selected) {
-    accountFilterSelected[i] = selected;
+  void setExpenseFilter(Set<ExpenseType> newSelection) {
+    expenseFilterSelected = newSelection;
     notifyListeners();
   }
 
-  void setExpenseFilter(Set<ExpenseType> newSelection) {
-    expenseFilterSelected = newSelection;
+  void setAccountFilter(Account account, bool selected) {
+    if (selected) {
+      accountFilterSelected.add(account.key);
+    } else {
+      accountFilterSelected.remove(account.key);
+    }
+    notifyListeners();
+  }
+
+  void setCategoryFilter(Category cat, bool selected) {
+    if (selected) {
+      categoryFilterSelected.add(cat.key);
+    } else {
+      categoryFilterSelected.remove(cat.key);
+    }
     notifyListeners();
   }
 }

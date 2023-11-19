@@ -3,9 +3,8 @@ import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/category_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/test_state.dart';
-import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +16,7 @@ class TransactionTabFilters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionTabState>();
+    final textStyle = Theme.of(context).textTheme.titleMedium;
 
     return Column(
       children: [
@@ -26,7 +26,7 @@ class TransactionTabFilters extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 10),
-        const Text("Type"),
+        Text("Type", style: textStyle),
         const SizedBox(height: 5),
         ExpenseTypeFilter(
           state.expenseFilterSelected,
@@ -34,27 +34,58 @@ class TransactionTabFilters extends StatelessWidget {
         ),
 
         const SizedBox(height: 15),
-        const Text("Time Frame"),
+        Text("Time Frame", style: textStyle),
         const SizedBox(height: 5),
-        // const _TimeFrameSelector(),
+        // TODO ,
 
         const SizedBox(height: 15),
-        const Text("Account"),
+        Text("Value", style: textStyle),
         const SizedBox(height: 5),
-        AccountFilterChips(
-          accounts: state.accounts,
-          selected: (_, i) => state.accountFilterSelected[i],
-          onSelected: (_, i, selected) => state.setAccountFilter(i, selected),
-        ),
+        // TODO value filter
+
+        const SizedBox(height: 15),
+        Text("Account", style: textStyle),
+        const SizedBox(height: 5),
+        const _AccountChips(),
 
         // TODO add Tag filter
 
         const SizedBox(height: 15),
-        const Text("Categories"),
+        Text("Category", style: textStyle),
         const SizedBox(height: 5),
-        CategoryFilterChips(categories: testCategoryValues),
+        const _CategoryChips(),
         // const _SubCategorySwitch(),
       ],
+    );
+  }
+}
+
+class _AccountChips extends StatelessWidget {
+  const _AccountChips({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionTabState>();
+    final accounts = context.select<LibraAppState, List<Account>>((it) => it.accounts);
+    return AccountFilterChips(
+      accounts: accounts,
+      selected: (account, i) => state.accountFilterSelected.contains(account.key),
+      onSelected: (account, i, selected) => state.setAccountFilter(account, selected),
+    );
+  }
+}
+
+class _CategoryChips extends StatelessWidget {
+  const _CategoryChips({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionTabState>();
+    final categories = context.select<LibraAppState, List<Category>>((it) => it.categories);
+    return CategoryFilterChips(
+      categories: categories,
+      selected: (cat) => state.categoryFilterSelected.contains(cat.key),
+      onSelected: (cat, selected) => state.setCategoryFilter(cat, selected),
     );
   }
 }

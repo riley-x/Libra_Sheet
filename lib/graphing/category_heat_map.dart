@@ -51,17 +51,3 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
     );
   }
 }
-
-final testCategoryValues = [
-  CategoryValue(name: 'cat 1', color: Colors.amber, value: 357000),
-  CategoryValue(name: 'cat 2', color: Colors.blue, value: 23000),
-  CategoryValue(name: 'cat 3', color: Colors.green, value: 1000000, subCats: [
-    CategoryValue(name: 'subcat 1', color: Colors.grey, value: 200000),
-    CategoryValue(name: 'subcat 2', color: Colors.greenAccent, value: 200000),
-    CategoryValue(name: 'subcat 3', color: Colors.lightGreen, value: 200000),
-    CategoryValue(name: 'subcat 4', color: Colors.lightGreenAccent, value: 200000),
-    CategoryValue(name: 'subcat 5', color: Colors.green, value: 200000),
-  ]),
-  CategoryValue(name: 'cat 4', color: Colors.red, value: 223000),
-  CategoryValue(name: 'cat 5', color: Colors.purple, value: 43000),
-];

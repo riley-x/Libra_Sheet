@@ -11,10 +11,8 @@ class TransactionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accounts = context.select<LibraAppState, List<Account>>((it) => it.accounts);
-
     return ChangeNotifierProvider(
-      create: (context) => TransactionTabState(accounts),
+      create: (context) => TransactionTabState(),
       child: const _TransactionTab(),
     );
   }
