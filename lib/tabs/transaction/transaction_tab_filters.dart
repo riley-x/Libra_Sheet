@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
+import 'package:libra_sheet/components/category_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/test_state.dart';
+import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
@@ -48,8 +50,9 @@ class TransactionTabFilters extends StatelessWidget {
         // TODO add Tag filter
 
         const SizedBox(height: 15),
-        const Text("Show Sub-Categories"),
+        const Text("Categories"),
         const SizedBox(height: 5),
+        CategoryFilterChips(categories: testCategoryValues),
         // const _SubCategorySwitch(),
       ],
     );
