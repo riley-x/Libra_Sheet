@@ -4,9 +4,10 @@ import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
-  const TransactionCard({super.key, required this.trans});
+  const TransactionCard({super.key, required this.trans, this.maxRowsForName = 1});
 
   final Transaction trans;
+  final int? maxRowsForName;
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +32,9 @@ class TransactionCard extends StatelessWidget {
                     ),
                     Text(
                       trans.account?.name ?? "",
-                      maxLines: 1,
+                      maxLines: maxRowsForName,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: theme.colorScheme.outline),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                     ),
                   ],
                 ),
@@ -46,9 +46,7 @@ class TransactionCard extends StatelessWidget {
                   Text(
                     trans.value.dollarString(),
                     style: theme.textTheme.bodyMedium?.copyWith(
-                        color: (trans.value < 0)
-                            ? theme.colorScheme.error
-                            : Colors.green),
+                        color: (trans.value < 0) ? theme.colorScheme.error : Colors.green),
                   ),
                   Text(
                     dtFormat.format(trans.date),

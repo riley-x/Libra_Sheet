@@ -3,10 +3,13 @@ import 'package:libra_sheet/components/transaction_card.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 class TransactionFilterGrid extends StatefulWidget {
-  const TransactionFilterGrid(this.transactions, {super.key, this.title});
+  const TransactionFilterGrid(this.transactions,
+      {super.key, this.title, this.maxRowsForName = 1, this.fixedColumns});
 
   final Widget? title;
   final List<Transaction> transactions;
+  final int? maxRowsForName;
+  final int? fixedColumns;
 
   @override
   State<TransactionFilterGrid> createState() => _TransactionFilterGridState();
@@ -36,11 +39,14 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 10),
           ],
         ),
         Expanded(
-          child: TransactionGrid(widget.transactions),
+          child: TransactionGrid(
+            widget.transactions,
+            maxRowsForName: widget.maxRowsForName,
+            fixedColumns: widget.fixedColumns,
+          ),
         ),
       ],
     );
@@ -50,10 +56,14 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
 class TransactionGrid extends StatelessWidget {
   const TransactionGrid(
     this.transactions, {
+    this.maxRowsForName = 1,
+    this.fixedColumns,
     super.key,
   });
 
   final List<Transaction> transactions;
+  final int? maxRowsForName;
+  final int? fixedColumns;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +72,7 @@ class TransactionGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const minWidth = 300;
-        final numCols = (constraints.maxWidth / minWidth).floor();
+        final numCols = fixedColumns ?? (constraints.maxWidth / minWidth).floor();
         final numRows = (transactions.length + numCols - 1) ~/ numCols;
         return ListView.builder(
           itemCount: numRows,
@@ -77,6 +87,7 @@ class TransactionGrid extends StatelessWidget {
                       : Expanded(
                           child: TransactionCard(
                             trans: transactions[i],
+                            maxRowsForName: maxRowsForName,
                           ),
                         ),
               ],

@@ -40,12 +40,39 @@ class AccountScreen extends StatelessWidget {
               account.balance.dollarString(),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 15),
           ],
         ),
-        const TestGraph(),
-        const SizedBox(height: 20),
-        Expanded(child: TransactionFilterGrid(transactions ?? [])),
+        const SizedBox(height: 5),
+        Container(
+          height: 2,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        Expanded(
+          child: Row(
+            children: [
+              const SizedBox(width: 10),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(),
+                  child: TransactionFilterGrid(
+                    transactions ?? [],
+                    fixedColumns: 1,
+                    maxRowsForName: 3,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Container(
+                width: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              const SizedBox(width: 5),
+              const Expanded(child: TestGraph()),
+              const SizedBox(width: 10),
+            ],
+          ),
+        ),
       ],
     );
   }

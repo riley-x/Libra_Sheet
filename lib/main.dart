@@ -71,7 +71,6 @@ class _LibraHomePageState extends State<LibraHomePage> {
                 },
               ),
             ),
-            const SizedBox(width: 15),
             Expanded(
               child: Container(
                 // color: Theme.of(context).colorScheme.primaryContainer,

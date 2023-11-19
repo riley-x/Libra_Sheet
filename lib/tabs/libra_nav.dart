@@ -4,7 +4,8 @@ enum LibraNavDestination {
   home(icon: Icons.home, label: 'Home'),
   cashFlows(icon: Icons.swap_horiz, label: 'Cash Flows'),
   categories(icon: Icons.category, label: 'Categories'),
-  transactions(icon: Icons.request_quote, label: 'Transactions');
+  transactions(icon: Icons.request_quote, label: 'Transactions'),
+  settings(icon: Icons.settings, label: 'Settings');
 
   const LibraNavDestination({
     required this.icon,
@@ -42,14 +43,11 @@ class LibraNav extends StatelessWidget {
     return NavigationRail(
       backgroundColor: colorScheme.secondary,
       indicatorColor: colorScheme.surfaceVariant,
-      unselectedLabelTextStyle:
-          textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
-      selectedLabelTextStyle:
-          textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
-      unselectedIconTheme:
-          Theme.of(context).iconTheme.copyWith(color: colorScheme.onSecondary),
+      unselectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
+      selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
+      unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: colorScheme.onSecondary),
       extended: extended,
-      minExtendedWidth: 180,
+      minExtendedWidth: 220,
       destinations: libraNavDestinations,
       selectedIndex: selectedIndex,
       onDestinationSelected: onDestinationSelected,
