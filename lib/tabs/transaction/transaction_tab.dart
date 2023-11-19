@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/test_state.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_tab_filters.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
 
@@ -8,8 +11,10 @@ class TransactionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accounts = context.select<LibraAppState, List<Account>>((it) => it.accounts);
+
     return ChangeNotifierProvider(
-      create: (context) => TransactionTabState(),
+      create: (context) => TransactionTabState(accounts),
       child: const _TransactionTab(),
     );
   }
@@ -49,7 +54,7 @@ class _TransactionTab extends StatelessWidget {
         const SizedBox(width: 10),
 
         ///
-        Expanded(child: Placeholder()),
+        Expanded(child: TransactionTabFilters()),
         const SizedBox(width: 10),
       ],
     );

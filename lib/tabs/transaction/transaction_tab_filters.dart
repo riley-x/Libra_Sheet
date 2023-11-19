@@ -1,49 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
 
 /// Creates the column that holds all the option selectors for the category tab.
-class CategoryTabFilters extends StatelessWidget {
-  const CategoryTabFilters({super.key});
+class TransactionTabFilters extends StatelessWidget {
+  const TransactionTabFilters({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<TransactionTabState>();
+
     return Column(
       children: [
         const SizedBox(height: 10),
         Text(
-          "Options",
+          "Filter",
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 10),
         const Text("Type"),
         const SizedBox(height: 5),
         ExpenseTypeSelector(
-          context.watch<CategoryTabState>().expenseType,
+          ExpenseType.expense,
+          // context.watch<TransactionTabState>().expenseType,
           onSelect: (it) {
-            context.read<CategoryTabState>().setExpenseType(it);
+            // context.read<TransactionTabState>().setExpenseType(it);
           },
         ),
 
         const SizedBox(height: 15),
         const Text("Time Frame"),
         const SizedBox(height: 5),
-        const _TimeFrameSelector(),
+        // const _TimeFrameSelector(),
 
         const SizedBox(height: 15),
         const Text("Account"),
         const SizedBox(height: 5),
-        const _AccountFilterMenu(),
+        AccountFilterChips(
+          accounts: state.accounts,
+          selected: (_, i) => state.accountFilterSelected[i],
+          onSelected: (_, i, selected) => state.setAccountFilter(i, selected),
+        ),
 
         // TODO add Tag filter
 
         const SizedBox(height: 15),
         const Text("Show Sub-Categories"),
         const SizedBox(height: 5),
-        const _SubCategorySwitch(),
+        // const _SubCategorySwitch(),
       ],
     );
   }
@@ -147,10 +158,4 @@ class _SubCategorySwitch extends StatelessWidget {
   // @override
   // Widget build(BuildContext context) {
   //   final categoryTabState = context.watch<CategoryTabState>();
-  //   return FilterChip(
-  //     label: const Text('Show'),
-  //     selected: categoryTabState.showSubCategories,
-  //     onSelected: categoryTabState.shouldShowSubCategories,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //   );
   // }
