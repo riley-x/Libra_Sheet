@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
-import 'package:libra_sheet/graphing/heat_map_painter.dart';
 import 'package:libra_sheet/tabs/category/category_focus_screen.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +16,7 @@ class CategoryTab extends StatelessWidget {
       child: Consumer<CategoryTabState>(
         builder: (context, state, child) {
           if (state.categoriesFocused.isNotEmpty) {
-            return CategoryFocusScreen();
+            return const CategoryFocusScreen();
           } else {
             return const _CategoryTab();
           }

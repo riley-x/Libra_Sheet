@@ -3,7 +3,6 @@ import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
@@ -27,12 +26,9 @@ class TransactionTabFilters extends StatelessWidget {
         const SizedBox(height: 10),
         const Text("Type"),
         const SizedBox(height: 5),
-        ExpenseTypeSelector(
-          ExpenseType.expense,
-          // context.watch<TransactionTabState>().expenseType,
-          onSelect: (it) {
-            // context.read<TransactionTabState>().setExpenseType(it);
-          },
+        ExpenseTypeFilter(
+          state.expenseFilterSelected,
+          onSelect: state.setExpenseFilter,
         ),
 
         const SizedBox(height: 15),
