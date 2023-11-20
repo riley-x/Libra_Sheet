@@ -5,7 +5,6 @@ import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/test_state.dart';
-import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
 
@@ -18,44 +17,50 @@ class TransactionTabFilters extends StatelessWidget {
     final state = context.watch<TransactionTabState>();
     final textStyle = Theme.of(context).textTheme.titleMedium;
 
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        Text(
-          "Filter",
-          style: Theme.of(context).textTheme.headlineMedium,
+    return Align(
+      alignment: Alignment.topCenter,
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Text(
+              "Filter",
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 10),
+            Text("Type", style: textStyle),
+            const SizedBox(height: 5),
+            ExpenseTypeFilter(
+              state.expenseFilterSelected,
+              onSelect: state.setExpenseFilter,
+            ),
+
+            const SizedBox(height: 15),
+            Text("Date", style: textStyle),
+            const SizedBox(height: 5),
+            const _DateFilter(),
+
+            const SizedBox(height: 15),
+            Text("Value", style: textStyle),
+            const SizedBox(height: 5),
+            const _ValueRange(),
+
+            const SizedBox(height: 15),
+            Text("Account", style: textStyle),
+            const SizedBox(height: 5),
+            const _AccountChips(),
+
+            const SizedBox(height: 15),
+            Text("Category", style: textStyle),
+            const SizedBox(height: 5),
+            const _CategoryChips(),
+
+            // TODO add Tag filter
+            const SizedBox(height: 10),
+          ],
         ),
-        const SizedBox(height: 10),
-        Text("Type", style: textStyle),
-        const SizedBox(height: 5),
-        ExpenseTypeFilter(
-          state.expenseFilterSelected,
-          onSelect: state.setExpenseFilter,
-        ),
-
-        const SizedBox(height: 15),
-        Text("Date", style: textStyle),
-        const SizedBox(height: 5),
-        const _DateFilter(),
-
-        const SizedBox(height: 15),
-        Text("Value", style: textStyle),
-        const SizedBox(height: 5),
-        const _ValueRange(),
-
-        const SizedBox(height: 15),
-        Text("Account", style: textStyle),
-        const SizedBox(height: 5),
-        const _AccountChips(),
-
-        // TODO add Tag filter
-
-        const SizedBox(height: 15),
-        Text("Category", style: textStyle),
-        const SizedBox(height: 5),
-        const _CategoryChips(),
-        // const _SubCategorySwitch(),
-      ],
+      ),
     );
   }
 }

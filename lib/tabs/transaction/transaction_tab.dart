@@ -50,7 +50,7 @@ class _TransactionTab extends StatelessWidget {
         const SizedBox(width: 10),
 
         ///
-        Expanded(child: TransactionTabFilters()),
+        Expanded(child: Center(child: TransactionTabFilters())),
         const SizedBox(width: 10),
       ],
     );
