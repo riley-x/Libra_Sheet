@@ -25,7 +25,10 @@ class TransactionDetailsScreen extends StatelessWidget {
             children: [
               SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
-                child: _TransactionDetails(transaction),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: _TransactionDetails(transaction),
+                ),
               ),
             ],
           ),
@@ -47,7 +50,7 @@ class _TransactionDetails extends StatelessWidget {
       defaultVerticalAlignment: TableCellVerticalAlignment.top,
       columnWidths: const {
         0: IntrinsicColumnWidth(),
-        1: FixedColumnWidth(300),
+        1: FixedColumnWidth(250),
       },
       children: [
         _nameRow(context, t?.name),
@@ -57,34 +60,29 @@ class _TransactionDetails extends StatelessWidget {
 }
 
 TableRow _nameRow(BuildContext context, String? initialName) {
+  return _labelRow(
+    context,
+    'Account',
+    LibraTextField(
+      onChanged: (it) => print(it),
+    ),
+  );
+}
+
+TableRow _labelRow(BuildContext context, String label, Widget? right) {
   return TableRow(
     children: [
       Align(
         alignment: Alignment.topRight,
-        child: Text(
-          'Account',
-          style: Theme.of(context).textTheme.titleMedium,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: Text(
+            'Account',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
       ),
-      LibraTextField(
-        onChanged: (it) => print(it),
-      )
+      if (right != null) right,
     ],
   );
 }
-
-// class _NameRow extends StatelessWidget {
-//   const _NameRow(this.name, {super.key});
-
-//   /// Name used as the initial value.
-//   final String? name;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return TableRow(
-//       children: [
-//         Text("Account"),
-//       ],
-//     );
-//   }
-// }
