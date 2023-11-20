@@ -112,7 +112,7 @@ class _ValueRange extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LibraTextField(
+        FocusTextField(
           label: 'Min',
           active: state.minValue != null,
           error: state.minValueError,
@@ -125,7 +125,7 @@ class _ValueRange extends StatelessWidget {
           color: Theme.of(context).colorScheme.outline,
         ),
         const SizedBox(width: 5),
-        LibraTextField(
+        FocusTextField(
           label: 'Max',
           active: state.maxValue != null,
           error: state.maxValueError,
@@ -145,7 +145,7 @@ class _DateFilter extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LibraTextField(
+        FocusTextField(
           label: 'Start',
           active: state.startTime != null,
           error: state.startTimeError,
@@ -159,7 +159,7 @@ class _DateFilter extends StatelessWidget {
           color: Theme.of(context).colorScheme.outline,
         ),
         const SizedBox(width: 5),
-        LibraTextField(
+        FocusTextField(
           label: 'End',
           active: state.endTime != null,
           error: state.endTimeError,

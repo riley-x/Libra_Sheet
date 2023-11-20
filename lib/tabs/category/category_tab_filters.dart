@@ -39,6 +39,7 @@ class CategoryTabFilters extends StatelessWidget {
         const Text("Account"),
         const SizedBox(height: 5),
         AccountSelectionMenu(
+          includeNone: true,
           selected: state.account,
           onChanged: (Account? value) {
             state.setAccount(value);

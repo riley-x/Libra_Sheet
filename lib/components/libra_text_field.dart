@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 
-/// Common simplified text field for forms
-class LibraTextField extends StatefulWidget {
+/// Common simplified text field that calls [onChanged] whenever it looses focus.
+class FocusTextField extends StatefulWidget {
   final String? label;
   final String? hint;
   final bool error;
   final bool active;
+  final int? minLines;
+  final int? maxLines;
   final Function(String?)? onChanged;
 
-  const LibraTextField({
+  const FocusTextField({
     super.key,
     this.label,
     this.hint,
     this.error = false,
     this.active = false,
+    this.minLines,
+    this.maxLines = 1,
     this.onChanged,
   });
 
   @override
-  State<LibraTextField> createState() => _LibraTextFieldState();
+  State<FocusTextField> createState() => _FocusTextFieldState();
 }
 
-class _LibraTextFieldState extends State<LibraTextField> {
+class _FocusTextFieldState extends State<FocusTextField> {
   final FocusNode _focus = FocusNode();
   String? text;
 
@@ -63,7 +67,48 @@ class _LibraTextFieldState extends State<LibraTextField> {
         ),
         onChanged: (it) => text = it,
         focusNode: _focus,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
       ),
+    );
+  }
+}
+
+class LibraTextFormField extends StatelessWidget {
+  const LibraTextFormField({
+    super.key,
+    this.initial,
+    this.hint,
+    this.validator,
+    this.onSave,
+    this.minLines,
+    this.maxLines = 1,
+  });
+
+  final int? minLines;
+  final int? maxLines;
+  final String? initial;
+  final String? hint;
+  final String? Function(String? text)? validator;
+  final Function(String? text)? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      initialValue: initial,
+      style: Theme.of(context).textTheme.bodyMedium,
+      minLines: minLines,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        hintText: hint,
+        // hintStyle: Theme.of(context).textTheme.bodySmall,
+        errorStyle: const TextStyle(height: 0), // remove space used by error message
+        border: const OutlineInputBorder(), // this sets the shape, but the color is not used
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        isDense: true,
+      ),
+      validator: validator,
+      onSaved: onSave,
     );
   }
 }
