@@ -10,7 +10,11 @@ import 'package:provider/provider.dart';
 
 /// Creates the column that holds all the option selectors for the category tab.
 class TransactionTabFilters extends StatelessWidget {
-  const TransactionTabFilters({super.key});
+  /// Padding to be applied to the central column. Don't use padding outside the Scroll class, or
+  /// else the scroll bar is oddly offset.
+  final EdgeInsetsGeometry? interiorPadding;
+
+  const TransactionTabFilters({super.key, this.interiorPadding});
 
   @override
   Widget build(BuildContext context) {
@@ -21,44 +25,47 @@ class TransactionTabFilters extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Text(
-              "Filter",
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 10),
-            Text("Type", style: textStyle),
-            const SizedBox(height: 5),
-            ExpenseTypeFilter(
-              state.expenseFilterSelected,
-              onSelect: state.setExpenseFilter,
-            ),
+        child: Padding(
+          padding: interiorPadding ?? EdgeInsets.zero,
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                "Filter",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 10),
+              Text("Type", style: textStyle),
+              const SizedBox(height: 5),
+              ExpenseTypeFilter(
+                state.expenseFilterSelected,
+                onSelect: state.setExpenseFilter,
+              ),
 
-            const SizedBox(height: 15),
-            Text("Date", style: textStyle),
-            const SizedBox(height: 5),
-            const _DateFilter(),
+              const SizedBox(height: 15),
+              Text("Date", style: textStyle),
+              const SizedBox(height: 5),
+              const _DateFilter(),
 
-            const SizedBox(height: 15),
-            Text("Value", style: textStyle),
-            const SizedBox(height: 5),
-            const _ValueRange(),
+              const SizedBox(height: 15),
+              Text("Value", style: textStyle),
+              const SizedBox(height: 5),
+              const _ValueRange(),
 
-            const SizedBox(height: 15),
-            Text("Account", style: textStyle),
-            const SizedBox(height: 5),
-            const _AccountChips(),
+              const SizedBox(height: 15),
+              Text("Account", style: textStyle),
+              const SizedBox(height: 5),
+              const _AccountChips(),
 
-            const SizedBox(height: 15),
-            Text("Category", style: textStyle),
-            const SizedBox(height: 5),
-            const _CategoryChips(),
+              const SizedBox(height: 15),
+              Text("Category", style: textStyle),
+              const SizedBox(height: 5),
+              const _CategoryChips(),
 
-            // TODO add Tag filter
-            const SizedBox(height: 10),
-          ],
+              // TODO add Tag filter
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );

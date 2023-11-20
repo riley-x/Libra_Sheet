@@ -41,17 +41,21 @@ class _TransactionTab extends StatelessWidget {
           ),
         ),
 
-        ///
+        /// Separator
         const SizedBox(width: 10),
         Container(
           width: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
         ),
-        const SizedBox(width: 10),
 
-        ///
-        Expanded(child: Center(child: TransactionTabFilters())),
-        const SizedBox(width: 10),
+        /// Filters
+        const Expanded(
+          child: Center(
+            child: TransactionTabFilters(
+              interiorPadding: EdgeInsets.symmetric(horizontal: 10),
+            ),
+          ),
+        ),
       ],
     );
   }

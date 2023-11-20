@@ -42,8 +42,7 @@ class AccountRow extends StatelessWidget {
                   ),
                   Text(
                     account.number,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.colorScheme.outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                   ),
                 ],
               ),
@@ -83,6 +82,12 @@ class AccountList extends StatelessWidget {
 
     return ListView(
       children: [
+        Text(
+          "Cash Accounts",
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        for (final account in appState.accounts) AccountRow(account: account),
+        const SizedBox(height: 20),
         Text(
           "Bank Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
