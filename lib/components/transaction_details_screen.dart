@@ -50,16 +50,22 @@ class _TransactionDetails extends StatelessWidget {
         1: FixedColumnWidth(300),
       },
       children: [
-        _nameRow(t?.name),
+        _nameRow(context, t?.name),
       ],
     );
   }
 }
 
-TableRow _nameRow(String? initialName) {
+TableRow _nameRow(BuildContext context, String? initialName) {
   return TableRow(
     children: [
-      Text('Account'),
+      Align(
+        alignment: Alignment.topRight,
+        child: Text(
+          'Account',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
       LibraTextField(
         onChanged: (it) => print(it),
       )
