@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/test_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
@@ -10,6 +11,10 @@ import 'package:libra_sheet/theme/text_theme.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  /// Disable debugPrint() in release mode
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
   runApp(const LibraApp());
 }
 

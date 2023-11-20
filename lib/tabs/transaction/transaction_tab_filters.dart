@@ -41,7 +41,7 @@ class TransactionTabFilters extends StatelessWidget {
         const SizedBox(height: 15),
         Text("Value", style: textStyle),
         const SizedBox(height: 5),
-        // TODO value filter
+        const _ValueRange(),
 
         const SizedBox(height: 15),
         Text("Account", style: textStyle),
@@ -90,102 +90,102 @@ class _CategoryChips extends StatelessWidget {
   }
 }
 
-/// Segmented button for the time frame
-class _TimeFrameSelector extends StatelessWidget {
-  const _TimeFrameSelector({super.key});
+class _ValueRange extends StatelessWidget {
+  const _ValueRange({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<CategoryTabState>();
-    return SegmentedButton<CategoryTabTimeFrame>(
-      showSelectedIcon: false,
-      segments: const <ButtonSegment<CategoryTabTimeFrame>>[
-        ButtonSegment<CategoryTabTimeFrame>(
-          value: CategoryTabTimeFrame.current,
-          label: Text('Month'),
+    final state = context.watch<TransactionTabState>();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _TextField(
+          label: 'Min',
+          active: state.minValue != null,
+          error: state.minValueError,
+          onChanged: state.setMinValue,
         ),
-        ButtonSegment<CategoryTabTimeFrame>(
-          value: CategoryTabTimeFrame.oneYear,
-          label: Text('Year'),
+        const SizedBox(width: 5),
+        Container(
+          width: 20,
+          height: 1,
+          color: Theme.of(context).colorScheme.outline,
         ),
-        ButtonSegment<CategoryTabTimeFrame>(
-          value: CategoryTabTimeFrame.all,
-          label: Text('All'),
+        const SizedBox(width: 5),
+        _TextField(
+          label: 'Max',
+          active: state.maxValue != null,
+          error: state.maxValueError,
+          onChanged: state.setMaxValue,
         ),
       ],
-      selected: <CategoryTabTimeFrame>{state.timeFrame},
-      onSelectionChanged: (Set<CategoryTabTimeFrame> newSelection) {
-        state.setTimeFrame(newSelection.first);
-      },
     );
   }
 }
 
-/// Dropdown button for filtering by an account
-class _AccountFilterMenu extends StatelessWidget {
-  const _AccountFilterMenu({super.key});
+class _TextField extends StatefulWidget {
+  final String? label;
+  final String? hint;
+  final bool error;
+  final bool active;
+  final Function(String?)? onChanged;
+
+  const _TextField({
+    super.key,
+    this.label,
+    this.hint,
+    this.error = false,
+    this.active = false,
+    this.onChanged,
+  });
+
+  @override
+  State<_TextField> createState() => _TextFieldState();
+}
+
+class _TextFieldState extends State<_TextField> {
+  final FocusNode _focus = FocusNode();
+  String? text;
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _focus.removeListener(_onFocusChange);
+    _focus.dispose();
+  }
+
+  void _onFocusChange() {
+    if (!_focus.hasFocus) {
+      widget.onChanged?.call(text);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<LibraAppState>();
-    final categoryTabState = context.watch<CategoryTabState>();
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 30),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          focusColor: Theme.of(context).colorScheme.secondaryContainer,
-          hoverColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(128),
+    return SizedBox(
+      width: 100,
+      child: TextField(
+        decoration: InputDecoration(
+          filled: widget.active && !widget.error,
+          fillColor: Theme.of(context).colorScheme.secondaryContainer,
+          errorText: (widget.error) ? '' : null, // setting this to not null shows the error border
+          errorStyle: const TextStyle(height: 0),
+          border: const OutlineInputBorder(), // this sets the shape, but the color is not used
+          hintText: widget.hint,
+          hintStyle: Theme.of(context).textTheme.bodySmall,
+          labelText: widget.label,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          isDense: true,
         ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<Account?>(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            borderRadius: BorderRadius.circular(10),
-            focusColor: Theme.of(context).colorScheme.secondaryContainer,
-            value: categoryTabState.account,
-            items: [
-              DropdownMenuItem(
-                value: null,
-                child: Text(
-                  'None',
-                  style: Theme.of(context).textTheme.labelLarge, // match with SegmentedButton
-                ),
-              ),
-              for (final account in appState.accounts)
-                DropdownMenuItem(
-                  value: account,
-                  child: Text(
-                    account.name,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
-            ],
-            onChanged: (Account? value) {
-              categoryTabState.setAccount(value);
-            },
-          ),
-        ),
+        onChanged: (it) => text = it,
+        focusNode: _focus,
       ),
     );
   }
 }
-
-class _SubCategorySwitch extends StatelessWidget {
-  const _SubCategorySwitch({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final categoryTabState = context.watch<CategoryTabState>();
-    return Switch(
-      value: categoryTabState.showSubCategories,
-      onChanged: categoryTabState.shouldShowSubCategories,
-      activeColor: Theme.of(context).colorScheme.surfaceTint,
-      activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
-    );
-  }
-}
-
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   final categoryTabState = context.watch<CategoryTabState>();
-  // }
