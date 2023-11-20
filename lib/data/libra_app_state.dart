@@ -28,10 +28,21 @@ class LibraAppState extends ChangeNotifier {
 
   final List<Category> categories = testCategoryValues;
 
+  /// Current tab as an index into [LibraNavDestination.values].
+  int currentTab = 0;
+
   /// Current screen being displayed. When not empty, contains the back stack of detail screens.
   /// When empty, defaults to the main tab specified by LibraHomePage. The Object is the input used
   /// to initialize the respective screens.
   final List<(DetailScreen, Object?)> backStack = [];
+
+  void setTab(int i) {
+    if (currentTab != i || backStack.isNotEmpty) {
+      currentTab = i;
+      backStack.clear();
+      notifyListeners();
+    }
+  }
 
   void popBackStack() {
     if (backStack.isNotEmpty) {

@@ -42,23 +42,18 @@ class LibraApp extends StatelessWidget {
   }
 }
 
-class LibraHomePage extends StatefulWidget {
+class LibraHomePage extends StatelessWidget {
   const LibraHomePage({super.key});
 
   @override
-  State<LibraHomePage> createState() => _LibraHomePageState();
-}
-
-class _LibraHomePageState extends State<LibraHomePage> {
-  var selectedIndex = 0;
-
-  @override
   Widget build(BuildContext context) {
-    Widget page;
+    final currentTab = context.select<LibraAppState, int>((it) => it.currentTab);
 
     /// DO NOT select the List itself, as that is a pointer only and updates won't be registered.
     final focusPage =
         context.select<LibraAppState, (DetailScreen, Object?)?>((it) => it.backStack.lastOrNull);
+
+    Widget page;
     if (focusPage != null) {
       switch (focusPage.$1) {
         case DetailScreen.account:
@@ -67,7 +62,7 @@ class _LibraHomePageState extends State<LibraHomePage> {
           page = TransactionDetailsScreen(focusPage.$2 as Transaction?);
       }
     } else {
-      switch (LibraNavDestination.values[selectedIndex]) {
+      switch (LibraNavDestination.values[currentTab]) {
         case LibraNavDestination.home:
           page = const HomeTab();
         case LibraNavDestination.cashFlows:
@@ -87,13 +82,9 @@ class _LibraHomePageState extends State<LibraHomePage> {
           children: [
             SafeArea(
               child: LibraNav(
-                selectedIndex: selectedIndex,
+                selectedIndex: currentTab,
                 extended: constraints.maxWidth >= 900,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
+                onDestinationSelected: context.read<LibraAppState>().setTab,
               ),
             ),
             Expanded(

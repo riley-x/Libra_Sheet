@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/transaction.dart';
-import 'package:provider/provider.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen(this.transaction, {super.key});
