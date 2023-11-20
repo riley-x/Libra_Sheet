@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
@@ -18,7 +19,7 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var transactions = context.watch<HomeTabState>().accountFocusedTransactions;
+    var transactions = testTransactions; // TODO
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,9 +27,6 @@ class AccountScreen extends StatelessWidget {
         CommonBackBar(
           leftText: account.name,
           rightText: account.balance.dollarString(),
-          onBack: () {
-            context.read<HomeTabState>().focusAccount(null);
-          },
         ),
         const SizedBox(height: 5),
         Container(
@@ -46,7 +44,7 @@ class AccountScreen extends StatelessWidget {
                     transactions ?? [],
                     fixedColumns: 1,
                     maxRowsForName: 3,
-                    onSelect: context.read<LibraAppState>().focus,
+                    onSelect: context.read<LibraAppState>().focusTransaction,
                   ),
                 ),
               ),

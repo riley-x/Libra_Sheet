@@ -25,7 +25,7 @@ class AccountRow extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        context.read<HomeTabState>().focusAccount(account);
+        context.read<LibraAppState>().focusAccount(account);
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),

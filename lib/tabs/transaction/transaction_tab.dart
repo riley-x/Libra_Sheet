@@ -34,7 +34,7 @@ class _TransactionTab extends StatelessWidget {
                 state.transactions,
                 maxRowsForName: 3,
                 fixedColumns: 1,
-                onSelect: context.read<LibraAppState>().focus,
+                onSelect: context.read<LibraAppState>().focusTransaction,
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {}, // TODO

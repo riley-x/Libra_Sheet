@@ -18,7 +18,6 @@ class TransactionDetailsScreen extends StatelessWidget {
           leftText: "Transaction Editor",
           rightText: "Database key: ${transaction?.key}",
           rightStyle: Theme.of(context).textTheme.labelMedium,
-          onBack: () => context.read<LibraAppState>().focus(null),
         ),
       ],
     );

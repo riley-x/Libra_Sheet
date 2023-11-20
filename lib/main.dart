@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_details_screen.dart';
+import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/transaction.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/category/category_tab.dart';
+import 'package:libra_sheet/tabs/home/account_screen.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:libra_sheet/tabs/libra_nav.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab.dart';
@@ -53,10 +55,17 @@ class _LibraHomePageState extends State<LibraHomePage> {
   @override
   Widget build(BuildContext context) {
     Widget page;
-    final focusTransaction =
-        context.select<LibraAppState, Transaction?>((it) => it.focusTransaction);
-    if (focusTransaction != null) {
-      page = TransactionDetailsScreen(focusTransaction);
+
+    /// DO NOT select the List itself, as that is a pointer only and updates won't be registered.
+    final focusPage =
+        context.select<LibraAppState, (DetailScreen, Object?)?>((it) => it.backStack.lastOrNull);
+    if (focusPage != null) {
+      switch (focusPage.$1) {
+        case DetailScreen.account:
+          page = AccountScreen(account: focusPage.$2 as Account);
+        case DetailScreen.transaction:
+          page = TransactionDetailsScreen(focusPage.$2 as Transaction?);
+      }
     } else {
       switch (LibraNavDestination.values[selectedIndex]) {
         case LibraNavDestination.home:

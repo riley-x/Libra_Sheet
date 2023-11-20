@@ -61,7 +61,7 @@ class _Body extends StatelessWidget {
               context.watch<CategoryTabState>().categoryFocusedTransactions,
               fixedColumns: 1,
               maxRowsForName: 3,
-              onSelect: context.read<LibraAppState>().focus,
+              onSelect: context.read<LibraAppState>().focusTransaction,
             ),
           ),
         ),
