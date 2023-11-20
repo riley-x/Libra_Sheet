@@ -3,13 +3,20 @@ import 'package:libra_sheet/components/transaction_card.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 class TransactionFilterGrid extends StatefulWidget {
-  const TransactionFilterGrid(this.transactions,
-      {super.key, this.title, this.maxRowsForName = 1, this.fixedColumns});
+  const TransactionFilterGrid(
+    this.transactions, {
+    super.key,
+    this.title,
+    this.maxRowsForName = 1,
+    this.fixedColumns,
+    this.onSelect,
+  });
 
   final Widget? title;
   final List<Transaction> transactions;
   final int? maxRowsForName;
   final int? fixedColumns;
+  final Function(Transaction)? onSelect;
 
   @override
   State<TransactionFilterGrid> createState() => _TransactionFilterGridState();
@@ -46,6 +53,7 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
             widget.transactions,
             maxRowsForName: widget.maxRowsForName,
             fixedColumns: widget.fixedColumns,
+            onSelect: widget.onSelect,
           ),
         ),
       ],
@@ -58,12 +66,14 @@ class TransactionGrid extends StatelessWidget {
     this.transactions, {
     this.maxRowsForName = 1,
     this.fixedColumns,
+    this.onSelect,
     super.key,
   });
 
   final List<Transaction> transactions;
   final int? maxRowsForName;
   final int? fixedColumns;
+  final Function(Transaction)? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +98,7 @@ class TransactionGrid extends StatelessWidget {
                           child: TransactionCard(
                             trans: transactions[i],
                             maxRowsForName: maxRowsForName,
+                            onSelect: onSelect,
                           ),
                         ),
               ],

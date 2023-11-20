@@ -4,10 +4,16 @@ import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
-  const TransactionCard({super.key, required this.trans, this.maxRowsForName = 1});
+  const TransactionCard({
+    super.key,
+    required this.trans,
+    this.maxRowsForName = 1,
+    this.onSelect,
+  });
 
   final Transaction trans;
   final int? maxRowsForName;
+  final Function(Transaction)? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +32,7 @@ class TransactionCard extends StatelessWidget {
     }
 
     return GestureDetector(
+      onTap: () => onSelect?.call(trans),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Padding(

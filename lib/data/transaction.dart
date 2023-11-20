@@ -3,6 +3,7 @@ import 'package:libra_sheet/data/category.dart';
 
 class Transaction {
   const Transaction({
+    this.key = -1,
     required this.name,
     required this.date,
     required this.value,
@@ -14,6 +15,7 @@ class Transaction {
     this.reimbursements = const [],
   });
 
+  final int key;
   final String name;
   final DateTime date;
   final int value;

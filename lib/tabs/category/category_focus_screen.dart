@@ -89,6 +89,7 @@ class _Body extends StatelessWidget {
               context.watch<CategoryTabState>().categoryFocusedTransactions,
               fixedColumns: 1,
               maxRowsForName: 3,
+              onSelect: (it) => print(it.name), // TODO
             ),
           ),
         ),

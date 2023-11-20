@@ -61,6 +61,7 @@ class AccountScreen extends StatelessWidget {
                     transactions ?? [],
                     fixedColumns: 1,
                     maxRowsForName: 3,
+                    onSelect: (it) => print(it.name), // TODO
                   ),
                 ),
               ),

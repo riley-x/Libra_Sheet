@@ -25,6 +25,7 @@ class _TransactionTab extends StatelessWidget {
     return Row(
       children: [
         Expanded(
+          flex: 15,
           child: Padding(
             padding: const EdgeInsets.only(top: 10, left: 10),
             child: Scaffold(
@@ -50,6 +51,7 @@ class _TransactionTab extends StatelessWidget {
 
         /// Filters
         const Expanded(
+          flex: 10,
           child: Center(
             child: TransactionTabFilters(
               interiorPadding: EdgeInsets.symmetric(horizontal: 10),
