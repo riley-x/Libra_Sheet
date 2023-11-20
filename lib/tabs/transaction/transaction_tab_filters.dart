@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/category_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
+import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
@@ -111,7 +112,7 @@ class _ValueRange extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _TextField(
+        LibraTextField(
           label: 'Min',
           active: state.minValue != null,
           error: state.minValueError,
@@ -124,7 +125,7 @@ class _ValueRange extends StatelessWidget {
           color: Theme.of(context).colorScheme.outline,
         ),
         const SizedBox(width: 5),
-        _TextField(
+        LibraTextField(
           label: 'Max',
           active: state.maxValue != null,
           error: state.maxValueError,
@@ -144,7 +145,7 @@ class _DateFilter extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _TextField(
+        LibraTextField(
           label: 'Start',
           active: state.startTime != null,
           error: state.startTimeError,
@@ -158,7 +159,7 @@ class _DateFilter extends StatelessWidget {
           color: Theme.of(context).colorScheme.outline,
         ),
         const SizedBox(width: 5),
-        _TextField(
+        LibraTextField(
           label: 'End',
           active: state.endTime != null,
           error: state.endTimeError,
@@ -166,73 +167,6 @@ class _DateFilter extends StatelessWidget {
           onChanged: state.setEndTime,
         ),
       ],
-    );
-  }
-}
-
-class _TextField extends StatefulWidget {
-  final String? label;
-  final String? hint;
-  final bool error;
-  final bool active;
-  final Function(String?)? onChanged;
-
-  const _TextField({
-    super.key,
-    this.label,
-    this.hint,
-    this.error = false,
-    this.active = false,
-    this.onChanged,
-  });
-
-  @override
-  State<_TextField> createState() => _TextFieldState();
-}
-
-class _TextFieldState extends State<_TextField> {
-  final FocusNode _focus = FocusNode();
-  String? text;
-
-  @override
-  void initState() {
-    super.initState();
-    _focus.addListener(_onFocusChange);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _focus.removeListener(_onFocusChange);
-    _focus.dispose();
-  }
-
-  void _onFocusChange() {
-    if (!_focus.hasFocus) {
-      widget.onChanged?.call(text);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      child: TextField(
-        decoration: InputDecoration(
-          filled: widget.active && !widget.error,
-          fillColor: Theme.of(context).colorScheme.secondaryContainer,
-          errorText: (widget.error) ? '' : null, // setting this to not null shows the error border
-          errorStyle: const TextStyle(height: 0),
-          border: const OutlineInputBorder(), // this sets the shape, but the color is not used
-          hintText: widget.hint,
-          hintStyle: Theme.of(context).textTheme.bodySmall,
-          labelText: widget.label,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          isDense: true,
-        ),
-        onChanged: (it) => text = it,
-        focusNode: _focus,
-      ),
     );
   }
 }
