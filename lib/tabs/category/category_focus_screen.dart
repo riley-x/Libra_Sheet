@@ -30,11 +30,6 @@ class CategoryFocusScreen extends StatelessWidget {
             context.read<CategoryTabState>().clearFocus();
           },
         ),
-        const SizedBox(height: 5),
-        Container(
-          height: 2,
-          color: Theme.of(context).colorScheme.outline,
-        ),
         Expanded(child: _Body(category: category)),
       ],
     );

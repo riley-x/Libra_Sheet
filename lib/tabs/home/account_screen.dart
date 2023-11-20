@@ -7,7 +7,6 @@ import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
-import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:provider/provider.dart';
 
 /// Main widget for displaying the details of a single account. Navigated to by clicking on an
@@ -27,11 +26,6 @@ class AccountScreen extends StatelessWidget {
         CommonBackBar(
           leftText: account.name,
           rightText: account.balance.dollarString(),
-        ),
-        const SizedBox(height: 5),
-        Container(
-          height: 2,
-          color: Theme.of(context).colorScheme.outline,
         ),
         Expanded(
           child: Row(
