@@ -27,6 +27,11 @@ class LibraAppState extends ChangeNotifier {
   /// transaction as the initial values (and uses its key for update operations).
   Transaction? focusTransaction;
 
+  void focus(Transaction? t) {
+    focusTransaction = t;
+    notifyListeners();
+  }
+
   void increment() {
     notifyListeners();
   }

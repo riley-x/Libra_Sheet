@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_filters.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class _TransactionTab extends StatelessWidget {
                 state.transactions,
                 maxRowsForName: 3,
                 fixedColumns: 1,
-                onSelect: (it) => print(it.name), // TODO
+                onSelect: context.read<LibraAppState>().focus,
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {}, // TODO

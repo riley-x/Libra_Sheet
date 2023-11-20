@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/transaction_details_screen.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/transaction.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/category/category_tab.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
@@ -51,17 +53,23 @@ class _LibraHomePageState extends State<LibraHomePage> {
   @override
   Widget build(BuildContext context) {
     Widget page;
-    switch (LibraNavDestination.values[selectedIndex]) {
-      case LibraNavDestination.home:
-        page = const HomeTab();
-      case LibraNavDestination.cashFlows:
-        page = const CashFlowTab();
-      case LibraNavDestination.categories:
-        page = const CategoryTab();
-      case LibraNavDestination.transactions:
-        page = const TransactionTab();
-      default:
-        page = const Placeholder();
+    final focusTransaction =
+        context.select<LibraAppState, Transaction?>((it) => it.focusTransaction);
+    if (focusTransaction != null) {
+      page = TransactionDetailsScreen(focusTransaction);
+    } else {
+      switch (LibraNavDestination.values[selectedIndex]) {
+        case LibraNavDestination.home:
+          page = const HomeTab();
+        case LibraNavDestination.cashFlows:
+          page = const CashFlowTab();
+        case LibraNavDestination.categories:
+          page = const CategoryTab();
+        case LibraNavDestination.transactions:
+          page = const TransactionTab();
+        default:
+          page = const Placeholder();
+      }
     }
 
     return LayoutBuilder(builder: (context, constraints) {

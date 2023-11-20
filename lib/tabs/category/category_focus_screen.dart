@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
@@ -60,7 +61,7 @@ class _Body extends StatelessWidget {
               context.watch<CategoryTabState>().categoryFocusedTransactions,
               fixedColumns: 1,
               maxRowsForName: 3,
-              onSelect: (it) => print(it.name), // TODO
+              onSelect: context.read<LibraAppState>().focus,
             ),
           ),
         ),

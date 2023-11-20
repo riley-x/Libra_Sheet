@@ -4,8 +4,15 @@ import 'package:flutter/material.dart';
 class CommonBackBar extends StatelessWidget {
   final String? leftText;
   final String? rightText;
+  final TextStyle? rightStyle;
   final Function()? onBack;
-  const CommonBackBar({super.key, this.leftText, this.rightText, this.onBack});
+  const CommonBackBar({
+    super.key,
+    this.leftText,
+    this.rightText,
+    this.onBack,
+    this.rightStyle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +32,7 @@ class CommonBackBar extends StatelessWidget {
         const Spacer(),
         Text(
           rightText ?? '',
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: rightStyle ?? Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(width: 15),
       ],
