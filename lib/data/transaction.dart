@@ -1,4 +1,5 @@
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/category.dart';
 
 class Transaction {
   const Transaction({
@@ -21,7 +22,7 @@ class Transaction {
   final int? accountKey;
   final Account? account;
   final int? categoryKey;
-  final int? category;
+  final Category? category;
 
   // final List<Allocation> allocations;
   // final List<Tag> tags;

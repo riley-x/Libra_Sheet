@@ -74,13 +74,19 @@ class AccountRow extends StatelessWidget {
 }
 
 class AccountList extends StatelessWidget {
-  const AccountList({super.key});
+  final EdgeInsets padding;
+
+  const AccountList({
+    super.key,
+    this.padding = EdgeInsets.zero,
+  });
 
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<LibraAppState>();
 
     return ListView(
+      padding: padding,
       children: [
         Text(
           "Cash Accounts",

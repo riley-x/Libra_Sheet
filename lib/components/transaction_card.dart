@@ -14,6 +14,17 @@ class TransactionCard extends StatelessWidget {
     var theme = Theme.of(context);
     final dtFormat = DateFormat("M/d/yy");
 
+    var subText = '';
+    if (trans.account != null) {
+      subText += trans.account!.name;
+    }
+    if (trans.category != null) {
+      if (subText.isNotEmpty) {
+        subText += ', ';
+      }
+      subText += trans.category!.name;
+    }
+
     return GestureDetector(
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -32,7 +43,7 @@ class TransactionCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      trans.account?.name ?? "",
+                      subText,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
