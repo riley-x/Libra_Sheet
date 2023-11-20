@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -21,49 +22,19 @@ class CategoryFocusScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),
-        _Header(category: category),
+        CommonBackBar(
+          leftText: category.name,
+          rightText: category.value.dollarString(),
+          onBack: () {
+            context.read<CategoryTabState>().clearFocus();
+          },
+        ),
         const SizedBox(height: 5),
         Container(
           height: 2,
           color: Theme.of(context).colorScheme.outline,
         ),
         Expanded(child: _Body(category: category)),
-      ],
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    super.key,
-    required this.category,
-  });
-
-  final CategoryValue category;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () {
-            context.read<CategoryTabState>().clearFocus();
-          },
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        Text(
-          category.name,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const Spacer(),
-        Text(
-          category.value.dollarString(),
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(width: 15),
       ],
     );
   }

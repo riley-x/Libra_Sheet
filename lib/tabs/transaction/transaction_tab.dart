@@ -33,6 +33,7 @@ class _TransactionTab extends StatelessWidget {
                 state.transactions,
                 maxRowsForName: 3,
                 fixedColumns: 1,
+                onSelect: (it) => print(it.name), // TODO
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {}, // TODO

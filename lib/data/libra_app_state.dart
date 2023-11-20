@@ -3,6 +3,7 @@ import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/data/test_data.dart';
+import 'package:libra_sheet/data/transaction.dart';
 
 class LibraAppState extends ChangeNotifier {
   final List<TimeValue> chartData = [
@@ -21,6 +22,10 @@ class LibraAppState extends ChangeNotifier {
   final List<Account> accounts = testAccounts;
 
   final List<Category> categories = testCategoryValues;
+
+  /// Current transaction being focused. If not null, shows the transaction details screen with this
+  /// transaction as the initial values (and uses its key for update operations).
+  Transaction? focusTransaction;
 
   void increment() {
     notifyListeners();

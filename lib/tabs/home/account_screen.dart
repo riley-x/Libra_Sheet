@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -22,28 +23,12 @@ class AccountScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),
-        Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                context.read<HomeTabState>().focusAccount(null);
-              },
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            Text(
-              account.name,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const Spacer(),
-            Text(
-              account.balance.dollarString(),
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(width: 15),
-          ],
+        CommonBackBar(
+          leftText: account.name,
+          rightText: account.balance.dollarString(),
+          onBack: () {
+            context.read<HomeTabState>().focusAccount(null);
+          },
         ),
         const SizedBox(height: 5),
         Container(
