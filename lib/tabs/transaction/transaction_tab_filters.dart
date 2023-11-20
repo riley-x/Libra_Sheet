@@ -34,9 +34,9 @@ class TransactionTabFilters extends StatelessWidget {
         ),
 
         const SizedBox(height: 15),
-        Text("Time Frame", style: textStyle),
+        Text("Date", style: textStyle),
         const SizedBox(height: 5),
-        // TODO ,
+        const _DateFilter(),
 
         const SizedBox(height: 15),
         Text("Value", style: textStyle),
@@ -117,6 +117,41 @@ class _ValueRange extends StatelessWidget {
           active: state.maxValue != null,
           error: state.maxValueError,
           onChanged: state.setMaxValue,
+        ),
+      ],
+    );
+  }
+}
+
+class _DateFilter extends StatelessWidget {
+  const _DateFilter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionTabState>();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _TextField(
+          label: 'Start',
+          active: state.startTime != null,
+          error: state.startTimeError,
+          hint: 'MM/DD/YY',
+          onChanged: state.setStartTime,
+        ),
+        const SizedBox(width: 5),
+        Container(
+          width: 20,
+          height: 1,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        const SizedBox(width: 5),
+        _TextField(
+          label: 'End',
+          active: state.endTime != null,
+          error: state.endTimeError,
+          hint: 'MM/DD/YY',
+          onChanged: state.setEndTime,
         ),
       ],
     );

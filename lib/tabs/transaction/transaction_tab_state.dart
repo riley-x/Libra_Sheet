@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
@@ -88,6 +89,49 @@ class TransactionTabState extends ChangeNotifier {
       notifyListeners();
     } else if (maxValueError != val.$2) {
       maxValueError = val.$2;
+      notifyListeners();
+    }
+  }
+
+  (DateTime?, bool) _parseDate(String? text) {
+    DateTime? time;
+    bool error = false;
+    if (text == null || text.isEmpty) {
+      // pass
+    } else {
+      try {
+        final format = DateFormat('MM/dd/yy');
+        time = format.parse(text);
+      } on FormatException {
+        error = true;
+      }
+    }
+    debugPrint('TransactionTabState::_parseDate() text:$text time=$time error=$error');
+    return (time, error);
+  }
+
+  void setStartTime(String? text) {
+    final val = _parseDate(text);
+    if (startTime != val.$1) {
+      // TODO load transactions
+      startTime = val.$1;
+      startTimeError = val.$2;
+      notifyListeners();
+    } else if (startTimeError != val.$2) {
+      startTimeError = val.$2;
+      notifyListeners();
+    }
+  }
+
+  void setEndTime(String? text) {
+    final val = _parseDate(text);
+    if (endTime != val.$1) {
+      // TODO load transactions
+      endTime = val.$1;
+      endTimeError = val.$2;
+      notifyListeners();
+    } else if (endTimeError != val.$2) {
+      endTimeError = val.$2;
       notifyListeners();
     }
   }
