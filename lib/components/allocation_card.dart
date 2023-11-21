@@ -23,7 +23,7 @@ class AllocationCard extends StatelessWidget {
             Icons.add,
             color: Theme.of(context).colorScheme.outline,
           ),
-          SizedBox(width: 5, height: 30),
+          const SizedBox(width: 5, height: 30),
           Text(
             'Add an allocation',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -38,12 +38,14 @@ class AllocationCard extends StatelessWidget {
         maxWidth: 300,
         child: Row(
           children: [
-            Text(
-              allocation!.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Text(
+                allocation!.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            Spacer(),
+            const SizedBox(width: 15),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

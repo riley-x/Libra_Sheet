@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/printer.dart';
+import 'package:libra_sheet/components/reimbursement_card.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
@@ -13,6 +14,7 @@ import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/reimbursement.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
@@ -73,13 +75,17 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   ExpenseFilterType expenseType = ExpenseFilterType.all;
   final Set<Tag> tags = {};
+  final List<Allocation> allocations = [];
+  final List<Reimbursement> reimbursements = [];
 
   @override
   void initState() {
     super.initState();
     if (widget.seed != null) {
       expenseType = _valToFilterType(widget.seed?.value);
-      for (final tag in widget.seed?.tags ?? []) {
+      allocations.insertAll(0, widget.seed?.allocations ?? const []);
+      reimbursements.insertAll(0, widget.seed?.reimbursements ?? const []);
+      for (final tag in widget.seed?.tags ?? const []) {
         tags.add(tag);
       }
     }
@@ -113,7 +119,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
     return Form(
       key: _formKey,
       child: SizedBox(
-        width: 400,
+        width: 450,
         child: Column(
           children: [
             Table(
@@ -206,11 +212,33 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   'Allocations',
                   Column(
                     children: [
-                      for (final alloc in testAllocations) ...[
+                      for (final alloc in allocations) ...[
                         AllocationCard(alloc),
                         const SizedBox(height: 4)
                       ],
-                      AllocationCard(null),
+                      const AllocationCard(null),
+                    ],
+                  ),
+                  labelAlign: TableCellVerticalAlignment.top,
+                ),
+                _rowSpacing,
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Reimbursements',
+                  Column(
+                    children: [
+                      for (final r in reimbursements) ...[
+                        ReimbursementCard(
+                          r,
+                          onTap: (it) {},
+                        ),
+                        const SizedBox(height: 6)
+                      ],
+                      ReimbursementCard(
+                        null,
+                        onTap: (it) {},
+                      ),
                     ],
                   ),
                   labelAlign: TableCellVerticalAlignment.top,
@@ -221,8 +249,10 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
                   _formKey.currentState?.save();
-                  print(tags);
-                  // TODO handle tags too, save transaction
+                  print(tags.length);
+                  print(allocations.length);
+                  print(reimbursements.length);
+                  // TODO handle tags, allocations, save transaction
                 }
               },
               child: const Text('Submit'),

@@ -1,5 +1,7 @@
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/allocation.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/reimbursement.dart';
 import 'package:libra_sheet/data/tag.dart';
 
 class Transaction {
@@ -13,6 +15,7 @@ class Transaction {
     this.accountKey,
     this.account,
     this.note = "",
+    this.allocations,
     this.reimbursements,
     this.tags,
   });
@@ -28,7 +31,7 @@ class Transaction {
   final int? categoryKey;
   final Category? category;
 
-  // final List<Allocation> allocations;
   final List<Tag>? tags;
-  final List<Transaction>? reimbursements;
+  final List<Allocation>? allocations;
+  final List<Reimbursement>? reimbursements;
 }

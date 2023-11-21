@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/allocation.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/reimbursement.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
@@ -65,11 +66,12 @@ final List<Transaction> testTransactions = [
     date: DateTime(2023, 11, 16),
     value: -502300,
     account: testAccounts[0],
+    reimbursements: [],
   ),
   Transaction(
     name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
     date: DateTime(2023, 11, 15),
-    value: 502300,
+    value: 1502300,
   ),
   Transaction(
     name: "test test",
@@ -77,3 +79,12 @@ final List<Transaction> testTransactions = [
     value: 12322300,
   ),
 ];
+
+final List<Reimbursement> testReimbursements = [
+  Reimbursement(
+      parentTransaction: testTransactions[0], otherTransaction: testTransactions[1], value: 2300),
+];
+
+void initializeTestData() {
+  testTransactions[0].reimbursements!.add(testReimbursements[0]);
+}
