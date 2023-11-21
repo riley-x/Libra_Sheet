@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/printer.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
+import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
+import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/transaction.dart';
@@ -149,6 +152,17 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   borderRadius: BorderRadius.circular(4),
                   type: expenseType,
                 ),
+              ),
+              _rowSpacing,
+              _labelRow(
+                context, 'Tags', SizedBox(),
+                // DropdownCheckboxMenu<Tag>(
+                //   icon: Icons.add,
+                //   items: [],
+                //   // items: tags,
+                //   builder: dropdownCategoryBuilder,
+                //   isChecked: map.get,
+                // ),
               ),
             ],
           ),

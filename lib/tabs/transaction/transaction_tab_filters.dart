@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
-import 'package:libra_sheet/components/selectors/category_filter_chips.dart';
+import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
-import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
@@ -110,6 +108,7 @@ class _CategoryChips extends StatelessWidget {
             DropdownCategoryMenu(
               categories: categories,
               map: state.categoryFilterSelected,
+              // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
               notify: state.notifyListeners,
             ),
           ],
@@ -118,6 +117,7 @@ class _CategoryChips extends StatelessWidget {
         CategoryFilterChips(
           categories: categories,
           map: state.categoryFilterSelected,
+          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
           notify: state.notifyListeners,
         ),
       ],

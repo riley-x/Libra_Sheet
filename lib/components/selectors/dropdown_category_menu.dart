@@ -65,6 +65,7 @@ class DropdownCategoryMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownCheckboxMenu<Category>(
+      icon: Icons.add,
       items: categories,
       builder: dropdownCategoryBuilder,
       isChecked: map.get,
