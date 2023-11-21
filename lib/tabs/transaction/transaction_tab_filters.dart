@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/category_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
+import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/account.dart';
@@ -123,39 +124,15 @@ class _CategoryChips extends StatelessWidget {
           children: [
             for (final cat in categories)
               if (state.categoryFilterSelected[cat.key] ?? cat.hasSubCats())
-                GestureDetector(
-                  onTap: () {
-                    state.setCategoryFilter(cat, false);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 4, right: 4, bottom: 3),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                    ),
-                    child: Text(
-                      cat.name,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
+                LibraChip(
+                  cat.name,
+                  onTap: () => state.setCategoryFilter(cat, false),
                 )
           ],
         )
       ],
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   final state = context.watch<TransactionTabState>();
-  //   var categories = context
-  //       .select<LibraAppState, List<Category>>((it) => it.incomeCategories + it.expenseCategories);
-  //   return CategoryFilterChips(
-  //     categories: [ignoreCategory, incomeCategory, expenseCategory] + categories,
-  //     selected: (cat) => state.categoryFilterSelected.contains(cat.key),
-  //     onSelected: (cat, selected) => state.setCategoryFilter(cat, selected),
-  //   );
-  // }
 }
 
 class _ValueRange extends StatelessWidget {
