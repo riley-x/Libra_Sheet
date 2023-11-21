@@ -7,15 +7,16 @@ import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/allocation_card.dart';
 import '../../components/tri_buttons.dart';
+import 'value_field.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen(this.transaction, {super.key});
@@ -83,7 +84,7 @@ class _TransactionDetails extends StatelessWidget {
                 1: FixedColumnWidth(250),
               },
               children: [
-                _labelRow(
+                labelRow(
                   context,
                   'Account',
                   AccountSelectionFormField(
@@ -93,8 +94,8 @@ class _TransactionDetails extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Name',
                   LibraTextFormField(
@@ -105,8 +106,8 @@ class _TransactionDetails extends StatelessWidget {
                     onSave: (it) => state.name = it,
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Date',
                   _DateField(
@@ -114,18 +115,18 @@ class _TransactionDetails extends StatelessWidget {
                     onSave: (it) => state.date = it,
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Value',
-                  _ValueField(
+                  ValueField(
                     initial: state.seed?.value,
                     onSave: (it) => state.value = it,
                     onChanged: state.onValueChanged,
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Category',
                   CategorySelectionFormField(
@@ -136,8 +137,8 @@ class _TransactionDetails extends StatelessWidget {
                     type: state.expenseType,
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Tags',
                   _TagSelector(
@@ -145,8 +146,8 @@ class _TransactionDetails extends StatelessWidget {
                     onChanged: state.onTagChanged,
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Note',
                   LibraTextFormField(
@@ -155,8 +156,8 @@ class _TransactionDetails extends StatelessWidget {
                     onSave: (it) => state.note = it,
                   ),
                 ),
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                labelRow(
                   context,
                   'Allocations',
                   Column(
@@ -170,9 +171,9 @@ class _TransactionDetails extends StatelessWidget {
                   ),
                   labelAlign: TableCellVerticalAlignment.top,
                 ),
-                _rowSpacing,
-                _rowSpacing,
-                _labelRow(
+                rowSpacing,
+                rowSpacing,
+                labelRow(
                   context,
                   'Reimbursements',
                   Column(
@@ -208,37 +209,6 @@ class _TransactionDetails extends StatelessWidget {
   }
 }
 
-TableRow _labelRow(BuildContext context, String label, Widget? right,
-    {TableCellVerticalAlignment? labelAlign}) {
-  return TableRow(
-    children: [
-      TableCell(
-        verticalAlignment: labelAlign,
-        child: Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-        ),
-      ),
-      if (right != null) right,
-    ],
-  );
-}
-
-const _rowSpacing = TableRow(children: [
-  SizedBox(
-    height: 8,
-  ),
-  SizedBox(
-    height: 8,
-  )
-]);
-
 final _dateFormat = DateFormat('MM/dd/yy');
 
 class _DateField extends StatelessWidget {
@@ -266,37 +236,6 @@ class _DateField extends StatelessWidget {
         }
       },
       onSave: (it) => onSave?.call(_dateFormat.parse(it!)),
-    );
-  }
-}
-
-class _ValueField extends StatelessWidget {
-  const _ValueField({
-    super.key,
-    this.formFieldKey,
-    this.initial,
-    this.onSave,
-    this.onChanged,
-  });
-
-  final int? initial;
-  final Function(int)? onSave;
-  final Function(int?)? onChanged;
-  final Key? formFieldKey;
-
-  @override
-  Widget build(BuildContext context) {
-    return LibraTextFormField(
-      formFieldKey: formFieldKey,
-      initial: initial?.dollarString(dollarSign: false),
-      validator: (String? text) {
-        if (text == null || text.isEmpty) return ''; // No message to not take up space
-        final val = text.toIntDollar();
-        if (val == null) return ''; // No message to not take up space
-        return null;
-      },
-      onChanged: (it) => onChanged?.call(it?.toIntDollar()),
-      onSave: (it) => onSave?.call(it?.toIntDollar() ?? 0),
     );
   }
 }
