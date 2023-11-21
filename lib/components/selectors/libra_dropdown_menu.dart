@@ -23,6 +23,27 @@ class LibraDropdownMenu<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// We have to add selected into the list if it's not already, otherwise the DropdownButton complains.
+    /// This happens if i.e. an income category is selected but the list is changed to expenses.
+    var menuItems = <DropdownMenuItem<T?>>[];
+    // bool seenSelected = selected == null; // i.e. false by default
+    // for (final item in items) {
+    //   menuItems.add(DropdownMenuItem(
+    //     value: item,
+    //     child: builder(item),
+    //   ));
+    //   if (item == selected) {
+    //     seenSelected = true;
+    //   }
+    // }
+    // if (!seenSelected) {
+    //   menuItems.add(DropdownMenuItem(
+    //     value: selected,
+    //     child: builder(selected),
+    //   ));
+    // }
+    print('libradropdown');
+
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: height),
       child: Theme(
@@ -39,13 +60,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
             /// this is the color of the button when it has keyboard focus
             focusColor: Theme.of(context).colorScheme.background,
             value: selected,
-            items: [
-              for (final item in items)
-                DropdownMenuItem(
-                  value: item,
-                  child: builder(item),
-                ),
-            ],
+            items: menuItems,
             onChanged: onChanged,
           ),
         ),
@@ -76,7 +91,9 @@ class LibraDropdownFormField<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return FormField<T>(
       initialValue: initial,
+      autovalidateMode: AutovalidateMode.disabled,
       builder: (state) {
+        print('libradropdownform builder');
         final widget = LibraDropdownMenu<T>(
           selected: state.value,
           items: items,

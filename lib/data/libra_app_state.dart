@@ -27,7 +27,7 @@ class LibraAppState extends ChangeNotifier {
 
   final List<Account> accounts = testAccounts;
 
-  final List<Category> incomeCategories = testCategoryValues;
+  final List<Category> incomeCategories = [];
   final List<Category> expenseCategories = testCategoryValues;
 
   List<Category> flattenedCategories([ExpenseFilterType type = ExpenseFilterType.all]) {

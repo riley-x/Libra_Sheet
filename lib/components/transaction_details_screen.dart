@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/printer.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
@@ -55,96 +56,113 @@ class _TransactionDetails extends StatefulWidget {
 
 class _TransactionDetailsState extends State<_TransactionDetails> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final _valueFieldKey = GlobalKey<FormFieldState<String>>();
+  ExpenseFilterType expenseType = ExpenseFilterType.all;
+
+  @override
+  void initState() {
+    super.initState();
+    expenseType = _valToFilterType(widget.seed?.value);
+  }
+
+  ExpenseFilterType _valToFilterType(int? val) {
+    if (val == null || val == 0) {
+      return ExpenseFilterType.all;
+    } else if (val > 0) {
+      return ExpenseFilterType.income;
+    } else {
+      return ExpenseFilterType.expense;
+    }
+  }
+
+  void _onValueChanged(int? val) {
+    var newType = _valToFilterType(val);
+    if (newType != expenseType) {
+      setState(() {
+        expenseType = newType;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    var type = ExpenseFilterType.all;
-
-    return Form(
-      key: _formKey,
-      // onChanged: () {
-      //   if (_valueFieldKey.currentState?.isValid == true) {
-      //     final val = _valueFieldKey.currentState?.value?.toIntDollar();
-      //     if (val != null && val != 0) {
-      //       type = (val > 0) ? ExpenseFilterType.income : ExpenseFilterType.expense;
-      //     }
-      //     print(type);
-      //   }
-      // },
-      child: Column(
-        children: [
-          Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FixedColumnWidth(250),
-            },
-            children: [
-              _labelRow(
-                context,
-                'Account',
-                AccountSelectionFormField(
-                  height: 40,
-                  initial: widget.seed?.account,
-                  onSave: (it) => print(it?.name),
-                  borderRadius: BorderRadius.circular(4),
-                ),
+    return
+        // Form(
+        //   key: _formKey,
+        //   child:
+        Column(
+      children: [
+        Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: const {
+            0: IntrinsicColumnWidth(),
+            1: FixedColumnWidth(250),
+          },
+          children: [
+            // _labelRow(
+            //   context,
+            //   'Account',
+            //   AccountSelectionFormField(
+            //     height: 40,
+            //     initial: widget.seed?.account,
+            //     onSave: (it) => print(it?.name),
+            //     borderRadius: BorderRadius.circular(4),
+            //   ),
+            // ),
+            _rowSpacing,
+            _labelRow(
+              context,
+              'Name',
+              _NameField(
+                initialName: widget.seed?.name,
+                onSave: (newValue) => print(newValue),
               ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Name',
-                _NameField(
-                  initialName: widget.seed?.name,
-                  onSave: (newValue) => print(newValue),
-                ),
+            ),
+            _rowSpacing,
+            _labelRow(
+              context,
+              'Date',
+              _DateField(
+                initial: widget.seed?.date,
+                onSave: (newValue) => print(newValue),
               ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Date',
-                _DateField(
-                  initial: widget.seed?.date,
-                  onSave: (newValue) => print(newValue),
-                ),
+            ),
+            _rowSpacing,
+            _labelRow(
+              context,
+              'Value',
+              _ValueField(
+                initial: widget.seed?.value,
+                onSave: (newValue) => print(newValue),
+                // onChanged: _onValueChanged,
               ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Value',
-                _ValueField(
-                  formFieldKey: _valueFieldKey,
-                  initial: widget.seed?.value,
-                  onSave: (newValue) => print(newValue),
-                ),
+            ),
+            _rowSpacing,
+            _labelRow(
+              context,
+              'Category',
+              CategorySelectionFormField(
+                height: 40,
+                initial: widget.seed?.category,
+                onSave: (it) => print(it?.name),
+                borderRadius: BorderRadius.circular(4),
+                type: expenseType,
               ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Category',
-                CategorySelectionFormField(
-                  height: 40,
-                  initial: widget.seed?.category,
-                  onSave: (it) => print(it?.name),
-                  borderRadius: BorderRadius.circular(4),
-                  type: type,
-                ),
-              ),
-            ],
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Validate will return true if the form is valid, or false if
-              // the form is invalid.
-              if (_formKey.currentState?.validate() ?? false) {
-                _formKey.currentState?.save();
-              }
-            },
-            child: const Text('Submit'),
-          ),
-        ],
-      ),
+            ),
+            _labelRow(context, 'Test', Printer(widget.seed?.category?.key ?? 0)),
+          ],
+        ),
+        ElevatedButton(
+          onPressed: () {
+            // Validate will return true if the form is valid, or false if
+            // the form is invalid.
+            if (_formKey.currentState?.validate() ?? false) {
+              _formKey.currentState?.save();
+            }
+          },
+          child: const Text('Submit'),
+        ),
+      ],
+      // ),
     );
   }
 }
@@ -236,10 +254,12 @@ class _ValueField extends StatelessWidget {
     this.formFieldKey,
     this.initial,
     this.onSave,
+    this.onChanged,
   });
 
   final int? initial;
   final Function(int)? onSave;
+  final Function(int?)? onChanged;
   final Key? formFieldKey;
 
   @override
@@ -253,7 +273,7 @@ class _ValueField extends StatelessWidget {
         if (val == null) return ''; // No message to not take up space
         return null;
       },
-      // validator should ensure not null already
+      onChanged: (it) => onChanged?.call(it?.toIntDollar()),
       onSave: (it) => onSave?.call(it?.toIntDollar() ?? 0),
     );
   }

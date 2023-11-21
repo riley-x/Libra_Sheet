@@ -81,6 +81,7 @@ class LibraTextFormField extends StatelessWidget {
     this.hint,
     this.validator,
     this.onSave,
+    this.onChanged,
     this.minLines,
     this.maxLines = 1,
     this.formFieldKey,
@@ -92,11 +93,13 @@ class LibraTextFormField extends StatelessWidget {
   final String? hint;
   final String? Function(String? text)? validator;
   final Function(String? text)? onSave;
+  final Function(String? text)? onChanged;
   final Key? formFieldKey;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      autovalidateMode: AutovalidateMode.disabled,
       key: formFieldKey,
       initialValue: initial,
       style: Theme.of(context).textTheme.bodyMedium,
@@ -112,6 +115,7 @@ class LibraTextFormField extends StatelessWidget {
       ),
       validator: validator,
       onSaved: onSave,
+      onChanged: onChanged,
     );
   }
 }
