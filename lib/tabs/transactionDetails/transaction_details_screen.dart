@@ -7,15 +7,11 @@ import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
-import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/allocation.dart';
-import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
-import 'package:libra_sheet/data/reimbursement.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/allocation_card.dart';
@@ -28,139 +24,53 @@ class TransactionDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CommonBackBar(
-          leftText: "Transaction Editor",
-          rightText: "Database key: ${transaction?.key}",
-          rightStyle: Theme.of(context).textTheme.labelMedium,
-        ),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: _TransactionDetails(transaction),
-                ),
-              ),
-              Container(
-                width: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              )
-            ],
+    return ChangeNotifierProvider(
+      create: (context) => TransactionDetailsState(transaction),
+      child: Column(
+        children: [
+          CommonBackBar(
+            leftText: "Transaction Editor",
+            rightText: "Database key: ${transaction?.key}",
+            rightStyle: Theme.of(context).textTheme.labelMedium,
           ),
-        ),
-      ],
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SingleChildScrollView(
+                  physics: ClampingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: _TransactionDetails(),
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _TransactionDetails extends StatefulWidget {
-  const _TransactionDetails(this.seed, {super.key});
-
-  /// Transaction used to initialize the fields.
-  final Transaction? seed;
-
-  @override
-  State<_TransactionDetails> createState() => _TransactionDetailsState();
-}
-
-class _TransactionDetailsState extends State<_TransactionDetails> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  ExpenseFilterType expenseType = ExpenseFilterType.all;
-
-  /// These variables are saved to by the relevant FormFields. Don't need to manage via SetState.
-  Account? account;
-  String? name;
-  DateTime? date;
-  int? value;
-  Category? category;
-  String? note;
-
-  /// These variables are the state for the relevant fields
-  final List<Tag> tags = [];
-  final List<Allocation> allocations = [];
-  final List<Reimbursement> reimbursements = [];
-
-  void _init() {
-    if (widget.seed != null) {
-      expenseType = _valToFilterType(widget.seed?.value);
-      tags.insertAll(0, widget.seed?.tags ?? const []);
-      allocations.insertAll(0, widget.seed?.allocations ?? const []);
-      reimbursements.insertAll(0, widget.seed?.reimbursements ?? const []);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _init();
-  }
-
-  ExpenseFilterType _valToFilterType(int? val) {
-    if (val == null || val == 0) {
-      return ExpenseFilterType.all;
-    } else if (val > 0) {
-      return ExpenseFilterType.income;
-    } else {
-      return ExpenseFilterType.expense;
-    }
-  }
-
-  void _onValueChanged(int? val) {
-    var newType = _valToFilterType(val);
-    if (newType != expenseType) {
-      setState(() {
-        expenseType = newType;
-      });
-    }
-  }
-
-  void _reset() {
-    _formKey.currentState?.reset();
-    setState(() {
-      tags.clear();
-      allocations.clear();
-      reimbursements.clear();
-      _init();
-    });
-  }
-
-  void _save() {
-    if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState?.save();
-      if (name == null || date == null || value == null || note == null) {
-        debugPrint("_TransactionDetailsState:_save() ERROR found null values!");
-        return;
-      }
-      var t = Transaction(
-        key: widget.seed?.key ?? 0,
-        name: name!,
-        date: date!,
-        value: value!,
-        category: category,
-        account: account,
-        note: note!,
-        allocations: allocations,
-        reimbursements: reimbursements,
-        tags: tags,
-      );
-      print(t); // TODO save transaction
-    }
-  }
+class _TransactionDetails extends StatelessWidget {
+  const _TransactionDetails({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<TransactionDetailsState>();
+
     /// WARNING!
     /// Form rebuilds every FormField descendant on every change of one of the fields (i.e. it calls
     /// their respective builder functions). (Tested and noted in the onChange() callback).
     /// This may not be ideal...
     return Form(
-      key: _formKey,
+      key: state.formKey,
       child: SizedBox(
         width: 450,
         child: Column(
@@ -177,8 +87,8 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   'Account',
                   AccountSelectionFormField(
                     height: 35,
-                    initial: widget.seed?.account,
-                    onSave: (it) => account = it,
+                    initial: state.seed?.account,
+                    onSave: (it) => state.account = it,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -187,11 +97,11 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Name',
                   LibraTextFormField(
-                    initial: widget.seed?.name,
+                    initial: state.seed?.name,
                     minLines: 3,
                     maxLines: 3,
                     validator: (it) => null,
-                    onSave: (it) => name = it,
+                    onSave: (it) => state.name = it,
                   ),
                 ),
                 _rowSpacing,
@@ -199,8 +109,8 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Date',
                   _DateField(
-                    initial: widget.seed?.date,
-                    onSave: (it) => date = it,
+                    initial: state.seed?.date,
+                    onSave: (it) => state.date = it,
                   ),
                 ),
                 _rowSpacing,
@@ -208,9 +118,9 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Value',
                   _ValueField(
-                    initial: widget.seed?.value,
-                    onSave: (it) => value = it,
-                    onChanged: _onValueChanged,
+                    initial: state.seed?.value,
+                    onSave: (it) => state.value = it,
+                    onChanged: state.onValueChanged,
                   ),
                 ),
                 _rowSpacing,
@@ -219,10 +129,10 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   'Category',
                   CategorySelectionFormField(
                     height: 35,
-                    initial: widget.seed?.category,
-                    onSave: (it) => category = it,
+                    initial: state.seed?.category,
+                    onSave: (it) => state.category = it,
                     borderRadius: BorderRadius.circular(4),
-                    type: expenseType,
+                    type: state.expenseType,
                   ),
                 ),
                 _rowSpacing,
@@ -230,16 +140,8 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Tags',
                   _TagSelector(
-                    tags: tags,
-                    onChanged: (tag, selected) {
-                      setState(() {
-                        if (selected == true) {
-                          tags.add(tag);
-                        } else {
-                          tags.remove(tag);
-                        }
-                      });
-                    },
+                    tags: state.tags,
+                    onChanged: state.onTagChanged,
                   ),
                 ),
                 _rowSpacing,
@@ -247,9 +149,9 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Note',
                   LibraTextFormField(
-                    initial: widget.seed?.note,
+                    initial: state.seed?.note,
                     validator: (it) => null,
-                    onSave: (it) => note = it,
+                    onSave: (it) => state.note = it,
                   ),
                 ),
                 _rowSpacing,
@@ -258,7 +160,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   'Allocations',
                   Column(
                     children: [
-                      for (final alloc in allocations) ...[
+                      for (final alloc in state.allocations) ...[
                         AllocationCard(alloc),
                         const SizedBox(height: 4)
                       ],
@@ -274,7 +176,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   'Reimbursements',
                   Column(
                     children: [
-                      for (final r in reimbursements) ...[
+                      for (final r in state.reimbursements) ...[
                         ReimbursementCard(
                           r,
                           onTap: (it) {},
@@ -293,10 +195,10 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
             ),
             const SizedBox(height: 20),
             _Buttons(
-              allowDelete: (widget.seed?.key ?? 0) > 0,
-              delete: () {}, // TODO
-              reset: _reset,
-              save: _save,
+              allowDelete: (state.seed?.key ?? 0) > 0,
+              delete: state.delete,
+              reset: state.reset,
+              save: state.save,
             ),
           ],
         ),
