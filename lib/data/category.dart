@@ -76,6 +76,44 @@ class CategoryHistory {
   );
 }
 
+/// A tristate map for checkboxes. Categories can have three states:
+///       - checked (map true, returns true)
+///       - dashed (map false, returns null)
+///       - off (map null, returns false)
+/// Only categories with children can have the dashed state. Selecting the checked state for such
+/// categories will automatically add all its children, while switching to the dashed state will
+/// remove the children.
+class CategoryTristateMap {
+  Map<int, bool> _map = {};
+
+  void set(Category cat, bool? selected) {
+    if (selected == true) {
+      _map[cat.key] = true;
+      for (final subCat in cat.subCats ?? []) {
+        _map[subCat.key] = true;
+      }
+    } else if (selected == null) {
+      _map[cat.key] = false;
+      for (final subCat in cat.subCats ?? []) {
+        _map.remove(subCat.key);
+      }
+    } else {
+      _map.remove(cat.key);
+    }
+  }
+
+  bool? get(Category cat) {
+    final val = _map[cat.key];
+    if (val == true) {
+      return true;
+    } else if (val == false) {
+      return null;
+    } else {
+      return false;
+    }
+  }
+}
+
 // class CategoryWithTransactions extends Category<CategoryWithTransactions> {
 //   final List<Transaction> transactions;
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
-import 'package:libra_sheet/components/category_filter_chips.dart';
+import 'package:libra_sheet/components/selectors/category_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -107,29 +107,19 @@ class _CategoryChips extends StatelessWidget {
             const Spacer(),
             Text("Category", style: Theme.of(context).textTheme.titleMedium),
             const Spacer(),
-            DropdownCheckboxMenu<Category>(
-              items: categories,
-              builder: dropdownCategoryBuilder,
-              isChecked: (cat) =>
-                  state.categoryFilterSelected[cat.key] ?? (cat.hasSubCats() ? null : false),
-              isTristate: (cat) => cat.hasSubCats(),
-              onChanged: (cat, i, selected) => state.setCategoryFilter(cat, selected),
+            DropdownCategoryMenu(
+              categories: categories,
+              map: state.categoryFilterSelected,
+              notify: state.notifyListeners,
             ),
           ],
         ),
         const SizedBox(height: 5),
-        Wrap(
-          spacing: 10,
-          runSpacing: 4,
-          children: [
-            for (final cat in categories)
-              if (state.categoryFilterSelected[cat.key] ?? cat.hasSubCats())
-                LibraChip(
-                  cat.name,
-                  onTap: () => state.setCategoryFilter(cat, false),
-                )
-          ],
-        )
+        CategoryFilterChips(
+          categories: categories,
+          map: state.categoryFilterSelected,
+          notify: state.notifyListeners,
+        ),
       ],
     );
   }

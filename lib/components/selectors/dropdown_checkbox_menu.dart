@@ -18,7 +18,7 @@ class DropdownCheckboxMenu<T> extends StatelessWidget {
   final Widget Function(BuildContext, T) builder;
   final bool? Function(T)? isChecked;
   final bool Function(T)? isTristate;
-  final Function(T item, int index, bool? isChecked)? onChanged;
+  final Function(T item, bool? isChecked)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class DropdownCheckboxMenu<T> extends StatelessWidget {
               title: builder(context, items[i]),
               value: isChecked?.call(items[i]),
               onChanged: (bool? value) {
-                onChanged?.call(items[i], i, value);
+                onChanged?.call(items[i], value);
               },
               tristate: isTristate?.call(items[i]) ?? false,
             ),
@@ -52,16 +52,4 @@ class DropdownCheckboxMenu<T> extends StatelessWidget {
       ],
     );
   }
-}
-
-Widget dropdownCategoryBuilder(BuildContext context, Category? cat) {
-  return Padding(
-    padding: EdgeInsets.only(left: ((cat?.level ?? 0) > 1) ? 20 : 0),
-    child: Text(
-      cat?.name ?? '',
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.labelLarge,
-    ),
-  );
 }
