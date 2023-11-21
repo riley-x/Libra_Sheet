@@ -62,6 +62,7 @@ final testAllocations = [
 
 final List<Transaction> testTransactions = [
   Transaction(
+    key: 1,
     name: "TARGET abbey is awesome",
     date: DateTime(2023, 11, 16),
     value: -502300,
@@ -69,11 +70,13 @@ final List<Transaction> testTransactions = [
     reimbursements: [],
   ),
   Transaction(
+    key: 2,
     name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
     date: DateTime(2023, 11, 15),
     value: 1502300,
   ),
   Transaction(
+    key: 3,
     name: "test test",
     date: DateTime(2023, 11, 12),
     value: 12322300,

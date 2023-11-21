@@ -10,9 +10,7 @@ class Transaction {
     required this.name,
     required this.date,
     required this.value,
-    this.categoryKey,
     this.category,
-    this.accountKey,
     this.account,
     this.note = "",
     this.allocations,
@@ -26,9 +24,7 @@ class Transaction {
   final int value;
   final String note;
 
-  final int? accountKey;
   final Account? account;
-  final int? categoryKey;
   final Category? category;
 
   final List<Tag>? tags;
