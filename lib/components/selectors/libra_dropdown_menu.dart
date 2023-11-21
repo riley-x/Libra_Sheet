@@ -89,7 +89,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FormField<T>(
-      key: ObjectKey(initial),
+      key: ObjectKey(initial), // This forces the form field to rebuild if the initial value changes
       initialValue: initial,
       builder: (state) {
         return Container(

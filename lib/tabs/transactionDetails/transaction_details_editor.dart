@@ -7,7 +7,7 @@ import 'package:libra_sheet/components/reimbursement_card.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
-import 'package:libra_sheet/components/tri_buttons.dart';
+import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
@@ -155,7 +155,8 @@ class TransactionDetailsEditor extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          TriButtons(
+          FormButtons(
+            showCancel: false,
             allowDelete: (state.seed?.key ?? 0) > 0,
             onDelete: state.delete,
             onReset: state.reset,

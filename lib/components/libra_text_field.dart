@@ -99,8 +99,9 @@ class LibraTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      autovalidateMode: AutovalidateMode.disabled,
+      /// This forces the form field to rebuild if the initial value changes
       key: formFieldKey ?? Key(initial ?? '__^^^__null'),
+      autovalidateMode: AutovalidateMode.disabled,
       initialValue: initial,
       style: Theme.of(context).textTheme.bodyMedium,
       minLines: minLines,

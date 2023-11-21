@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
-import 'package:libra_sheet/components/tri_buttons.dart';
+import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
@@ -66,11 +66,12 @@ class AllocationEditor extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        TriButtons(
+        FormButtons(
           allowDelete: state.focusedAllocation != null,
           onDelete: state.deleteAllocation,
           onReset: state.resetAllocation,
           onSave: state.saveAllocation,
+          onCancel: state.clearFocus,
         )
       ],
     );
