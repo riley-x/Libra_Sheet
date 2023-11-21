@@ -45,6 +45,7 @@ class ReimbursementEditor extends StatelessWidget {
         const SizedBox(height: 20),
         FormButtons(
           allowDelete: state.focusedReimbursement != null,
+          // showCancel: state.focusedReimbursement == null,
           onDelete: state.deleteReimbursement,
           onReset: state.resetReimbursement,
           onSave: state.saveReimbursement,
