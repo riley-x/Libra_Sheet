@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// hidden.
 class LibraDropdownMenu<T> extends StatelessWidget {
   final T? selected;
-  final List<T> items;
+  final List<T?> items;
   final Function(T?)? onChanged;
   final BorderRadius? borderRadius;
   final double height;
@@ -32,7 +32,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
           // hoverColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(128),
         ),
         child: DropdownButtonHideUnderline(
-          child: DropdownButton<T>(
+          child: DropdownButton<T?>(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             borderRadius: borderRadius ?? BorderRadius.circular(10),
 
@@ -66,7 +66,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
   });
 
   final T? initial;
-  final List<T> items;
+  final List<T?> items;
   final Function(T?)? onSave;
   final BorderRadius? borderRadius;
   final double height;

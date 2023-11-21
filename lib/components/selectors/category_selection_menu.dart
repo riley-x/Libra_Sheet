@@ -5,15 +5,15 @@ import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:provider/provider.dart';
 
-List<Category> _items(LibraAppState state, ExpenseFilterType type) {
-  List<Category> items = state.flattenedCategories(type);
+List<Category?> _items(LibraAppState state, ExpenseFilterType type) {
+  List<Category?> items = state.flattenedCategories(type);
   switch (type) {
     case ExpenseFilterType.income:
-      items = [ignoreCategory, incomeCategory] + items;
+      items = <Category?>[ignoreCategory, incomeCategory] + items;
     case ExpenseFilterType.expense:
-      items = [ignoreCategory, expenseCategory] + items;
+      items = <Category?>[ignoreCategory, expenseCategory] + items;
     case ExpenseFilterType.all:
-      items = [ignoreCategory, incomeCategory, expenseCategory] + items;
+      items = <Category?>[ignoreCategory, incomeCategory, expenseCategory] + items;
   }
   return items;
 }
@@ -47,7 +47,7 @@ class CategorySelectionMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = context.watch<LibraAppState>();
 
-    return LibraDropdownMenu(
+    return LibraDropdownMenu<Category?>(
       selected: selected,
       items: _items(appState, type),
       builder: (cat) => _builder(context, cat),
@@ -79,7 +79,7 @@ class CategorySelectionFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<LibraAppState>();
-    return LibraDropdownFormField(
+    return LibraDropdownFormField<Category?>(
       initial: initial,
       items: _items(appState, type),
       builder: (cat) => _builder(context, cat),

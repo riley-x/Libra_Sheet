@@ -30,7 +30,7 @@ class AccountSelectionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Account?> items = context.watch<LibraAppState>().accounts;
-    if (includeNone) items.insert(0, null);
+    if (includeNone) items = <Account?>[null] + items;
     return LibraDropdownMenu<Account?>(
       selected: selected,
       items: items,
@@ -62,7 +62,7 @@ class AccountSelectionFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Account?> items = context.watch<LibraAppState>().accounts;
-    if (includeNone) items.insert(0, null);
+    if (includeNone) items = <Account?>[null] + items;
     return LibraDropdownFormField<Account?>(
       initial: initial,
       items: items,

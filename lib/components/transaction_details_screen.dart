@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
@@ -54,11 +55,23 @@ class _TransactionDetails extends StatefulWidget {
 
 class _TransactionDetailsState extends State<_TransactionDetails> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _valueFieldKey = GlobalKey<FormFieldState<String>>();
 
   @override
   Widget build(BuildContext context) {
+    var type = ExpenseFilterType.all;
+
     return Form(
       key: _formKey,
+      // onChanged: () {
+      //   if (_valueFieldKey.currentState?.isValid == true) {
+      //     final val = _valueFieldKey.currentState?.value?.toIntDollar();
+      //     if (val != null && val != 0) {
+      //       type = (val > 0) ? ExpenseFilterType.income : ExpenseFilterType.expense;
+      //     }
+      //     print(type);
+      //   }
+      // },
       child: Column(
         children: [
           Table(
@@ -101,6 +114,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                 context,
                 'Value',
                 _ValueField(
+                  formFieldKey: _valueFieldKey,
                   initial: widget.seed?.value,
                   onSave: (newValue) => print(newValue),
                 ),
@@ -114,6 +128,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   initial: widget.seed?.category,
                   onSave: (it) => print(it?.name),
                   borderRadius: BorderRadius.circular(4),
+                  type: type,
                 ),
               ),
             ],
@@ -218,16 +233,19 @@ class _DateField extends StatelessWidget {
 class _ValueField extends StatelessWidget {
   const _ValueField({
     super.key,
+    this.formFieldKey,
     this.initial,
     this.onSave,
   });
 
   final int? initial;
   final Function(int)? onSave;
+  final Key? formFieldKey;
 
   @override
   Widget build(BuildContext context) {
     return LibraTextFormField(
+      formFieldKey: formFieldKey,
       initial: initial?.dollarString(dollarSign: false),
       validator: (String? text) {
         if (text == null || text.isEmpty) return ''; // No message to not take up space
