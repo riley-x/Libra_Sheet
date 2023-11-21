@@ -31,10 +31,10 @@ class TransactionCard extends StatelessWidget {
       subText += trans.category!.name;
     }
 
-    return GestureDetector(
-      onTap: () => onSelect?.call(trans),
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: InkWell(
+        onTap: () => onSelect?.call(trans),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: Row(

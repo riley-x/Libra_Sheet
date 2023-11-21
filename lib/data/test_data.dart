@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/allocation.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
@@ -31,25 +32,6 @@ final List<Account> testAccounts = [
   ),
 ];
 
-final List<Transaction> testTransactions = [
-  Transaction(
-    name: "TARGET abbey is awesome",
-    date: DateTime(2023, 11, 16),
-    value: -502300,
-    account: testAccounts[0],
-  ),
-  Transaction(
-    name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
-    date: DateTime(2023, 11, 15),
-    value: 502300,
-  ),
-  Transaction(
-    name: "test test",
-    date: DateTime(2023, 11, 12),
-    value: 12322300,
-  ),
-];
-
 const testCategoryValues = [
   CategoryValue(key: 1, level: 1, name: 'cat 1', color: Colors.amber, value: 357000),
   CategoryValue(key: 2, level: 1, name: 'cat 2', color: Colors.blue, value: 23000),
@@ -67,6 +49,31 @@ const testCategoryValues = [
 
 const testTags = [
   Tag(key: 0, name: 'Tag 1', color: Colors.amber),
-  Tag(key: 0, name: 'Tag 2', color: Colors.green),
-  Tag(key: 0, name: 'Tag 3', color: Colors.blue),
+  Tag(key: 1, name: 'Tag 2', color: Colors.green),
+  Tag(key: 2, name: 'Tag 3', color: Colors.blue),
+];
+
+final testAllocations = [
+  Allocation(key: 0, name: 'Alloc 1', category: testCategoryValues[0], value: 100000),
+  Allocation(key: 1, name: 'Alloc 2', category: testCategoryValues[1], value: 100000),
+  Allocation(key: 2, name: 'Alloc 3', category: testCategoryValues[2].subCats![0], value: 100000),
+];
+
+final List<Transaction> testTransactions = [
+  Transaction(
+    name: "TARGET abbey is awesome",
+    date: DateTime(2023, 11, 16),
+    value: -502300,
+    account: testAccounts[0],
+  ),
+  Transaction(
+    name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
+    date: DateTime(2023, 11, 15),
+    value: 502300,
+  ),
+  Transaction(
+    name: "test test",
+    date: DateTime(2023, 11, 12),
+    value: 12322300,
+  ),
 ];

@@ -8,13 +8,17 @@ import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
+import 'package:libra_sheet/data/allocation.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/tag.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
 import 'package:provider/provider.dart';
+
+import '../components/allocation_card.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen(this.transaction, {super.key});
@@ -123,7 +127,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Account',
                   AccountSelectionFormField(
-                    height: 40,
+                    height: 35,
                     initial: widget.seed?.account,
                     onSave: (it) => print(it?.name),
                     borderRadius: BorderRadius.circular(4),
@@ -162,7 +166,7 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                   context,
                   'Category',
                   CategorySelectionFormField(
-                    height: 40,
+                    height: 35,
                     initial: widget.seed?.category,
                     onSave: (it) => print(it?.name),
                     borderRadius: BorderRadius.circular(4),
@@ -196,24 +200,21 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                     onSave: (newValue) => print(newValue),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Container(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const SizedBox(width: 48),
-                // const Spacer(),
-                Text(
+                _rowSpacing,
+                _labelRow(
+                  context,
                   'Allocations',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  Column(
+                    children: [
+                      for (final alloc in testAllocations) ...[
+                        AllocationCard(alloc),
+                        const SizedBox(height: 4)
+                      ],
+                      AllocationCard(null),
+                    ],
+                  ),
+                  labelAlign: TableCellVerticalAlignment.top,
                 ),
-                const Spacer(),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
               ],
             ),
             ElevatedButton(
@@ -234,16 +235,19 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
 }
 
 TableRow _labelRow(BuildContext context, String label, Widget? right,
-    {Alignment labelAlign = Alignment.topRight}) {
+    {TableCellVerticalAlignment? labelAlign}) {
   return TableRow(
     children: [
-      Align(
-        alignment: Alignment.topRight,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium,
+      TableCell(
+        verticalAlignment: labelAlign,
+        child: Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
         ),
       ),

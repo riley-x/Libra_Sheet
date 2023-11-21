@@ -19,7 +19,8 @@ extension IntDollar on int {
       default:
         throw UnimplementedError('dollarString() unknown decimals $decimals');
     }
-    return "$integer.$fraction";
+    final String factionStr = fraction.toString().padRight(2, '0');
+    return "$integer.$factionStr";
   }
 }
 
