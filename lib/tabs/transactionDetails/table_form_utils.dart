@@ -1,8 +1,12 @@
 /// Utilities for the two-column table form format
 import 'package:flutter/material.dart';
 
-TableRow labelRow(BuildContext context, String label, Widget? right,
-    {TableCellVerticalAlignment? labelAlign}) {
+TableRow labelRow(
+  BuildContext context,
+  String label,
+  Widget? right, {
+  TableCellVerticalAlignment? labelAlign,
+}) {
   return TableRow(
     children: [
       TableCell(

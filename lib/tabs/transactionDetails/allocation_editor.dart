@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/data/allocation.dart';
+import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:provider/provider.dart';
 
@@ -15,10 +17,31 @@ class AllocationEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
-    return Column(
-      children: [
-        Text((initial == null) ? 'Add Allocation' : 'Edit Allocation'),
-      ],
+    return SizedBox(
+      width: 400,
+      child: Column(
+        children: [
+          Text((initial == null) ? 'Add Allocation' : 'Edit Allocation'),
+          Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: FixedColumnWidth(250),
+            },
+            children: [
+              labelRow(
+                context,
+                'Name',
+                LibraTextFormField(
+                  // initial: state.seed?.name,
+                  validator: (it) => null,
+                  // onSave: (it) => state.name = it,
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

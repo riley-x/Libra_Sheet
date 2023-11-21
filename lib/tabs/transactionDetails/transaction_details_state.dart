@@ -7,6 +7,8 @@ import 'package:libra_sheet/data/reimbursement.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
+enum TransactionDetailActiveFocus { none, allocation, reimbursement }
+
 class TransactionDetailsState extends ChangeNotifier {
   TransactionDetailsState(this.seed) {
     _init();
@@ -24,6 +26,7 @@ class TransactionDetailsState extends ChangeNotifier {
   String? note;
 
   /// These variables are the state for the relevant fields
+  TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
   ExpenseFilterType expenseType = ExpenseFilterType.all;
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
