@@ -15,6 +15,7 @@ class TransactionDetailsState extends ChangeNotifier {
   }
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> allocationFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> reimbursementFormKey = GlobalKey<FormState>();
 
   /// Initial values for the respective editors. Don't edit these; they're used to reset.
   Transaction? seed;
@@ -25,6 +26,7 @@ class TransactionDetailsState extends ChangeNotifier {
   /// the various FormFields' onSave methods. They don't contain any UI state, so don't need to
   /// notifyListeners.
   final MutableAllocation updatedAllocation = MutableAllocation();
+  final MutableReimbursement updatedReimbursement = MutableReimbursement();
 
   /// These variables are saved to by the relevant FormFields. Don't need to manage via SetState.
   Account? account;
@@ -165,7 +167,29 @@ class TransactionDetailsState extends ChangeNotifier {
     allocationFormKey.currentState?.reset();
   }
 
-  void saveReimbursement() {}
-  void deleteReimbursement() {}
-  void resetReimbursement() {}
+  void saveReimbursement() {
+    if (reimbursementFormKey.currentState?.validate() ?? false) {
+      reimbursementFormKey.currentState?.save();
+      if (focusedReimbursement == null) {
+        reimbursements.add(updatedReimbursement);
+      } else {
+        for (int i = 0; i < reimbursements.length; i++) {
+          if (reimbursements[i] == focusedReimbursement) {
+            reimbursements[i] = updatedReimbursement.freeze();
+            break;
+          }
+        }
+      }
+      clearFocus();
+    }
+  }
+
+  void deleteReimbursement() {
+    reimbursements.remove(focusedReimbursement);
+    clearFocus();
+  }
+
+  void resetReimbursement() {
+    reimbursementFormKey.currentState?.reset();
+  }
 }

@@ -37,14 +37,14 @@ class ReimbursementCard extends StatelessWidget {
     } else {
       var accCatStr = '';
       final dtFormat = DateFormat("M/d/yy");
-      if (reimbursement!.otherTransaction.account != null) {
-        accCatStr = reimbursement!.otherTransaction.account!.name;
+      if (reimbursement!.otherTransaction?.account != null) {
+        accCatStr = reimbursement!.otherTransaction!.account!.name;
       }
-      if (reimbursement!.otherTransaction.category != null) {
+      if (reimbursement!.otherTransaction?.category != null) {
         if (accCatStr.isNotEmpty) {
           accCatStr += ', ';
         }
-        accCatStr += reimbursement!.otherTransaction.category!.name;
+        accCatStr += reimbursement!.otherTransaction!.category!.name;
       }
       content = LimitedBox(
         maxWidth: 300,
@@ -54,7 +54,7 @@ class ReimbursementCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    reimbursement!.otherTransaction.name,
+                    reimbursement!.otherTransaction?.name ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -71,7 +71,7 @@ class ReimbursementCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(reimbursement!.value.dollarString()),
-                Text(dtFormat.format(reimbursement!.otherTransaction.date)),
+                Text(dtFormat.format(reimbursement!.otherTransaction?.date ?? DateTime(1987))),
               ],
             ),
           ],

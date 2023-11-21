@@ -100,7 +100,7 @@ class LibraTextFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       autovalidateMode: AutovalidateMode.disabled,
-      key: formFieldKey,
+      key: formFieldKey ?? Key(initial ?? '__^^^__null'),
       initialValue: initial,
       style: Theme.of(context).textTheme.bodyMedium,
       minLines: minLines,
