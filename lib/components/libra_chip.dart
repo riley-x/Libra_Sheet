@@ -16,7 +16,7 @@ class LibraChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.only(left: 4, right: 4, bottom: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: Theme.of(context).colorScheme.secondaryContainer,

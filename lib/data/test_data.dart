@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 final List<Account> testAccounts = [
@@ -62,4 +63,10 @@ const testCategoryValues = [
   ]),
   CategoryValue(key: 9, level: 1, name: 'cat 4', color: Colors.red, value: 223000),
   CategoryValue(key: 10, level: 1, name: 'cat 5', color: Colors.purple, value: 43000),
+];
+
+const testTags = [
+  Tag(key: 0, name: 'Tag 1', color: Colors.amber),
+  Tag(key: 0, name: 'Tag 2', color: Colors.green),
+  Tag(key: 0, name: 'Tag 3', color: Colors.blue),
 ];

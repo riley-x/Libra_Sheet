@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/printer.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
@@ -10,7 +11,10 @@ import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/transaction.dart';
+import 'package:provider/provider.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen(this.transaction, {super.key});
@@ -60,11 +64,17 @@ class _TransactionDetails extends StatefulWidget {
 class _TransactionDetailsState extends State<_TransactionDetails> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   ExpenseFilterType expenseType = ExpenseFilterType.all;
+  final Set<Tag> tags = {};
 
   @override
   void initState() {
     super.initState();
-    expenseType = _valToFilterType(widget.seed?.value);
+    if (widget.seed != null) {
+      expenseType = _valToFilterType(widget.seed?.value);
+      for (final tag in widget.seed?.tags ?? []) {
+        tags.add(tag);
+      }
+    }
   }
 
   ExpenseFilterType _valToFilterType(int? val) {
@@ -155,14 +165,20 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
               ),
               _rowSpacing,
               _labelRow(
-                context, 'Tags', SizedBox(),
-                // DropdownCheckboxMenu<Tag>(
-                //   icon: Icons.add,
-                //   items: [],
-                //   // items: tags,
-                //   builder: dropdownCategoryBuilder,
-                //   isChecked: map.get,
-                // ),
+                context,
+                'Tags',
+                _TagSelector(
+                  tags: tags,
+                  onChanged: (tag, selected) {
+                    setState(() {
+                      if (selected == true) {
+                        tags.add(tag);
+                      } else {
+                        tags.remove(tag);
+                      }
+                    });
+                  },
+                ),
               ),
             ],
           ),
@@ -290,6 +306,47 @@ class _ValueField extends StatelessWidget {
       },
       onChanged: (it) => onChanged?.call(it?.toIntDollar()),
       onSave: (it) => onSave?.call(it?.toIntDollar() ?? 0),
+    );
+  }
+}
+
+class _TagSelector extends StatelessWidget {
+  const _TagSelector({super.key, required this.tags, this.onChanged});
+
+  final Set<Tag> tags;
+  final Function(Tag, bool?)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final tag in tags)
+                LibraChip(
+                  tag.name,
+                  onTap: () => onChanged?.call(tag, false),
+                ),
+            ],
+          ),
+        ),
+        DropdownCheckboxMenu<Tag>(
+          icon: Icons.add,
+          items: context.watch<LibraAppState>().tags,
+          builder: (context, tag) => Text(
+            tag.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          isChecked: (it) => tags.contains(it),
+          onChanged: onChanged,
+        ),
+        const SizedBox(width: 7),
+      ],
     );
   }
 }

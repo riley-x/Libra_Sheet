@@ -1,5 +1,6 @@
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/tag.dart';
 
 class Transaction {
   const Transaction({
@@ -12,7 +13,8 @@ class Transaction {
     this.accountKey,
     this.account,
     this.note = "",
-    this.reimbursements = const [],
+    this.reimbursements,
+    this.tags,
   });
 
   final int key;
@@ -27,6 +29,6 @@ class Transaction {
   final Category? category;
 
   // final List<Allocation> allocations;
-  // final List<Tag> tags;
-  final List<Transaction> reimbursements;
+  final List<Tag>? tags;
+  final List<Transaction>? reimbursements;
 }

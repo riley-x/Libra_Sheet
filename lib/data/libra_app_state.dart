@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
@@ -26,6 +27,7 @@ class LibraAppState extends ChangeNotifier {
   ];
 
   final List<Account> accounts = testAccounts;
+  final List<Tag> tags = testTags;
 
   final List<Category> incomeCategories = [];
   final List<Category> expenseCategories = testCategoryValues;
