@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 Widget _builder(BuildContext context, Account? acc) {
   return Text(
-    acc?.name ?? '',
+    acc?.name ?? 'None',
     style: Theme.of(context).textTheme.labelLarge,
   );
 }

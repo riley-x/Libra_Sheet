@@ -85,84 +85,85 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return
-        // Form(
-        //   key: _formKey,
-        //   child:
-        Column(
-      children: [
-        Table(
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths: const {
-            0: IntrinsicColumnWidth(),
-            1: FixedColumnWidth(250),
-          },
-          children: [
-            // _labelRow(
-            //   context,
-            //   'Account',
-            //   AccountSelectionFormField(
-            //     height: 40,
-            //     initial: widget.seed?.account,
-            //     onSave: (it) => print(it?.name),
-            //     borderRadius: BorderRadius.circular(4),
-            //   ),
-            // ),
-            _rowSpacing,
-            _labelRow(
-              context,
-              'Name',
-              _NameField(
-                initialName: widget.seed?.name,
-                onSave: (newValue) => print(newValue),
+    /// WARNING!
+    /// Form rebuilds every FormField descendant on every change of one of the fields (i.e. it calls
+    /// their respective builder functions). (Tested and noted in the onChange() callback).
+    /// This may not be ideal...
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: FixedColumnWidth(250),
+            },
+            children: [
+              _labelRow(
+                context,
+                'Account',
+                AccountSelectionFormField(
+                  height: 40,
+                  initial: widget.seed?.account,
+                  onSave: (it) => print(it?.name),
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
-            ),
-            _rowSpacing,
-            _labelRow(
-              context,
-              'Date',
-              _DateField(
-                initial: widget.seed?.date,
-                onSave: (newValue) => print(newValue),
+              _rowSpacing,
+              _labelRow(
+                context,
+                'Name',
+                _NameField(
+                  initialName: widget.seed?.name,
+                  onSave: (newValue) => print(newValue),
+                ),
               ),
-            ),
-            _rowSpacing,
-            _labelRow(
-              context,
-              'Value',
-              _ValueField(
-                initial: widget.seed?.value,
-                onSave: (newValue) => print(newValue),
-                // onChanged: _onValueChanged,
+              _rowSpacing,
+              _labelRow(
+                context,
+                'Date',
+                _DateField(
+                  initial: widget.seed?.date,
+                  onSave: (newValue) => print(newValue),
+                ),
               ),
-            ),
-            _rowSpacing,
-            _labelRow(
-              context,
-              'Category',
-              CategorySelectionFormField(
-                height: 40,
-                initial: widget.seed?.category,
-                onSave: (it) => print(it?.name),
-                borderRadius: BorderRadius.circular(4),
-                type: expenseType,
+              _rowSpacing,
+              _labelRow(
+                context,
+                'Value',
+                _ValueField(
+                  initial: widget.seed?.value,
+                  onSave: (newValue) => print(newValue),
+                  onChanged: _onValueChanged,
+                ),
               ),
-            ),
-            _labelRow(context, 'Test', Printer(widget.seed?.category?.key ?? 0)),
-          ],
-        ),
-        ElevatedButton(
-          onPressed: () {
-            // Validate will return true if the form is valid, or false if
-            // the form is invalid.
-            if (_formKey.currentState?.validate() ?? false) {
-              _formKey.currentState?.save();
-            }
-          },
-          child: const Text('Submit'),
-        ),
-      ],
-      // ),
+              _rowSpacing,
+              _labelRow(
+                context,
+                'Category',
+                CategorySelectionFormField(
+                  height: 40,
+                  initial: widget.seed?.category,
+                  onSave: (it) => print(it?.name),
+                  borderRadius: BorderRadius.circular(4),
+                  type: expenseType,
+                ),
+              ),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Validate will return true if the form is valid, or false if
+              // the form is invalid.
+              if (_formKey.currentState?.validate() ?? false) {
+                _formKey.currentState?.save();
+              }
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
     );
   }
 }
