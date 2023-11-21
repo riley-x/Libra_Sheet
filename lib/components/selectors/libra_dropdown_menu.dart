@@ -91,25 +91,23 @@ class LibraDropdownFormField<T> extends StatelessWidget {
     return FormField<T>(
       initialValue: initial,
       builder: (state) {
-        final widget = LibraDropdownMenu<T>(
-          selected: state.value,
-          items: items,
-          builder: builder,
-          height: height,
-          borderRadius: borderRadius,
-          onChanged: state.didChange,
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: borderRadius ?? BorderRadius.circular(10),
+            border: Border.all(
+                color: (state.hasError)
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.surface),
+          ),
+          child: LibraDropdownMenu<T>(
+            selected: state.value,
+            items: items,
+            builder: builder,
+            height: height,
+            borderRadius: borderRadius,
+            onChanged: state.didChange,
+          ),
         );
-        if (state.hasError) {
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius ?? BorderRadius.circular(10),
-              border: Border.all(color: Theme.of(context).colorScheme.error),
-            ),
-            child: widget,
-          );
-        } else {
-          return widget;
-        }
       },
       validator: (value) => (value == null) ? '' : null,
       onSaved: onSave,

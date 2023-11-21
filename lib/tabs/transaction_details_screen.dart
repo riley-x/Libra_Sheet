@@ -39,10 +39,14 @@ class TransactionDetailsScreen extends StatelessWidget {
               SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   child: _TransactionDetails(transaction),
                 ),
               ),
+              Container(
+                width: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              )
             ],
           ),
         ),
@@ -104,95 +108,126 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
     /// This may not be ideal...
     return Form(
       key: _formKey,
-      child: Column(
-        children: [
-          Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FixedColumnWidth(250),
-            },
-            children: [
-              _labelRow(
-                context,
-                'Account',
-                AccountSelectionFormField(
-                  height: 40,
-                  initial: widget.seed?.account,
-                  onSave: (it) => print(it?.name),
-                  borderRadius: BorderRadius.circular(4),
+      child: SizedBox(
+        width: 400,
+        child: Column(
+          children: [
+            Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FixedColumnWidth(250),
+              },
+              children: [
+                _labelRow(
+                  context,
+                  'Account',
+                  AccountSelectionFormField(
+                    height: 40,
+                    initial: widget.seed?.account,
+                    onSave: (it) => print(it?.name),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Name',
-                _NameField(
-                  initialName: widget.seed?.name,
-                  onSave: (newValue) => print(newValue),
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Name',
+                  _NameField(
+                    initialName: widget.seed?.name,
+                    onSave: (newValue) => print(newValue),
+                  ),
                 ),
-              ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Date',
-                _DateField(
-                  initial: widget.seed?.date,
-                  onSave: (newValue) => print(newValue),
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Date',
+                  _DateField(
+                    initial: widget.seed?.date,
+                    onSave: (newValue) => print(newValue),
+                  ),
                 ),
-              ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Value',
-                _ValueField(
-                  initial: widget.seed?.value,
-                  onSave: (newValue) => print(newValue),
-                  onChanged: _onValueChanged,
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Value',
+                  _ValueField(
+                    initial: widget.seed?.value,
+                    onSave: (newValue) => print(newValue),
+                    onChanged: _onValueChanged,
+                  ),
                 ),
-              ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Category',
-                CategorySelectionFormField(
-                  height: 40,
-                  initial: widget.seed?.category,
-                  onSave: (it) => print(it?.name),
-                  borderRadius: BorderRadius.circular(4),
-                  type: expenseType,
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Category',
+                  CategorySelectionFormField(
+                    height: 40,
+                    initial: widget.seed?.category,
+                    onSave: (it) => print(it?.name),
+                    borderRadius: BorderRadius.circular(4),
+                    type: expenseType,
+                  ),
                 ),
-              ),
-              _rowSpacing,
-              _labelRow(
-                context,
-                'Tags',
-                _TagSelector(
-                  tags: tags,
-                  onChanged: (tag, selected) {
-                    setState(() {
-                      if (selected == true) {
-                        tags.add(tag);
-                      } else {
-                        tags.remove(tag);
-                      }
-                    });
-                  },
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Tags',
+                  _TagSelector(
+                    tags: tags,
+                    onChanged: (tag, selected) {
+                      setState(() {
+                        if (selected == true) {
+                          tags.add(tag);
+                        } else {
+                          tags.remove(tag);
+                        }
+                      });
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Validate will return true if the form is valid, or false if
-              // the form is invalid.
-              if (_formKey.currentState?.validate() ?? false) {
-                _formKey.currentState?.save();
-              }
-            },
-            child: const Text('Submit'),
-          ),
-        ],
+                _rowSpacing,
+                _labelRow(
+                  context,
+                  'Note',
+                  LibraTextFormField(
+                    initial: widget.seed?.note,
+                    validator: (it) => null,
+                    onSave: (newValue) => print(newValue),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Container(
+              height: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const SizedBox(width: 48),
+                // const Spacer(),
+                Text(
+                  'Allocations',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const Spacer(),
+                IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState?.validate() ?? false) {
+                  _formKey.currentState?.save();
+                  print(tags);
+                  // TODO handle tags too, save transaction
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        ),
       ),
     );
   }
