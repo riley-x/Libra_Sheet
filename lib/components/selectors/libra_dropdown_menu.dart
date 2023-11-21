@@ -1,29 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
-import 'package:provider/provider.dart';
 
-/// Dropdown button for filtering by an account
+/// Dropdown button for selecting an object of class [T].
 /// P.S. Don't try switching to a DropdownButtonFormField -- a lot of trouble getting the underline
 /// hidden.
-class AccountSelectionMenu extends StatelessWidget {
-  final Account? selected;
-  final bool includeNone;
-  final Function(Account?)? onChanged;
+class LibraDropdownMenu<T> extends StatelessWidget {
+  final T? selected;
+  final List<T> items;
+  final Function(T?)? onChanged;
   final BorderRadius? borderRadius;
   final double height;
-  const AccountSelectionMenu({
+  final Widget Function(T?) builder;
+
+  const LibraDropdownMenu({
     super.key,
+    required this.items,
+    required this.builder,
     this.selected,
     this.onChanged,
-    this.includeNone = false,
     this.borderRadius,
     this.height = 30,
   });
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<LibraAppState>();
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: height),
       child: Theme(
@@ -33,29 +32,18 @@ class AccountSelectionMenu extends StatelessWidget {
           // hoverColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(128),
         ),
         child: DropdownButtonHideUnderline(
-          child: DropdownButton<Account?>(
+          child: DropdownButton<T>(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             borderRadius: borderRadius ?? BorderRadius.circular(10),
-            focusColor: Theme.of(context)
-                .colorScheme
-                .background, // this is the color of the button when it has keyboard focus
+
+            /// this is the color of the button when it has keyboard focus
+            focusColor: Theme.of(context).colorScheme.background,
             value: selected,
             items: [
-              if (includeNone)
+              for (final item in items)
                 DropdownMenuItem(
-                  value: null,
-                  child: Text(
-                    'None',
-                    style: Theme.of(context).textTheme.labelLarge, // match with SegmentedButton
-                  ),
-                ),
-              for (final account in appState.accounts)
-                DropdownMenuItem(
-                  value: account,
-                  child: Text(
-                    account.name,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
+                  value: item,
+                  child: builder(item),
                 ),
             ],
             onChanged: onChanged,
@@ -66,30 +54,33 @@ class AccountSelectionMenu extends StatelessWidget {
   }
 }
 
-class AccountSelectionFormField extends StatelessWidget {
-  const AccountSelectionFormField({
+class LibraDropdownFormField<T> extends StatelessWidget {
+  const LibraDropdownFormField({
     super.key,
     this.initial,
-    this.includeNone = false,
+    required this.items,
+    required this.builder,
     this.borderRadius,
     this.height = 30,
     this.onSave,
   });
 
-  final Account? initial;
-  final bool includeNone;
-  final Function(Account?)? onSave;
+  final T? initial;
+  final List<T> items;
+  final Function(T?)? onSave;
   final BorderRadius? borderRadius;
   final double height;
+  final Widget Function(T?) builder;
 
   @override
   Widget build(BuildContext context) {
-    return FormField<Account?>(
+    return FormField<T>(
       initialValue: initial,
       builder: (state) {
-        final widget = AccountSelectionMenu(
+        final widget = LibraDropdownMenu<T>(
           selected: state.value,
-          includeNone: includeNone,
+          items: items,
+          builder: builder,
           height: height,
           borderRadius: borderRadius,
           onChanged: state.didChange,

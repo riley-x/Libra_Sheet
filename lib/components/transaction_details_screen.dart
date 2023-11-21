@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:libra_sheet/components/account_selection_menu.dart';
+import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
+import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -102,6 +103,17 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                 _ValueField(
                   initial: widget.seed?.value,
                   onSave: (newValue) => print(newValue),
+                ),
+              ),
+              _rowSpacing,
+              _labelRow(
+                context,
+                'Category',
+                CategorySelectionFormField(
+                  height: 40,
+                  initial: widget.seed?.category,
+                  onSave: (it) => print(it?.name),
+                  borderRadius: BorderRadius.circular(4),
                 ),
               ),
             ],

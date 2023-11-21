@@ -94,9 +94,10 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionTabState>();
-    final categories = context.select<LibraAppState, List<Category>>((it) => it.categories);
+    var categories = context
+        .select<LibraAppState, List<Category>>((it) => it.incomeCategories + it.expenseCategories);
     return CategoryFilterChips(
-      categories: categories,
+      categories: [ignoreCategory, incomeCategory, expenseCategory] + categories,
       selected: (cat) => state.categoryFilterSelected.contains(cat.key),
       onSelected: (cat, selected) => state.setCategoryFilter(cat, selected),
     );

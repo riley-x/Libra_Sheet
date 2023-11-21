@@ -4,7 +4,7 @@ import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 
-import '../../components/account_selection_menu.dart';
+import '../../components/selectors/account_selection_menu.dart';
 
 /// Creates the column that holds all the option selectors for the category tab.
 class CategoryTabFilters extends StatelessWidget {

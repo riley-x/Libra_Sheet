@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
@@ -26,7 +27,31 @@ class LibraAppState extends ChangeNotifier {
 
   final List<Account> accounts = testAccounts;
 
-  final List<Category> categories = testCategoryValues;
+  final List<Category> incomeCategories = testCategoryValues;
+  final List<Category> expenseCategories = testCategoryValues;
+
+  List<Category> flattenedCategories([ExpenseFilterType type = ExpenseFilterType.all]) {
+    List<Category> nested;
+    switch (type) {
+      case ExpenseFilterType.all:
+        nested = incomeCategories + expenseCategories;
+      case ExpenseFilterType.income:
+        nested = incomeCategories;
+      case ExpenseFilterType.expense:
+        nested = expenseCategories;
+    }
+
+    final out = <Category>[];
+    for (final cat in nested) {
+      out.add(cat);
+      if (cat.subCats != null) {
+        for (final subCat in cat.subCats!) {
+          out.add(subCat);
+        }
+      }
+    }
+    return out;
+  }
 
   /// Current tab as an index into [LibraNavDestination.values].
   int currentTab = 0;
