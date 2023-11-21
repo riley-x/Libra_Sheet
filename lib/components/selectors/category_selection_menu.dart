@@ -25,9 +25,7 @@ Widget _builder(BuildContext context, Category? cat) {
   );
 }
 
-/// Dropdown button for filtering by an account
-/// P.S. Don't try switching to a DropdownButtonFormField -- a lot of trouble getting the underline
-/// hidden.
+/// Dropdown button for choosing a single category
 class CategorySelectionMenu extends StatelessWidget {
   final ExpenseFilterType type;
   final Category? selected;
@@ -58,6 +56,7 @@ class CategorySelectionMenu extends StatelessWidget {
   }
 }
 
+/// As above, but wrapped in a FormField
 class CategorySelectionFormField extends StatelessWidget {
   const CategorySelectionFormField({
     super.key,

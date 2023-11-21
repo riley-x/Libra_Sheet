@@ -19,7 +19,7 @@ class TransactionTabState extends ChangeNotifier {
 
   Set<ExpenseType> expenseFilterSelected = {};
   Set<int> accountFilterSelected = {};
-  Set<int> categoryFilterSelected = {};
+  Map<int, bool?> categoryFilterSelected = {};
 
   List<Transaction> transactions = testTransactions;
   Transaction? focusedTransaction;
@@ -43,11 +43,17 @@ class TransactionTabState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCategoryFilter(Category cat, bool selected) {
-    if (selected) {
-      categoryFilterSelected.add(cat.key);
-    } else {
-      categoryFilterSelected.remove(cat.key);
+  /// WARNING! This assumes selected cycles true -> null -> false from a tristate CheckboxListTile
+  void setCategoryFilter(Category cat, bool? selected) {
+    categoryFilterSelected[cat.key] = selected;
+    if (selected == true) {
+      for (final subCat in cat.subCats ?? []) {
+        categoryFilterSelected[subCat.key] = true;
+      }
+    } else if (selected == null) {
+      for (final subCat in cat.subCats ?? []) {
+        categoryFilterSelected.remove(subCat.key);
+      }
     }
     notifyListeners();
   }

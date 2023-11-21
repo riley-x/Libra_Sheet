@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/category_filter_chips.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
@@ -59,7 +60,7 @@ class TransactionTabFilters extends StatelessWidget {
               const _AccountChips(),
 
               const SizedBox(height: 15),
-              Text("Category", style: textStyle),
+
               const SizedBox(height: 5),
               const _CategoryChips(),
 
@@ -94,14 +95,42 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionTabState>();
-    var categories = context
-        .select<LibraAppState, List<Category>>((it) => it.incomeCategories + it.expenseCategories);
-    return CategoryFilterChips(
-      categories: [ignoreCategory, incomeCategory, expenseCategory] + categories,
-      selected: (cat) => state.categoryFilterSelected.contains(cat.key),
-      onSelected: (cat, selected) => state.setCategoryFilter(cat, selected),
+    var categories =
+        context.select<LibraAppState, List<Category>>((it) => it.flattenedCategories());
+    return Column(
+      children: [
+        Row(
+          children: [
+            const SizedBox(width: 40),
+            const Spacer(),
+            Text("Category", style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            DropdownCheckboxMenu<Category>(
+              items: [ignoreCategory, incomeCategory, expenseCategory] + categories,
+              builder: dropdownCategoryBuilder,
+              isChecked: (cat) =>
+                  state.categoryFilterSelected[cat.key] ?? (cat.hasSubCats() ? null : false),
+              isTristate: (cat) => cat.hasSubCats(),
+              onChanged: (cat, i, selected) => state.setCategoryFilter(cat, selected),
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+      ],
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   final state = context.watch<TransactionTabState>();
+  //   var categories = context
+  //       .select<LibraAppState, List<Category>>((it) => it.incomeCategories + it.expenseCategories);
+  //   return CategoryFilterChips(
+  //     categories: [ignoreCategory, incomeCategory, expenseCategory] + categories,
+  //     selected: (cat) => state.categoryFilterSelected.contains(cat.key),
+  //     onSelected: (cat, selected) => state.setCategoryFilter(cat, selected),
+  //   );
+  // }
 }
 
 class _ValueRange extends StatelessWidget {

@@ -50,15 +50,16 @@ final List<Transaction> testTransactions = [
 ];
 
 const testCategoryValues = [
-  CategoryValue(key: 1, name: 'cat 1', color: Colors.amber, value: 357000),
-  CategoryValue(key: 2, name: 'cat 2', color: Colors.blue, value: 23000),
-  CategoryValue(key: 3, name: 'cat 3', color: Colors.green, value: 1000000, subCats: [
-    CategoryValue(key: 4, name: 'subcat 1', color: Colors.grey, value: 200000),
-    CategoryValue(key: 5, name: 'subcat 2', color: Colors.greenAccent, value: 200000),
-    CategoryValue(key: 6, name: 'subcat 3', color: Colors.lightGreen, value: 200000),
-    CategoryValue(key: 7, name: 'subcat 4', color: Colors.lightGreenAccent, value: 200000),
-    CategoryValue(key: 8, name: 'subcat 5', color: Colors.green, value: 200000),
+  CategoryValue(key: 1, level: 1, name: 'cat 1', color: Colors.amber, value: 357000),
+  CategoryValue(key: 2, level: 1, name: 'cat 2', color: Colors.blue, value: 23000),
+  CategoryValue(key: 3, level: 1, name: 'cat 3', color: Colors.green, value: 1000000, subCats: [
+    CategoryValue(key: 4, level: 2, name: 'subcat 1', color: Colors.grey, value: 200000),
+    CategoryValue(key: 5, level: 2, name: 'subcat 2', color: Colors.greenAccent, value: 200000),
+    CategoryValue(key: 6, level: 2, name: 'subcat 3', color: Colors.lightGreen, value: 200000),
+    CategoryValue(
+        key: 7, level: 2, name: 'subcat 4', color: Colors.lightGreenAccent, value: 200000),
+    CategoryValue(key: 8, level: 2, name: 'subcat 5', color: Colors.green, value: 200000),
   ]),
-  CategoryValue(key: 9, name: 'cat 4', color: Colors.red, value: 223000),
-  CategoryValue(key: 10, name: 'cat 5', color: Colors.purple, value: 43000),
+  CategoryValue(key: 9, level: 1, name: 'cat 4', color: Colors.red, value: 223000),
+  CategoryValue(key: 10, level: 1, name: 'cat 5', color: Colors.purple, value: 43000),
 ];
