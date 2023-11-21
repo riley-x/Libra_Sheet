@@ -116,10 +116,16 @@ class TransactionDetailsEditor extends StatelessWidget {
                 Column(
                   children: [
                     for (final alloc in state.allocations) ...[
-                      AllocationCard(alloc),
-                      const SizedBox(height: 4)
+                      AllocationCard(
+                        alloc,
+                        onTap: (it) => state.focusAllocation(it),
+                      ),
+                      const SizedBox(height: 6)
                     ],
-                    const AllocationCard(null),
+                    AllocationCard(
+                      null,
+                      onTap: (it) => state.focusAllocation(it),
+                    ),
                   ],
                 ),
                 labelAlign: TableCellVerticalAlignment.top,
@@ -134,13 +140,13 @@ class TransactionDetailsEditor extends StatelessWidget {
                     for (final r in state.reimbursements) ...[
                       ReimbursementCard(
                         r,
-                        onTap: (it) {},
+                        onTap: (it) => state.focusReimbursement(it),
                       ),
                       const SizedBox(height: 6)
                     ],
                     ReimbursementCard(
                       null,
-                      onTap: (it) {},
+                      onTap: (it) => state.focusReimbursement(it),
                     ),
                   ],
                 ),

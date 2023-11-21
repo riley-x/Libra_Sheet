@@ -13,9 +13,18 @@ class TransactionDetailsState extends ChangeNotifier {
   TransactionDetailsState(this.seed) {
     _init();
   }
-
-  Transaction? seed;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> allocationFormKey = GlobalKey<FormState>();
+
+  /// Initial values for the respective editors. Don't edit these; they're used to reset.
+  Transaction? seed;
+  Allocation? focusedAllocation;
+  Reimbursement? focusedReimbursement;
+
+  /// Updated values for the respective editors. These are used to save the values retrieved from
+  /// the various FormFields' onSave methods. They don't contain any UI state, so don't need to
+  /// notifyListeners.
+  final MutableAllocation updatedAllocation = MutableAllocation();
 
   /// These variables are saved to by the relevant FormFields. Don't need to manage via SetState.
   Account? account;
@@ -26,11 +35,12 @@ class TransactionDetailsState extends ChangeNotifier {
   String? note;
 
   /// These variables are the state for the relevant fields
-  TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
   ExpenseFilterType expenseType = ExpenseFilterType.all;
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
   final List<Reimbursement> reimbursements = [];
+
+  TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
 
   void _init() {
     if (seed != null) {
@@ -103,4 +113,59 @@ class TransactionDetailsState extends ChangeNotifier {
       return ExpenseFilterType.expense;
     }
   }
+
+  void clearFocus() {
+    focusedAllocation = null;
+    focusedReimbursement = null;
+    focus = TransactionDetailActiveFocus.none;
+    notifyListeners();
+  }
+
+  void focusAllocation(Allocation? alloc) {
+    if (focus == TransactionDetailActiveFocus.reimbursement) {
+      focusedReimbursement = null;
+    }
+    focusedAllocation = alloc;
+    focus = TransactionDetailActiveFocus.allocation;
+    notifyListeners();
+  }
+
+  void focusReimbursement(Reimbursement? it) {
+    if (focus == TransactionDetailActiveFocus.allocation) {
+      focusedAllocation = null;
+    }
+    focusedReimbursement = it;
+    focus = TransactionDetailActiveFocus.reimbursement;
+    notifyListeners();
+  }
+
+  void saveAllocation() {
+    if (allocationFormKey.currentState?.validate() ?? false) {
+      allocationFormKey.currentState?.save();
+      if (focusedAllocation == null) {
+        allocations.add(updatedAllocation);
+      } else {
+        for (int i = 0; i < allocations.length; i++) {
+          if (allocations[i] == focusedAllocation) {
+            allocations[i] = updatedAllocation.withKey(allocations[i].key);
+            break;
+          }
+        }
+      }
+      clearFocus();
+    }
+  }
+
+  void deleteAllocation() {
+    allocations.remove(focusedAllocation);
+    clearFocus();
+  }
+
+  void resetAllocation() {
+    allocationFormKey.currentState?.reset();
+  }
+
+  void saveReimbursement() {}
+  void deleteReimbursement() {}
+  void resetReimbursement() {}
 }

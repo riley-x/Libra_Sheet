@@ -10,12 +10,14 @@ class ValueField extends StatelessWidget {
     this.initial,
     this.onSave,
     this.onChanged,
+    this.positiveOnly = false,
   });
 
   final int? initial;
   final Function(int)? onSave;
   final Function(int?)? onChanged;
   final Key? formFieldKey;
+  final bool positiveOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class ValueField extends StatelessWidget {
         if (text == null || text.isEmpty) return ''; // No message to not take up space
         final val = text.toIntDollar();
         if (val == null) return ''; // No message to not take up space
+        if (positiveOnly && val < 0) return '';
         return null;
       },
       onChanged: (onChanged == null) ? null : (it) => onChanged!.call(it?.toIntDollar()),

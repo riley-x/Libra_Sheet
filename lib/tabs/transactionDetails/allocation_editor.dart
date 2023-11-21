@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/data/allocation.dart';
+import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
+import 'package:libra_sheet/components/tri_buttons.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
+import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
 
 /// Simple form for adding an allocation, used in the second panel of the transaction detail screen.
 class AllocationEditor extends StatelessWidget {
-  const AllocationEditor({
-    super.key,
-    this.initial,
-  });
-
-  final Allocation? initial;
+  const AllocationEditor({super.key});
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
-    return SizedBox(
-      width: 400,
-      child: Column(
-        children: [
-          Text((initial == null) ? 'Add Allocation' : 'Edit Allocation'),
-          Table(
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Text(
+          (state.focusedAllocation == null) ? 'Add Allocation' : 'Edit Allocation',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 10),
+        Form(
+          key: state.allocationFormKey,
+          child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: const {
               0: IntrinsicColumnWidth(),
@@ -33,15 +35,44 @@ class AllocationEditor extends StatelessWidget {
                 context,
                 'Name',
                 LibraTextFormField(
-                  // initial: state.seed?.name,
+                  initial: state.focusedAllocation?.name,
                   validator: (it) => null,
-                  // onSave: (it) => state.name = it,
+                  onSave: (it) => state.updatedAllocation.name = it ?? '',
                 ),
-              )
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'Value',
+                ValueField(
+                  initial: state.focusedAllocation?.value,
+                  onSave: (it) => state.updatedAllocation.value = it,
+                  positiveOnly: true,
+                ),
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'Category',
+                CategorySelectionFormField(
+                  height: 35,
+                  initial: state.focusedAllocation?.category,
+                  onSave: (it) => state.updatedAllocation.category = it,
+                  borderRadius: BorderRadius.circular(4),
+                  type: state.expenseType,
+                ),
+              ),
             ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20),
+        TriButtons(
+          allowDelete: state.focusedAllocation != null,
+          onDelete: state.deleteAllocation,
+          onReset: state.resetAllocation,
+          onSave: state.saveAllocation,
+        )
+      ],
     );
   }
 }
