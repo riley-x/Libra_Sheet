@@ -15,6 +15,7 @@ import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.da
 import 'package:provider/provider.dart';
 
 import '../../components/allocation_card.dart';
+import '../../components/tri_buttons.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen(this.transaction, {super.key});
@@ -194,11 +195,11 @@ class _TransactionDetails extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            _Buttons(
+            TriButtons(
               allowDelete: (state.seed?.key ?? 0) > 0,
-              delete: state.delete,
-              reset: state.reset,
-              save: state.save,
+              onDelete: state.delete,
+              onReset: state.reset,
+              onSave: state.save,
             ),
           ],
         ),
@@ -336,54 +337,6 @@ class _TagSelector extends StatelessWidget {
           onChanged: onChanged,
         ),
         const SizedBox(width: 7.5),
-      ],
-    );
-  }
-}
-
-class _Buttons extends StatelessWidget {
-  const _Buttons({
-    super.key,
-    required this.allowDelete,
-    this.delete,
-    this.reset,
-    this.save,
-  });
-
-  final bool allowDelete;
-  final Function()? delete;
-  final Function()? reset;
-  final Function()? save;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (allowDelete) ...[
-          ElevatedButton(
-            onPressed: delete,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: const Text('Delete'),
-          ),
-          const SizedBox(width: 20),
-        ],
-        ElevatedButton(
-          onPressed: reset,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.errorContainer,
-            foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-          ),
-          child: const Text('Reset'),
-        ),
-        const SizedBox(width: 20),
-        ElevatedButton(
-          onPressed: save,
-          child: const Text('Save'),
-        ),
       ],
     );
   }
