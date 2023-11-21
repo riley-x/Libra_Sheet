@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
-import 'package:libra_sheet/components/printer.dart';
 import 'package:libra_sheet/components/reimbursement_card.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
-import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -17,11 +15,10 @@ import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/reimbursement.dart';
 import 'package:libra_sheet/data/tag.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
 import 'package:provider/provider.dart';
 
-import '../components/allocation_card.dart';
+import '../../components/allocation_card.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   const TransactionDetailsScreen(this.transaction, {super.key});
@@ -152,9 +149,8 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
         reimbursements: reimbursements,
         tags: tags,
       );
-      print(t);
+      print(t); // TODO save transaction
     }
-    // TODO save transaction
   }
 
   @override
@@ -190,8 +186,11 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
                 _labelRow(
                   context,
                   'Name',
-                  _NameField(
-                    initialName: widget.seed?.name,
+                  LibraTextFormField(
+                    initial: widget.seed?.name,
+                    minLines: 3,
+                    maxLines: 3,
+                    validator: (it) => null,
                     onSave: (it) => name = it,
                   ),
                 ),
@@ -293,36 +292,11 @@ class _TransactionDetailsState extends State<_TransactionDetails> {
               ],
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if ((widget.seed?.key ?? 0) > 0) ...[
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                      foregroundColor: Theme.of(context).colorScheme.onError,
-                      // textStyle: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
-                    ),
-                    child: const Text('Delete'),
-                  ),
-                  const SizedBox(width: 20),
-                ],
-                ElevatedButton(
-                  onPressed: _reset,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-                    // textStyle: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
-                  ),
-                  child: const Text('Reset'),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: _save,
-                  child: const Text('Save'),
-                ),
-              ],
+            _Buttons(
+              allowDelete: (widget.seed?.key ?? 0) > 0,
+              delete: () {}, // TODO
+              reset: _reset,
+              save: _save,
             ),
           ],
         ),
@@ -361,28 +335,6 @@ const _rowSpacing = TableRow(children: [
     height: 8,
   )
 ]);
-
-class _NameField extends StatelessWidget {
-  const _NameField({
-    super.key,
-    this.initialName,
-    this.onSave,
-  });
-
-  final String? initialName;
-  final Function(String?)? onSave;
-
-  @override
-  Widget build(BuildContext context) {
-    return LibraTextFormField(
-      initial: initialName,
-      minLines: 3,
-      maxLines: 3,
-      validator: (it) => null,
-      onSave: onSave,
-    );
-  }
-}
 
 final _dateFormat = DateFormat('MM/dd/yy');
 
@@ -481,7 +433,55 @@ class _TagSelector extends StatelessWidget {
           isChecked: (it) => tags.contains(it),
           onChanged: onChanged,
         ),
-        const SizedBox(width: 7),
+        const SizedBox(width: 7.5),
+      ],
+    );
+  }
+}
+
+class _Buttons extends StatelessWidget {
+  const _Buttons({
+    super.key,
+    required this.allowDelete,
+    this.delete,
+    this.reset,
+    this.save,
+  });
+
+  final bool allowDelete;
+  final Function()? delete;
+  final Function()? reset;
+  final Function()? save;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (allowDelete) ...[
+          ElevatedButton(
+            onPressed: delete,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Delete'),
+          ),
+          const SizedBox(width: 20),
+        ],
+        ElevatedButton(
+          onPressed: reset,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.errorContainer,
+            foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+          ),
+          child: const Text('Reset'),
+        ),
+        const SizedBox(width: 20),
+        ElevatedButton(
+          onPressed: save,
+          child: const Text('Save'),
+        ),
       ],
     );
   }

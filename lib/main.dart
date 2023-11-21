@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/test_data.dart';
-import 'package:libra_sheet/tabs/transaction_details_screen.dart';
+import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/data/transaction.dart';
