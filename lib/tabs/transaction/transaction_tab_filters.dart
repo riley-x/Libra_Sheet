@@ -97,16 +97,17 @@ class _CategoryChips extends StatelessWidget {
     final state = context.watch<TransactionTabState>();
     var categories =
         context.select<LibraAppState, List<Category>>((it) => it.flattenedCategories());
+    categories = [ignoreCategory, incomeCategory, expenseCategory] + categories;
     return Column(
       children: [
         Row(
           children: [
-            const SizedBox(width: 40),
+            const SizedBox(width: 48),
             const Spacer(),
             Text("Category", style: Theme.of(context).textTheme.titleMedium),
             const Spacer(),
             DropdownCheckboxMenu<Category>(
-              items: [ignoreCategory, incomeCategory, expenseCategory] + categories,
+              items: categories,
               builder: dropdownCategoryBuilder,
               isChecked: (cat) =>
                   state.categoryFilterSelected[cat.key] ?? (cat.hasSubCats() ? null : false),
@@ -116,6 +117,30 @@ class _CategoryChips extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 5),
+        Wrap(
+          spacing: 10,
+          runSpacing: 4,
+          children: [
+            for (final cat in categories)
+              if (state.categoryFilterSelected[cat.key] ?? cat.hasSubCats())
+                GestureDetector(
+                  onTap: () {
+                    state.setCategoryFilter(cat, false);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 4, right: 4, bottom: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                    ),
+                    child: Text(
+                      cat.name,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ),
+                )
+          ],
+        )
       ],
     );
   }
