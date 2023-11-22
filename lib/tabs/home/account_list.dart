@@ -9,9 +9,11 @@ class AccountRow extends StatelessWidget {
   const AccountRow({
     super.key,
     required this.account,
+    this.onTap,
   });
 
   final Account account;
+  final Function(Account)? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,11 @@ class AccountRow extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () {
-          context.read<LibraAppState>().focusAccount(account);
+          if (onTap != null) {
+            onTap?.call(account);
+          } else {
+            context.read<LibraAppState>().focusAccount(account);
+          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -41,7 +47,7 @@ class AccountRow extends StatelessWidget {
                     style: theme.textTheme.titleMedium,
                   ),
                   Text(
-                    account.number,
+                    account.description,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                   ),
                 ],

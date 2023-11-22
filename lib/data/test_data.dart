@@ -10,7 +10,7 @@ final List<Account> testAccounts = [
   Account(
     key: 1,
     name: 'Robinhood',
-    number: 'xxx-1234',
+    description: 'xxx-1234',
     balance: 13451200,
     lastUpdated: DateTime(2023, 11, 15),
     color: Colors.green,
@@ -18,7 +18,7 @@ final List<Account> testAccounts = [
   Account(
     key: 2,
     name: 'Virgo',
-    number: 'xxx-1234',
+    description: 'xxx-1234',
     balance: 4221100,
     lastUpdated: DateTime(2023, 10, 15),
     color: Colors.red,
@@ -26,7 +26,7 @@ final List<Account> testAccounts = [
   Account(
     key: 3,
     name: 'TD',
-    number: 'xxx-1234',
+    description: 'xxx-1234',
     balance: 124221100,
     lastUpdated: DateTime(2023, 10, 15),
     color: Colors.lightBlue,
