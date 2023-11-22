@@ -19,4 +19,9 @@ class Account {
 
   final int key;
   final String csvFormat;
+
+  @override
+  String toString() {
+    return "Account($key: $name)";
+  }
 }

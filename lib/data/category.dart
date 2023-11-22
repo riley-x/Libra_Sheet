@@ -26,29 +26,37 @@ class Category {
   bool hasSubCats() {
     return subCats != null && subCats!.isNotEmpty;
   }
+
+  @override
+  String toString() {
+    return "Category($key: $name)";
+  }
 }
 
+// ignore: prefer_const_constructors
 final incomeCategory = Category(
   key: -1,
   level: 0,
   name: 'Income',
-  color: Color(0xFF004940),
+  color: const Color(0xFF004940),
   subCats: [],
 );
 
+// ignore: prefer_const_constructors
 final expenseCategory = Category(
   key: -2,
   level: 0,
   name: 'Expense',
-  color: Color(0xFF5C1604),
+  color: const Color(0xFF5C1604),
   subCats: [],
 );
 
+// ignore: prefer_const_constructors
 final ignoreCategory = Category(
   key: -3,
   level: 0,
   name: 'Ignore',
-  color: Color(0),
+  color: const Color(0x00000000),
 );
 
 class CategoryValue extends Category {

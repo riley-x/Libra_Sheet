@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/transaction_card.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/test_data.dart';
+import 'package:libra_sheet/data/transaction.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
@@ -45,12 +46,16 @@ class ReimbursementEditor extends StatelessWidget {
               labelRow(
                 context,
                 'Transaction',
-                (state.reimburseTarget == null)
-                    ? const SizedBox()
-                    : TransactionCard(
-                        trans: state.reimburseTarget!,
-                        margin: const EdgeInsets.all(0),
-                      ),
+                Visibility(
+                  visible: state.reimburseTarget != null,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: TransactionCard(
+                    trans: state.reimburseTarget ?? dummyTransaction,
+                    margin: const EdgeInsets.all(0),
+                  ),
+                ),
               ),
             ],
           ),

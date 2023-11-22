@@ -30,4 +30,21 @@ class Transaction {
   final List<Tag>? tags;
   final List<Allocation>? allocations;
   final List<Reimbursement>? reimbursements;
+
+  @override
+  String toString() {
+    var out = "Transaction($key): $value $date"
+        "\n\t$name"
+        "\n\t$account"
+        "\n\t$category";
+    if (note.isNotEmpty) {
+      out += "\n\t$note";
+    }
+    out += "\n\ttags=${tags?.length ?? 0}"
+        " alloc=${allocations?.length ?? 0}"
+        " reimb=${reimbursements?.length ?? 0}";
+    return out;
+  }
 }
+
+final dummyTransaction = Transaction(name: '___TEST___', date: DateTime(1987), value: 10000);
