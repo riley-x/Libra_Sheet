@@ -129,6 +129,8 @@ class TransactionDetailsEditor extends StatelessWidget {
                   ],
                 ),
                 labelAlign: TableCellVerticalAlignment.top,
+                tooltip: "An allocation assigns a portion of the\n"
+                    "transaction's value to a separate category.",
               ),
               rowSpacing,
               rowSpacing,
@@ -151,6 +153,11 @@ class TransactionDetailsEditor extends StatelessWidget {
                   ],
                 ),
                 labelAlign: TableCellVerticalAlignment.top,
+                tooltip: "A reimbursement cancels a specified amount\n"
+                    "from two opposite transactions. For example,\n"
+                    "a \$100 dining transaction can be reimbursed\n"
+                    "by four \$20 Venmo payments. The net effect \n"
+                    "is a \$20 addition to the dining category.",
               ),
             ],
           ),

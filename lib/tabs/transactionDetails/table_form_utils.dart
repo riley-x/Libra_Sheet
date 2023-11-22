@@ -6,7 +6,12 @@ TableRow labelRow(
   String label,
   Widget? right, {
   TableCellVerticalAlignment? labelAlign,
+  String? tooltip,
 }) {
+  Widget text = Text(
+    label,
+    style: Theme.of(context).textTheme.titleMedium,
+  );
   return TableRow(
     children: [
       TableCell(
@@ -15,10 +20,16 @@ TableRow labelRow(
           alignment: Alignment.topRight,
           child: Padding(
             padding: const EdgeInsets.only(right: 20),
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            child: (tooltip != null)
+                ? Tooltip(
+                    message: tooltip,
+                    textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onInverseSurface,
+                          fontSize: 14,
+                        ),
+                    child: text,
+                  )
+                : text,
           ),
         ),
       ),
