@@ -22,12 +22,13 @@ class AccountRow extends StatelessWidget {
       lastUpdatedColor = theme.colorScheme.error;
     }
 
-    return GestureDetector(
-      onTap: () {
-        context.read<LibraAppState>().focusAccount(account);
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () {
+          context.read<LibraAppState>().focusAccount(account);
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: Row(

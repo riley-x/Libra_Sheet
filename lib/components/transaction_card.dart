@@ -36,6 +36,7 @@ class TransactionCard extends StatelessWidget {
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: InkWell(
+        borderRadius: BorderRadius.circular(8),
         onTap: () => onSelect?.call(trans),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
