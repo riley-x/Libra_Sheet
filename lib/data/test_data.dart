@@ -85,7 +85,10 @@ final List<Transaction> testTransactions = [
 
 final List<Reimbursement> testReimbursements = [
   Reimbursement(
-      parentTransaction: testTransactions[0], otherTransaction: testTransactions[1], value: 2300),
+    parentTransaction: testTransactions[0],
+    otherTransaction: testTransactions[1],
+    value: 2300,
+  ),
 ];
 
 void initializeTestData() {

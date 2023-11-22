@@ -41,8 +41,10 @@ class TransactionDetailsState extends ChangeNotifier {
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
   final List<Reimbursement> reimbursements = [];
-
   TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
+
+  /// Active target of the reimbursement editor
+  Transaction? reimburseTarget;
 
   void _init() {
     if (seed != null) {
@@ -119,6 +121,7 @@ class TransactionDetailsState extends ChangeNotifier {
   void clearFocus() {
     focusedAllocation = null;
     focusedReimbursement = null;
+    reimburseTarget = null;
     focus = TransactionDetailActiveFocus.none;
     notifyListeners();
   }
@@ -129,15 +132,6 @@ class TransactionDetailsState extends ChangeNotifier {
     }
     focusedAllocation = alloc;
     focus = TransactionDetailActiveFocus.allocation;
-    notifyListeners();
-  }
-
-  void focusReimbursement(Reimbursement? it) {
-    if (focus == TransactionDetailActiveFocus.allocation) {
-      focusedAllocation = null;
-    }
-    focusedReimbursement = it;
-    focus = TransactionDetailActiveFocus.reimbursement;
     notifyListeners();
   }
 
@@ -167,9 +161,32 @@ class TransactionDetailsState extends ChangeNotifier {
     allocationFormKey.currentState?.reset();
   }
 
+  void setReimbursementTarget(Transaction? it) {
+    reimburseTarget = it;
+    notifyListeners();
+  }
+
+  void focusReimbursement(Reimbursement? it) {
+    if (focus == TransactionDetailActiveFocus.allocation) {
+      focusedAllocation = null;
+    }
+    focusedReimbursement = it;
+    reimburseTarget = it?.otherTransaction;
+    focus = TransactionDetailActiveFocus.reimbursement;
+    notifyListeners();
+  }
+
+  bool validateReimbursement() {
+    bool out = reimbursementFormKey.currentState?.validate() ?? false;
+    return out && reimburseTarget != null;
+  }
+
   void saveReimbursement() {
-    if (reimbursementFormKey.currentState?.validate() ?? false) {
+    if (validateReimbursement()) {
       reimbursementFormKey.currentState?.save();
+      updatedReimbursement.otherTransaction = reimburseTarget;
+      updatedReimbursement.parentTransaction = seed;
+
       if (focusedReimbursement == null) {
         reimbursements.add(updatedReimbursement);
       } else {
@@ -186,10 +203,12 @@ class TransactionDetailsState extends ChangeNotifier {
 
   void deleteReimbursement() {
     reimbursements.remove(focusedReimbursement);
+    reimburseTarget = null;
     clearFocus();
   }
 
   void resetReimbursement() {
     reimbursementFormKey.currentState?.reset();
+    reimburseTarget = focusedReimbursement?.otherTransaction;
   }
 }

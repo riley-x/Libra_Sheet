@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
+import 'package:libra_sheet/components/transaction_card.dart';
+import 'package:libra_sheet/components/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
@@ -29,7 +32,6 @@ class ReimbursementEditor extends StatelessWidget {
               1: FixedColumnWidth(250),
             },
             children: [
-              rowSpacing,
               labelRow(
                 context,
                 'Value',
@@ -38,6 +40,17 @@ class ReimbursementEditor extends StatelessWidget {
                   onSave: (it) => state.updatedReimbursement.value = it,
                   positiveOnly: true,
                 ),
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'Transaction',
+                (state.reimburseTarget == null)
+                    ? const SizedBox()
+                    : TransactionCard(
+                        trans: state.reimburseTarget!,
+                        margin: const EdgeInsets.all(0),
+                      ),
               ),
             ],
           ),
@@ -50,6 +63,25 @@ class ReimbursementEditor extends StatelessWidget {
           onReset: state.resetReimbursement,
           onSave: state.saveReimbursement,
           onCancel: state.clearFocus,
+        ),
+        const SizedBox(height: 10),
+        Container(
+          height: 1,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+        // const SizedBox(height: 5),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: TransactionFilterGrid(
+              testTransactions + testTransactions + testTransactions,
+              title: Text(
+                'Select target transaction',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              onSelect: state.setReimbursementTarget,
+            ),
+          ),
         )
       ],
     );

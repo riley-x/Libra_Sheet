@@ -52,6 +52,7 @@ class ReimbursementCard extends StatelessWidget {
           children: [
             Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     reimbursement!.otherTransaction?.name ?? '',
@@ -70,7 +71,10 @@ class ReimbursementCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(reimbursement!.value.dollarString()),
+                Text(
+                  reimbursement!.value.dollarString(),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text(dtFormat.format(reimbursement!.otherTransaction?.date ?? DateTime(1987))),
               ],
             ),

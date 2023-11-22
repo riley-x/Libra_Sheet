@@ -9,11 +9,13 @@ class TransactionCard extends StatelessWidget {
     required this.trans,
     this.maxRowsForName = 1,
     this.onSelect,
+    this.margin,
   });
 
   final Transaction trans;
   final int? maxRowsForName;
   final Function(Transaction)? onSelect;
+  final EdgeInsets? margin;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class TransactionCard extends StatelessWidget {
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: InkWell(
         onTap: () => onSelect?.call(trans),
         child: Padding(

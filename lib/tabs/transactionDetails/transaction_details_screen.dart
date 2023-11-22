@@ -57,20 +57,15 @@ class _TransactionDetailsScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 850) {
+          /// The IndexedStack keeps the FormField states alive when transitioning to the
+          /// auxEditor and back.
           return IndexedStack(
-            index: focus == TransactionDetailActiveFocus.none
-                ? 0
-                : 1, // switch between Foo and Bar based on condition
+            index: focus == TransactionDetailActiveFocus.none ? 0 : 1,
             children: [
               mainEditor,
               auxEditor,
             ],
           );
-          // if (focus == TransactionDetailActiveFocus.none) {
-          //   return mainEditor;
-          // } else {
-          //   return auxEditor;
-          // }
         } else {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
