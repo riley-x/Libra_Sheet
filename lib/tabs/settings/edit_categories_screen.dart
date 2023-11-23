@@ -68,6 +68,7 @@ class _CategorySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = context.watch<LibraAppState>();
     final categories = (isExpense) ? appState.expenseCategories : appState.incomeCategories;
+
     return Column(
       children: [
         Row(
@@ -86,7 +87,7 @@ class _CategorySection extends StatelessWidget {
             height: 45.0 * categories.length,
             child: ReorderableListView(
               physics: const NeverScrollableScrollPhysics(),
-              onReorder: (oldIndex, newIndex) => {},
+              onReorder: (o, n) => appState.reorderCategories(isExpense, o, n),
               children: <Widget>[
                 for (int i = 0; i < categories.length; i++)
                   CategoryCard(categories[i],

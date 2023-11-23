@@ -30,7 +30,7 @@ class LibraAppState extends ChangeNotifier {
   final List<Tag> tags = testTags;
 
   final List<Category> incomeCategories = [];
-  final List<Category> expenseCategories = testCategoryValues;
+  final List<Category> expenseCategories = List.from(testCategoryValues);
 
   List<Category> flattenedCategories([ExpenseFilterType type = ExpenseFilterType.all]) {
     List<Category> nested;
@@ -91,6 +91,16 @@ class LibraAppState extends ChangeNotifier {
   }
 
   void increment() {
+    notifyListeners();
+  }
+
+  void reorderCategories(bool isExpense, int oldIndex, int newIndex) {
+    final list = (isExpense) ? expenseCategories : incomeCategories;
+    if (newIndex > oldIndex) {
+      list.insert(newIndex - 1, list.removeAt(oldIndex));
+    } else {
+      list.insert(newIndex, list.removeAt(oldIndex));
+    }
     notifyListeners();
   }
 }
