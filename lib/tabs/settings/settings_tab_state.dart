@@ -14,15 +14,40 @@ class EditAccountState extends ChangeNotifier {
   /// We use the color in the class as the state of the color box though!
   MutableAccount saveSink = MutableAccount();
 
+  void _init() {
+    if (focused == null) {
+      saveSink = MutableAccount();
+    } else {
+      saveSink = MutableAccount.copy(focused!);
+    }
+  }
+
+  void reset() {
+    formKey.currentState?.reset();
+    _init();
+    notifyListeners();
+  }
+
   void setFocus(Account? it) {
     focused = it;
     isFocused = true;
-    saveSink.color = it?.color ?? Colors.lightBlue;
+    _init();
     notifyListeners();
   }
 
   void clearFocus() {
     isFocused = false;
     notifyListeners();
+  }
+
+  void delete() {
+    // TODO
+  }
+
+  void save() {
+    formKey.currentState?.save();
+    final acc = saveSink.freeze();
+    print(acc);
+    // TODO
   }
 }

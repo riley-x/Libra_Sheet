@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
@@ -126,12 +127,39 @@ class _EditAccount extends StatelessWidget {
               rowSpacing,
               labelRow(
                 context,
+                'Type',
+                LibraDropdownFormField<AccountType>(
+                  initial: state.focused?.type,
+                  items: AccountType.values,
+                  builder: (it) =>
+                      Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
+                  borderRadius: BorderRadius.circular(8),
+                  height: 35,
+                  onSave: (it) => state.saveSink.type = it!,
+                ),
+                tooltip: "This is used mostly for organizing similar accounts together."
+                    "\nLiability accounts should only have negative values though.",
+              ),
+              rowSpacing,
+              labelRow(
+                context,
                 'Description',
                 LibraTextFormField(
                   initial: state.focused?.description,
                   validator: (it) => null,
                   onSave: (it) => state.saveSink.description = it ?? '',
                 ),
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'CSV Format',
+                LibraTextFormField(
+                  initial: state.focused?.csvFormat,
+                  validator: (it) => null,
+                  onSave: (it) => state.saveSink.csvFormat = it ?? '',
+                ),
+                tooltip: "TODO write this tooltip", // TODO
               ),
               rowSpacing,
               labelRow(
@@ -153,10 +181,12 @@ class _EditAccount extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
         FormButtons(
           allowDelete: state.focused != null,
           onCancel: state.clearFocus,
+          onReset: state.reset,
+          onSave: state.save,
         ),
       ],
     );
