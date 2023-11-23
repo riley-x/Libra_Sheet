@@ -1,45 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/tabs/settings/category_card.dart';
 import 'package:provider/provider.dart';
-
-/// Card for a category that allows editing the color, name, and level
-class CategoryCard extends StatelessWidget {
-  const CategoryCard(this.cat, {super.key, this.isLast = false});
-
-  final Category cat;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.only(top: 12, bottom: 12, left: (cat.level == 1) ? 10 : 40),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  cat.name,
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-              Container(
-                width: 30,
-                height: 20,
-                color: cat.color,
-              ),
-              const SizedBox(width: 50),
-            ],
-          ),
-        ),
-        if (isLast) const Divider(height: 1, thickness: 1),
-        if (!isLast) const SizedBox(height: 1),
-      ],
-    );
-  }
-}
 
 /// Settings screen for editing categories
 class EditCategoriesScreen extends StatelessWidget {
@@ -84,14 +47,19 @@ class _CategorySection extends StatelessWidget {
         ),
         if (categories.isNotEmpty)
           SizedBox(
-            height: 45.0 * categories.length,
+            height: 45.0 * categories.countFlattened(),
             child: ReorderableListView(
+              buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
               onReorder: (o, n) => appState.reorderCategories(isExpense, o, n),
               children: <Widget>[
                 for (int i = 0; i < categories.length; i++)
-                  CategoryCard(categories[i],
-                      key: ObjectKey(categories[i]), isLast: i != categories.length - 1),
+                  CategoryCard(
+                    cat: categories[i],
+                    index: i,
+                    key: ObjectKey(categories[i]),
+                    isLast: i == categories.length - 1,
+                  ),
               ],
             ),
           ),

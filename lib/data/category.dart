@@ -136,3 +136,13 @@ class CategoryTristateMap {
 //   CategoryWithTransactions.fromCategory(other, {required this.transactions})
 //       : super(key: other.key, color: other.color, name: other.name);
 // }
+
+extension CategoryList on List<Category> {
+  int countFlattened() {
+    int out = length;
+    forEach((it) {
+      out += it.subCats?.length ?? 0;
+    });
+    return out;
+  }
+}
