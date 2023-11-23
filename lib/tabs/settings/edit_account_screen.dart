@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -73,6 +74,28 @@ class EditAccountScreen extends StatelessWidget {
   }
 }
 
+void showColorPicker({
+  required BuildContext context,
+  Color? initialColor,
+  required Function(Color) onColorChanged,
+  Function()? onClose,
+}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Pick a color"),
+        content: SingleChildScrollView(
+          child: HueRingPicker(
+            pickerColor: initialColor ?? Theme.of(context).colorScheme.primary,
+            onColorChanged: onColorChanged,
+          ),
+        ),
+      );
+    },
+  ).then((value) => onClose?.call());
+}
+
 class _EditAccount extends StatelessWidget {
   const _EditAccount({super.key});
 
@@ -111,6 +134,22 @@ class _EditAccount extends StatelessWidget {
                 ),
               ),
               rowSpacing,
+              labelRow(
+                context,
+                'Color',
+                Container(
+                  height: 30,
+                  color: state.saveSink.color,
+                  child: InkWell(
+                    onTap: () => showColorPicker(
+                      context: context,
+                      initialColor: state.saveSink.color,
+                      onColorChanged: (it) => state.saveSink.color = it,
+                      onClose: state.notifyListeners,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

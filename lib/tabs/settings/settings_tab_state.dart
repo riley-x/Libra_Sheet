@@ -10,11 +10,14 @@ class EditAccountState extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isFocused = false;
   Account? focused;
+
+  /// We use the color in the class as the state of the color box though!
   MutableAccount saveSink = MutableAccount();
 
   void setFocus(Account? it) {
     focused = it;
     isFocused = true;
+    saveSink.color = it?.color ?? Colors.lightBlue;
     notifyListeners();
   }
 
