@@ -33,14 +33,20 @@ class BaseCategoryCard extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 44,
+          height: 45,
           child: Row(
             children: [
               const SizedBox(width: 10),
               if (isSubCat)
                 SizedBox(
                   width: subCatIndicatorWidth,
-                  child: Placeholder(),
+                  child: CustomPaint(
+                    painter: SubcategoryIndicator(
+                      color: Colors.blue,
+                      isLast: isLast,
+                    ),
+                    size: Size.infinite,
+                  ),
                 ),
               Container(
                 width: 30,
@@ -72,10 +78,10 @@ class BaseCategoryCard extends StatelessWidget {
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(left: (isShortDivider) ? subCatOffset : 0),
-          child: (hasDivider) ? const Divider(height: 1, thickness: 1) : const SizedBox(height: 1),
-        ),
+        // Padding(
+        //   padding: EdgeInsets.only(left: (isShortDivider) ? subCatOffset : 0),
+        //   child: (hasDivider) ? const Divider(height: 1, thickness: 1) : const SizedBox(height: 1),
+        // ),
         if (child != null) child!,
       ],
     );
@@ -132,5 +138,48 @@ class _CategoryCardState extends State<CategoryCard> {
             )
           : null,
     );
+  }
+}
+
+class SubcategoryIndicator extends CustomPainter {
+  final Color color;
+  final bool isLast;
+
+  const SubcategoryIndicator({
+    required this.color,
+    this.isLast = false,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint brush = Paint()
+      ..color = color
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round;
+
+    if (!isLast) {
+      canvas.drawLine(
+        Offset(size.width / 2, 0),
+        Offset(size.width / 2, size.height),
+        brush,
+      );
+      canvas.drawLine(
+        Offset(size.width / 2, size.height / 2),
+        Offset(size.width, size.height / 2),
+        brush,
+      );
+    } else {
+      final path = Path()
+        ..moveTo(size.width / 2, 0)
+        ..lineTo(size.width / 2, size.height / 2)
+        ..lineTo(size.width, size.height / 2);
+      canvas.drawPath(path, brush);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant SubcategoryIndicator oldDelegate) {
+    return color != oldDelegate.color || isLast != oldDelegate.isLast;
   }
 }

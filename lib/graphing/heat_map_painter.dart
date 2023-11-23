@@ -13,42 +13,6 @@ List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
   return out;
 }
 
-/// Represents a single group in the heatmap algorithm below.
-class _Group {
-  final int start;
-  final int end;
-  final bool isXAxis;
-  Offset topLeft;
-  Offset topLeftChild;
-
-  _Group(
-    this.start,
-    this.end,
-    this.isXAxis,
-    this.topLeft,
-    this.topLeftChild,
-  );
-
-  int n() => end - start;
-
-  /// Width of the entire group + child
-  double width(Size size) {
-    return size.width - topLeft.dx;
-  }
-
-  /// Height of the entire group + child
-  double height(Size size) {
-    return size.height - topLeft.dy;
-  }
-}
-
-class _MSize {
-  double width;
-  double height;
-
-  _MSize(this.width, this.height);
-}
-
 /// Returns a list of [Rect] positions for a heatmap. Each entry in [data] is given a rectangular
 /// region proportional to its value from [valueMapper].
 ///
