@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/tabs/settings/edit_account_screen.dart';
+import 'package:libra_sheet/tabs/settings/edit_accounts_screen.dart';
+import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
+import 'package:libra_sheet/tabs/settings/settings_screen_header.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
 import 'package:provider/provider.dart';
 
 import 'settings_card.dart';
 
-enum _CurrentTab { none, accounts, categories, tags, rules, transactions, database }
+enum _CurrentTab {
+  none(''),
+  accounts('Accounts'),
+  categories('Categories'),
+  tags('Tags'),
+  rules('Rules'),
+  transactions('Transactions'),
+  database('Database');
+
+  const _CurrentTab(this.title);
+
+  final String title;
+}
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -31,6 +45,13 @@ class _SettingsTabState extends State<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
+    Widget mainScreen = _SettingsTab(onSelect: onSelect);
+    Widget auxContent = switch (tab) {
+      _CurrentTab.accounts => const EditAccountsScreen(),
+      _CurrentTab.categories => const EditCategoriesScreen(),
+      _ => const Placeholder(),
+    };
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<EditAccountState>(create: (context) => EditAccountState()),
@@ -38,16 +59,12 @@ class _SettingsTabState extends State<SettingsTab> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           bool isFullScreen = constraints.maxWidth < 850;
-          Widget mainScreen = _SettingsTab(
-            onSelect: onSelect,
+          Widget auxScreen = SettingsScreenHeader(
+            title: tab.title,
+            isFullScreen: isFullScreen,
+            onBack: onBack,
+            child: auxContent,
           );
-          Widget auxScreen = switch (tab) {
-            _CurrentTab.accounts => EditAccountScreen(
-                isFullScreen: isFullScreen,
-                onBack: onBack,
-              ),
-            _ => const Placeholder(),
-          };
 
           if (isFullScreen) {
             if (tab == _CurrentTab.none) {
