@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -13,6 +14,17 @@ enum DetailScreen {
 }
 
 class LibraAppState extends ChangeNotifier {
+  LibraAppState() {
+    _init();
+  }
+
+  void _init() async {
+    /// Setup database
+    await initDatabase();
+
+    // TODO
+  }
+
   final List<TimeValue> chartData = [
     TimeValue.monthStart(2019, 1, 35),
     TimeValue.monthStart(2019, 2, 28),
@@ -26,7 +38,7 @@ class LibraAppState extends ChangeNotifier {
     TimeValue.monthStart(2019, 10, 40.10)
   ];
 
-  final List<Account> accounts = testAccounts;
+  final List<Account> accounts = [];
   final List<Tag> tags = testTags;
 
   final List<Category> incomeCategories = [];

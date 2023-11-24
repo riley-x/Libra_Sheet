@@ -55,7 +55,7 @@ class EditAccountState extends ChangeNotifier {
     // TODO
   }
 
-  void save() {
+  void save() async {
     formKey.currentState?.save();
     if (focused == null) {
       saveSink.listIndex = appState.accounts.length;
@@ -64,16 +64,15 @@ class EditAccountState extends ChangeNotifier {
     debugPrint("EditAccountState::save() $acc");
 
     if (focused == null) {
-      appState.accounts.add(acc);
+      int key = await insertAccount(acc);
+      appState.accounts.add(acc.copyWith(key: key));
       appState.notifyListeners();
-      insertAccount(acc);
     } else {
       for (int i = 0; i < appState.accounts.length; i++) {
         if (appState.accounts[i] == focused) {
           appState.accounts[i] = acc;
           appState.notifyListeners();
-          // TODO updateAccount(acc)
-          // Remember that the key of any new accounts will be 0!!!!
+          updateAccount(acc);
           break;
         }
       }

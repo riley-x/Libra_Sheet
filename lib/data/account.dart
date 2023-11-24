@@ -17,6 +17,17 @@ enum AccountType {
 }
 
 class Account {
+  final AccountType type;
+  final String name;
+  final int balance;
+  final int listIndex;
+  final String description;
+  final DateTime? lastUpdated;
+  final Color? color;
+
+  final int key;
+  final String csvFormat;
+
   const Account({
     this.type = AccountType.bank,
     this.name = '',
@@ -29,16 +40,28 @@ class Account {
     this.csvFormat = '',
   });
 
-  final AccountType type;
-  final String name;
-  final int balance;
-  final int listIndex;
-  final String description;
-  final DateTime? lastUpdated;
-  final Color? color;
-
-  final int key;
-  final String csvFormat;
+  Account copyWith(
+      {AccountType? type,
+      String? name,
+      int? balance,
+      String? description,
+      DateTime? lastUpdated,
+      Color? color,
+      int? key,
+      int? listIndex,
+      String? csvFormat}) {
+    return Account(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      balance: balance ?? this.balance,
+      description: description ?? this.description,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      color: color ?? this.color,
+      key: key ?? this.key,
+      listIndex: listIndex ?? this.listIndex,
+      csvFormat: csvFormat ?? this.csvFormat,
+    );
+  }
 
   @override
   String toString() {
@@ -55,6 +78,8 @@ class Account {
       'listIndex': listIndex,
       'balance': balance,
     };
+
+    /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
     if (key != 0) {
       out['key'] = key;
     }
@@ -62,7 +87,7 @@ class Account {
   }
 }
 
-class MutableAccount implements Account {
+class MutableAccount {
   MutableAccount({
     this.type = AccountType.bank,
     this.name = '',
@@ -86,23 +111,14 @@ class MutableAccount implements Account {
         listIndex = other.listIndex,
         csvFormat = other.csvFormat;
 
-  @override
   AccountType type;
-  @override
   String name;
-  @override
   int balance;
-  @override
   String description;
-  @override
   DateTime? lastUpdated;
-  @override
   Color? color;
-  @override
   int key;
-  @override
   int listIndex;
-  @override
   String csvFormat;
 
   @override
@@ -122,10 +138,5 @@ class MutableAccount implements Account {
       listIndex: listIndex,
       csvFormat: csvFormat,
     );
-  }
-
-  @override
-  Map<String, dynamic> toMap() {
-    return freeze().toMap();
   }
 }

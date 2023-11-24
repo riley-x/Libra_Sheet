@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -6,10 +8,20 @@ import 'package:sqflite/sqlite_api.dart';
 
 const accountsTable = '`accounts`';
 
-Future<void> insertAccount(Account acc) async {
-  await database?.insert(
+FutureOr<int> insertAccount(Account acc) async {
+  if (database == null) return 0;
+  return database!.insert(
     accountsTable,
     acc.toMap(),
     conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
+
+Future<void> updateAccount(Account acc) async {
+  await database?.update(
+    accountsTable,
+    acc.toMap(),
+    where: '`key` = ?',
+    whereArgs: [acc.key],
   );
 }

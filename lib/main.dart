@@ -25,19 +25,21 @@ Future<void> main() async {
     initializeTestData();
   }
 
-  /// Setup database
-  final database = initDatabase();
+  /// Top level state
+  final state = LibraAppState();
 
-  runApp(const LibraApp());
+  runApp(LibraApp(state));
 }
 
 class LibraApp extends StatelessWidget {
-  const LibraApp({super.key});
+  final LibraAppState state;
+
+  const LibraApp(this.state, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => LibraAppState(),
+    return ChangeNotifierProvider.value(
+      value: state,
       child: MaterialApp(
         title: 'Libra Sheet',
         theme: ThemeData(
