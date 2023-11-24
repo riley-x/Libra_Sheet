@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/transaction.dart' as transaction;
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/category/category_tab.dart';
 import 'package:libra_sheet/tabs/home/account_screen.dart';
@@ -16,13 +17,17 @@ import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:libra_sheet/theme/text_theme.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
   /// Disable debugPrint() in release mode
   if (kReleaseMode) {
     debugPrint = (String? message, {int? wrapWidth}) {};
   } else {
     initializeTestData();
   }
+
+  /// Setup database
+  final database = initDatabase();
+
   runApp(const LibraApp());
 }
 
@@ -63,7 +68,7 @@ class LibraHomePage extends StatelessWidget {
         case DetailScreen.account:
           page = AccountScreen(account: focusPage.$2 as Account);
         case DetailScreen.transaction:
-          page = TransactionDetailsScreen(focusPage.$2 as Transaction?);
+          page = TransactionDetailsScreen(focusPage.$2 as transaction.Transaction?);
       }
     } else {
       switch (LibraNavDestination.values[currentTab]) {
