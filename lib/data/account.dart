@@ -20,7 +20,6 @@ class Account {
   final AccountType type;
   final String name;
   final int balance;
-  final int listIndex;
   final String description;
   final DateTime? lastUpdated;
   final Color? color;
@@ -36,7 +35,6 @@ class Account {
     this.lastUpdated,
     this.color,
     this.key = 0,
-    this.listIndex = -1,
     this.csvFormat = '',
   });
 
@@ -58,7 +56,6 @@ class Account {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       color: color ?? this.color,
       key: key ?? this.key,
-      listIndex: listIndex ?? this.listIndex,
       csvFormat: csvFormat ?? this.csvFormat,
     );
   }
@@ -68,20 +65,22 @@ class Account {
     return "Account($key: $name $type $color)";
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({int? listIndex}) {
     final out = {
       'name': name,
       'description': description,
       'type': type.label,
       'csvPattern': csvFormat,
       'colorLong': color?.value ?? 0,
-      'listIndex': listIndex,
       'balance': balance,
     };
 
     /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
     if (key != 0) {
       out['key'] = key;
+    }
+    if (listIndex != null) {
+      out['listIndex'] = listIndex;
     }
     return out;
   }
@@ -96,7 +95,6 @@ class MutableAccount {
     this.lastUpdated,
     this.color,
     this.key = 0,
-    this.listIndex = -1,
     this.csvFormat = '',
   });
 
@@ -108,7 +106,6 @@ class MutableAccount {
         lastUpdated = other.lastUpdated,
         color = other.color,
         key = other.key,
-        listIndex = other.listIndex,
         csvFormat = other.csvFormat;
 
   AccountType type;
@@ -118,7 +115,6 @@ class MutableAccount {
   DateTime? lastUpdated;
   Color? color;
   int key;
-  int listIndex;
   String csvFormat;
 
   @override
@@ -135,7 +131,6 @@ class MutableAccount {
       lastUpdated: lastUpdated,
       color: color,
       key: key,
-      listIndex: listIndex,
       csvFormat: csvFormat,
     );
   }

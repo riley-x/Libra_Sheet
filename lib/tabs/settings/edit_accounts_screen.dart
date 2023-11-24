@@ -4,11 +4,83 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
-import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
+
+/// State for the accounts submenu in the settings tab
+class EditAccountState extends ChangeNotifier {
+  final LibraAppState appState;
+
+  EditAccountState(this.appState);
+
+  /// Accounts Screen
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isFocused = false;
+  Account? focused;
+
+  /// We use the color in the class as the state of the color box though!
+  MutableAccount saveSink = MutableAccount();
+
+  void _init() {
+    if (focused == null) {
+      saveSink = MutableAccount(
+        color: Colors.blue,
+      );
+    } else {
+      saveSink = MutableAccount.copy(focused!);
+    }
+  }
+
+  void reset() {
+    formKey.currentState?.reset();
+    _init();
+    notifyListeners();
+  }
+
+  void setFocus(Account? it) {
+    focused = it;
+    isFocused = true;
+    reset();
+    // it's important to call reset() here so the forms don't keep stale data from previous focuses.
+    // this is orthogonal to the Key(initial) used by the forms; if the initial state didn't change
+    // (i.e. both null when adding accounts back to back), only the reset above will clear the form.
+  }
+
+  void clearFocus() {
+    isFocused = false;
+    notifyListeners();
+  }
+
+  void delete() {
+    // TODO
+  }
+
+  void save() async {
+    formKey.currentState?.save();
+    final acc = saveSink.freeze();
+    debugPrint("EditAccountState::save() $acc");
+
+    if (focused == null) {
+      int key = await insertAccount(acc, listIndex: appState.accounts.length);
+      appState.accounts.add(acc.copyWith(key: key));
+      appState.notifyListeners();
+    } else {
+      for (int i = 0; i < appState.accounts.length; i++) {
+        if (appState.accounts[i] == focused) {
+          appState.accounts[i] = acc;
+          appState.notifyListeners();
+          updateAccount(acc);
+          break;
+        }
+      }
+    }
+
+    clearFocus();
+  }
+}
 
 /// Settings screen for editing accounts. This lists the accounts, and clicking them switches to an
 /// editor form.
@@ -51,6 +123,7 @@ class EditAccountsScreen extends StatelessWidget {
   }
 }
 
+/// Account details form
 class _EditAccount extends StatelessWidget {
   const _EditAccount({super.key});
 
@@ -112,7 +185,8 @@ class _EditAccount extends StatelessWidget {
                   validator: (it) => null,
                   onSave: (it) => state.saveSink.csvFormat = it ?? '',
                 ),
-                tooltip: "TODO write this tooltip", // TODO
+                tooltip: "Instructions on how to parse the CSV.\n"
+                    "You can leave this blank for new accounts.",
               ),
               rowSpacing,
               labelRow(
@@ -126,6 +200,7 @@ class _EditAccount extends StatelessWidget {
                       context: context,
                       initialColor: state.saveSink.color,
                       onColorChanged: (it) => state.saveSink.color = it,
+                      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
                       onClose: state.notifyListeners,
                     ),
                   ),

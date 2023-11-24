@@ -3,7 +3,6 @@ import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/edit_accounts_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_screen_header.dart';
-import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
 import 'package:provider/provider.dart';
 
 import 'settings_card.dart';
@@ -50,7 +49,7 @@ class _SettingsTabState extends State<SettingsTab> {
     Widget auxContent = switch (tab) {
       _CurrentTab.accounts => const EditAccountsScreen(),
       _CurrentTab.categories => const EditCategoriesScreen(),
-      _ => const Placeholder(),
+      _ => const SizedBox(),
     };
 
     return MultiProvider(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
+import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
 import 'package:provider/provider.dart';
 
 /// Base card that shows the color, name, and drag handle. This base card doesn't handle any
@@ -147,7 +148,9 @@ class _CategoryCardState extends State<CategoryCard> {
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
-              onReorder: (oldIndex, newIndex) => print('$oldIndex $newIndex'),
+              onReorder: (oldIndex, newIndex) => context
+                  .read<LibraAppState>()
+                  .reorderSubCategories(widget.cat, oldIndex, newIndex),
               children: [
                 for (int i = 0; i < widget.cat.subCats!.length; i++)
                   BaseCategoryCard(
