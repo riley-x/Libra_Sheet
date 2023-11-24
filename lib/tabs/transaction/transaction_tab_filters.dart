@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
+import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
 
-/// Creates the column that holds all the option selectors for the category tab.
+/// Creates the column that holds all the option selectors for the transaction tab.
 class TransactionTabFilters extends StatelessWidget {
   /// Padding to be applied to the central column. Don't use padding outside the Scroll class, or
   /// else the scroll bar is oddly offset.
@@ -43,27 +46,31 @@ class TransactionTabFilters extends StatelessWidget {
                 onSelect: state.setExpenseFilter,
               ),
 
+              /// Date
               const SizedBox(height: 15),
               Text("Date", style: textStyle),
               const SizedBox(height: 5),
               const _DateFilter(),
 
+              /// Value
               const SizedBox(height: 15),
               Text("Value", style: textStyle),
               const SizedBox(height: 5),
               const _ValueRange(),
 
+              /// Account
               const SizedBox(height: 15),
               Text("Account", style: textStyle),
               const SizedBox(height: 5),
               const _AccountChips(),
 
+              /// Category
               const SizedBox(height: 15),
-
-              const SizedBox(height: 5),
               const _CategoryChips(),
 
-              // TODO add Tag filter
+              /// Tags
+              const SizedBox(height: 15),
+              const _TagSelector(),
               const SizedBox(height: 10),
             ],
           ),
@@ -187,6 +194,51 @@ class _DateFilter extends StatelessWidget {
           error: state.endTimeError,
           hint: 'MM/DD/YY',
           onChanged: state.setEndTime,
+        ),
+      ],
+    );
+  }
+}
+
+class _TagSelector extends StatelessWidget {
+  const _TagSelector({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionTabState>();
+    return Column(
+      children: [
+        Row(
+          children: [
+            const SizedBox(width: 48),
+            const Spacer(),
+            Text("Tags", style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            DropdownCheckboxMenu<Tag>(
+              icon: Icons.add,
+              items: context.watch<LibraAppState>().tags,
+              builder: (context, tag) => Text(
+                tag.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              isChecked: (it) => state.tags.contains(it),
+              onChanged: state.onTagChanged,
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final tag in state.tags)
+              LibraChip(
+                tag.name,
+                onTap: () => state.onTagChanged(tag, false),
+              ),
+          ],
         ),
       ],
     );

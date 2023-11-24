@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
@@ -20,6 +21,7 @@ class TransactionTabState extends ChangeNotifier {
   Set<ExpenseType> expenseFilterSelected = {};
   Set<int> accountFilterSelected = {};
   CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
+  final List<Tag> tags = [];
 
   List<Transaction> transactions = testTransactions;
   Transaction? focusedTransaction;
@@ -142,5 +144,14 @@ class TransactionTabState extends ChangeNotifier {
       endTimeError = val.$2;
       notifyListeners();
     }
+  }
+
+  void onTagChanged(Tag tag, bool? selected) {
+    if (selected == true) {
+      tags.add(tag);
+    } else {
+      tags.remove(tag);
+    }
+    notifyListeners();
   }
 }
