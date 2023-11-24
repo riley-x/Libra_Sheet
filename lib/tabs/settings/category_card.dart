@@ -8,11 +8,11 @@ class BaseCategoryCard extends StatelessWidget {
     super.key,
     required this.cat,
     required this.index,
-    this.isSubCat = false,
+    this.parentColor,
     this.isLast = false,
     this.isExpanded,
     this.onExpandedChanged,
-  });
+  }) : isSubCat = parentColor != null;
 
   static const double subCatIndicatorWidth = 30;
   static const double subCatOffset = 10 + subCatIndicatorWidth;
@@ -22,6 +22,7 @@ class BaseCategoryCard extends StatelessWidget {
   final int index;
   final bool isLast;
   final bool isSubCat;
+  final Color? parentColor;
   final bool? isExpanded; // null for no expansion
   final Function()? onExpandedChanged;
 
@@ -45,22 +46,36 @@ class BaseCategoryCard extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 10),
+
+              /// Indicator and color boxes
               if (isSubCat)
                 SizedBox(
                   width: subCatIndicatorWidth,
                   child: CustomPaint(
                     painter: SubcategoryIndicator(
-                      color: Colors.blue,
+                      color: parentColor ?? Colors.black,
                       isLast: isLast,
                     ),
                     size: Size.infinite,
                   ),
                 ),
-              Container(
-                width: 30,
-                height: 20,
-                color: cat.color,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: subCatIndicatorWidth,
+                    height: 20,
+                    color: cat.color,
+                  ),
+                  if (isExpanded == true)
+                    CustomPaint(
+                      painter: SubcategoryIndicatorParent(color: cat.color ?? Colors.black),
+                      size: const Size(subCatIndicatorWidth, height),
+                    ),
+                ],
               ),
+
+              /// Rest of row
               const SizedBox(width: 10),
               Text(
                 cat.name,
@@ -134,7 +149,7 @@ class _CategoryCardState extends State<CategoryCard> {
                     cat: widget.cat.subCats![i],
                     index: i,
                     isLast: i == widget.cat.subCats!.length - 1,
-                    isSubCat: true,
+                    parentColor: widget.cat.color,
                   ),
               ],
             ),
@@ -144,6 +159,7 @@ class _CategoryCardState extends State<CategoryCard> {
   }
 }
 
+/// The "connector" line between parent and child categories, for the subcategories
 class SubcategoryIndicator extends CustomPainter {
   final Color color;
   final bool isLast;
@@ -184,5 +200,32 @@ class SubcategoryIndicator extends CustomPainter {
   @override
   bool shouldRepaint(covariant SubcategoryIndicator oldDelegate) {
     return color != oldDelegate.color || isLast != oldDelegate.isLast;
+  }
+}
+
+/// The "connector" line between parent and child categories, for the parent
+class SubcategoryIndicatorParent extends CustomPainter {
+  final Color color;
+
+  const SubcategoryIndicatorParent({
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint brush = Paint()
+      ..color = color
+      ..strokeWidth = 3;
+
+    canvas.drawLine(
+      Offset(size.width / 2, size.height / 2),
+      Offset(size.width / 2, size.height),
+      brush,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant SubcategoryIndicatorParent oldDelegate) {
+    return color != oldDelegate.color;
   }
 }
