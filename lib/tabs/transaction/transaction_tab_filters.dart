@@ -7,7 +7,7 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';

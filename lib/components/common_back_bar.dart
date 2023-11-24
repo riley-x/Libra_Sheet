@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:provider/provider.dart';
 
 /// Simple top app bar with a back button and two texts.

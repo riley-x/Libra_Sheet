@@ -5,14 +5,16 @@ import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/database/categories.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/category_card.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
 /// State for the EditCategoriesScreen
 class EditCategoriesState extends ChangeNotifier {
-  /// Accounts Screen
+  final LibraAppState appState;
+  EditCategoriesState(this.appState);
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isFocused = false;
 
@@ -66,8 +68,11 @@ class EditCategoriesState extends ChangeNotifier {
       debugPrint("EditCategoriesState::save() $cat");
 
       // if (cat.key == 0) {
-      //   int key = await insertCategory(cat, listIndex: parent!.subCats?.length ?? 0);
-      //   appState.accounts.add(cat.copyWith(key: key));
+      //   /// new category
+      //   int key = await insertCategory(cat, listIndex: parent!.subCats.length);
+      //   appState.
+
+      //    .add(cat.copyWith(key: key));
       //   appState.notifyListeners();
       // } else {
       //   for (int i = 0; i < appState.accounts.length; i++) {

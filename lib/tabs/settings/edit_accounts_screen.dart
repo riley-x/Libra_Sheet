@@ -5,7 +5,7 @@ import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/database/accounts.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';

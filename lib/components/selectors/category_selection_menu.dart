@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:provider/provider.dart';
 
 /// Dropdown selector for choosing a single category
