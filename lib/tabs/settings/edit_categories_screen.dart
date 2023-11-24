@@ -47,7 +47,7 @@ class _CategorySection extends StatelessWidget {
         ),
         if (categories.isNotEmpty)
           SizedBox(
-            height: 45.0 * categories.countFlattened(),
+            height: BaseCategoryCard.height * categories.countFlattened(),
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
@@ -58,7 +58,6 @@ class _CategorySection extends StatelessWidget {
                     cat: categories[i],
                     index: i,
                     key: ObjectKey(categories[i]),
-                    isLast: i == categories.length - 1,
                   ),
               ],
             ),

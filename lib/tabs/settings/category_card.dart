@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/category.dart';
 
-/// Card for a category that shows the color, name, and drag handle. This is the base card that
-/// doesn't handle the children.
+/// Base card that shows the color, name, and drag handle. This base card doesn't handle any
+/// children.
 class BaseCategoryCard extends StatelessWidget {
   const BaseCategoryCard({
     super.key,
@@ -10,30 +10,38 @@ class BaseCategoryCard extends StatelessWidget {
     required this.index,
     this.isSubCat = false,
     this.isLast = false,
-    this.child,
     this.isExpanded,
     this.onExpandedChanged,
   });
 
   static const double subCatIndicatorWidth = 30;
   static const double subCatOffset = 10 + subCatIndicatorWidth;
+  static const double height = 45;
 
   final Category cat;
   final int index;
   final bool isLast;
   final bool isSubCat;
   final bool? isExpanded; // null for no expansion
-  final Widget? child;
   final Function()? onExpandedChanged;
 
   @override
   Widget build(BuildContext context) {
-    bool hasDivider = !isLast || child != null || isSubCat;
-    bool isShortDivider = child != null || (isSubCat && !isLast);
-    return Column(
+    return Stack(
       children: [
+        /// Divider
+        if (index != 0 || isSubCat)
+          Positioned(
+            left: (isSubCat) ? subCatOffset : 5,
+            right: 5,
+            top: 0,
+            height: 1,
+            child: const Divider(height: 1, thickness: 1),
+          ),
+
+        /// Main row
         SizedBox(
-          height: 45,
+          height: height,
           child: Row(
             children: [
               const SizedBox(width: 10),
@@ -78,11 +86,6 @@ class BaseCategoryCard extends StatelessWidget {
             ],
           ),
         ),
-        // Padding(
-        //   padding: EdgeInsets.only(left: (isShortDivider) ? subCatOffset : 0),
-        //   child: (hasDivider) ? const Divider(height: 1, thickness: 1) : const SizedBox(height: 1),
-        // ),
-        if (child != null) child!,
       ],
     );
   }
@@ -93,12 +96,10 @@ class CategoryCard extends StatefulWidget {
     super.key,
     required this.cat,
     required this.index,
-    this.isLast = false,
   });
 
   final Category cat;
   final int index;
-  final bool isLast;
 
   @override
   State<CategoryCard> createState() => _CategoryCardState();
@@ -109,34 +110,36 @@ class _CategoryCardState extends State<CategoryCard> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseCategoryCard(
-      cat: widget.cat,
-      index: widget.index,
-      isLast: widget.isLast,
-      isExpanded: (widget.cat.hasSubCats()) ? isExpanded : null,
-      onExpandedChanged: () => setState(() {
-        isExpanded = !isExpanded;
-      }),
-      child: (widget.cat.hasSubCats() && isExpanded)
-          ? SizedBox(
-              height: 45.0 * widget.cat.subCats!.length,
-              child: ReorderableListView(
-                buildDefaultDragHandles: false,
-                physics: const NeverScrollableScrollPhysics(),
-                onReorder: (oldIndex, newIndex) => print('$oldIndex $newIndex'),
-                children: [
-                  for (int i = 0; i < widget.cat.subCats!.length; i++)
-                    BaseCategoryCard(
-                      key: ObjectKey(widget.cat.subCats![i]),
-                      cat: widget.cat.subCats![i],
-                      index: i,
-                      isLast: i == widget.cat.subCats!.length - 1,
-                      isSubCat: true,
-                    ),
-                ],
-              ),
-            )
-          : null,
+    return Column(
+      children: [
+        BaseCategoryCard(
+          cat: widget.cat,
+          index: widget.index,
+          isExpanded: (widget.cat.hasSubCats()) ? isExpanded : null,
+          onExpandedChanged: () => setState(() {
+            isExpanded = !isExpanded;
+          }),
+        ),
+        if (widget.cat.hasSubCats() && isExpanded)
+          SizedBox(
+            height: BaseCategoryCard.height * widget.cat.subCats!.length,
+            child: ReorderableListView(
+              buildDefaultDragHandles: false,
+              physics: const NeverScrollableScrollPhysics(),
+              onReorder: (oldIndex, newIndex) => print('$oldIndex $newIndex'),
+              children: [
+                for (int i = 0; i < widget.cat.subCats!.length; i++)
+                  BaseCategoryCard(
+                    key: ObjectKey(widget.cat.subCats![i]),
+                    cat: widget.cat.subCats![i],
+                    index: i,
+                    isLast: i == widget.cat.subCats!.length - 1,
+                    isSubCat: true,
+                  ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
