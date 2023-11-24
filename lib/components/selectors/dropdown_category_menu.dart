@@ -69,7 +69,7 @@ class DropdownCategoryMenu extends StatelessWidget {
       items: categories,
       builder: dropdownCategoryBuilder,
       isChecked: map.get,
-      isTristate: (cat) => cat.hasSubCats(),
+      isTristate: (cat) => cat.subCats.isNotEmpty,
       onChanged: (cat, selected) {
         map.set(cat, selected);
         notify?.call();

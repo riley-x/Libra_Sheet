@@ -132,13 +132,14 @@ class LibraAppState extends ChangeNotifier {
   }
 
   void reorderSubCategories(Category parent, int oldIndex, int newIndex) {
-    if (!parent.hasSubCats()) return;
-    final list = parent.subCats!;
+    if (parent.subCats.isEmpty) return;
+    final list = List.from(parent.subCats);
     if (newIndex > oldIndex) {
       list.insert(newIndex - 1, list.removeAt(oldIndex));
     } else {
       list.insert(newIndex, list.removeAt(oldIndex));
     }
+    // TODO update parent with list
     notifyListeners();
   }
 }

@@ -5,7 +5,7 @@ class Category {
   final int key;
   final String name;
   final Color? color;
-  final List<Category>? subCats;
+  final List<Category> subCats;
   final Category? parent;
 
   /// Level of category
@@ -19,7 +19,7 @@ class Category {
       {this.key = 0,
       required this.name,
       this.color,
-      this.subCats,
+      this.subCats = const [],
       this.parent,
       required this.level});
 
@@ -29,7 +29,24 @@ class Category {
         color = other.color,
         level = other.level,
         parent = other.parent,
-        subCats = List.from(other.subCats ?? []);
+        subCats = List.from(other.subCats);
+
+  Category copyWith({
+    int? key,
+    String? name,
+    Color? color,
+    int? level,
+    Category? parent,
+    List<Category>? subCats,
+  }) {
+    return Category(
+        key: key ?? this.key,
+        name: name ?? this.name,
+        color: color ?? this.color,
+        level: level ?? this.level,
+        parent: parent ?? this.parent,
+        subCats: subCats ?? this.subCats);
+  }
 
   static const empty = Category(
     key: 0,
@@ -63,13 +80,26 @@ class Category {
     color: Colors.transparent,
   );
 
-  bool hasSubCats() {
-    return subCats != null && subCats!.isNotEmpty;
-  }
-
   @override
   String toString() {
     return "Category($key: $name)";
+  }
+
+  Map<String, dynamic> toMap({int? listIndex}) {
+    final out = {
+      'name': name,
+      'colorLong': color?.value ?? 0,
+      'parentKey': parent?.key,
+    };
+
+    /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
+    if (key != 0) {
+      out['key'] = key;
+    }
+    if (listIndex != null) {
+      out['listIndex'] = listIndex;
+    }
+    return out;
   }
 }
 
@@ -80,13 +110,13 @@ class CategoryValue extends Category {
     required super.level,
     super.parent,
     super.color,
-    this.subCats,
+    this.subCats = const [],
     required this.value,
   });
   final int value;
 
   @override
-  final List<CategoryValue>? subCats;
+  final List<CategoryValue> subCats;
 }
 
 class CategoryHistory {
@@ -112,12 +142,12 @@ class CategoryTristateMap {
   void set(Category cat, bool? selected) {
     if (selected == true) {
       _map[cat.key] = true;
-      for (final subCat in cat.subCats ?? []) {
+      for (final subCat in cat.subCats) {
         _map[subCat.key] = true;
       }
     } else if (selected == null) {
       _map[cat.key] = false;
-      for (final subCat in cat.subCats ?? []) {
+      for (final subCat in cat.subCats) {
         _map.remove(subCat.key);
       }
     } else {
@@ -156,7 +186,7 @@ extension CategoryList on List<Category> {
   int countFlattened() {
     int out = length;
     forEach((it) {
-      out += it.subCats?.length ?? 0;
+      out += it.subCats.length;
     });
     return out;
   }

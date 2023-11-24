@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/category_card.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
@@ -51,18 +52,33 @@ class EditCategoriesState extends ChangeNotifier {
     // TODO
   }
 
-  void save() {
+  void save() async {
     if (formKey.currentState?.validate() ?? false) {
+      if (parent == null) return;
+
       formKey.currentState?.save();
-      // TODO handle parents here
-      final cat = Category(
-        key: focused?.key ?? 0,
+      final cat = focused.copyWith(
         name: saveName,
-        level: 1,
         color: color,
+        level: parent!.level + 1,
+        parent: parent,
       );
-      print(cat);
-      // TODO
+      debugPrint("EditCategoriesState::save() $cat");
+
+      // if (cat.key == 0) {
+      //   int key = await insertCategory(cat, listIndex: parent!.subCats?.length ?? 0);
+      //   appState.accounts.add(cat.copyWith(key: key));
+      //   appState.notifyListeners();
+      // } else {
+      //   for (int i = 0; i < appState.accounts.length; i++) {
+      //     if (appState.accounts[i] == focused) {
+      //       appState.accounts[i] = acc;
+      //       appState.notifyListeners();
+      //       updateAccount(acc);
+      //       break;
+      //     }
+      //   }
+      // }
     }
   }
 }

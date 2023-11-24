@@ -17,7 +17,7 @@ class CategoryFilterChips extends StatelessWidget {
     this.onSelected,
   }) {
     for (final cat in categories) {
-      if (cat.hasSubCats()) {
+      if (cat.subCats.isNotEmpty) {
         parentCategories.add(cat);
       } else {
         soloCategories.add(cat);

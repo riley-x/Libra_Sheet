@@ -77,7 +77,7 @@ class _Body extends StatelessWidget {
                   child: TestGraph(),
                 ),
               ),
-              if (category.hasSubCats()) ...[
+              if (category.subCats.isNotEmpty) ...[
                 const SizedBox(height: 5),
                 Container(
                   height: 1,

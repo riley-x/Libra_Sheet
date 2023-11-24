@@ -137,12 +137,12 @@ class _CategoryCardState extends State<CategoryCard> {
         BaseCategoryCard(
           cat: widget.cat,
           index: widget.index,
-          isExpanded: (widget.cat.hasSubCats()) ? isExpanded : null,
+          isExpanded: (widget.cat.subCats.isNotEmpty) ? isExpanded : null,
           onExpandedChanged: () => setState(() {
             isExpanded = !isExpanded;
           }),
         ),
-        if (widget.cat.hasSubCats() && isExpanded)
+        if (widget.cat.subCats.isNotEmpty && isExpanded)
           SizedBox(
             height: BaseCategoryCard.height * widget.cat.subCats!.length,
             child: ReorderableListView(
