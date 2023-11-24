@@ -79,15 +79,16 @@ class TransactionDetailsEditor extends StatelessWidget {
               ),
               rowSpacing,
               labelRow(
-                context,
-                'Category',
-                CategorySelectionFormField(
-                  height: 35,
-                  initial: state.seed?.category,
-                  onSave: (it) => state.category = it,
-                  type: state.expenseType,
-                ),
-              ),
+                  context,
+                  'Category',
+                  CategorySelectionFormField(
+                    height: 35,
+                    initial: state.seed?.category,
+                    onSave: (it) => state.category = it,
+                    type: state.expenseType,
+                  ),
+                  tooltip: "Choose the 'Ignore' category to not count this\n"
+                      "transaction in your income or expenses."),
               rowSpacing,
               labelRow(
                 context,
