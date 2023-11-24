@@ -96,7 +96,7 @@ class _CategoryChips extends StatelessWidget {
     final state = context.watch<TransactionTabState>();
     var categories =
         context.select<LibraAppState, List<Category>>((it) => it.flattenedCategories());
-    categories = [ignoreCategory, incomeCategory, expenseCategory] + categories;
+    categories = [Category.ignore, Category.income, Category.expense] + categories;
     return Column(
       children: [
         Row(

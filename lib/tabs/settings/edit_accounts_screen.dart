@@ -90,7 +90,6 @@ class _EditAccount extends StatelessWidget {
                   items: AccountType.values,
                   builder: (it) =>
                       Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
-                  borderRadius: BorderRadius.circular(8),
                   height: 35,
                   onSave: (it) => state.saveSink.type = it!,
                 ),

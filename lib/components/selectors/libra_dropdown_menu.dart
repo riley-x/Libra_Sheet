@@ -54,7 +54,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
         child: DropdownButtonHideUnderline(
           child: DropdownButton<T?>(
             padding: const EdgeInsets.symmetric(horizontal: 9),
-            borderRadius: borderRadius ?? BorderRadius.circular(10),
+            borderRadius: borderRadius ?? BorderRadius.circular(4),
 
             /// this is the color of the button when it has keyboard focus
             focusColor: Theme.of(context).colorScheme.background,
@@ -94,7 +94,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
       builder: (state) {
         return Container(
           decoration: BoxDecoration(
-            borderRadius: borderRadius ?? BorderRadius.circular(10),
+            borderRadius: borderRadius ?? BorderRadius.circular(4),
             border: Border.all(
                 color: (state.hasError)
                     ? Theme.of(context).colorScheme.error

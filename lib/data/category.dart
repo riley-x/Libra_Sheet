@@ -6,6 +6,7 @@ class Category {
   final String name;
   final Color? color;
   final List<Category>? subCats;
+  final Category? parent;
 
   /// Level of category
   ///   0: fixed categories (income/expense/ignore)
@@ -14,14 +15,53 @@ class Category {
   ///   3+: not implemented
   final int level;
 
-  const Category({this.key = 0, required this.name, this.color, this.subCats, required this.level});
+  const Category(
+      {this.key = 0,
+      required this.name,
+      this.color,
+      this.subCats,
+      this.parent,
+      required this.level});
 
   Category.copy(Category other)
       : key = other.key,
         name = other.name,
         color = other.color,
         level = other.level,
-        subCats = other.subCats;
+        parent = other.parent,
+        subCats = List.from(other.subCats ?? []);
+
+  static const empty = Category(
+    key: 0,
+    level: 0,
+    name: '',
+    color: Colors.transparent,
+  );
+
+  // ignore: prefer_const_constructors
+  static final income = Category(
+    key: -1,
+    level: 0,
+    name: 'Income',
+    color: const Color(0xFF004940),
+    subCats: [],
+  );
+
+  // ignore: prefer_const_constructors
+  static final expense = Category(
+    key: -2,
+    level: 0,
+    name: 'Expense',
+    color: const Color(0xFF5C1604),
+    subCats: [],
+  );
+
+  static const ignore = Category(
+    key: -3,
+    level: 0,
+    name: 'Ignore',
+    color: Colors.transparent,
+  );
 
   bool hasSubCats() {
     return subCats != null && subCats!.isNotEmpty;
@@ -33,37 +73,12 @@ class Category {
   }
 }
 
-// ignore: prefer_const_constructors
-final incomeCategory = Category(
-  key: -1,
-  level: 0,
-  name: 'Income',
-  color: const Color(0xFF004940),
-  subCats: [],
-);
-
-// ignore: prefer_const_constructors
-final expenseCategory = Category(
-  key: -2,
-  level: 0,
-  name: 'Expense',
-  color: const Color(0xFF5C1604),
-  subCats: [],
-);
-
-// ignore: prefer_const_constructors
-final ignoreCategory = Category(
-  key: -3,
-  level: 0,
-  name: 'Ignore',
-  color: const Color(0x00000000),
-);
-
 class CategoryValue extends Category {
   const CategoryValue({
     super.key,
     required super.name,
     required super.level,
+    super.parent,
     super.color,
     this.subCats,
     required this.value,

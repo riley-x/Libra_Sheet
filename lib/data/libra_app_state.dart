@@ -55,6 +55,21 @@ class LibraAppState extends ChangeNotifier {
     return out;
   }
 
+  /// Gets a list of potential parent categories. Excludes [current] from the list.
+  List<Category> getParentCategories(Category? current) {
+    var out = [
+      Category.income,
+      Category.expense,
+    ];
+    for (final cat in incomeCategories) {
+      if (cat != current) out.add(cat);
+    }
+    for (final cat in expenseCategories) {
+      if (cat != current) out.add(cat);
+    }
+    return out;
+  }
+
   /// Current tab as an index into [LibraNavDestination.values].
   int currentTab = 0;
 

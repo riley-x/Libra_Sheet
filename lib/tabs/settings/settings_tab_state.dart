@@ -60,7 +60,7 @@ class EditCategoriesState extends ChangeNotifier {
   bool isFocused = false;
 
   /// Currently edited category. This also serves as the initial state for the FormFields.
-  Category? focused;
+  Category focused = Category.empty;
 
   /// Save sink for the FormFields
   String saveName = '';
@@ -70,11 +70,7 @@ class EditCategoriesState extends ChangeNotifier {
   Color color = Colors.deepPurple;
 
   void _init() {
-    if (focused == null) {
-      color = Colors.deepPurple;
-    } else {
-      color = focused?.color ?? Colors.deepPurple;
-    }
+    color = focused.color ?? Colors.deepPurple;
   }
 
   void reset() {
@@ -83,7 +79,7 @@ class EditCategoriesState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setFocus(Category? it) {
+  void setFocus(Category it) {
     focused = it;
     isFocused = true;
     _init();
@@ -100,15 +96,17 @@ class EditCategoriesState extends ChangeNotifier {
   }
 
   void save() {
-    formKey.currentState?.save();
-    // TODO handle parents here
-    final cat = Category(
-      key: focused?.key ?? 0,
-      name: saveName,
-      level: 1,
-      color: color,
-    );
-    print(cat);
-    // TODO
+    if (formKey.currentState?.validate() ?? false) {
+      formKey.currentState?.save();
+      // TODO handle parents here
+      final cat = Category(
+        key: focused?.key ?? 0,
+        name: saveName,
+        level: 1,
+        color: color,
+      );
+      print(cat);
+      // TODO
+    }
   }
 }

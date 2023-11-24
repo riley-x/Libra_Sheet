@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
@@ -45,6 +46,7 @@ class _CategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<LibraAppState>();
+    final state = context.watch<EditCategoriesState>();
     final categories = (isExpense) ? appState.expenseCategories : appState.incomeCategories;
 
     return Column(
@@ -57,7 +59,17 @@ class _CategorySection extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const Spacer(),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+            IconButton(
+              onPressed: () => state.setFocus(
+                Category(
+                  level: 1,
+                  name: '',
+                  color: Colors.lightBlue,
+                  parent: (isExpense) ? Category.expense : Category.income,
+                ),
+              ),
+              icon: const Icon(Icons.add),
+            ),
           ],
         ),
         if (categories.isNotEmpty)
@@ -87,6 +99,7 @@ class _EditCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<LibraAppState>();
     final state = context.watch<EditCategoriesState>();
     return Column(
       children: [
@@ -104,9 +117,19 @@ class _EditCategory extends StatelessWidget {
                 context,
                 'Name',
                 LibraTextFormField(
-                  initial: state.focused?.name,
+                  initial: state.focused.name,
                   validator: (it) => null,
                   onSave: (it) => state.saveName = it ?? '',
+                ),
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'Parent',
+                CategorySelectionFormField(
+                  initial: state.focused.parent,
+                  categories: appState.getParentCategories(state.focused),
+                  onSave: (it) => state.parent = it,
                 ),
               ),
               rowSpacing,
@@ -131,7 +154,7 @@ class _EditCategory extends StatelessWidget {
         ),
         const SizedBox(height: 15),
         FormButtons(
-          allowDelete: state.focused != null,
+          allowDelete: state.focused.key > 0,
           onCancel: state.clearFocus,
           onReset: state.reset,
           onSave: state.save,
