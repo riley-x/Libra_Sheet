@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/form_buttons.dart';
+import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/category_card.dart';
+import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
+import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
 /// Settings screen for editing categories
@@ -10,14 +15,24 @@ class EditCategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      child: Column(
-        children: [
-          _CategorySection(false),
-          SizedBox(height: 30),
-          _CategorySection(true),
-        ],
-      ),
+    final state = context.watch<EditCategoriesState>();
+    return IndexedStack(
+      index: (state.isFocused) ? 0 : 1,
+      children: [
+        _EditCategory(
+          /// this prevents the IndexedStack from reusing the form editor, which causes a flicker
+          key: ObjectKey(state.focused),
+        ),
+        const SingleChildScrollView(
+          child: Column(
+            children: [
+              _CategorySection(false),
+              SizedBox(height: 30),
+              _CategorySection(true),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -62,6 +77,65 @@ class _CategorySection extends StatelessWidget {
               ],
             ),
           ),
+      ],
+    );
+  }
+}
+
+class _EditCategory extends StatelessWidget {
+  const _EditCategory({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<EditCategoriesState>();
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Form(
+          key: state.formKey,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: FixedColumnWidth(250),
+            },
+            children: [
+              labelRow(
+                context,
+                'Name',
+                LibraTextFormField(
+                  initial: state.focused?.name,
+                  validator: (it) => null,
+                  onSave: (it) => state.saveName = it ?? '',
+                ),
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'Color',
+                Container(
+                  height: 30,
+                  color: state.color,
+                  child: InkWell(
+                    onTap: () => showColorPicker(
+                      context: context,
+                      initialColor: state.color,
+                      onColorChanged: (it) => state.color = it,
+                      onClose: state.notifyListeners,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 15),
+        FormButtons(
+          allowDelete: state.focused != null,
+          onCancel: state.clearFocus,
+          onReset: state.reset,
+          onSave: state.save,
+        ),
       ],
     );
   }

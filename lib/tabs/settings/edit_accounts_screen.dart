@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
+import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
@@ -51,28 +52,6 @@ class EditAccountsScreen extends StatelessWidget {
       ],
     );
   }
-}
-
-void showColorPicker({
-  required BuildContext context,
-  Color? initialColor,
-  required Function(Color) onColorChanged,
-  Function()? onClose,
-}) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text("Pick a color"),
-        content: SingleChildScrollView(
-          child: HueRingPicker(
-            pickerColor: initialColor ?? Theme.of(context).colorScheme.primary,
-            onColorChanged: onColorChanged,
-          ),
-        ),
-      );
-    },
-  ).then((value) => onClose?.call());
 }
 
 class _EditAccount extends StatelessWidget {

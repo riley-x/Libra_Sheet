@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
+import 'package:provider/provider.dart';
 
 /// Base card that shows the color, name, and drag handle. This base card doesn't handle any
 /// children.
@@ -43,62 +45,66 @@ class BaseCategoryCard extends StatelessWidget {
         /// Main row
         SizedBox(
           height: height,
-          child: Row(
-            children: [
-              const SizedBox(width: 10),
-
-              /// Indicator and color boxes
-              if (isSubCat)
-                SizedBox(
-                  width: subCatIndicatorWidth,
-                  child: CustomPaint(
-                    painter: SubcategoryIndicator(
-                      color: parentColor ?? Colors.black,
-                      isLast: isLast,
-                    ),
-                    size: Size.infinite,
-                  ),
-                ),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: subCatIndicatorWidth,
-                    height: 20,
-                    color: cat.color,
-                  ),
-                  if (isExpanded == true)
-                    CustomPaint(
-                      painter: SubcategoryIndicatorParent(color: cat.color ?? Colors.black),
-                      size: const Size(subCatIndicatorWidth, height),
-                    ),
-                ],
-              ),
-
-              /// Rest of row
-              const SizedBox(width: 10),
-              Text(
-                cat.name,
-                maxLines: 1,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              if (isExpanded != null) ...[
+          child: InkWell(
+            onTap: () => context.read<EditCategoriesState>().setFocus(cat),
+            splashFactory: NoSplash.splashFactory,
+            child: Row(
+              children: [
                 const SizedBox(width: 10),
-                IconButton(
-                  padding: const EdgeInsets.all(6),
-                  constraints: const BoxConstraints(),
-                  onPressed: onExpandedChanged,
-                  icon: Icon((isExpanded!) ? Icons.expand_less : Icons.expand_more),
+
+                /// Indicator and color boxes
+                if (isSubCat)
+                  SizedBox(
+                    width: subCatIndicatorWidth,
+                    child: CustomPaint(
+                      painter: SubcategoryIndicator(
+                        color: parentColor ?? Colors.black,
+                        isLast: isLast,
+                      ),
+                      size: Size.infinite,
+                    ),
+                  ),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: subCatIndicatorWidth,
+                      height: 20,
+                      color: cat.color,
+                    ),
+                    if (isExpanded == true)
+                      CustomPaint(
+                        painter: SubcategoryIndicatorParent(color: cat.color ?? Colors.black),
+                        size: const Size(subCatIndicatorWidth, height),
+                      ),
+                  ],
                 ),
+
+                /// Rest of row
+                const SizedBox(width: 10),
+                Text(
+                  cat.name,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                if (isExpanded != null) ...[
+                  const SizedBox(width: 10),
+                  IconButton(
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(),
+                    onPressed: onExpandedChanged,
+                    icon: Icon((isExpanded!) ? Icons.expand_less : Icons.expand_more),
+                  ),
+                ],
+                const Spacer(),
+                const SizedBox(width: 10),
+                ReorderableDragStartListener(
+                  index: index,
+                  child: const Icon(Icons.drag_handle),
+                ),
+                const SizedBox(width: 10),
               ],
-              const Spacer(),
-              const SizedBox(width: 10),
-              ReorderableDragStartListener(
-                index: index,
-                child: const Icon(Icons.drag_handle),
-              ),
-              const SizedBox(width: 10),
-            ],
+            ),
           ),
         ),
       ],

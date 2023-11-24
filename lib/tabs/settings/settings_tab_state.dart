@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/category.dart';
 
 /// State for the EditAccountsScreen
 class EditAccountState extends ChangeNotifier {
@@ -48,6 +49,66 @@ class EditAccountState extends ChangeNotifier {
     formKey.currentState?.save();
     final acc = saveSink.freeze();
     print(acc);
+    // TODO
+  }
+}
+
+/// State for the EditCategoriesScreen
+class EditCategoriesState extends ChangeNotifier {
+  /// Accounts Screen
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isFocused = false;
+
+  /// Currently edited category. This also serves as the initial state for the FormFields.
+  Category? focused;
+
+  /// Save sink for the FormFields
+  String saveName = '';
+  Category? parent;
+
+  /// Active UI state for the displayed box, and the saved value
+  Color color = Colors.deepPurple;
+
+  void _init() {
+    if (focused == null) {
+      color = Colors.deepPurple;
+    } else {
+      color = focused?.color ?? Colors.deepPurple;
+    }
+  }
+
+  void reset() {
+    formKey.currentState?.reset();
+    _init();
+    notifyListeners();
+  }
+
+  void setFocus(Category? it) {
+    focused = it;
+    isFocused = true;
+    _init();
+    notifyListeners();
+  }
+
+  void clearFocus() {
+    isFocused = false;
+    notifyListeners();
+  }
+
+  void delete() {
+    // TODO
+  }
+
+  void save() {
+    formKey.currentState?.save();
+    // TODO handle parents here
+    final cat = Category(
+      key: focused?.key ?? 0,
+      name: saveName,
+      level: 1,
+      color: color,
+    );
+    print(cat);
     // TODO
   }
 }

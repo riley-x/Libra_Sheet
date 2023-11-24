@@ -55,6 +55,7 @@ class _SettingsTabState extends State<SettingsTab> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<EditAccountState>(create: (context) => EditAccountState()),
+        ChangeNotifierProvider<EditCategoriesState>(create: (context) => EditCategoriesState()),
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
