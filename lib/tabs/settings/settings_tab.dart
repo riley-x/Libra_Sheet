@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/edit_accounts_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_screen_header.dart';
@@ -54,7 +55,8 @@ class _SettingsTabState extends State<SettingsTab> {
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<EditAccountState>(create: (context) => EditAccountState()),
+        ChangeNotifierProvider<EditAccountState>(
+            create: (context) => EditAccountState(context.read<LibraAppState>())),
         ChangeNotifierProvider<EditCategoriesState>(create: (context) => EditCategoriesState()),
       ],
       child: LayoutBuilder(

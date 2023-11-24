@@ -19,18 +19,20 @@ enum AccountType {
 class Account {
   const Account({
     this.type = AccountType.bank,
-    required this.name,
+    this.name = '',
     this.balance = 0,
     this.description = '',
     this.lastUpdated,
     this.color,
-    this.key = -1,
+    this.key = 0,
+    this.listIndex = -1,
     this.csvFormat = '',
   });
 
   final AccountType type;
   final String name;
   final int balance;
+  final int listIndex;
   final String description;
   final DateTime? lastUpdated;
   final Color? color;
@@ -42,6 +44,22 @@ class Account {
   String toString() {
     return "Account($key: $name $type $color)";
   }
+
+  Map<String, dynamic> toMap() {
+    final out = {
+      'name': name,
+      'description': description,
+      'type': type.label,
+      'csvPattern': csvFormat,
+      'colorLong': color?.value ?? 0,
+      'listIndex': listIndex,
+      'balance': balance,
+    };
+    if (key != 0) {
+      out['key'] = key;
+    }
+    return out;
+  }
 }
 
 class MutableAccount implements Account {
@@ -52,7 +70,8 @@ class MutableAccount implements Account {
     this.description = '',
     this.lastUpdated,
     this.color,
-    this.key = -1,
+    this.key = 0,
+    this.listIndex = -1,
     this.csvFormat = '',
   });
 
@@ -64,6 +83,7 @@ class MutableAccount implements Account {
         lastUpdated = other.lastUpdated,
         color = other.color,
         key = other.key,
+        listIndex = other.listIndex,
         csvFormat = other.csvFormat;
 
   @override
@@ -81,6 +101,8 @@ class MutableAccount implements Account {
   @override
   int key;
   @override
+  int listIndex;
+  @override
   String csvFormat;
 
   @override
@@ -90,14 +112,20 @@ class MutableAccount implements Account {
 
   Account freeze() {
     return Account(
-      key: key,
       type: type,
       name: name,
       balance: balance,
       description: description,
       lastUpdated: lastUpdated,
       color: color,
+      key: key,
+      listIndex: listIndex,
       csvFormat: csvFormat,
     );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return freeze().toMap();
   }
 }

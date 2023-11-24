@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
@@ -12,7 +10,8 @@ import 'package:libra_sheet/tabs/settings/settings_tab_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
-/// Settings screen for editing accounts
+/// Settings screen for editing accounts. This lists the accounts, and clicking them switches to an
+/// editor form.
 class EditAccountsScreen extends StatelessWidget {
   const EditAccountsScreen({super.key});
 
@@ -43,9 +42,7 @@ class EditAccountsScreen extends StatelessWidget {
           floatingActionButton: FloatingActionButton(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            onPressed: () {
-              state.setFocus(null);
-            },
+            onPressed: () => state.setFocus(null),
             child: const Icon(Icons.add),
           ),
         ),

@@ -4,9 +4,15 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/database/accounts.dart';
+import 'package:libra_sheet/data/libra_app_state.dart';
 
 /// State for the EditAccountsScreen
 class EditAccountState extends ChangeNotifier {
+  final LibraAppState appState;
+
+  EditAccountState(this.appState);
+
   /// Accounts Screen
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isFocused = false;
@@ -17,7 +23,9 @@ class EditAccountState extends ChangeNotifier {
 
   void _init() {
     if (focused == null) {
-      saveSink = MutableAccount();
+      saveSink = MutableAccount(
+        color: Colors.blue,
+      );
     } else {
       saveSink = MutableAccount.copy(focused!);
     }
@@ -32,8 +40,10 @@ class EditAccountState extends ChangeNotifier {
   void setFocus(Account? it) {
     focused = it;
     isFocused = true;
-    _init();
-    notifyListeners();
+    reset();
+    // it's important to call reset() here so the forms don't keep stale data from previous focuses.
+    // this is orthogonal to the Key(initial) used by the forms; if the initial state didn't change
+    // (i.e. both null when adding accounts back to back), only the reset above will clear the form.
   }
 
   void clearFocus() {
@@ -47,9 +57,29 @@ class EditAccountState extends ChangeNotifier {
 
   void save() {
     formKey.currentState?.save();
+    if (focused == null) {
+      saveSink.listIndex = appState.accounts.length;
+    }
     final acc = saveSink.freeze();
-    print(acc);
-    // TODO
+    debugPrint("EditAccountState::save() $acc");
+
+    if (focused == null) {
+      appState.accounts.add(acc);
+      appState.notifyListeners();
+      insertAccount(acc);
+    } else {
+      for (int i = 0; i < appState.accounts.length; i++) {
+        if (appState.accounts[i] == focused) {
+          appState.accounts[i] = acc;
+          appState.notifyListeners();
+          // TODO updateAccount(acc)
+          // Remember that the key of any new accounts will be 0!!!!
+          break;
+        }
+      }
+    }
+
+    clearFocus();
   }
 }
 

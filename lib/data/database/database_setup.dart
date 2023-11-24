@@ -4,7 +4,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-Future<Database> initDatabase() async {
+Database? database;
+
+FutureOr<void> initDatabase() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
@@ -15,13 +17,11 @@ Future<Database> initDatabase() async {
   final path = join(await getDatabasesPath(), 'libra_sheet.db');
   debugPrint('initDatabase() path=$path');
 
-  final database = openDatabase(
+  database = await openDatabase(
     path,
     onCreate: _createDatabse,
     version: 14,
   );
-
-  return database;
 }
 
 FutureOr<void> _createDatabse(Database db, int version) {
@@ -35,6 +35,8 @@ FutureOr<void> _createDatabse14(Database db) async {
   await db.execute("CREATE TABLE IF NOT EXISTS `accounts` ("
       "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
       "`name` TEXT NOT NULL, "
+      "`description` TEXT NOT NULL, "
+      "`type` TEXT NOT NULL, "
       "`csvPattern` TEXT NOT NULL DEFAULT '', "
       "`screenReaderAlias` TEXT NOT NULL DEFAULT '', "
       "`colorLong` INTEGER NOT NULL, "
