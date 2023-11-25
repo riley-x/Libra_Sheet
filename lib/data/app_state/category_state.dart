@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/category.dart';
@@ -14,6 +16,16 @@ class CategoryState {
   CategoryState(this.appState);
 
   //----------------------------------------------------------------------------
+  // Loading
+  //----------------------------------------------------------------------------
+  Future<void> load() async {
+    await libraDatabase?.transaction((txn) async {
+      await loadChildCategories(txn, Category.income);
+      await loadChildCategories(txn, Category.expense);
+    });
+  }
+
+  //----------------------------------------------------------------------------
   // Editing and updating categories
   //----------------------------------------------------------------------------
   void add(Category cat) async {
@@ -27,7 +39,7 @@ class CategoryState {
   void delete(Category cat) async {
     debugPrint("CategoryState::delete() $cat");
     final parentList = cat.parent!.subCats;
-    final ind = parentList.indexOf(cat);
+    final ind = parentList.indexWhere((it) => it.key == cat.key);
     parentList.removeAt(ind);
     appState.notifyListeners();
 
@@ -42,7 +54,7 @@ class CategoryState {
     } else {
       debugPrint("CategoryState::update() $cat");
       final parentList = cat.parent!.subCats;
-      final ind = parentList.indexOf(cat);
+      final ind = parentList.indexWhere((it) => it.key == cat.key);
       parentList[ind] = cat;
       appState.notifyListeners();
       updateCategory(cat);

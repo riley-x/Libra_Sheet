@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
@@ -25,6 +27,11 @@ class LibraAppState extends ChangeNotifier {
     /// Setup database
     await initDatabase();
 
+    var futures = <Future>[];
+    futures.add(categories.load());
+    await Future.wait(futures);
+
+    notifyListeners();
     // TODO
   }
 

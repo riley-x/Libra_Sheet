@@ -17,9 +17,11 @@ class BaseCategoryCard extends StatelessWidget {
     this.onExpandedChanged,
   }) : isSubCat = parentColor != null;
 
+  static const double height = 45;
+  static const double colorBoxWidth = 6;
+  static const double colorBoxHeight = height - 10;
   static const double subCatIndicatorWidth = 30;
   static const double subCatOffset = 10 + subCatIndicatorWidth;
-  static const double height = 45;
 
   final Category cat;
   final int index;
@@ -55,28 +57,25 @@ class BaseCategoryCard extends StatelessWidget {
 
                 /// Indicator and color boxes
                 if (isSubCat)
-                  SizedBox(
-                    width: subCatIndicatorWidth,
-                    child: CustomPaint(
-                      painter: SubcategoryIndicator(
-                        color: parentColor ?? Colors.black,
-                        isLast: isLast,
-                      ),
-                      size: Size.infinite,
+                  CustomPaint(
+                    painter: SubcategoryIndicator(
+                      color: parentColor ?? Colors.black,
+                      isLast: isLast,
                     ),
+                    size: const Size(subCatIndicatorWidth, height),
                   ),
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      width: subCatIndicatorWidth,
-                      height: 20,
+                      width: colorBoxWidth,
+                      height: colorBoxHeight,
                       color: cat.color,
                     ),
                     if (isExpanded == true)
                       CustomPaint(
                         painter: SubcategoryIndicatorParent(color: cat.color ?? Colors.black),
-                        size: const Size(subCatIndicatorWidth, height),
+                        size: const Size(colorBoxWidth, height),
                       ),
                   ],
                 ),
@@ -194,7 +193,7 @@ class SubcategoryIndicator extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint brush = Paint()
       ..color = color
-      ..strokeWidth = 3
+      ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round;
 
@@ -236,7 +235,7 @@ class SubcategoryIndicatorParent extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint brush = Paint()
       ..color = color
-      ..strokeWidth = 3;
+      ..strokeWidth = 2;
 
     canvas.drawLine(
       Offset(size.width / 2, size.height / 2),
