@@ -64,7 +64,11 @@ class EditCategoriesState extends ChangeNotifier {
         level: parent!.level + 1,
         parent: parent,
       );
-      appState.categories.save(cat);
+      if (focused.key == 0) {
+        appState.categories.add(cat);
+      } else {
+        appState.categories.update(focused, cat);
+      }
       clearFocus();
     }
   }

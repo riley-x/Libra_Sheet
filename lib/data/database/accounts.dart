@@ -7,8 +7,8 @@ import 'package:sqflite/sqlite_api.dart';
 const accountsTable = '`accounts`';
 
 FutureOr<int> insertAccount(Account acc, {int? listIndex}) async {
-  if (database == null) return 0;
-  return database!.insert(
+  if (libraDatabase == null) return 0;
+  return libraDatabase!.insert(
     accountsTable,
     acc.toMap(listIndex: listIndex),
     conflictAlgorithm: ConflictAlgorithm.replace,
@@ -16,7 +16,7 @@ FutureOr<int> insertAccount(Account acc, {int? listIndex}) async {
 }
 
 Future<void> updateAccount(Account acc, {int? listIndex}) async {
-  await database?.update(
+  await libraDatabase?.update(
     accountsTable,
     acc.toMap(listIndex: listIndex),
     where: '`key` = ?',

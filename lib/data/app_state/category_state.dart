@@ -16,26 +16,44 @@ class CategoryState {
   //----------------------------------------------------------------------------
   // Editing and updating categories
   //----------------------------------------------------------------------------
-  void save(Category cat) async {
-    debugPrint("CategoryState::save() $cat");
-    assert(cat.parent != null);
-    if (cat.key == 0) {
-      /// new category
-      int key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
-      cat = cat.copyWith(key: key);
-      cat.parent!.subCats.add(cat);
+  void add(Category cat) async {
+    debugPrint("CategoryState::add() $cat");
+    int key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
+    cat = cat.copyWith(key: key);
+    cat.parent!.subCats.add(cat);
+    appState.notifyListeners();
+  }
+
+  void delete(Category cat) {
+    debugPrint("CategoryState::delete() $cat");
+    final parentList = cat.parent!.subCats;
+    final ind = parentList.indexOf(cat);
+    parentList.removeAt(ind);
+    appState.notifyListeners();
+
+    /// We don't delete from the database because no real need, and also used by [update].
+    shiftListIndicies(cat.parent!.key, ind + 1, -1);
+  }
+
+  void update(Category old, Category cat) {
+    if (old.parent != cat.parent) {
+      delete(old);
+      add(cat);
+    } else {
+      debugPrint("CategoryState::update() $cat");
+      final parentList = cat.parent!.subCats;
+      final ind = parentList.indexOf(cat);
+      parentList[ind] = cat;
       appState.notifyListeners();
+      updateCategory(cat);
+    }
+  }
+
+  void save(Category cat) {
+    if (cat.key == 0) {
+      add(cat);
     } else {
       /// update old category
-      final parentList = cat.parent!.subCats;
-      for (int i = 0; i < parentList.length; i++) {
-        if (parentList[i].key == cat.key) {
-          parentList[i] = cat;
-          appState.notifyListeners();
-          updateCategory(cat);
-          break;
-        }
-      }
     }
   }
 

@@ -114,7 +114,7 @@ class Category {
 
   @override
   String toString() {
-    return "Category($key: $name)";
+    return "Category($key: $name parent=${parent?.name})";
   }
 
   Map<String, dynamic> toMap({int? listIndex}) {

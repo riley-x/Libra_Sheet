@@ -5,7 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-Database? database;
+Database? libraDatabase;
 
 FutureOr<void> initDatabase() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,7 @@ FutureOr<void> initDatabase() async {
   final path = join(await getDatabasesPath(), 'libra_sheet.db');
   debugPrint('initDatabase() path=$path');
 
-  database = await openDatabase(
+  libraDatabase = await openDatabase(
     path,
     onCreate: _createDatabse,
     version: 14,
