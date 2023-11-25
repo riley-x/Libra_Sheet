@@ -17,6 +17,8 @@ class CategoryState {
   //----------------------------------------------------------------------------
   // Editing and updating categories
   //----------------------------------------------------------------------------
+  void add(Category parent, Category cat) {}
+
   void reorder(bool isExpense, int oldIndex, int newIndex) {
     final list = (isExpense) ? expenseList : incomeList;
     if (newIndex > oldIndex) {
@@ -65,21 +67,20 @@ class CategoryState {
     return out;
   }
 
-  /// Gets a list of potential parent categories. Excludes [current] from the list. Also prepends
-  /// [null] to indicate no parent (i.e. income or expense).
+  /// Gets a list of potential parent categories. Excludes [current] from the list. Prepends
+  /// the corresponding super category to [current.type].
   List<Category> getPotentialParents(Category current) {
     List<Category> out = [];
-    switch (current.type) {
-      case ExpenseType.expense:
-        out.add(Category.expense);
-        for (final cat in expenseList) {
-          if (cat != current) out.add(cat);
-        }
-      case ExpenseType.income:
-        out.add(Category.income);
-        for (final cat in incomeList) {
-          if (cat != current) out.add(cat);
-        }
+    if (current.type case ExpenseType.expense) {
+      out.add(Category.expense);
+      for (final cat in expenseList) {
+        if (cat != current) out.add(cat);
+      }
+    } else if (current.type case ExpenseType.income) {
+      out.add(Category.income);
+      for (final cat in incomeList) {
+        if (cat != current) out.add(cat);
+      }
     }
     return out;
   }

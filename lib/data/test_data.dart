@@ -36,30 +36,7 @@ final List<Account> testAccounts = [
 final testCategories = [
   Category(key: 1, level: 1, name: 'cat 1', color: Colors.amber, parent: Category.expense),
   Category(key: 2, level: 1, name: 'cat 2', color: Colors.blue, parent: Category.expense),
-  Category(
-      key: 3,
-      level: 1,
-      name: 'cat 3',
-      color: Colors.green,
-      parent: Category.expense,
-      subCats: [
-        Category(key: 4, level: 2, name: 'subcat 1', color: Colors.grey, parent: Category.expense),
-        Category(
-            key: 5,
-            level: 2,
-            name: 'subcat 2',
-            color: Colors.greenAccent,
-            parent: Category.expense),
-        Category(
-            key: 6, level: 2, name: 'subcat 3', color: Colors.lightGreen, parent: Category.expense),
-        Category(
-            key: 7,
-            level: 2,
-            name: 'subcat 4',
-            color: Colors.lightGreenAccent,
-            parent: Category.expense),
-        Category(key: 8, level: 2, name: 'subcat 5', color: Colors.green, parent: Category.expense),
-      ]),
+  Category(key: 3, level: 1, name: 'cat 3', color: Colors.green, parent: Category.expense),
   Category(key: 9, level: 1, name: 'cat 4', color: Colors.red, parent: Category.expense),
   Category(key: 10, level: 1, name: 'cat 5', color: Colors.purple, parent: Category.expense),
 ];
@@ -122,4 +99,13 @@ final List<Reimbursement> testReimbursements = [
 
 void initializeTestData() {
   testTransactions[0].reimbursements!.add(testReimbursements[0]);
+
+  final parent = testCategories[2];
+  parent.subCats.addAll([
+    Category(key: 4, name: 'subcat 1', color: Colors.grey, parent: parent),
+    Category(key: 5, name: 'subcat 2', color: Colors.greenAccent, parent: parent),
+    Category(key: 6, name: 'subcat 3', color: Colors.lightGreen, parent: parent),
+    Category(key: 7, name: 'subcat 4', color: Colors.lightGreenAccent, parent: parent),
+    Category(key: 8, name: 'subcat 5', color: Colors.green, parent: parent),
+  ]);
 }

@@ -15,14 +15,14 @@ class Category {
   ///   1: top-level user categories
   ///   2: user subCategories
   ///   3+: not implemented
-  final int level;
+  late final int level;
 
   Category({
     this.key = 0,
     required this.name,
     this.color,
     this.parent,
-    required this.level,
+    int? level,
     ExpenseType? type,
     List<Category>? subCats,
   }) {
@@ -30,13 +30,16 @@ class Category {
       this.subCats.addAll(subCats);
     }
 
-    /// Type
+    /// Type and level from parent
     if (parent != null) {
       assert(type == null || type == parent!.type);
+      assert(level == null || level == parent!.level + 1);
       this.type = parent!.type;
+      this.level = parent!.level + 1;
     } else {
-      assert(type != null);
+      assert(type != null && level != null);
       this.type = type!;
+      this.level = level!;
     }
   }
 
