@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/test_data.dart';
 
 /// Helper module for handling the categories
 class CategoryState {
