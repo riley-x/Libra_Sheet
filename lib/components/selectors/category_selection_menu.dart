@@ -15,6 +15,7 @@ class CategorySelectionMenu extends StatelessWidget {
   final Function(Category?)? onChanged;
   final BorderRadius? borderRadius;
   final double height;
+  final bool superAsNone;
 
   const CategorySelectionMenu({
     super.key,
@@ -24,6 +25,7 @@ class CategorySelectionMenu extends StatelessWidget {
     this.borderRadius,
     this.height = 30,
     this.type = ExpenseFilterType.all,
+    this.superAsNone = false,
   });
 
   @override
@@ -36,7 +38,7 @@ class CategorySelectionMenu extends StatelessWidget {
     return LibraDropdownMenu<Category?>(
       selected: selected,
       items: cats!,
-      builder: (cat) => _builder(context, cat),
+      builder: (cat) => _builder(context, cat, superAsNone),
       onChanged: onChanged,
       borderRadius: borderRadius,
       height: height,
@@ -50,12 +52,12 @@ class CategorySelectionFormField extends StatelessWidget {
     super.key,
     this.categories,
     this.initial,
-    this.includeNone = false,
     this.borderRadius,
     this.height = 30,
     this.type = ExpenseFilterType.all,
     this.onSave,
     this.validator,
+    this.superAsNone = false,
   });
 
   /// The list of categories to show in the dropdown menu. You can alternatively choose all categories
@@ -63,11 +65,11 @@ class CategorySelectionFormField extends StatelessWidget {
   final List<Category?>? categories;
   final ExpenseFilterType type;
   final Category? initial;
-  final bool includeNone;
   final Function(Category?)? onSave;
   final String? Function(Category?)? validator;
   final BorderRadius? borderRadius;
   final double height;
+  final bool superAsNone;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +81,7 @@ class CategorySelectionFormField extends StatelessWidget {
     return LibraDropdownFormField<Category?>(
       initial: initial,
       items: cats,
-      builder: (cat) => _builder(context, cat),
+      builder: (cat) => _builder(context, cat, superAsNone),
       borderRadius: borderRadius,
       height: height,
       onSave: onSave,
@@ -101,9 +103,12 @@ List<Category?> _items(LibraAppState state, ExpenseFilterType type) {
   return items;
 }
 
-Widget _builder(BuildContext context, Category? cat) {
+Widget _builder(BuildContext context, Category? cat, bool superAsNone) {
+  if (superAsNone && cat?.level == 0) cat = null;
   return Text(
-    cat?.name ?? '',
-    style: Theme.of(context).textTheme.labelLarge,
+    cat?.name ?? 'None',
+    style: (cat == null)
+        ? Theme.of(context).textTheme.labelLarge?.copyWith(fontStyle: FontStyle.italic)
+        : Theme.of(context).textTheme.labelLarge,
   );
 }

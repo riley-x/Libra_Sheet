@@ -40,8 +40,10 @@ class EditCategoriesState extends ChangeNotifier {
   void setFocus(Category it) {
     focused = it;
     isFocused = true;
-    _init();
-    notifyListeners();
+    reset();
+    // it's important to call reset() here so the forms don't keep stale data from previous focuses.
+    // this is orthogonal to the Key(initial) used by the forms; if the initial state didn't change
+    // (i.e. both null when adding accounts back to back), only the reset above will clear the form.
   }
 
   void clearFocus() {
@@ -207,6 +209,7 @@ class _EditCategory extends StatelessWidget {
                   CategorySelectionFormField(
                     initial: state.focused.parent,
                     categories: appState.categories.getPotentialParents(state.focused),
+                    superAsNone: true,
                     onSave: (it) => state.parent = it,
                     validator: (it) {
                       if (it == null) {

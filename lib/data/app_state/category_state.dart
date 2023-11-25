@@ -11,8 +11,8 @@ class CategoryState {
   LibraAppState parent;
   CategoryState(this.parent);
 
-  List<Category> expenseList = [];
-  List<Category> incomeList = List.from(testCategories);
+  List<Category> expenseList = List.from(testCategories);
+  List<Category> incomeList = [];
 
   //----------------------------------------------------------------------------
   // Editing and updating categories
@@ -67,14 +67,19 @@ class CategoryState {
 
   /// Gets a list of potential parent categories. Excludes [current] from the list. Also prepends
   /// [null] to indicate no parent (i.e. income or expense).
-  List<Category?> getPotentialParents(Category current) {
-    var out = <Category?>[null];
-    final list = switch (current.type) {
-      ExpenseType.expense => expenseList,
-      ExpenseType.income => incomeList,
-    };
-    for (final cat in list) {
-      if (cat != current) out.add(cat);
+  List<Category> getPotentialParents(Category current) {
+    List<Category> out = [];
+    switch (current.type) {
+      case ExpenseType.expense:
+        out.add(Category.expense);
+        for (final cat in expenseList) {
+          if (cat != current) out.add(cat);
+        }
+      case ExpenseType.income:
+        out.add(Category.income);
+        for (final cat in incomeList) {
+          if (cat != current) out.add(cat);
+        }
     }
     return out;
   }
