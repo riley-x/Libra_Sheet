@@ -15,9 +15,14 @@ FutureOr<int> insertCategory(Category cat, {int? listIndex}) async {
   );
 }
 
-FutureOr<int> updateCategory(Category cat, {int? listIndex}) async {
-  if (libraDatabase == null) return 0;
-  return libraDatabase!.update(
+FutureOr<int> updateCategory(
+  Category cat, {
+  int? listIndex,
+  DatabaseExecutor? db,
+}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.update(
     categoryTable,
     cat.toMap(listIndex: listIndex),
     where: '`key` = ?',
@@ -25,12 +30,19 @@ FutureOr<int> updateCategory(Category cat, {int? listIndex}) async {
   );
 }
 
-FutureOr<int> shiftListIndicies(int parentKey, int start, int delta) async {
-  if (libraDatabase == null) return 0;
-  return libraDatabase!.rawUpdate(
+FutureOr<int> shiftListIndicies(
+  int parentKey,
+  int start,
+  int end,
+  int delta, {
+  DatabaseExecutor? db,
+}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.rawUpdate(
     "UPDATE $categoryTable "
     "SET listIndex = listIndex + ? "
-    "WHERE parentKey = ? AND listIndex > ?",
-    [delta, parentKey, start],
+    "WHERE parentKey = ? AND listIndex >= ? AND listIndex < ?",
+    [delta, parentKey, start, end],
   );
 }

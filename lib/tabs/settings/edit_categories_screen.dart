@@ -150,7 +150,7 @@ class _CategorySection extends StatelessWidget {
                   CategoryCard(
                     cat: categories[i],
                     index: i,
-                    key: ObjectKey(categories[i]),
+                    key: Key('${categories[i].key} ${categories[i].subCats.length}'),
                   ),
               ],
             ),
@@ -203,7 +203,7 @@ class _EditCategory extends StatelessWidget {
                         return ''; // empty string produces error with no size box change
                       } else if (it.level == 1 && state.focused.subCats.isNotEmpty) {
                         // TODO this error message doesn't show
-                        return 'A category with sub-categories must have its parent be either "Income" or "Expense"';
+                        return 'A category with sub-categories must have its parent be "None"';
                       } else {
                         return null;
                       }

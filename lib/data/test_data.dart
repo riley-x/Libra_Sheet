@@ -100,6 +100,8 @@ final List<Reimbursement> testReimbursements = [
 void initializeTestData() {
   testTransactions[0].reimbursements!.add(testReimbursements[0]);
 
+  // Category.expense.subCats.addAll(testCategories);
+
   final parent = testCategories[2];
   parent.subCats.addAll([
     Category(key: 4, name: 'subcat 1', color: Colors.grey, parent: parent),

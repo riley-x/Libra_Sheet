@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/database/categories.dart';
+import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/test_data.dart';
 
@@ -24,7 +27,7 @@ class CategoryState {
     appState.notifyListeners();
   }
 
-  void delete(Category cat) {
+  void delete(Category cat) async {
     debugPrint("CategoryState::delete() $cat");
     final parentList = cat.parent!.subCats;
     final ind = parentList.indexOf(cat);
@@ -32,10 +35,10 @@ class CategoryState {
     appState.notifyListeners();
 
     /// We don't delete from the database because no real need, and also used by [update].
-    shiftListIndicies(cat.parent!.key, ind + 1, -1);
+    await shiftListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1);
   }
 
-  void update(Category old, Category cat) {
+  void update(Category old, Category cat) async {
     if (old.parent != cat.parent) {
       delete(old);
       add(cat);
@@ -49,21 +52,24 @@ class CategoryState {
     }
   }
 
-  void save(Category cat) {
-    if (cat.key == 0) {
-      add(cat);
-    } else {
-      /// update old category
-    }
-  }
-
-  void reorder(Category parent, int oldIndex, int newIndex) {
+  void reorder(Category parent, int oldIndex, int newIndex) async {
+    final cat = parent.subCats.removeAt(oldIndex);
     if (newIndex > oldIndex) {
-      parent.subCats.insert(newIndex - 1, parent.subCats.removeAt(oldIndex));
+      parent.subCats.insert(newIndex - 1, cat);
     } else {
-      parent.subCats.insert(newIndex, parent.subCats.removeAt(oldIndex));
+      parent.subCats.insert(newIndex, cat);
     }
     appState.notifyListeners();
+
+    await libraDatabase?.transaction((txn) async {
+      if (newIndex > oldIndex) {
+        await shiftListIndicies(parent.key, oldIndex, newIndex, -1, db: txn);
+        await updateCategory(cat, listIndex: newIndex - 1, db: txn);
+      } else {
+        await shiftListIndicies(parent.key, newIndex, oldIndex, 1, db: txn);
+        await updateCategory(cat, listIndex: newIndex, db: txn);
+      }
+    });
   }
 
   //----------------------------------------------------------------------------
