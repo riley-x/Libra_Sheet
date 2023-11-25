@@ -20,7 +20,7 @@ class BaseCategoryCard extends StatelessWidget {
   static const double height = 45;
   static const double colorBoxWidth = 6;
   static const double colorBoxHeight = height - 10;
-  static const double subCatIndicatorWidth = 30;
+  static const double subCatIndicatorWidth = 20;
   static const double subCatOffset = 10 + subCatIndicatorWidth;
 
   final Category cat;
@@ -184,6 +184,9 @@ class SubcategoryIndicator extends CustomPainter {
   final Color color;
   final bool isLast;
 
+  static const double width = 2;
+  static const int alpha = 200;
+
   const SubcategoryIndicator({
     required this.color,
     this.isLast = false,
@@ -192,26 +195,26 @@ class SubcategoryIndicator extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Paint brush = Paint()
-      ..color = color
-      ..strokeWidth = 2
+      ..color = color.withAlpha(alpha)
+      ..strokeWidth = width
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round;
 
     if (!isLast) {
       canvas.drawLine(
-        Offset(size.width / 2, 0),
-        Offset(size.width / 2, size.height),
+        const Offset(BaseCategoryCard.colorBoxWidth / 2, 0),
+        Offset(BaseCategoryCard.colorBoxWidth / 2, size.height),
         brush,
       );
       canvas.drawLine(
-        Offset(size.width / 2, size.height / 2),
+        Offset(BaseCategoryCard.colorBoxWidth / 2, size.height / 2),
         Offset(size.width, size.height / 2),
         brush,
       );
     } else {
       final path = Path()
-        ..moveTo(size.width / 2, 0)
-        ..lineTo(size.width / 2, size.height / 2)
+        ..moveTo(BaseCategoryCard.colorBoxWidth / 2, 0)
+        ..lineTo(BaseCategoryCard.colorBoxWidth / 2, size.height / 2)
         ..lineTo(size.width, size.height / 2);
       canvas.drawPath(path, brush);
     }
@@ -234,8 +237,8 @@ class SubcategoryIndicatorParent extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Paint brush = Paint()
-      ..color = color
-      ..strokeWidth = 2;
+      ..color = color.withAlpha(SubcategoryIndicator.alpha)
+      ..strokeWidth = SubcategoryIndicator.width;
 
     canvas.drawLine(
       Offset(size.width / 2, size.height / 2),
