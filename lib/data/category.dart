@@ -5,7 +5,7 @@ class Category {
   final int key;
   final String name;
   final Color? color;
-  final List<Category> subCats;
+  final List<Category> subCats = [];
   final Category? parent;
 
   /// Level of category
@@ -15,21 +15,27 @@ class Category {
   ///   3+: not implemented
   final int level;
 
-  const Category(
-      {this.key = 0,
-      required this.name,
-      this.color,
-      this.subCats = const [],
-      this.parent,
-      required this.level});
+  Category({
+    this.key = 0,
+    required this.name,
+    this.color,
+    this.parent,
+    required this.level,
+    List<Category>? subCats,
+  }) {
+    if (subCats != null) {
+      this.subCats.addAll(subCats);
+    }
+  }
 
   Category.copy(Category other)
       : key = other.key,
         name = other.name,
         color = other.color,
         level = other.level,
-        parent = other.parent,
-        subCats = List.from(other.subCats);
+        parent = other.parent {
+    subCats.addAll(other.subCats);
+  }
 
   Category copyWith({
     int? key,
@@ -48,14 +54,13 @@ class Category {
         subCats: subCats ?? this.subCats);
   }
 
-  static const empty = Category(
+  static final empty = Category(
     key: 0,
     level: 0,
     name: '',
     color: Colors.transparent,
   );
 
-  // ignore: prefer_const_constructors
   static final income = Category(
     key: -1,
     level: 0,
@@ -64,7 +69,6 @@ class Category {
     subCats: [],
   );
 
-  // ignore: prefer_const_constructors
   static final expense = Category(
     key: -2,
     level: 0,
@@ -73,7 +77,7 @@ class Category {
     subCats: [],
   );
 
-  static const ignore = Category(
+  static final ignore = Category(
     key: -3,
     level: 0,
     name: 'Ignore',
@@ -101,22 +105,6 @@ class Category {
     }
     return out;
   }
-}
-
-class CategoryValue extends Category {
-  const CategoryValue({
-    super.key,
-    required super.name,
-    required super.level,
-    super.parent,
-    super.color,
-    this.subCats = const [],
-    required this.value,
-  });
-  final int value;
-
-  @override
-  final List<CategoryValue> subCats;
 }
 
 class CategoryHistory {

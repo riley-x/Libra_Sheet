@@ -214,7 +214,7 @@ class HeatMapPainter<T> extends CustomPainter {
     }
 
     /// Sort largest to smallest.
-    this.data = List.from(data);
+    this.data = data.where((it) => valueMapper(it) != 0).toList();
     if (!dataAlreadySorted) {
       this.data.sort((a, b) {
         final diff = valueMapper(b) - valueMapper(a);

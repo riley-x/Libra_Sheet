@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
-import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/graphing/line.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:provider/provider.dart';
 
 class CategoryFocusScreen extends StatelessWidget {
@@ -15,9 +15,9 @@ class CategoryFocusScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryOrNull = context.watch<CategoryTabState>().categoriesFocused.lastOrNull;
-    if (categoryOrNull == null) return Placeholder();
-    final category = categoryOrNull!;
+    final state = context.watch<CategoryTabState>();
+    final category = state.categoriesFocused.lastOrNull;
+    if (category == null) return const Placeholder();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,7 +25,7 @@ class CategoryFocusScreen extends StatelessWidget {
         const SizedBox(height: 5),
         CommonBackBar(
           leftText: category.name,
-          rightText: category.value.dollarString(),
+          rightText: state.values[category.key]?.dollarString() ?? '',
           onBack: () {
             context.read<CategoryTabState>().clearFocus();
           },
@@ -42,7 +42,7 @@ class _Body extends StatelessWidget {
     required this.category,
   });
 
-  final CategoryValue category;
+  final Category category;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,8 @@ class _Body extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CategoryHeatMap(
-                      category.subCats!,
+                      categories: category.subCats,
+                      values: context.watch<CategoryTabState>().values,
                       onSelect: (it) {
                         context.read<CategoryTabState>().focusCategory(it);
                       },

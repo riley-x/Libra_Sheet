@@ -86,7 +86,7 @@ class CategorySelectionFormField extends StatelessWidget {
 }
 
 List<Category?> _items(LibraAppState state, ExpenseFilterType type) {
-  List<Category?> items = state.flattenedCategories(type);
+  List<Category?> items = state.categories.flattenedCategories(type);
   switch (type) {
     case ExpenseFilterType.income:
       items = <Category?>[Category.ignore, Category.income] + items;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/enums.dart';
@@ -14,7 +15,11 @@ enum DetailScreen {
 }
 
 class LibraAppState extends ChangeNotifier {
+  late final CategoryState categories;
+
   LibraAppState() {
+    categories = CategoryState(this);
+
     _init();
   }
 
@@ -40,47 +45,6 @@ class LibraAppState extends ChangeNotifier {
 
   final List<Account> accounts = [];
   final List<Tag> tags = testTags;
-
-  final List<Category> incomeCategories = [];
-  final List<Category> expenseCategories = List.from(testCategoryValues);
-
-  List<Category> flattenedCategories([ExpenseFilterType type = ExpenseFilterType.all]) {
-    List<Category> nested;
-    switch (type) {
-      case ExpenseFilterType.all:
-        nested = incomeCategories + expenseCategories;
-      case ExpenseFilterType.income:
-        nested = incomeCategories;
-      case ExpenseFilterType.expense:
-        nested = expenseCategories;
-    }
-
-    final out = <Category>[];
-    for (final cat in nested) {
-      out.add(cat);
-      if (cat.subCats != null) {
-        for (final subCat in cat.subCats!) {
-          out.add(subCat);
-        }
-      }
-    }
-    return out;
-  }
-
-  /// Gets a list of potential parent categories. Excludes [current] from the list.
-  List<Category> getParentCategories(Category? current) {
-    var out = [
-      Category.income,
-      Category.expense,
-    ];
-    for (final cat in incomeCategories) {
-      if (cat != current) out.add(cat);
-    }
-    for (final cat in expenseCategories) {
-      if (cat != current) out.add(cat);
-    }
-    return out;
-  }
 
   /// Current tab as an index into [LibraNavDestination.values].
   int currentTab = 0;
@@ -118,28 +82,6 @@ class LibraAppState extends ChangeNotifier {
   }
 
   void increment() {
-    notifyListeners();
-  }
-
-  void reorderCategories(bool isExpense, int oldIndex, int newIndex) {
-    final list = (isExpense) ? expenseCategories : incomeCategories;
-    if (newIndex > oldIndex) {
-      list.insert(newIndex - 1, list.removeAt(oldIndex));
-    } else {
-      list.insert(newIndex, list.removeAt(oldIndex));
-    }
-    notifyListeners();
-  }
-
-  void reorderSubCategories(Category parent, int oldIndex, int newIndex) {
-    if (parent.subCats.isEmpty) return;
-    final list = List.from(parent.subCats);
-    if (newIndex > oldIndex) {
-      list.insert(newIndex - 1, list.removeAt(oldIndex));
-    } else {
-      list.insert(newIndex, list.removeAt(oldIndex));
-    }
-    // TODO update parent with list
     notifyListeners();
   }
 }

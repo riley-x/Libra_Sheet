@@ -126,7 +126,8 @@ class _CategorySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = context.watch<LibraAppState>();
     final state = context.watch<EditCategoriesState>();
-    final categories = (isExpense) ? appState.expenseCategories : appState.incomeCategories;
+    final categories =
+        (isExpense) ? appState.categories.expenseList : appState.categories.incomeList;
 
     return Column(
       children: [
@@ -157,7 +158,7 @@ class _CategorySection extends StatelessWidget {
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
-              onReorder: (o, n) => appState.reorderCategories(isExpense, o, n),
+              onReorder: (o, n) => appState.categories.reorder(isExpense, o, n),
               children: <Widget>[
                 for (int i = 0; i < categories.length; i++)
                   CategoryCard(
@@ -208,7 +209,7 @@ class _EditCategory extends StatelessWidget {
                 'Parent',
                 CategorySelectionFormField(
                   initial: state.focused.parent,
-                  categories: appState.getParentCategories(state.focused),
+                  categories: appState.categories.getPotentialParents(state.focused),
                   onSave: (it) => state.parent = it,
                 ),
               ),

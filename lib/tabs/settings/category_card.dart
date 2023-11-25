@@ -150,7 +150,8 @@ class _CategoryCardState extends State<CategoryCard> {
               physics: const NeverScrollableScrollPhysics(),
               onReorder: (oldIndex, newIndex) => context
                   .read<LibraAppState>()
-                  .reorderSubCategories(widget.cat, oldIndex, newIndex),
+                  .categories
+                  .reorderSub(widget.cat, oldIndex, newIndex),
               children: [
                 for (int i = 0; i < widget.cat.subCats!.length; i++)
                   BaseCategoryCard(

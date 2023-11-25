@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 enum CategoryTabTimeFrame { current, oneYear, all }
 
 class CategoryTabState extends ChangeNotifier {
   /// The list contains the nesting of category focuses, since you can focus a subcategory from a parent.
-  List<CategoryValue> categoriesFocused = [];
+  List<Category> categoriesFocused = [];
   List<Transaction> categoryFocusedTransactions = [];
+
+  /// A map category.key: int_value for the currently displayed values
+  Map<int, int> values = testCategoryValues;
 
   CategoryTabTimeFrame timeFrame = CategoryTabTimeFrame.all;
   ExpenseType expenseType = ExpenseType.expense;
@@ -28,7 +32,7 @@ class CategoryTabState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void focusCategory(CategoryValue category) {
+  void focusCategory(Category category) {
     categoriesFocused.add(category);
     // TODO load transactions and history
     notifyListeners();

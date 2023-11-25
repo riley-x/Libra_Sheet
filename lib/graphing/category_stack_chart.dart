@@ -42,7 +42,7 @@ class CategoryStackChart extends StatelessWidget {
 
 final chartData1 = [
   CategoryHistory(
-    testCategoryValues[0],
+    testCategories[0],
     [
       TimeValue(time: DateTime(2010), value: 100),
       TimeValue(time: DateTime(2011), value: 200),
@@ -50,7 +50,7 @@ final chartData1 = [
     ],
   ),
   CategoryHistory(
-    testCategoryValues[1],
+    testCategories[1],
     [
       TimeValue(time: DateTime(2010), value: 500),
       TimeValue(time: DateTime(2011), value: 200),
@@ -58,7 +58,7 @@ final chartData1 = [
     ],
   ),
   CategoryHistory(
-    testCategoryValues[2],
+    testCategories[2],
     [
       TimeValue(time: DateTime(2010), value: 400),
       TimeValue(time: DateTime(2011), value: 200),

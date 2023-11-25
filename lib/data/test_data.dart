@@ -33,20 +33,32 @@ final List<Account> testAccounts = [
   ),
 ];
 
-const testCategoryValues = [
-  CategoryValue(key: 1, level: 1, name: 'cat 1', color: Colors.amber, value: 357000),
-  CategoryValue(key: 2, level: 1, name: 'cat 2', color: Colors.blue, value: 23000),
-  CategoryValue(key: 3, level: 1, name: 'cat 3', color: Colors.green, value: 1000000, subCats: [
-    CategoryValue(key: 4, level: 2, name: 'subcat 1', color: Colors.grey, value: 200000),
-    CategoryValue(key: 5, level: 2, name: 'subcat 2', color: Colors.greenAccent, value: 200000),
-    CategoryValue(key: 6, level: 2, name: 'subcat 3', color: Colors.lightGreen, value: 200000),
-    CategoryValue(
-        key: 7, level: 2, name: 'subcat 4', color: Colors.lightGreenAccent, value: 200000),
-    CategoryValue(key: 8, level: 2, name: 'subcat 5', color: Colors.green, value: 200000),
+final testCategories = [
+  Category(key: 1, level: 1, name: 'cat 1', color: Colors.amber),
+  Category(key: 2, level: 1, name: 'cat 2', color: Colors.blue),
+  Category(key: 3, level: 1, name: 'cat 3', color: Colors.green, subCats: [
+    Category(key: 4, level: 2, name: 'subcat 1', color: Colors.grey),
+    Category(key: 5, level: 2, name: 'subcat 2', color: Colors.greenAccent),
+    Category(key: 6, level: 2, name: 'subcat 3', color: Colors.lightGreen),
+    Category(key: 7, level: 2, name: 'subcat 4', color: Colors.lightGreenAccent),
+    Category(key: 8, level: 2, name: 'subcat 5', color: Colors.green),
   ]),
-  CategoryValue(key: 9, level: 1, name: 'cat 4', color: Colors.red, value: 223000),
-  CategoryValue(key: 10, level: 1, name: 'cat 5', color: Colors.purple, value: 43000),
+  Category(key: 9, level: 1, name: 'cat 4', color: Colors.red),
+  Category(key: 10, level: 1, name: 'cat 5', color: Colors.purple),
 ];
+
+const testCategoryValues = {
+  1: 357000,
+  2: 23000,
+  3: 1000000,
+  4: 200000,
+  5: 200000,
+  6: 200000,
+  7: 200000,
+  8: 200000,
+  9: 223000,
+  10: 43000
+};
 
 const testTags = [
   Tag(key: 0, name: 'Tag 1', color: Colors.amber),
@@ -55,9 +67,9 @@ const testTags = [
 ];
 
 final testAllocations = [
-  Allocation(key: 0, name: 'Alloc 1', category: testCategoryValues[0], value: 100000),
-  Allocation(key: 1, name: 'Alloc 2', category: testCategoryValues[1], value: 100000),
-  Allocation(key: 2, name: 'Alloc 3', category: testCategoryValues[2].subCats![0], value: 100000),
+  Allocation(key: 0, name: 'Alloc 1', category: testCategories[0], value: 100000),
+  Allocation(key: 1, name: 'Alloc 2', category: testCategories[1], value: 100000),
+  Allocation(key: 2, name: 'Alloc 3', category: testCategories[2].subCats[0], value: 100000),
 ];
 
 final List<Transaction> testTransactions = [

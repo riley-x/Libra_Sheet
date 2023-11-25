@@ -68,7 +68,8 @@ class _HeatMap extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<CategoryTabState>();
     return CategoryHeatMap(
-      testCategoryValues,
+      categories: testCategories,
+      values: testCategoryValues,
       onSelect: (it) {
         context.read<CategoryTabState>().focusCategory(it);
       },
