@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
-import 'package:libra_sheet/data/enums.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const categoryTable = '`categories`';

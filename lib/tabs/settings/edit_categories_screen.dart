@@ -150,7 +150,7 @@ class _CategorySection extends StatelessWidget {
                   CategoryCard(
                     cat: categories[i],
                     index: i,
-                    key: Key('${categories[i].key} ${categories[i].subCats.length}'),
+                    key: ObjectKey(categories[i]),
                   ),
               ],
             ),

@@ -47,7 +47,7 @@ class CategoryState {
     await shiftListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1);
   }
 
-  void update(Category old, Category cat) async {
+  Future<void> update(Category old, Category cat) async {
     if (old.parent != cat.parent) {
       delete(old);
       add(cat);

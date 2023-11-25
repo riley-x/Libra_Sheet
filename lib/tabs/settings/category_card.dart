@@ -20,8 +20,8 @@ class BaseCategoryCard extends StatelessWidget {
   static const double height = 45;
   static const double colorBoxWidth = 6;
   static const double colorBoxHeight = height - 10;
-  static const double subCatIndicatorWidth = 20;
-  static const double subCatOffset = 10 + subCatIndicatorWidth;
+  static const double subCatIndicatorWidth = 16;
+  static const double subCatDividerOffset = 20 + colorBoxWidth; // this aligns with start of text
 
   final Category cat;
   final int index;
@@ -38,7 +38,7 @@ class BaseCategoryCard extends StatelessWidget {
         /// Divider
         if (index != 0 || isSubCat)
           Positioned(
-            left: (isSubCat) ? subCatOffset : 5,
+            left: (isSubCat) ? subCatDividerOffset : 5,
             right: 5,
             top: 0,
             height: 1,

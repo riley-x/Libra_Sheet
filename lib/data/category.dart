@@ -114,7 +114,7 @@ class Category {
 
   @override
   String toString() {
-    return "Category($key: $name parent=${parent?.name})";
+    return "Category($key: $name 0x${(color?.value ?? 0).toRadixString(16)} parent=${parent?.name})";
   }
 
   Map<String, dynamic> toMap({int? listIndex}) {
