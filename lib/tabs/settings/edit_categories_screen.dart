@@ -64,25 +64,8 @@ class EditCategoriesState extends ChangeNotifier {
         level: parent!.level + 1,
         parent: parent,
       );
-      debugPrint("EditCategoriesState::save() $cat");
-
-      // if (cat.key == 0) {
-      //   /// new category
-      //   int key = await insertCategory(cat, listIndex: parent!.subCats.length);
-      //   appState.
-
-      //    .add(cat.copyWith(key: key));
-      //   appState.notifyListeners();
-      // } else {
-      //   for (int i = 0; i < appState.accounts.length; i++) {
-      //     if (appState.accounts[i] == focused) {
-      //       appState.accounts[i] = acc;
-      //       appState.notifyListeners();
-      //       updateAccount(acc);
-      //       break;
-      //     }
-      //   }
-      // }
+      appState.categories.save(cat);
+      clearFocus();
     }
   }
 }
@@ -125,8 +108,8 @@ class _CategorySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = context.watch<LibraAppState>();
     final state = context.watch<EditCategoriesState>();
-    final categories =
-        (isExpense) ? appState.categories.expenseList : appState.categories.incomeList;
+    final superCat = (isExpense) ? Category.expense : Category.income;
+    final categories = superCat.subCats;
 
     return Column(
       children: [
@@ -157,7 +140,7 @@ class _CategorySection extends StatelessWidget {
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
-              onReorder: (o, n) => appState.categories.reorder(isExpense, o, n),
+              onReorder: (o, n) => appState.categories.reorder(superCat, o, n),
               children: <Widget>[
                 for (int i = 0; i < categories.length; i++)
                   CategoryCard(

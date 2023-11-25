@@ -161,10 +161,8 @@ class _CategoryCardState extends State<CategoryCard> {
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
-              onReorder: (oldIndex, newIndex) => context
-                  .read<LibraAppState>()
-                  .categories
-                  .reorderSub(widget.cat, oldIndex, newIndex),
+              onReorder: (oldIndex, newIndex) =>
+                  context.read<LibraAppState>().categories.reorder(widget.cat, oldIndex, newIndex),
               children: [
                 for (int i = 0; i < widget.cat.subCats.length; i++)
                   BaseCategoryCard(

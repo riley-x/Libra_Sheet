@@ -15,11 +15,11 @@ FutureOr<int> insertCategory(Category cat, {int? listIndex}) async {
   );
 }
 
-// Future<void> updateAccount(Account acc, {int? listIndex}) async {
-//   await database?.update(
-//     categoryTable,
-//     acc.toMap(listIndex: listIndex),
-//     where: '`key` = ?',
-//     whereArgs: [acc.key],
-//   );
-// }
+Future<void> updateCategory(Category cat, {int? listIndex}) async {
+  await database?.update(
+    categoryTable,
+    cat.toMap(listIndex: listIndex),
+    where: '`key` = ?',
+    whereArgs: [cat.key],
+  );
+}

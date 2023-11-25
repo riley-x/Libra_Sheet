@@ -34,11 +34,11 @@ final List<Account> testAccounts = [
 ];
 
 final testCategories = [
-  Category(key: 1, level: 1, name: 'cat 1', color: Colors.amber, parent: Category.expense),
-  Category(key: 2, level: 1, name: 'cat 2', color: Colors.blue, parent: Category.expense),
-  Category(key: 3, level: 1, name: 'cat 3', color: Colors.green, parent: Category.expense),
-  Category(key: 9, level: 1, name: 'cat 4', color: Colors.red, parent: Category.expense),
-  Category(key: 10, level: 1, name: 'cat 5', color: Colors.purple, parent: Category.expense),
+  Category(key: 1, name: 'cat 1', color: Colors.amber, parent: Category.expense),
+  Category(key: 2, name: 'cat 2', color: Colors.blue, parent: Category.expense),
+  Category(key: 3, name: 'cat 3', color: Colors.green, parent: Category.expense),
+  Category(key: 9, name: 'cat 4', color: Colors.red, parent: Category.expense),
+  Category(key: 10, name: 'cat 5', color: Colors.purple, parent: Category.expense),
 ];
 
 const testCategoryValues = {

@@ -80,6 +80,9 @@ class Category {
     type: ExpenseType.expense,
   );
 
+  /// The main super-category corresponding to income transactions. This category includes all
+  /// un-categorized transactions with positive value. Note that all income categories must refer
+  /// to this as parent, and must be added to its subCats list.
   static final income = Category(
     key: -1,
     level: 0,
@@ -89,6 +92,9 @@ class Category {
     type: ExpenseType.income,
   );
 
+  /// The main super-category corresponding to expense transactions. This category includes all
+  /// un-categorized transactions with negative value. Note that all expense categories must refer
+  /// to this as parent, and must be added to its subCats list.
   static final expense = Category(
     key: -2,
     level: 0,
@@ -112,10 +118,11 @@ class Category {
   }
 
   Map<String, dynamic> toMap({int? listIndex}) {
+    assert(parent != null);
     final out = {
       'name': name,
       'colorLong': color?.value ?? 0,
-      'parentKey': parent?.key,
+      'parentKey': parent!.key,
     };
 
     /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.

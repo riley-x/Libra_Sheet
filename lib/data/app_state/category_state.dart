@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/test_data.dart';
 
@@ -8,36 +10,42 @@ class CategoryState {
   //----------------------------------------------------------------------------
   // Fields
   //----------------------------------------------------------------------------
-  LibraAppState parent;
-  CategoryState(this.parent);
-
-  List<Category> expenseList = List.from(testCategories);
-  List<Category> incomeList = [];
+  LibraAppState appState;
+  CategoryState(this.appState);
 
   //----------------------------------------------------------------------------
   // Editing and updating categories
   //----------------------------------------------------------------------------
-  void add(Category parent, Category cat) {}
-
-  void reorder(bool isExpense, int oldIndex, int newIndex) {
-    final list = (isExpense) ? expenseList : incomeList;
-    if (newIndex > oldIndex) {
-      list.insert(newIndex - 1, list.removeAt(oldIndex));
+  void save(Category cat) async {
+    debugPrint("CategoryState::save() $cat");
+    assert(cat.parent != null);
+    if (cat.key == 0) {
+      /// new category
+      int key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
+      cat = cat.copyWith(key: key);
+      cat.parent!.subCats.add(cat);
+      appState.notifyListeners();
     } else {
-      list.insert(newIndex, list.removeAt(oldIndex));
+      /// update old category
+      final parentList = cat.parent!.subCats;
+      for (int i = 0; i < parentList.length; i++) {
+        if (parentList[i].key == cat.key) {
+          parentList[i] = cat;
+          appState.notifyListeners();
+          updateCategory(cat);
+          break;
+        }
+      }
     }
-    parent.notifyListeners();
   }
 
-  void reorderSub(Category parent, int oldIndex, int newIndex) {
-    if (parent.subCats.isEmpty) return;
-    final list = parent.subCats;
+  void reorder(Category parent, int oldIndex, int newIndex) {
     if (newIndex > oldIndex) {
-      list.insert(newIndex - 1, list.removeAt(oldIndex));
+      parent.subCats.insert(newIndex - 1, parent.subCats.removeAt(oldIndex));
     } else {
-      list.insert(newIndex, list.removeAt(oldIndex));
+      parent.subCats.insert(newIndex, parent.subCats.removeAt(oldIndex));
     }
-    this.parent.notifyListeners();
+    appState.notifyListeners();
   }
 
   //----------------------------------------------------------------------------
@@ -50,11 +58,11 @@ class CategoryState {
     List<Category> nested;
     switch (type) {
       case ExpenseFilterType.all:
-        nested = incomeList + expenseList;
+        nested = Category.income.subCats + Category.expense.subCats;
       case ExpenseFilterType.income:
-        nested = incomeList;
+        nested = Category.income.subCats;
       case ExpenseFilterType.expense:
-        nested = expenseList;
+        nested = Category.expense.subCats;
     }
 
     final out = <Category>[];
@@ -73,12 +81,12 @@ class CategoryState {
     List<Category> out = [];
     if (current.type case ExpenseType.expense) {
       out.add(Category.expense);
-      for (final cat in expenseList) {
+      for (final cat in Category.expense.subCats) {
         if (cat != current) out.add(cat);
       }
     } else if (current.type case ExpenseType.income) {
       out.add(Category.income);
-      for (final cat in incomeList) {
+      for (final cat in Category.income.subCats) {
         if (cat != current) out.add(cat);
       }
     }
