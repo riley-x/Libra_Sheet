@@ -77,11 +77,13 @@ class LibraDropdownFormField<T> extends StatelessWidget {
     this.borderRadius,
     this.height = 30,
     this.onSave,
+    this.validator,
   });
 
   final T? initial;
   final List<T?> items;
   final Function(T?)? onSave;
+  final String? Function(T?)? validator;
   final BorderRadius? borderRadius;
   final double height;
   final Widget Function(T?) builder;
@@ -110,7 +112,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
           ),
         );
       },
-      validator: (value) => (value == null) ? '' : null,
+      validator: validator ?? ((value) => (value == null) ? '' : null),
       onSaved: onSave,
     );
   }

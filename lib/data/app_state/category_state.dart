@@ -65,16 +65,15 @@ class CategoryState {
     return out;
   }
 
-  /// Gets a list of potential parent categories. Excludes [current] from the list.
-  List<Category> getPotentialParents(Category? current) {
-    var out = [
-      Category.income,
-      Category.expense,
-    ];
-    for (final cat in incomeList) {
-      if (cat != current) out.add(cat);
-    }
-    for (final cat in expenseList) {
+  /// Gets a list of potential parent categories. Excludes [current] from the list. Also prepends
+  /// [null] to indicate no parent (i.e. income or expense).
+  List<Category?> getPotentialParents(Category current) {
+    var out = <Category?>[null];
+    final list = switch (current.type) {
+      ExpenseType.expense => expenseList,
+      ExpenseType.income => incomeList,
+    };
+    for (final cat in list) {
       if (cat != current) out.add(cat);
     }
     return out;

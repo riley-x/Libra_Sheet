@@ -55,6 +55,7 @@ class CategorySelectionFormField extends StatelessWidget {
     this.height = 30,
     this.type = ExpenseFilterType.all,
     this.onSave,
+    this.validator,
   });
 
   /// The list of categories to show in the dropdown menu. You can alternatively choose all categories
@@ -64,6 +65,7 @@ class CategorySelectionFormField extends StatelessWidget {
   final Category? initial;
   final bool includeNone;
   final Function(Category?)? onSave;
+  final String? Function(Category?)? validator;
   final BorderRadius? borderRadius;
   final double height;
 
@@ -76,11 +78,12 @@ class CategorySelectionFormField extends StatelessWidget {
     }
     return LibraDropdownFormField<Category?>(
       initial: initial,
-      items: cats!,
+      items: cats,
       builder: (cat) => _builder(context, cat),
       borderRadius: borderRadius,
       height: height,
       onSave: onSave,
+      validator: validator,
     );
   }
 }

@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 
 import 'category_tab_filters.dart';
 
+/// This tab shows a heat map of the category values, with a list of filters/time selections on the
+/// right.
 class CategoryTab extends StatelessWidget {
   const CategoryTab({super.key});
 

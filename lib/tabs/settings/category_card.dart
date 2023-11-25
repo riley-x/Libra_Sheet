@@ -144,7 +144,7 @@ class _CategoryCardState extends State<CategoryCard> {
         ),
         if (widget.cat.subCats.isNotEmpty && isExpanded)
           SizedBox(
-            height: BaseCategoryCard.height * widget.cat.subCats!.length,
+            height: BaseCategoryCard.height * widget.cat.subCats.length,
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
@@ -153,12 +153,12 @@ class _CategoryCardState extends State<CategoryCard> {
                   .categories
                   .reorderSub(widget.cat, oldIndex, newIndex),
               children: [
-                for (int i = 0; i < widget.cat.subCats!.length; i++)
+                for (int i = 0; i < widget.cat.subCats.length; i++)
                   BaseCategoryCard(
-                    key: ObjectKey(widget.cat.subCats![i]),
-                    cat: widget.cat.subCats![i],
+                    key: ObjectKey(widget.cat.subCats[i]),
+                    cat: widget.cat.subCats[i],
                     index: i,
-                    isLast: i == widget.cat.subCats!.length - 1,
+                    isLast: i == widget.cat.subCats.length - 1,
                     parentColor: widget.cat.color,
                   ),
               ],

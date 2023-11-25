@@ -34,17 +34,34 @@ final List<Account> testAccounts = [
 ];
 
 final testCategories = [
-  Category(key: 1, level: 1, name: 'cat 1', color: Colors.amber),
-  Category(key: 2, level: 1, name: 'cat 2', color: Colors.blue),
-  Category(key: 3, level: 1, name: 'cat 3', color: Colors.green, subCats: [
-    Category(key: 4, level: 2, name: 'subcat 1', color: Colors.grey),
-    Category(key: 5, level: 2, name: 'subcat 2', color: Colors.greenAccent),
-    Category(key: 6, level: 2, name: 'subcat 3', color: Colors.lightGreen),
-    Category(key: 7, level: 2, name: 'subcat 4', color: Colors.lightGreenAccent),
-    Category(key: 8, level: 2, name: 'subcat 5', color: Colors.green),
-  ]),
-  Category(key: 9, level: 1, name: 'cat 4', color: Colors.red),
-  Category(key: 10, level: 1, name: 'cat 5', color: Colors.purple),
+  Category(key: 1, level: 1, name: 'cat 1', color: Colors.amber, parent: Category.expense),
+  Category(key: 2, level: 1, name: 'cat 2', color: Colors.blue, parent: Category.expense),
+  Category(
+      key: 3,
+      level: 1,
+      name: 'cat 3',
+      color: Colors.green,
+      parent: Category.expense,
+      subCats: [
+        Category(key: 4, level: 2, name: 'subcat 1', color: Colors.grey, parent: Category.expense),
+        Category(
+            key: 5,
+            level: 2,
+            name: 'subcat 2',
+            color: Colors.greenAccent,
+            parent: Category.expense),
+        Category(
+            key: 6, level: 2, name: 'subcat 3', color: Colors.lightGreen, parent: Category.expense),
+        Category(
+            key: 7,
+            level: 2,
+            name: 'subcat 4',
+            color: Colors.lightGreenAccent,
+            parent: Category.expense),
+        Category(key: 8, level: 2, name: 'subcat 5', color: Colors.green, parent: Category.expense),
+      ]),
+  Category(key: 9, level: 1, name: 'cat 4', color: Colors.red, parent: Category.expense),
+  Category(key: 10, level: 1, name: 'cat 5', color: Colors.purple, parent: Category.expense),
 ];
 
 const testCategoryValues = {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
 class Category {
@@ -7,6 +8,7 @@ class Category {
   final Color? color;
   final List<Category> subCats = [];
   final Category? parent;
+  late final ExpenseType type; // this must be consistent with parent!
 
   /// Level of category
   ///   0: fixed categories (income/expense/ignore)
@@ -21,10 +23,20 @@ class Category {
     this.color,
     this.parent,
     required this.level,
+    ExpenseType? type,
     List<Category>? subCats,
   }) {
     if (subCats != null) {
       this.subCats.addAll(subCats);
+    }
+
+    /// Type
+    if (parent != null) {
+      assert(type == null || type == parent!.type);
+      this.type = parent!.type;
+    } else {
+      assert(type != null);
+      this.type = type!;
     }
   }
 
@@ -33,7 +45,8 @@ class Category {
         name = other.name,
         color = other.color,
         level = other.level,
-        parent = other.parent {
+        parent = other.parent,
+        type = other.type {
     subCats.addAll(other.subCats);
   }
 
@@ -43,6 +56,7 @@ class Category {
     Color? color,
     int? level,
     Category? parent,
+    ExpenseType? type,
     List<Category>? subCats,
   }) {
     return Category(
@@ -51,6 +65,7 @@ class Category {
         color: color ?? this.color,
         level: level ?? this.level,
         parent: parent ?? this.parent,
+        type: type ?? this.type,
         subCats: subCats ?? this.subCats);
   }
 
@@ -59,6 +74,7 @@ class Category {
     level: 0,
     name: '',
     color: Colors.transparent,
+    type: ExpenseType.expense,
   );
 
   static final income = Category(
@@ -67,6 +83,7 @@ class Category {
     name: 'Income',
     color: const Color(0xFF004940),
     subCats: [],
+    type: ExpenseType.income,
   );
 
   static final expense = Category(
@@ -75,6 +92,7 @@ class Category {
     name: 'Expense',
     color: const Color(0xFF5C1604),
     subCats: [],
+    type: ExpenseType.expense,
   );
 
   static final ignore = Category(
@@ -82,6 +100,7 @@ class Category {
     level: 0,
     name: 'Ignore',
     color: Colors.transparent,
+    type: ExpenseType.expense,
   );
 
   @override

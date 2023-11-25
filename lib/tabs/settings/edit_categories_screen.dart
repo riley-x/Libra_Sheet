@@ -4,13 +4,12 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/category.dart';
-import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/category_card.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
-/// State for the EditCategoriesScreen
+/// State for the EditCategoriesScreen in the settings tab
 class EditCategoriesState extends ChangeNotifier {
   final LibraAppState appState;
   EditCategoriesState(this.appState);
@@ -56,8 +55,6 @@ class EditCategoriesState extends ChangeNotifier {
 
   void save() async {
     if (formKey.currentState?.validate() ?? false) {
-      if (parent == null) return;
-
       formKey.currentState?.save();
       final cat = focused.copyWith(
         name: saveName,
@@ -205,14 +202,26 @@ class _EditCategory extends StatelessWidget {
               ),
               rowSpacing,
               labelRow(
-                context,
-                'Parent',
-                CategorySelectionFormField(
-                  initial: state.focused.parent,
-                  categories: appState.categories.getPotentialParents(state.focused),
-                  onSave: (it) => state.parent = it,
-                ),
-              ),
+                  context,
+                  'Parent',
+                  CategorySelectionFormField(
+                    initial: state.focused.parent,
+                    categories: appState.categories.getPotentialParents(state.focused),
+                    onSave: (it) => state.parent = it,
+                    validator: (it) {
+                      if (it == null) {
+                        return ''; // empty string produces error with no size box change
+                      } else if (it.level == 1 && state.focused.subCats.isNotEmpty) {
+                        // TODO this error message doesn't show
+                        return 'A category with sub-categories must have its parent be either "Income" or "Expense"';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  tooltip: "Set the parent to create a nested category. Note that\n"
+                      "a category with sub-categories cannot be nested again;\n"
+                      "its parent must be 'None'"),
               rowSpacing,
               labelRow(
                 context,
