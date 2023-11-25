@@ -98,6 +98,19 @@ class BaseCategoryCard extends StatelessWidget {
                   ),
                 ],
                 const Spacer(),
+                if (!isSubCat) ...[
+                  const SizedBox(width: 10),
+                  IconButton(
+                      onPressed: () => context.read<EditCategoriesState>().setFocus(
+                            Category(
+                              level: 2,
+                              name: '',
+                              color: Colors.lightBlue,
+                              parent: cat,
+                            ),
+                          ),
+                      icon: const Icon(Icons.add)),
+                ],
                 const SizedBox(width: 10),
                 ReorderableDragStartListener(
                   index: index,
