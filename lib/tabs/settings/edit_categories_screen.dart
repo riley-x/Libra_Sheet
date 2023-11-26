@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -28,7 +30,7 @@ class EditCategoriesState extends ChangeNotifier {
   Color color = Colors.deepPurple;
 
   void _init() {
-    color = focused.color ?? Colors.deepPurple;
+    color = focused.color;
   }
 
   void reset() {
@@ -128,7 +130,6 @@ class _CategorySection extends StatelessWidget {
             IconButton(
               onPressed: () => state.setFocus(
                 Category(
-                  level: 1,
                   name: '',
                   color: Colors.lightBlue,
                   parent: (isExpense) ? Category.expense : Category.income,

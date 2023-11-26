@@ -7,59 +7,54 @@ class CategoryBase {}
 class Category {
   final int key;
   String name;
-  Color? color;
-  final List<Category> subCats = [];
+  Color color;
 
   /// Parent category for nested categories. All level > 0 categories must have a valid parent.
   /// DO NOT replace the parent category without updating this field! Consider using [copyFrom] to
   /// in-place update the parent instead;
   Category? parent;
+  final List<Category> subCats = [];
 
   /// This must be consistent with parent!
-  late final ExpenseType type;
+  final ExpenseType type;
 
   /// Level of category. Should be [parent.level] + 1.
   ///   0: fixed categories (income/expense/ignore)
   ///   1: top-level user categories
   ///   2: user subCategories
   ///   3+: not implemented
-  late final int level;
+  final int level;
 
   Category({
     this.key = 0,
     required this.name,
-    this.color,
-    this.parent,
-    int? level,
-    ExpenseType? type,
+    required Category this.parent,
+    required this.color,
     List<Category>? subCats,
-  }) {
+  })  : type = parent.type,
+        level = parent.level {
     if (subCats != null) {
       this.subCats.addAll(subCats);
     }
-
-    /// Type and level from parent
-    if (parent != null) {
-      assert(type == null || type == parent!.type);
-      assert(level == null || level == parent!.level + 1);
-      this.type = parent!.type;
-      this.level = parent!.level + 1;
-    } else {
-      assert(type != null && level != null);
-      this.type = type!;
-      this.level = level!;
-    }
   }
 
-  Category.copy(Category other)
-      : key = other.key,
-        name = other.name,
-        color = other.color,
-        level = other.level,
-        parent = other.parent,
-        type = other.type {
-    subCats.addAll(other.subCats);
-  }
+  Category._manual({
+    required this.key,
+    required this.name,
+    required this.color,
+    required this.type,
+    required this.level,
+  });
+
+  // Category.copy(Category other)
+  //     : key = other.key,
+  //       name = other.name,
+  //       color = other.color,
+  //       level = other.level,
+  //       parent = other.parent,
+  //       type = other.type {
+  //   subCats.addAll(other.subCats);
+  // }
 
   /// Update current fields from [other].
   void copySoftFieldsFrom(Category other) {
@@ -68,6 +63,7 @@ class Category {
     color = other.color;
   }
 
+  /// Don't use with super (level==0) categories, because of the null check on this.parent :(
   Category copyWith({
     int? key,
     String? name,
@@ -77,66 +73,63 @@ class Category {
     ExpenseType? type,
     List<Category>? subCats,
   }) {
+    assert(this.level != 0);
     return Category(
         key: key ?? this.key,
         name: name ?? this.name,
         color: color ?? this.color,
-        level: level ?? this.level,
-        parent: parent ?? this.parent,
-        type: type ?? this.type,
+        parent: parent ?? this.parent!,
         subCats: subCats ?? this.subCats);
   }
 
-  static final empty = Category(
+  static final empty = Category._manual(
     key: 0,
-    level: 0,
     name: '',
     color: Colors.transparent,
     type: ExpenseType.expense,
+    level: 0,
   );
 
   /// The main super-category corresponding to income transactions. This category includes all
   /// un-categorized transactions with positive value. Note that all income categories must refer
   /// to this as parent, and must be added to its subCats list.
-  static final income = Category(
+  static final income = Category._manual(
     key: -1,
-    level: 0,
     name: 'Income',
     color: const Color(0xFF004940),
-    subCats: const [],
     type: ExpenseType.income,
+    level: 0,
   );
 
   /// The main super-category corresponding to expense transactions. This category includes all
   /// un-categorized transactions with negative value. Note that all expense categories must refer
   /// to this as parent, and must be added to its subCats list.
-  static final expense = Category(
+  static final expense = Category._manual(
     key: -2,
-    level: 0,
     name: 'Expense',
     color: const Color(0xFF5C1604),
-    subCats: [],
     type: ExpenseType.expense,
+    level: 0,
   );
 
-  static final ignore = Category(
+  static final ignore = Category._manual(
     key: -3,
-    level: 0,
     name: 'Ignore',
     color: Colors.transparent,
     type: ExpenseType.expense,
+    level: 0,
   );
 
   @override
   String toString() {
-    return "Category($key: $name 0x${(color?.value ?? 0).toRadixString(16)} parent=${parent?.name})";
+    return "Category($key: $name 0x${color.value.toRadixString(16)} parent=${parent?.name})";
   }
 
   Map<String, dynamic> toMap({int? listIndex}) {
     assert(parent != null);
     final out = {
       'name': name,
-      'colorLong': color?.value ?? 0,
+      'colorLong': color.value,
       'parentKey': parent!.key,
     };
 

@@ -74,7 +74,7 @@ class BaseCategoryCard extends StatelessWidget {
                     ),
                     if (isExpanded == true)
                       CustomPaint(
-                        painter: SubcategoryIndicatorParent(color: cat.color ?? Colors.black),
+                        painter: SubcategoryIndicatorParent(color: cat.color),
                         size: const Size(colorBoxWidth, height),
                       ),
                   ],
@@ -102,7 +102,6 @@ class BaseCategoryCard extends StatelessWidget {
                   IconButton(
                       onPressed: () => context.read<EditCategoriesState>().setFocus(
                             Category(
-                              level: 2,
                               name: '',
                               color: Colors.lightBlue,
                               parent: cat,
