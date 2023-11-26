@@ -32,8 +32,8 @@ class LibraAppState extends ChangeNotifier {
     /// Load account, categories
     var futures = <Future>[];
     futures.add(_loadAccounts());
-    futures.add(_loadNetWorth());
     futures.add(categories.load());
+    _loadNetWorth(); // not needed downstream, no need to await (but do place before the await below)
     await Future.wait(futures);
 
     notifyListeners();

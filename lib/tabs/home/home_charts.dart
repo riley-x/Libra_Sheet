@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
+import 'package:libra_sheet/graphing/libra_pie_chart.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -29,7 +31,7 @@ class HomeCharts extends StatelessWidget {
   }
 }
 
-/// Expands the line chart to maximum height
+/// Expands the line chart and pie charts to equal heights
 class _ExpandedCharts extends StatelessWidget {
   const _ExpandedCharts({super.key});
 
@@ -37,14 +39,12 @@ class _ExpandedCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: _NetWorthGraph(null)),
+        const Expanded(child: _NetWorthGraph(null)),
         Container(
           height: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
         ),
-        Expanded(
-          child: _alignedPies(null, context)[0],
-        ),
+        Expanded(child: _alignedPies(null, context)),
       ],
     );
   }
@@ -74,29 +74,27 @@ class _ListCharts extends StatelessWidget {
         ),
 
         /// Don't add padding here or else the vertical grid lines won't be tight
-        if (pieChartsAligned) ..._alignedPies(chartHeight, context),
+        if (pieChartsAligned) _alignedPies(chartHeight, context),
         if (!pieChartsAligned) ..._verticalPies(chartHeight, context),
       ],
     );
   }
 }
 
-List<Widget> _alignedPies(double? height, BuildContext context) {
-  return [
-    Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Expanded(child: _AssetsPie(height)),
-        Container(
-          width: 1,
-          height: height,
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-        const SizedBox(height: 10),
-        Expanded(child: _LiabilitiesPie(height)),
-      ],
-    ),
-  ];
+Widget _alignedPies(double? height, BuildContext context) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    children: [
+      Expanded(child: _AssetsPie(height)),
+      Container(
+        width: 1,
+        height: height,
+        color: Theme.of(context).colorScheme.outlineVariant,
+      ),
+      const SizedBox(height: 10),
+      Expanded(child: _LiabilitiesPie(height)),
+    ],
+  );
 }
 
 List<Widget> _verticalPies(double height, BuildContext context) {
@@ -145,13 +143,16 @@ class _AssetsPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<LibraAppState>();
+    final accounts = appState.accounts.where((it) => it.type != AccountType.liability).toList();
+    final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
       textLeft: 'Assets',
-      textRight: '\$123.00',
+      textRight: total.dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
-      child: TestPie(),
+      child: AccountPieChart(accounts),
     );
   }
 }
@@ -162,13 +163,16 @@ class _LiabilitiesPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<LibraAppState>();
+    final accounts = appState.accounts.where((it) => it.type == AccountType.liability).toList();
+    final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
       textLeft: 'Liabilities',
-      textRight: '\$123.00',
+      textRight: total.dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
-      child: TestPie(),
+      child: AccountPieChart(accounts),
     );
   }
 }
