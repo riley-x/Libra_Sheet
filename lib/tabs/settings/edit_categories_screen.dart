@@ -114,12 +114,6 @@ class _CategorySection extends StatelessWidget {
     final state = context.watch<EditCategoriesState>();
     final superCat = (isExpense) ? appState.categories.expense : appState.categories.income;
     final categories = superCat.subCats;
-    if (isExpense) {
-      for (final cat in categories) {
-        // This is stale already!
-        if (cat.key == 21) print("_CategorySection ${cat.hashCode}");
-      }
-    }
 
     return Column(
       children: [

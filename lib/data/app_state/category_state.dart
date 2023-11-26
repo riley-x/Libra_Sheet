@@ -57,13 +57,6 @@ class CategoryState {
     } else {
       debugPrint("CategoryState::update() $cat");
       old.copySoftFieldsFrom(cat);
-      // final parentList = cat.parent!.subCats;
-      // final ind = parentList.indexWhere((it) => it.key == cat.key);
-      // print("expense: ${Category.expense.subCats.hashCode}");
-      // print("parent: ${cat.parent.hashCode} ${cat.parent!.subCats.hashCode}");
-      // print("new: ${cat.hashCode} ${cat.subCats.hashCode}");
-      // print("old: ${parentList[ind].hashCode} ${parentList[ind].subCats.hashCode}");
-      // parentList[ind] = cat;
       appState.notifyListeners();
       updateCategory(cat);
     }

@@ -33,7 +33,6 @@ class BaseCategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (cat.key == 24) print("BaseCategoryCard ${cat.parent.hashCode} ${cat.hashCode}");
     return Stack(
       children: [
         /// Divider
@@ -145,8 +144,6 @@ class _CategoryCardState extends State<CategoryCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.cat.key == 21) print("CategoryCard ${widget.cat.hashCode}");
-
     return Column(
       children: [
         BaseCategoryCard(
@@ -169,7 +166,7 @@ class _CategoryCardState extends State<CategoryCard> {
                 for (int i = 0; i < widget.cat.subCats.length; i++)
                   BaseCategoryCard(
                     key: ObjectKey(widget.cat.subCats[i]),
-                    cat: _get(widget.cat, widget.cat.subCats, i),
+                    cat: widget.cat.subCats[i],
                     index: i,
                     isLast: i == widget.cat.subCats.length - 1,
                     parentColor: widget.cat.color,
@@ -179,14 +176,6 @@ class _CategoryCardState extends State<CategoryCard> {
           ),
       ],
     );
-  }
-
-  Category _get(Category parent, List<Category> categories, int i) {
-    var val = categories[i];
-    if (val.key == 24)
-      print(
-          "_get ${parent.hashCode} ${categories.hashCode} ${val.hashCode} ${val.parent.hashCode}");
-    return val;
   }
 }
 
