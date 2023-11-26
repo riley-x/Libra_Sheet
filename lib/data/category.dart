@@ -32,7 +32,7 @@ class Category {
     required this.color,
     List<Category>? subCats,
   })  : type = parent.type,
-        level = parent.level {
+        level = parent.level + 1 {
     if (subCats != null) {
       this.subCats.addAll(subCats);
     }
