@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/categories.dart';
+import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -47,12 +48,7 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`categoryKey` INTEGER NOT NULL, "
       "`isIncome` INTEGER NOT NULL, "
       "`listIndex` INTEGER NOT NULL)");
-  await db.execute("CREATE TABLE IF NOT EXISTS `category_history` ("
-      "`accountKey` INTEGER NOT NULL, "
-      "`categoryKey` INTEGER NOT NULL, "
-      "`date` INTEGER NOT NULL, "
-      "`value` INTEGER NOT NULL, "
-      "PRIMARY KEY(`accountKey`, `categoryKey`, `date`))");
+  await db.execute(createCategoryHistoryTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS `transaction_table` "
       "(`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
       "`name` TEXT NOT NULL, "

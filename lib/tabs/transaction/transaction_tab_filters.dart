@@ -1,7 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';

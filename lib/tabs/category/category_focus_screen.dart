@@ -4,7 +4,7 @@ import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
-import 'package:libra_sheet/graphing/line.dart';
+import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -74,7 +74,7 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: TestGraph(),
+                  child: DateTimeGraph([]),
                 ),
               ),
               if (category.subCats.isNotEmpty) ...[

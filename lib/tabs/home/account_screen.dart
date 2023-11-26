@@ -5,7 +5,7 @@ import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/test_data.dart';
-import 'package:libra_sheet/graphing/line.dart';
+import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:provider/provider.dart';
 
@@ -53,7 +53,7 @@ class AccountScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 7),
                   textLeft: 'Balance History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: TestGraph(),
+                  child: DateTimeGraph([]),
                 ),
               ),
             ],

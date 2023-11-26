@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
-import 'package:libra_sheet/graphing/line.dart';
+import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 
 class HomeCharts extends StatelessWidget {
@@ -122,7 +122,7 @@ class _NetWorthGraph extends StatelessWidget {
       textRight: 13413418374.dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
-      child: TestGraph(),
+      child: DateTimeGraph([]),
     );
   }
 }
