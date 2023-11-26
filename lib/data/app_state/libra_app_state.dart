@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
+import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -27,7 +29,9 @@ class LibraAppState extends ChangeNotifier {
     /// Setup database
     await initDatabase();
 
+    /// Load account, categories
     var futures = <Future>[];
+    futures.add(_loadAccounts());
     futures.add(categories.load());
     await Future.wait(futures);
 
@@ -54,6 +58,30 @@ class LibraAppState extends ChangeNotifier {
   // Accounts
   //--------------------------------------------------------------------------------
   final List<Account> accounts = [];
+
+  Future<void> _loadAccounts() async {
+    accounts.addAll(await db.getAccounts());
+    if (kReleaseMode) {
+      for (final acc in accounts) {
+        debugPrint("LibraAppState::_loadAccounts() $acc");
+      }
+    }
+  }
+
+  Future<void> addAccount(Account acc) async {
+    debugPrint("LibraAppState::addAccount() $acc");
+    int key = await db.insertAccount(acc, listIndex: accounts.length);
+    accounts.add(acc.copyWith(key: key));
+    notifyListeners();
+  }
+
+  Future<void> updateAccount(Account acc) async {
+    debugPrint("LibraAppState::updateAccount() $acc");
+    final i = accounts.indexWhere((it) => it.key == acc.key);
+    accounts[i] = acc;
+    notifyListeners();
+    db.updateAccount(acc);
+  }
 
   //--------------------------------------------------------------------------------
   // Screen handling

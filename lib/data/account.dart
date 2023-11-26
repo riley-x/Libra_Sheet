@@ -14,6 +14,13 @@ enum AccountType {
   String toString() {
     return label;
   }
+
+  static AccountType fromString(String text) {
+    for (final t in AccountType.values) {
+      if (t.label == text) return t;
+    }
+    return AccountType.cash;
+  }
 }
 
 class Account {

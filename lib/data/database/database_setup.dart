@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -33,16 +34,7 @@ FutureOr<void> _createDatabse(Database db, int version) {
 }
 
 FutureOr<void> _createDatabse14(Database db) async {
-  await db.execute("CREATE TABLE IF NOT EXISTS `accounts` ("
-      "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-      "`name` TEXT NOT NULL, "
-      "`description` TEXT NOT NULL, "
-      "`type` TEXT NOT NULL, "
-      "`csvPattern` TEXT NOT NULL DEFAULT '', "
-      "`screenReaderAlias` TEXT NOT NULL DEFAULT '', "
-      "`colorLong` INTEGER NOT NULL, "
-      "`listIndex` INTEGER NOT NULL, "
-      "`balance` INTEGER NOT NULL)");
+  await db.execute(createAccountsTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS $categoryTable ("
       "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
       "`name` TEXT NOT NULL, "

@@ -4,7 +4,6 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/home/account_list.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
@@ -59,26 +58,16 @@ class EditAccountState extends ChangeNotifier {
   }
 
   void save() async {
-    formKey.currentState?.save();
-    final acc = saveSink.freeze();
-    debugPrint("EditAccountState::save() $acc");
-
-    if (focused == null) {
-      int key = await insertAccount(acc, listIndex: appState.accounts.length);
-      appState.accounts.add(acc.copyWith(key: key));
-      appState.notifyListeners();
-    } else {
-      for (int i = 0; i < appState.accounts.length; i++) {
-        if (appState.accounts[i] == focused) {
-          appState.accounts[i] = acc;
-          appState.notifyListeners();
-          updateAccount(acc);
-          break;
-        }
+    if (formKey.currentState?.validate() ?? false) {
+      formKey.currentState?.save();
+      final acc = saveSink.freeze();
+      if (focused == null) {
+        appState.addAccount(acc);
+      } else {
+        appState.updateAccount(acc);
       }
+      clearFocus();
     }
-
-    clearFocus();
   }
 }
 
