@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 
 /// Lays out a set of filter chips for each account.
 class AccountFilterChips extends StatelessWidget {

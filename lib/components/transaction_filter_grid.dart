@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_card.dart';
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionFilterGrid extends StatefulWidget {
   const TransactionFilterGrid(

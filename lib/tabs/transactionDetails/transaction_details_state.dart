@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/allocation.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/account.dart';
+import 'package:libra_sheet/data/objects/allocation.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/reimbursement.dart';
-import 'package:libra_sheet/data/tag.dart';
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/objects/reimbursement.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum TransactionDetailActiveFocus { none, allocation, reimbursement }
 

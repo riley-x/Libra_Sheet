@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/transactionDetails/allocation_editor.dart';
 import 'package:libra_sheet/tabs/transactionDetails/reimbursement_editor.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_editor.dart';

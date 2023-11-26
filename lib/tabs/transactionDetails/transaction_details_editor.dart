@@ -9,7 +9,7 @@ import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/tag.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';

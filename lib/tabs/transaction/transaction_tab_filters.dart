@@ -7,10 +7,10 @@ import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
-import 'package:libra_sheet/data/account.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/account.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/tag.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
 

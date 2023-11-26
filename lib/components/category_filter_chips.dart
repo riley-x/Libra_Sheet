@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 
 /// Lays out a set of filter chips for each category and its sub categories. If a category has
 /// sub categories, it is layed out on its own row, and its sub categories in an indented row beneath.

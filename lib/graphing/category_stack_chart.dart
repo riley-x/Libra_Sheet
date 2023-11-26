@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';

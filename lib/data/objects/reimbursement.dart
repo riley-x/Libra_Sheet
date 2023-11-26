@@ -1,4 +1,4 @@
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 
 class Reimbursement {
   /// WARNING this can be null for newly added transactions!

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 
 /// Lays out active category filters. Clicking the category removes it from the filter. This widget
 /// has no way to add filters; use DropdownCategoryMenu instead.

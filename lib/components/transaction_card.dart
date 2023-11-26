@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
   const TransactionCard({

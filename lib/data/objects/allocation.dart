@@ -1,4 +1,4 @@
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 
 class Allocation {
   final int key;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
 import 'package:provider/provider.dart';

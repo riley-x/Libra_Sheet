@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
-import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:sqflite/sqlite_api.dart';
 

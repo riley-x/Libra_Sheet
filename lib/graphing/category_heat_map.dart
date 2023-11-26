@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/heat_map_painter.dart';
 

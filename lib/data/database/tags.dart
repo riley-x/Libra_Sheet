@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:libra_sheet/data/database/database_setup.dart';
-import 'package:libra_sheet/data/tag.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const tagsTable = '`tags`';

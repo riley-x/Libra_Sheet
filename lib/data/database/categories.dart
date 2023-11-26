@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/category.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:sqflite/sqlite_api.dart';
 

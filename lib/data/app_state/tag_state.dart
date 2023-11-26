@@ -2,7 +2,7 @@
 
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/tags.dart';
-import 'package:libra_sheet/data/tag.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 
 /// Helper module for handling the tags
 class TagState {

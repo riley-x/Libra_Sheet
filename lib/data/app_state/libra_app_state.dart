@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:libra_sheet/data/account.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/time_value.dart';
-import 'package:libra_sheet/data/transaction.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum DetailScreen {
   account,

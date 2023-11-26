@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/allocation.dart';
+import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 
 class AllocationCard extends StatelessWidget {
