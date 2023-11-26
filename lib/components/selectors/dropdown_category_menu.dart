@@ -4,7 +4,7 @@ import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/category.dart';
 
 /// Lays out active category filters. Clicking the category removes it from the filter. This widget
-/// has no way to add filters; use CategoryFilterMenu instead.
+/// has no way to add filters; use DropdownCategoryMenu instead.
 class CategoryFilterChips extends StatelessWidget {
   const CategoryFilterChips({
     super.key,
@@ -20,6 +20,7 @@ class CategoryFilterChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
+      alignment: WrapAlignment.center,
       spacing: 10,
       runSpacing: 4,
       children: [
@@ -27,6 +28,7 @@ class CategoryFilterChips extends StatelessWidget {
           if (map.get(cat) != false)
             LibraChip(
               cat.name,
+              color: cat.color,
               onTap: () {
                 map.set(cat, false);
                 notify?.call();
