@@ -7,9 +7,7 @@ import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
-import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/time_value.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
 
 enum DetailScreen {

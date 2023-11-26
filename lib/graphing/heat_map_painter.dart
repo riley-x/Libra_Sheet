@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/theme/colorscheme.dart';
 
 /// Finds the reverse cumulative sum of [data].
 /// `out[i] = sum(data.values[i:])` with 0 appended at the end.
@@ -229,13 +228,6 @@ class HeatMapPainter<T> extends CustomPainter {
     }
   }
 
-  /// Chooses the label text color based on the background color
-  /// https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
-  Color _textColor(Color bkg) {
-    if (bkg.red * 0.299 + bkg.green * 0.587 + bkg.blue * 0.114 > 186) return Colors.black;
-    return Colors.white;
-  }
-
   /// Paints a single entry (rectangle).
   void _paintEntry(T entry, Canvas canvas, Rect rect) {
     Paint brush = Paint()..color = colorMapper?.call(entry) ?? Colors.teal;
@@ -247,7 +239,7 @@ class HeatMapPainter<T> extends CustomPainter {
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: labelMapper!.call(entry),
-          style: textStyle?.copyWith(color: _textColor(brush.color)),
+          style: textStyle?.copyWith(color: adaptiveTextColor(brush.color)),
         ),
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,

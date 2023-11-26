@@ -19,12 +19,13 @@ class TagState {
   //----------------------------------------------------------------------------
   Future<void> load() async {
     list.addAll(await getTags());
+    appState.notifyListeners();
   }
 
   Future<void> add(Tag tag) async {
     int key = await insertTag(tag);
     tag = tag.copyWith(key: key);
-    list.add(tag);
+    list.insert(0, tag);
     appState.notifyListeners();
   }
 

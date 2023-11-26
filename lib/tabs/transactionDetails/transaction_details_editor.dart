@@ -223,6 +223,7 @@ class _TagSelector extends StatelessWidget {
               for (final tag in tags)
                 LibraChip(
                   tag.name,
+                  color: tag.color,
                   onTap: () => onChanged?.call(tag, false),
                 ),
             ],

@@ -135,7 +135,9 @@ class _SettingsTab extends StatelessWidget {
                 const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Tags',
-                  subText: "Customize your tags. Transactions can have multiple tags.",
+                  subText: "Customize your tags. "
+                      // "Tags are lightweight labels to help organize similar transactions from different categories and accounts. "
+                      "Each transaction can have multiple tags.",
                   onTap: () => onSelect?.call(_CurrentTab.tags),
                 ),
                 const SizedBox(height: 8),

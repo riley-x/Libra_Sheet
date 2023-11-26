@@ -94,7 +94,7 @@ class EditTagsScreen extends StatelessWidget {
         Scaffold(
           body: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
@@ -102,6 +102,7 @@ class EditTagsScreen extends StatelessWidget {
                   for (final tag in appState.tags.list)
                     LibraChip(
                       tag.name,
+                      color: tag.color,
                       onTap: () => state.setFocus(tag),
                     ),
                 ],
