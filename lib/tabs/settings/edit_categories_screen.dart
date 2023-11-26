@@ -56,8 +56,12 @@ class EditCategoriesState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void delete() {
-    // TODO
+  void delete(bool confirmed) {
+    if (confirmed) {
+      clearFocus();
+      appState.categories.delete(focused);
+      notifyListeners();
+    }
   }
 
   void onExpandedChanged(Category cat, bool isExpanded) {
@@ -262,6 +266,30 @@ class _EditCategory extends StatelessWidget {
           onCancel: state.clearFocus,
           onReset: state.reset,
           onSave: state.save,
+          onDelete: () => showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Delete Category?"),
+                content: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Text("Are you sure you want to delete category ${state.focused.name}? "
+                      "This cannot be undone! Any sub-categories and linked transactions and "
+                      "rules will be broken."),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Cancel'),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Ok'),
+                    child: const Text('Ok'),
+                  ),
+                ],
+              );
+            },
+          ).then((msg) => state.delete(msg == 'Ok')),
         ),
       ],
     );
