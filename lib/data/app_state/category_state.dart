@@ -39,21 +39,24 @@ class CategoryState {
     appState.notifyListeners();
   }
 
-  void delete(Category cat) async {
+  void delete(Category cat, [bool deleteFromDatabase = true]) async {
     debugPrint("CategoryState::delete() $cat");
     final parentList = cat.parent!.subCats;
     final ind = parentList.indexWhere((it) => it.key == cat.key);
     parentList.removeAt(ind);
     appState.notifyListeners();
 
-    /// We don't delete from the database because no real need, and also used by [update].
-    libraDatabase!.transaction((txn) => )
-    await shiftListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1);
+    libraDatabase!.transaction((txn) async {
+      if (deleteFromDatabase) {
+        await deleteCategory(cat, db: txn);
+      }
+      await shiftListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1, db: txn);
+    });
   }
 
   Future<void> update(Category old, Category cat) async {
     if (old.parent != cat.parent) {
-      delete(old);
+      delete(old, false);
       add(cat);
     } else {
       debugPrint("CategoryState::update() $cat");

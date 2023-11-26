@@ -36,6 +36,20 @@ FutureOr<int> updateCategory(
   );
 }
 
+FutureOr<int> deleteCategory(
+  Category cat, {
+  int? listIndex,
+  DatabaseExecutor? db,
+}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.delete(
+    categoryTable,
+    where: '`key` = ?',
+    whereArgs: [cat.key],
+  );
+}
+
 FutureOr<int> shiftListIndicies(
   int parentKey,
   int start,
