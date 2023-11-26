@@ -25,13 +25,13 @@ class TagState {
   Future<void> delete(Tag tag) async {
     list.removeWhere((it) => it.key == tag.key);
     appState.notifyListeners();
-    // TODO
+    await deleteTag(tag);
   }
 
   /// Tags are modified in place already. This function serves to notify listeners, and also update
   /// the database.
   Future<void> notifyUpdate(Tag tag) async {
     appState.notifyListeners();
-    updateTag(tag);
+    await updateTag(tag);
   }
 }

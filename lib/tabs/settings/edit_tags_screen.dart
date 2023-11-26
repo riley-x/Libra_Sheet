@@ -3,12 +3,9 @@ import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
-import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/tag.dart';
-import 'package:libra_sheet/tabs/home/account_list.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
 

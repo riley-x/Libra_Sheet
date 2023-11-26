@@ -45,9 +45,8 @@ Future<void> updateTag(Tag tag) async {
 }
 
 Future<void> deleteTag(Tag tag) async {
-  await libraDatabase?.update(
+  await libraDatabase?.delete(
     tagsTable,
-    _toMap(tag),
     where: '$_key = ?',
     whereArgs: [tag.key],
   );
