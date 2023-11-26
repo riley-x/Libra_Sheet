@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/tag.dart';
@@ -15,6 +17,10 @@ class TagState {
   //----------------------------------------------------------------------------
   // Modification Functions
   //----------------------------------------------------------------------------
+  Future<void> load() async {
+    list.addAll(await getTags());
+  }
+
   Future<void> add(Tag tag) async {
     int key = await insertTag(tag);
     tag = tag.copyWith(key: key);
