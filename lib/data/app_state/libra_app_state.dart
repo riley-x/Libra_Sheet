@@ -48,8 +48,16 @@ class LibraAppState extends ChangeNotifier {
     TimeValue.monthStart(2019, 10, 40.10)
   ];
 
-  final List<Account> accounts = [];
   final List<Tag> tags = testTags;
+
+  //--------------------------------------------------------------------------------
+  // Accounts
+  //--------------------------------------------------------------------------------
+  final List<Account> accounts = [];
+
+  //--------------------------------------------------------------------------------
+  // Screen handling
+  //--------------------------------------------------------------------------------
 
   /// Current tab as an index into [LibraNavDestination.values].
   int currentTab = 0;
@@ -83,10 +91,6 @@ class LibraAppState extends ChangeNotifier {
 
   void focusTransaction(Transaction? t) {
     backStack.add((DetailScreen.transaction, t));
-    notifyListeners();
-  }
-
-  void increment() {
     notifyListeners();
   }
 }

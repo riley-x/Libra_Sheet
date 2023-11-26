@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/category.dart';
 
 /// Dropdown menu where each entry has a checkbox that can be selected.
 class DropdownCheckboxMenu<T> extends StatelessWidget {

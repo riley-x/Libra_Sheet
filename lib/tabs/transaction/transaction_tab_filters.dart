@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/account_filter_chips.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
@@ -5,6 +7,7 @@ import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
+import 'package:libra_sheet/components/title_row.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -106,25 +109,18 @@ class _CategoryChips extends StatelessWidget {
     categories = [Category.ignore, Category.income, Category.expense] + categories;
     return Column(
       children: [
-        Row(
-          children: [
-            const SizedBox(width: 48),
-            const Spacer(),
-            Text("Category", style: Theme.of(context).textTheme.titleMedium),
-            const Spacer(),
-            DropdownCategoryMenu(
-              categories: categories,
-              map: state.categoryFilterSelected,
-              // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-              notify: state.notifyListeners,
-            ),
-          ],
+        TitleRow(
+          title: Text("Category", style: Theme.of(context).textTheme.titleMedium),
+          right: DropdownCategoryMenu(
+            categories: categories,
+            map: state.categoryFilterSelected,
+            notify: state.notifyListeners,
+          ),
         ),
         const SizedBox(height: 5),
         CategoryFilterChips(
           categories: categories,
           map: state.categoryFilterSelected,
-          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
           notify: state.notifyListeners,
         ),
       ],
@@ -208,25 +204,20 @@ class _TagSelector extends StatelessWidget {
     final state = context.watch<TransactionTabState>();
     return Column(
       children: [
-        Row(
-          children: [
-            const SizedBox(width: 48),
-            const Spacer(),
-            Text("Tags", style: Theme.of(context).textTheme.titleMedium),
-            const Spacer(),
-            DropdownCheckboxMenu<Tag>(
-              icon: Icons.add,
-              items: context.watch<LibraAppState>().tags,
-              builder: (context, tag) => Text(
-                tag.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              isChecked: (it) => state.tags.contains(it),
-              onChanged: state.onTagChanged,
+        TitleRow(
+          title: Text("Tags", style: Theme.of(context).textTheme.titleMedium),
+          right: DropdownCheckboxMenu<Tag>(
+            icon: Icons.add,
+            items: context.watch<LibraAppState>().tags,
+            builder: (context, tag) => Text(
+              tag.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge,
             ),
-          ],
+            isChecked: (it) => state.tags.contains(it),
+            onChanged: state.onTagChanged,
+          ),
         ),
         const SizedBox(height: 5),
         Wrap(
