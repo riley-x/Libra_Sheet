@@ -1,3 +1,10 @@
+class TimeIntValue {
+  final DateTime time;
+  final int value;
+
+  const TimeIntValue({required this.time, required this.value});
+}
+
 class TimeValue {
   final DateTime time;
   final double value;

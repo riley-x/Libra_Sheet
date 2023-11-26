@@ -15,7 +15,7 @@ const String createCategoryHistoryTableSql = "CREATE TABLE IF NOT EXISTS $catego
     "$_value INTEGER NOT NULL, "
     "PRIMARY KEY($_accountKey, `categoryKey`, $_date))";
 
-Future<List<TimeValue>> getNetWorth() async {
+Future<List<TimeIntValue>> getNetWorth() async {
   final List<Map<String, dynamic>> maps = await libraDatabase!.query(
     categoryHistoryTable,
     columns: [_date, "SUM($_value) as $_value"],
@@ -26,9 +26,9 @@ Future<List<TimeValue>> getNetWorth() async {
 
   return List.generate(
     maps.length,
-    (i) => TimeValue(
+    (i) => TimeIntValue(
       time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
-      value: (maps[i][_value] as int).asDollarDouble(),
+      value: maps[i][_value],
     ),
   );
 }

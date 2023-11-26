@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/database/accounts.dart' as db;
@@ -11,7 +10,6 @@ import 'package:libra_sheet/data/tag.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/transaction.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 enum DetailScreen {
   account,
@@ -34,6 +32,7 @@ class LibraAppState extends ChangeNotifier {
     /// Load account, categories
     var futures = <Future>[];
     futures.add(_loadAccounts());
+    futures.add(_loadNetWorth());
     futures.add(categories.load());
     await Future.wait(futures);
 
@@ -88,10 +87,11 @@ class LibraAppState extends ChangeNotifier {
   //--------------------------------------------------------------------------------
   // Net worth
   //--------------------------------------------------------------------------------
-  List<TimeValue> netWorthData = [];
+  List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
     netWorthData = await getNetWorth();
+    notifyListeners();
   }
 
   //--------------------------------------------------------------------------------

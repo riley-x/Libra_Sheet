@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
+import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomeCharts extends StatelessWidget {
   const HomeCharts({
@@ -116,13 +120,21 @@ class _NetWorthGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<TimeIntValue> data = context.watch<LibraAppState>().netWorthData;
     return ChartWithTitle(
       height: height,
       textLeft: 'Net Worth',
-      textRight: 13413418374.dollarString(),
+      textRight: (data.lastOrNull?.value ?? 0).dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
-      child: DateTimeGraph([]),
+      child: DateTimeGraph([
+        LineSeries<TimeIntValue, DateTime>(
+          animationDuration: 300,
+          dataSource: data,
+          xValueMapper: (TimeIntValue sales, _) => sales.time,
+          yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
+        ),
+      ]),
     );
   }
 }
