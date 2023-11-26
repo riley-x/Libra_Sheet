@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/edit_accounts_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
+import 'package:libra_sheet/tabs/settings/edit_tags_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_screen_header.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +50,7 @@ class _SettingsTabState extends State<SettingsTab> {
     Widget auxContent = switch (tab) {
       _CurrentTab.accounts => const EditAccountsScreen(),
       _CurrentTab.categories => const EditCategoriesScreen(),
+      _CurrentTab.tags => const EditTagsScreen(),
       _ => const SizedBox(),
     };
 
@@ -58,6 +60,8 @@ class _SettingsTabState extends State<SettingsTab> {
             create: (context) => EditAccountState(context.read<LibraAppState>())),
         ChangeNotifierProvider<EditCategoriesState>(
             create: (context) => EditCategoriesState(context.read<LibraAppState>())),
+        ChangeNotifierProvider<EditTagsState>(
+            create: (context) => EditTagsState(context.read<LibraAppState>())),
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {

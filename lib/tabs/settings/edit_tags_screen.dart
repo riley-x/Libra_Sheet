@@ -69,7 +69,7 @@ class EditTagsState extends ChangeNotifier {
       if (focused.key == 0) {
         appState.tags.add(focused);
       } else {
-        appState.tags.update(focused);
+        appState.tags.notifyUpdate(focused);
       }
       clearFocus();
     }
@@ -96,16 +96,19 @@ class EditTagsScreen extends StatelessWidget {
         ),
         Scaffold(
           body: SingleChildScrollView(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final tag in appState.tags.list)
-                  LibraChip(
-                    tag.name,
-                    onTap: () => state.setFocus(tag),
-                  ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final tag in appState.tags.list)
+                    LibraChip(
+                      tag.name,
+                      onTap: () => state.setFocus(tag),
+                    ),
+                ],
+              ),
             ),
           ),
           floatingActionButton: FloatingActionButton(
@@ -154,7 +157,7 @@ class _EditTag extends StatelessWidget {
                 'Color',
                 Container(
                   height: 30,
-                  color: state.focused.color,
+                  color: state.color,
                   child: InkWell(
                     onTap: () => showColorPicker(
                       context: context,

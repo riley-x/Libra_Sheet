@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/tags.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -69,10 +70,7 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`incomeId` INTEGER NOT NULL, "
       "`value` INTEGER NOT NULL, "
       "PRIMARY KEY(`expenseId`, `incomeId`))");
-  await db.execute("CREATE TABLE IF NOT EXISTS `tags` ("
-      "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-      "`name` TEXT NOT NULL, "
-      "`listIndex` INTEGER NOT NULL)");
+  await db.execute(createTagsTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS `tag_join` ("
       "`transactionKey` INTEGER NOT NULL, "
       "`tagKey` INTEGER NOT NULL, "

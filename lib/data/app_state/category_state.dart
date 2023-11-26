@@ -47,6 +47,7 @@ class CategoryState {
     appState.notifyListeners();
 
     /// We don't delete from the database because no real need, and also used by [update].
+    libraDatabase!.transaction((txn) => )
     await shiftListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1);
   }
 
