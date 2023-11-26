@@ -19,6 +19,9 @@ class EditCategoriesState extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isFocused = false;
 
+  /// This state is also used for determining the height of the ReorderableListViews at the top level.
+  final Set<int> categoryIsExpanded = {};
+
   /// Currently edited category. This also serves as the initial state for the FormFields.
   Category focused = Category.empty;
 
@@ -57,6 +60,15 @@ class EditCategoriesState extends ChangeNotifier {
     // TODO
   }
 
+  void onExpandedChanged(Category cat, bool isExpanded) {
+    if (isExpanded) {
+      categoryIsExpanded.add(cat.key);
+    } else {
+      categoryIsExpanded.remove(cat.key);
+    }
+    notifyListeners();
+  }
+
   void save() async {
     if (formKey.currentState?.validate() ?? false) {
       formKey.currentState?.save();
@@ -74,6 +86,16 @@ class EditCategoriesState extends ChangeNotifier {
       clearFocus();
     }
   }
+
+  double calculateHeight(List<Category> categories) {
+    double height = categories.length * BaseCategoryCard.height;
+    for (final cat in categories) {
+      if (categoryIsExpanded.contains(cat.key)) {
+        height += cat.subCats.length * BaseCategoryCard.height;
+      }
+    }
+    return height;
+  }
 }
 
 /// Settings screen for editing categories
@@ -85,6 +107,7 @@ class EditCategoriesScreen extends StatelessWidget {
     final state = context.watch<EditCategoriesState>();
     return IndexedStack(
       index: (state.isFocused) ? 0 : 1,
+      sizing: StackFit.expand,
       children: [
         _EditCategory(
           /// this prevents the IndexedStack from reusing the form editor, which causes a flicker
@@ -141,7 +164,7 @@ class _CategorySection extends StatelessWidget {
         ),
         if (categories.isNotEmpty)
           SizedBox(
-            height: BaseCategoryCard.height * categories.countFlattened(),
+            height: state.calculateHeight(categories),
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),

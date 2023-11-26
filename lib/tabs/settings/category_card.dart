@@ -29,7 +29,7 @@ class BaseCategoryCard extends StatelessWidget {
   final bool isSubCat;
   final Color? parentColor;
   final bool? isExpanded; // null for no expansion
-  final Function()? onExpandedChanged;
+  final Function(bool)? onExpandedChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +92,7 @@ class BaseCategoryCard extends StatelessWidget {
                   IconButton(
                     padding: const EdgeInsets.all(6),
                     constraints: const BoxConstraints(),
-                    onPressed: onExpandedChanged,
+                    onPressed: () => onExpandedChanged?.call(!isExpanded!),
                     icon: Icon((isExpanded!) ? Icons.expand_less : Icons.expand_more),
                   ),
                 ],
@@ -124,7 +124,7 @@ class BaseCategoryCard extends StatelessWidget {
   }
 }
 
-class CategoryCard extends StatefulWidget {
+class CategoryCard extends StatelessWidget {
   const CategoryCard({
     super.key,
     required this.cat,
@@ -135,40 +135,33 @@ class CategoryCard extends StatefulWidget {
   final int index;
 
   @override
-  State<CategoryCard> createState() => _CategoryCardState();
-}
-
-class _CategoryCardState extends State<CategoryCard> {
-  bool isExpanded = false;
-
-  @override
   Widget build(BuildContext context) {
+    final state = context.watch<EditCategoriesState>();
+    final isExpanded = state.categoryIsExpanded.contains(cat.key);
     return Column(
       children: [
         BaseCategoryCard(
-          cat: widget.cat,
-          index: widget.index,
-          isExpanded: (widget.cat.subCats.isNotEmpty) ? isExpanded : null,
-          onExpandedChanged: () => setState(() {
-            isExpanded = !isExpanded;
-          }),
+          cat: cat,
+          index: index,
+          isExpanded: (cat.subCats.isNotEmpty) ? isExpanded : null,
+          onExpandedChanged: (val) => state.onExpandedChanged(cat, val),
         ),
-        if (widget.cat.subCats.isNotEmpty && isExpanded)
+        if (cat.subCats.isNotEmpty && isExpanded)
           SizedBox(
-            height: BaseCategoryCard.height * widget.cat.subCats.length,
+            height: BaseCategoryCard.height * cat.subCats.length,
             child: ReorderableListView(
               buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
               onReorder: (oldIndex, newIndex) =>
-                  context.read<LibraAppState>().categories.reorder(widget.cat, oldIndex, newIndex),
+                  context.read<LibraAppState>().categories.reorder(cat, oldIndex, newIndex),
               children: [
-                for (int i = 0; i < widget.cat.subCats.length; i++)
+                for (int i = 0; i < cat.subCats.length; i++)
                   BaseCategoryCard(
-                    key: ObjectKey(widget.cat.subCats[i]),
-                    cat: widget.cat.subCats[i],
+                    key: ObjectKey(cat.subCats[i]),
+                    cat: cat.subCats[i],
                     index: i,
-                    isLast: i == widget.cat.subCats.length - 1,
-                    parentColor: widget.cat.color,
+                    isLast: i == cat.subCats.length - 1,
+                    parentColor: cat.color,
                   ),
               ],
             ),
