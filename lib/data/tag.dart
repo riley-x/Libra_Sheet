@@ -1,13 +1,15 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 class Tag {
   final int key;
-  final String name;
-  final Color? color;
+  String name;
+  Color color;
 
-  const Tag({
+  Tag({
     this.key = 0,
     required this.name,
-    this.color,
+    required this.color,
   });
+
+  static final empty = Tag(name: '', color: Colors.transparent);
 }

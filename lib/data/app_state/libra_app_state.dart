@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:libra_sheet/data/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
+import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
@@ -18,9 +19,11 @@ enum DetailScreen {
 
 class LibraAppState extends ChangeNotifier {
   late final CategoryState categories;
+  late final TagState tags;
 
   LibraAppState() {
     categories = CategoryState(this);
+    tags = TagState(this);
 
     _init();
   }
@@ -52,8 +55,6 @@ class LibraAppState extends ChangeNotifier {
     TimeValue.monthStart(2019, 9, 32.01),
     TimeValue.monthStart(2019, 10, 40.10)
   ];
-
-  final List<Tag> tags = testTags;
 
   //--------------------------------------------------------------------------------
   // Accounts

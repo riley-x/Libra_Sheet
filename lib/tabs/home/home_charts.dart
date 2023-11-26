@@ -109,10 +109,7 @@ List<Widget> _verticalPies(double height, BuildContext context) {
 }
 
 class _NetWorthGraph extends StatelessWidget {
-  const _NetWorthGraph(
-    this.height, {
-    super.key,
-  });
+  const _NetWorthGraph(this.height, {super.key});
 
   final double? height;
 

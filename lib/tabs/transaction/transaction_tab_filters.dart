@@ -231,7 +231,7 @@ class _TagSelector extends StatelessWidget {
           title: Text("Tags", style: Theme.of(context).textTheme.titleMedium),
           right: DropdownCheckboxMenu<Tag>(
             icon: Icons.add,
-            items: context.watch<LibraAppState>().tags,
+            items: context.watch<LibraAppState>().tags.list,
             builder: (context, tag) => Text(
               tag.name,
               maxLines: 1,

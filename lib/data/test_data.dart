@@ -54,7 +54,7 @@ const testCategoryValues = {
   10: 43000
 };
 
-const testTags = [
+final testTags = [
   Tag(key: 0, name: 'Tag 1', color: Colors.amber),
   Tag(key: 1, name: 'Tag 2', color: Colors.green),
   Tag(key: 2, name: 'Tag 3', color: Colors.blue),
