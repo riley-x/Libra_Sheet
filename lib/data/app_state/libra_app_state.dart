@@ -61,7 +61,7 @@ class LibraAppState extends ChangeNotifier {
 
   Future<void> _loadAccounts() async {
     accounts.addAll(await db.getAccounts());
-    if (kReleaseMode) {
+    if (!kReleaseMode) {
       for (final acc in accounts) {
         debugPrint("LibraAppState::_loadAccounts() $acc");
       }

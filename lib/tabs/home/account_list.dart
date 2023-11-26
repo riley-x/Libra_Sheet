@@ -98,25 +98,33 @@ class AccountList extends StatelessWidget {
           "Cash Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) AccountRow(account: account),
+        for (final account in appState.accounts) ...[
+          if (account.type == AccountType.cash) AccountRow(account: account),
+        ],
         const SizedBox(height: 20),
         Text(
           "Bank Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) AccountRow(account: account),
+        for (final account in appState.accounts) ...[
+          if (account.type == AccountType.bank) AccountRow(account: account),
+        ],
         const SizedBox(height: 20),
         Text(
           "Investment Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) AccountRow(account: account),
+        for (final account in appState.accounts) ...[
+          if (account.type == AccountType.investment) AccountRow(account: account),
+        ],
         const SizedBox(height: 20),
         Text(
           "Liabilities",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) AccountRow(account: account),
+        for (final account in appState.accounts) ...[
+          if (account.type == AccountType.liability) AccountRow(account: account),
+        ],
       ],
     );
   }
