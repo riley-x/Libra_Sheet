@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
@@ -266,30 +267,14 @@ class _EditCategory extends StatelessWidget {
           onCancel: state.clearFocus,
           onReset: state.reset,
           onSave: state.save,
-          onDelete: () => showDialog(
+          onDelete: () => showConfirmationDialog(
             context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text("Delete Category?"),
-                content: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Text("Are you sure you want to delete category ${state.focused.name}? "
-                      "This cannot be undone! Any sub-categories and linked transactions and "
-                      "rules will be broken."),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'Cancel'),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'Ok'),
-                    child: const Text('Ok'),
-                  ),
-                ],
-              );
-            },
-          ).then((msg) => state.delete(msg == 'Ok')),
+            title: "Delete Category?",
+            msg: 'Are you sure you want to delete category "${state.focused.name}"? '
+                "This cannot be undone! Any sub-categories and linked transactions and "
+                "rules will be broken.",
+            onClose: state.delete,
+          ),
         ),
       ],
     );
