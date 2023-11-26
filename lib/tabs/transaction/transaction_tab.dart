@@ -26,20 +26,30 @@ class _TransactionTab extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10, left: 10),
-            child: Scaffold(
-              body: TransactionGrid(
-                state.transactions,
-                maxRowsForName: 3,
-                fixedColumns: 1,
-                onSelect: context.read<LibraAppState>().focusTransaction,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10, left: 10),
+                  child: Scaffold(
+                    body: TransactionGrid(
+                      state.transactions,
+                      maxRowsForName: 3,
+                      fixedColumns: 1,
+                      onSelect: context.read<LibraAppState>().focusTransaction,
+                    ),
+                    floatingActionButton: FloatingActionButton(
+                      onPressed: () {}, // TODO
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
+                ),
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {}, // TODO
-                child: const Icon(Icons.add),
+              Text(
+                "Results are limited to the first 300 transactions",
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-            ),
+            ],
           ),
         ),
 

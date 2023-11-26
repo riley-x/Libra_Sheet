@@ -19,7 +19,7 @@ class TransactionTabState extends ChangeNotifier {
   bool maxValueError = false;
 
   Set<ExpenseType> expenseFilterSelected = {};
-  Set<int> accountFilterSelected = {};
+  Set<Account> accountFilterSelected = {};
   CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
   final List<Tag> tags = [];
 
@@ -36,11 +36,11 @@ class TransactionTabState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAccountFilter(Account account, bool selected) {
-    if (selected) {
-      accountFilterSelected.add(account.key);
+  void setAccountFilter(Account account, bool? selected) {
+    if (selected == true) {
+      accountFilterSelected.add(account);
     } else {
-      accountFilterSelected.remove(account.key);
+      accountFilterSelected.remove(account);
     }
     notifyListeners();
   }

@@ -63,8 +63,6 @@ class TransactionTabFilters extends StatelessWidget {
 
               /// Account
               const SizedBox(height: 15),
-              Text("Account", style: textStyle),
-              const SizedBox(height: 5),
               const _AccountChips(),
 
               /// Category
@@ -89,11 +87,37 @@ class _AccountChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionTabState>();
-    final accounts = context.select<LibraAppState, List<Account>>((it) => it.accounts);
-    return AccountFilterChips(
-      accounts: accounts,
-      selected: (account, i) => state.accountFilterSelected.contains(account.key),
-      onSelected: (account, i, selected) => state.setAccountFilter(account, selected),
+    final accounts = context.watch<LibraAppState>().accounts;
+    return Column(
+      children: [
+        TitleRow(
+          title: Text("Accounts", style: Theme.of(context).textTheme.titleMedium),
+          right: DropdownCheckboxMenu<Account>(
+            icon: Icons.add,
+            items: accounts,
+            builder: (context, acc) => Text(
+              acc.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            isChecked: (it) => state.accountFilterSelected.contains(it),
+            onChanged: state.setAccountFilter,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final acc in state.accountFilterSelected)
+              LibraChip(
+                acc.name,
+                onTap: () => state.setAccountFilter(acc, false),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }
