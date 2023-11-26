@@ -89,4 +89,22 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`transactionKey` INTEGER NOT NULL, "
       "`tagKey` INTEGER NOT NULL, "
       "PRIMARY KEY(`transactionKey`, `tagKey`))");
+  await db.execute('''
+INSERT INTO "categories" ("key", "name", "colorLong", "parentKey", "listIndex") VALUES
+('1', 'Paycheck', '4279939415', '-1', '0'),
+('2', 'Cash Back', '4278607389', '-1', '1'),
+('3', 'Gifts', '4293828260', '-1', '2'),
+('4', 'Interest', '4285770954', '-1', '3'),
+('5', 'Tax Refund', '4284238947', '-1', '4'),
+('6', 'Household', '4293104896', '-2', '0'),
+('7', 'Utilities', '4294957568', '6', '1'),
+('8', 'Rent/Mortgage', '4286863910', '6', '0'),
+('9', 'Supplies', '4292638720', '6', '2'),
+('10', 'Food', '4283611708', '-2', '1'),
+('11', 'Groceries', '4285851992', '10', '0'),
+('12', 'Takeout', '4291882280', '10', '1'),
+('13', 'Restaurants', '4278422059', '10', '2'),
+('14', 'Snacks', '4285369631', '10', '3'),
+('15', 'Alcohol', '4287806109', '10', '4');
+''');
 }

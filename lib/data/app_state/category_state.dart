@@ -15,6 +15,9 @@ class CategoryState {
   LibraAppState appState;
   CategoryState(this.appState);
 
+  Category income = Category.income;
+  Category expense = Category.expense;
+
   //----------------------------------------------------------------------------
   // Loading
   //----------------------------------------------------------------------------
@@ -53,9 +56,14 @@ class CategoryState {
       add(cat);
     } else {
       debugPrint("CategoryState::update() $cat");
-      final parentList = cat.parent!.subCats;
-      final ind = parentList.indexWhere((it) => it.key == cat.key);
-      parentList[ind] = cat;
+      old.copySoftFieldsFrom(cat);
+      // final parentList = cat.parent!.subCats;
+      // final ind = parentList.indexWhere((it) => it.key == cat.key);
+      // print("expense: ${Category.expense.subCats.hashCode}");
+      // print("parent: ${cat.parent.hashCode} ${cat.parent!.subCats.hashCode}");
+      // print("new: ${cat.hashCode} ${cat.subCats.hashCode}");
+      // print("old: ${parentList[ind].hashCode} ${parentList[ind].subCats.hashCode}");
+      // parentList[ind] = cat;
       appState.notifyListeners();
       updateCategory(cat);
     }

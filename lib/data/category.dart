@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
+class CategoryBase {}
+
 class Category {
   final int key;
-  final String name;
-  final Color? color;
+  String name;
+  Color? color;
   final List<Category> subCats = [];
-  final Category? parent;
-  late final ExpenseType type; // this must be consistent with parent!
 
-  /// Level of category
+  /// Parent category for nested categories. All level > 0 categories must have a valid parent.
+  /// DO NOT replace the parent category without updating this field! Consider using [copyFrom] to
+  /// in-place update the parent instead;
+  Category? parent;
+
+  /// This must be consistent with parent!
+  late final ExpenseType type;
+
+  /// Level of category. Should be [parent.level] + 1.
   ///   0: fixed categories (income/expense/ignore)
   ///   1: top-level user categories
   ///   2: user subCategories
@@ -53,6 +61,13 @@ class Category {
     subCats.addAll(other.subCats);
   }
 
+  /// Update current fields from [other].
+  void copySoftFieldsFrom(Category other) {
+    assert(other.parent == parent);
+    name = other.name;
+    color = other.color;
+  }
+
   Category copyWith({
     int? key,
     String? name,
@@ -88,7 +103,7 @@ class Category {
     level: 0,
     name: 'Income',
     color: const Color(0xFF004940),
-    subCats: [],
+    subCats: const [],
     type: ExpenseType.income,
   );
 
