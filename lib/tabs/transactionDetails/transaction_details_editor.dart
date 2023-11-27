@@ -162,8 +162,9 @@ class TransactionDetailsEditor extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           FormButtons(
-            showCancel: false,
+            // showCancel: false,
             allowDelete: (state.seed?.key ?? 0) > 0,
+            onCancel: context.read<LibraAppState>().popBackStack,
             onDelete: state.delete,
             onReset: state.reset,
             onSave: state.save,

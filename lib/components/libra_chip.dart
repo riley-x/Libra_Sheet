@@ -8,11 +8,13 @@ class LibraChip extends StatelessWidget {
     super.key,
     this.onTap,
     this.color,
+    this.style,
   });
 
   final String text;
   final Function()? onTap;
   final Color? color;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +28,7 @@ class LibraChip extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: Theme.of(context)
-              .textTheme
-              .labelLarge
+          style: (style ?? Theme.of(context).textTheme.labelLarge)
               ?.copyWith(color: (color == null) ? null : adaptiveTextColor(color!)),
         ),
       ),

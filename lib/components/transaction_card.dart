@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
@@ -18,11 +19,17 @@ class TransactionCard extends StatelessWidget {
   final EdgeInsets? margin;
 
   static const double colorIndicatorWidth = 6;
+  static const double colorIndicatorOffset = 10;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      // color: Color.alphaBlend(
+      //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
+      //     Theme.of(context).colorScheme.surface),
+      surfaceTintColor: trans.category?.color,
+      // shadowColor: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => onSelect?.call(trans),
@@ -30,21 +37,38 @@ class TransactionCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: Stack(
             children: [
-              Positioned(
-                left: 0,
-                width: colorIndicatorWidth,
-                top: 0,
-                bottom: 0,
-                child: Container(color: trans.category?.color ?? Colors.transparent),
-              ),
+              // Positioned(
+              //   left: 0,
+              //   width: colorIndicatorWidth,
+              //   top: 0,
+              //   bottom: 0,
+              //   child: Container(color: trans.category?.color ?? Colors.transparent),
+              // ),
               Padding(
-                padding: const EdgeInsets.only(left: colorIndicatorWidth + 10),
+                // padding: const EdgeInsets.only(left: colorIndicatorWidth + colorIndicatorOffset),
+                padding: const EdgeInsets.only(),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _TextElements(
                       trans: trans,
                       maxRowsForName: maxRowsForName,
                     ),
+                    if (trans.tags?.isEmpty == false) ...[
+                      const SizedBox(height: 3),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          for (final tag in trans.tags!)
+                            LibraChip(
+                              tag.name,
+                              color: tag.color,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                        ],
+                      ),
+                    ]
                   ],
                 ),
               ),
