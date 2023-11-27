@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A simple card with a large title and optional subtitle, plus a > arrow to indicate a submenu.
 class SettingsCard extends StatelessWidget {
   const SettingsCard({super.key, required this.text, this.subText, this.onTap});
 

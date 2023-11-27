@@ -2,24 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/edit_accounts_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
+import 'package:libra_sheet/tabs/settings/edit_rules_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_tags_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_screen_header.dart';
 import 'package:provider/provider.dart';
 
 import 'settings_card.dart';
 
-enum _CurrentTab {
+enum SettingsScreen {
   none(''),
   accounts('Accounts'),
   categories('Categories'),
   tags('Tags'),
   rules('Rules'),
+  incomeRules('Rules  |  Income', SettingsScreen.rules),
+  expenseRules('Rules  |  Expense', SettingsScreen.rules),
   transactions('Transactions'),
   database('Database');
 
-  const _CurrentTab(this.title);
+  const SettingsScreen(this.title, [this.parent]);
 
   final String title;
+  final SettingsScreen? parent;
 }
 
 class SettingsTab extends StatefulWidget {
@@ -30,15 +34,19 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  _CurrentTab tab = _CurrentTab.none;
+  SettingsScreen tab = SettingsScreen.none;
 
   void onBack() {
     setState(() {
-      tab = _CurrentTab.none;
+      if (tab.parent != null) {
+        tab = tab.parent!;
+      } else {
+        tab = SettingsScreen.none;
+      }
     });
   }
 
-  void onSelect(_CurrentTab it) {
+  void onSelect(SettingsScreen it) {
     setState(() {
       tab = it;
     });
@@ -48,9 +56,10 @@ class _SettingsTabState extends State<SettingsTab> {
   Widget build(BuildContext context) {
     Widget mainScreen = _SettingsTab(onSelect: onSelect);
     Widget auxContent = switch (tab) {
-      _CurrentTab.accounts => const EditAccountsScreen(),
-      _CurrentTab.categories => const EditCategoriesScreen(),
-      _CurrentTab.tags => const EditTagsScreen(),
+      SettingsScreen.accounts => const EditAccountsScreen(),
+      SettingsScreen.categories => const EditCategoriesScreen(),
+      SettingsScreen.tags => const EditTagsScreen(),
+      SettingsScreen.rules => RulesSettingsScreen(onSelect),
       _ => const SizedBox(),
     };
 
@@ -62,19 +71,21 @@ class _SettingsTabState extends State<SettingsTab> {
             create: (context) => EditCategoriesState(context.read<LibraAppState>())),
         ChangeNotifierProvider<EditTagsState>(
             create: (context) => EditTagsState(context.read<LibraAppState>())),
+        ChangeNotifierProvider<EditRulesState>(
+            create: (context) => EditRulesState(context.read<LibraAppState>())),
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
           bool isFullScreen = constraints.maxWidth < 850;
           Widget auxScreen = SettingsScreenHeader(
-            title: tab.title,
+            screen: tab,
             isFullScreen: isFullScreen,
             onBack: onBack,
             child: auxContent,
           );
 
           if (isFullScreen) {
-            if (tab == _CurrentTab.none) {
+            if (tab == SettingsScreen.none) {
               return mainScreen;
             } else {
               return auxScreen;
@@ -101,7 +112,7 @@ class _SettingsTabState extends State<SettingsTab> {
 class _SettingsTab extends StatelessWidget {
   const _SettingsTab({super.key, this.onSelect});
 
-  final Function(_CurrentTab tab)? onSelect;
+  final Function(SettingsScreen tab)? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -123,14 +134,14 @@ class _SettingsTab extends StatelessWidget {
                 SettingsCard(
                   text: 'Accounts',
                   subText: "Add and edit accounts.",
-                  onTap: () => onSelect?.call(_CurrentTab.accounts),
+                  onTap: () => onSelect?.call(SettingsScreen.accounts),
                 ),
                 const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Categories',
                   subText:
                       "Customize your categories. Each transaction is classified into a single category.",
-                  onTap: () => onSelect?.call(_CurrentTab.categories),
+                  onTap: () => onSelect?.call(SettingsScreen.categories),
                 ),
                 const SizedBox(height: 8),
                 SettingsCard(
@@ -138,25 +149,25 @@ class _SettingsTab extends StatelessWidget {
                   subText: "Customize your tags. "
                       // "Tags are lightweight labels to help organize similar transactions from different categories and accounts. "
                       "Each transaction can have multiple tags.",
-                  onTap: () => onSelect?.call(_CurrentTab.tags),
+                  onTap: () => onSelect?.call(SettingsScreen.tags),
                 ),
                 const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Rules',
                   subText: "Create automatic categorization rules when inputting CSV files.",
-                  onTap: () => onSelect?.call(_CurrentTab.rules),
+                  onTap: () => onSelect?.call(SettingsScreen.rules),
                 ),
                 const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Transactions',
                   subText: "Add new transactions.",
-                  onTap: () => onSelect?.call(_CurrentTab.transactions),
+                  onTap: () => onSelect?.call(SettingsScreen.transactions),
                 ),
                 const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Database',
                   subText: "Backup or restore the app database.",
-                  onTap: () => onSelect?.call(_CurrentTab.database),
+                  onTap: () => onSelect?.call(SettingsScreen.database),
                 ),
               ],
             ),

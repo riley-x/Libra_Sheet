@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
@@ -18,10 +19,12 @@ enum DetailScreen {
 class LibraAppState extends ChangeNotifier {
   late final CategoryState categories;
   late final TagState tags;
+  late final RuleState rules;
 
   LibraAppState() {
     categories = CategoryState(this);
     tags = TagState(this);
+    rules = RuleState(this);
 
     _init();
   }
@@ -37,6 +40,8 @@ class LibraAppState extends ChangeNotifier {
     futures.add(tags.load());
     _loadNetWorth(); // not needed downstream, no need to await (but do place before the await below)
     await Future.wait(futures);
+
+    rules.load(); // not needed until adding transactions/editing rules
 
     notifyListeners();
     // TODO
