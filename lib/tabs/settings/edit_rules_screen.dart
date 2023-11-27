@@ -136,7 +136,7 @@ class EditRulesScreen extends StatelessWidget {
         Scaffold(
           body: ReorderableListView(
             padding: const EdgeInsets.symmetric(vertical: 15),
-            onReorder: (oldIndex, newIndex) {},
+            onReorder: (oldIndex, newIndex) => appState.rules.reorder(type, oldIndex, newIndex),
             children: [
               for (int i = 0; i < rules.length; i++)
                 _RuleRow(

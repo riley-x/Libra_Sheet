@@ -3,6 +3,7 @@
 import 'dart:math';
 
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
@@ -42,9 +43,14 @@ class RuleState {
   Future<void> delete(CategoryRule rule) async {
     if (rule.category == null) return;
     final list = (rule.category!.type == ExpenseType.income) ? income : expense;
-    list.removeWhere((it) => it.key == rule.key);
+    final ind = list.indexWhere((it) => it.key == rule.key);
+    list.removeAt(ind);
     appState.notifyListeners();
-    await deleteRule(rule);
+
+    await libraDatabase?.transaction((txn) async {
+      await deleteRule(rule, db: txn);
+      await shiftRuleIndicies(rule.category!.type, ind + 1, list.length + 1, -1, db: txn);
+    });
   }
 
   /// Rules are modified in place already. This function serves to notify listeners, and also update
@@ -54,22 +60,24 @@ class RuleState {
     await updateRule(rule);
   }
 
-  // void reorder(Category parent, int oldIndex, int newIndex) async {
-  //   final cat = parent.subCats.removeAt(oldIndex);
-  //   if (newIndex > oldIndex) {
-  //     parent.subCats.insert(newIndex - 1, cat);
-  //   } else {
-  //     parent.subCats.insert(newIndex, cat);
-  //   }
-  //   appState.notifyListeners();
+  void reorder(ExpenseType type, int oldIndex, int newIndex) async {
+    final list = (type == ExpenseType.income) ? income : expense;
+    final rule = list.removeAt(oldIndex);
+    if (newIndex > oldIndex) {
+      list.insert(newIndex - 1, rule);
+    } else {
+      list.insert(newIndex, rule);
+    }
+    appState.notifyListeners();
 
-  //   await libraDatabase?.transaction((txn) async {
-  //     if (newIndex > oldIndex) {
-  //       await shiftListIndicies(parent.key, oldIndex, newIndex, -1, db: txn);
-  //       await updateCategory(cat, listIndex: newIndex - 1, db: txn);
-  //     } else {
-  //       await shiftListIndicies(parent.key, newIndex, oldIndex, 1, db: txn);
-  //       await updateCategory(cat, listIndex: newIndex, db: txn);
-  //     }
-  //   });
+    await libraDatabase?.transaction((txn) async {
+      if (newIndex > oldIndex) {
+        await shiftRuleIndicies(type, oldIndex, newIndex, -1, db: txn);
+        await updateRule(rule, listIndex: newIndex - 1, db: txn);
+      } else {
+        await shiftRuleIndicies(type, newIndex, oldIndex, 1, db: txn);
+        await updateRule(rule, listIndex: newIndex, db: txn);
+      }
+    });
+  }
 }

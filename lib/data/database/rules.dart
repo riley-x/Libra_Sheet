@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
-import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const rulesTable = '`rules`';
@@ -57,8 +55,10 @@ Future<int> insertRule(CategoryRule rule, {required int listIndex}) async {
   );
 }
 
-Future<void> updateRule(CategoryRule rule, {int? listIndex}) async {
-  await libraDatabase?.update(
+Future<int> updateRule(CategoryRule rule, {int? listIndex, DatabaseExecutor? db}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.update(
     rulesTable,
     _toMap(rule, listIndex),
     where: '$_key = ?',
@@ -66,8 +66,10 @@ Future<void> updateRule(CategoryRule rule, {int? listIndex}) async {
   );
 }
 
-Future<void> deleteRule(CategoryRule rule) async {
-  await libraDatabase?.delete(
+Future<int> deleteRule(CategoryRule rule, {DatabaseExecutor? db}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.delete(
     rulesTable,
     where: '$_key = ?',
     whereArgs: [rule.key],
@@ -84,5 +86,22 @@ Future<List<CategoryRule>> getRules(ExpenseType type, Map<int, Category> categor
   return List.generate(
     maps.length,
     (i) => _fromMap(maps[i], categoryMap),
+  );
+}
+
+Future<int> shiftRuleIndicies(
+  ExpenseType type,
+  int start,
+  int end,
+  int delta, {
+  DatabaseExecutor? db,
+}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.rawUpdate(
+    "UPDATE $rulesTable "
+    "SET $_index = $_index + ? "
+    "WHERE $_type = ? AND $_index >= ? AND $_index < ?",
+    [delta, type.name, start, end],
   );
 }
