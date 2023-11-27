@@ -82,6 +82,13 @@ class RulesSettingsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Text("Each rule matches a pattern to a category. If a transaction's name "
+                "contains the pattern, the rule is triggered, and the transaction "
+                "is assigned the corresponding category. Rules are not case sensitive, "
+                "and are matched first-come first-serve."),
+          ),
           const SizedBox(height: 8),
           SettingsCard(
             text: 'Income Rules',
@@ -124,6 +131,7 @@ class EditRulesScreen extends StatelessWidget {
         _EditRule(
           /// this prevents the IndexedStack from reusing the form editor, which causes a flicker
           key: ObjectKey(state.focused),
+          type: type,
         ),
         Scaffold(
           body: ReorderableListView(
@@ -208,7 +216,9 @@ class _RuleRow extends StatelessWidget {
 
 /// Single rule details editing form
 class _EditRule extends StatelessWidget {
-  const _EditRule({super.key});
+  const _EditRule({super.key, required this.type});
+
+  final ExpenseType type;
 
   @override
   Widget build(BuildContext context) {
@@ -227,22 +237,21 @@ class _EditRule extends StatelessWidget {
             },
             children: [
               labelRow(
-                context,
-                'Pattern',
-                LibraTextFormField(
-                  initial: state.focused.pattern,
-                  validator: (it) => (it?.isEmpty == true) ? '' : null,
-                  onSave: (it) => state.focused.pattern = it ?? '',
-                ),
-              ),
+                  context,
+                  'Pattern',
+                  LibraTextFormField(
+                    initial: state.focused.pattern,
+                    validator: (it) => (it?.isEmpty == true) ? '' : null,
+                    onSave: (it) => state.focused.pattern = it ?? '',
+                  ),
+                  tooltip: "Patterns are not case sensitive."),
               rowSpacing,
               labelRow(
                 context,
-                'Parent',
+                'Category',
                 CategorySelectionFormField(
                   initial: state.focused.category,
-                  categories: appState.categories
-                      .flattenedCategories(toFilterType(state.focused.category?.type)),
+                  categories: appState.categories.flattenedCategories(toFilterType(type)),
                   onSave: (it) => state.focused.category = it,
                   validator: (it) {
                     if (it == null) {

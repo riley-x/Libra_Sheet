@@ -29,7 +29,7 @@ Map<String, dynamic> _toMap(CategoryRule rule, [int? listIndex]) {
     _pattern: rule.pattern,
     _category: rule.category?.key ?? 0,
     _account: rule.account?.key ?? 0,
-    _type: rule.category?.type ?? ExpenseType.expense.name,
+    _type: rule.category?.type.name ?? ExpenseType.expense.name,
   };
   if (rule.key != 0) {
     map[_key] = rule.key;
