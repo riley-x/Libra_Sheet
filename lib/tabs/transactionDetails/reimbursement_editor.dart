@@ -54,6 +54,7 @@ class ReimbursementEditor extends StatelessWidget {
                   child: TransactionCard(
                     trans: state.reimburseTarget ?? dummyTransaction,
                     margin: const EdgeInsets.all(0),
+                    showTags: false,
                   ),
                 ),
               ),

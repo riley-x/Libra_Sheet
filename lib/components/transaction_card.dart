@@ -11,12 +11,14 @@ class TransactionCard extends StatelessWidget {
     this.maxRowsForName = 1,
     this.onSelect,
     this.margin,
+    this.showTags = true,
   });
 
   final Transaction trans;
   final int? maxRowsForName;
   final Function(Transaction)? onSelect;
   final EdgeInsets? margin;
+  final bool showTags;
 
   static const double colorIndicatorWidth = 6;
   static const double colorIndicatorOffset = 10;
@@ -54,7 +56,7 @@ class TransactionCard extends StatelessWidget {
                       trans: trans,
                       maxRowsForName: maxRowsForName,
                     ),
-                    if (trans.tags?.isEmpty == false) ...[
+                    if (showTags && trans.tags?.isNotEmpty == true) ...[
                       const SizedBox(height: 3),
                       Wrap(
                         spacing: 8,
