@@ -44,8 +44,9 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`colorLong` INTEGER NOT NULL, "
       "`parentKey` INTEGER NOT NULL, "
       "`listIndex` INTEGER NOT NULL)");
-  await db.execute(createRulesTableSql);
   await db.execute(createCategoryHistoryTableSql);
+  await db.execute(createRulesTableSql);
+  await db.execute(createTagsTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS `transaction_table` "
       "(`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
       "`name` TEXT NOT NULL, "
@@ -66,7 +67,6 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`incomeId` INTEGER NOT NULL, "
       "`value` INTEGER NOT NULL, "
       "PRIMARY KEY(`expenseId`, `incomeId`))");
-  await db.execute(createTagsTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS `tag_join` ("
       "`transactionKey` INTEGER NOT NULL, "
       "`tagKey` INTEGER NOT NULL, "

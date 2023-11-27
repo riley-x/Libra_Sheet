@@ -83,7 +83,6 @@ FutureOr<void> loadChildCategories(Transaction txn, Category parent) async {
       color: Color(map['colorLong'] as int),
       parent: parent,
     );
-    debugPrint("loadChildCategories() loaded $cat");
     parent.subCats.add(cat);
 
     if (cat.level <= 1) {
