@@ -17,11 +17,60 @@ class TransactionCard extends StatelessWidget {
   final Function(Transaction)? onSelect;
   final EdgeInsets? margin;
 
+  static const double colorIndicatorWidth = 6;
+
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    final dtFormat = DateFormat("M/d/yy");
+    return Card(
+      margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => onSelect?.call(trans),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                width: colorIndicatorWidth,
+                top: 0,
+                bottom: 0,
+                child: Container(color: trans.category?.color ?? Colors.transparent),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: colorIndicatorWidth + 10),
+                child: Column(
+                  children: [
+                    _TextElements(
+                      trans: trans,
+                      maxRowsForName: maxRowsForName,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
+final _dtFormat = DateFormat("M/d/yy");
+
+class _TextElements extends StatelessWidget {
+  const _TextElements({
+    super.key,
+    required this.trans,
+    required this.maxRowsForName,
+  });
+
+  final Transaction trans;
+  final int? maxRowsForName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     var subText = '';
     if (trans.account != null) {
       subText += trans.account!.name;
@@ -33,52 +82,42 @@ class TransactionCard extends StatelessWidget {
       subText += trans.category!.name;
     }
 
-    return Card(
-      margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => onSelect?.call(trans),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Row(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trans.name,
-                      maxLines: maxRowsForName,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      subText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                    ),
-                  ],
-                ),
+              Text(
+                trans.name,
+                maxLines: maxRowsForName,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    trans.value.dollarString(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                        color: (trans.value < 0) ? theme.colorScheme.error : Colors.green),
-                  ),
-                  Text(
-                    dtFormat.format(trans.date),
-                  ),
-                ],
+              Text(
+                subText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
               ),
             ],
           ),
         ),
-      ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              trans.value.dollarString(),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: (trans.value < 0) ? Colors.red : Colors.green),
+            ),
+            Text(
+              _dtFormat.format(trans.date),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

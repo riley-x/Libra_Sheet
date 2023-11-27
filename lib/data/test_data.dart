@@ -73,7 +73,9 @@ final List<Transaction> testTransactions = [
     date: DateTime(2023, 11, 16),
     value: -502300,
     account: testAccounts[0],
+    category: testCategories[0],
     reimbursements: [],
+    tags: testTags,
   ),
   Transaction(
     key: 2,
