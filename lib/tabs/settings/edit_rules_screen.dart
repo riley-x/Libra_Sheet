@@ -34,7 +34,7 @@ class EditRulesState extends ChangeNotifier {
 
   void setFocus(CategoryRule? it, [ExpenseType type = ExpenseType.expense]) {
     if (it == null) {
-      focused = CategoryRule(type: type, pattern: "", category: null);
+      focused = CategoryRule(pattern: "", category: null);
     } else {
       focused = it;
     }
@@ -96,53 +96,105 @@ class RulesSettingsScreen extends StatelessWidget {
   }
 }
 
-// /// Settings screen for editing tags. This lists the tags, and clicking them switches to an
-// /// editor form.
-// class EditRulesScreen extends StatelessWidget {
-//   const EditRulesScreen({super.key});
+/// Settings screen for editing rules. This lists the rules for one of the expense types, allowing
+/// to reorder them, and clicking on a rule opens the editor screen.
+class EditRulesScreen extends StatelessWidget {
+  const EditRulesScreen(this.type, {super.key});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final appState = context.watch<LibraAppState>();
-//     final state = context.watch<EditRulesState>();
+  final ExpenseType type;
 
-//     /// The IndexedStack preserves the scroll state of the scroll I think...
-//     return IndexedStack(
-//       index: (state.isFocused) ? 0 : 1,
-//       children: [
-//         _EditRule(
-//           /// this prevents the IndexedStack from reusing the form editor, which causes a flicker
-//           key: ObjectKey(state.focused),
-//         ),
-//         Scaffold(
-//           body: SingleChildScrollView(
-//             child: Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-//               child: Wrap(
-//                 spacing: 8,
-//                 runSpacing: 4,
-//                 children: [
-//                   for (final tag in appState.tags.list)
-//                     LibraChip(
-//                       tag.name,
-//                       color: tag.color,
-//                       onTap: () => state.setFocus(tag),
-//                     ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//           floatingActionButton: FloatingActionButton(
-//             backgroundColor: Theme.of(context).colorScheme.primary,
-//             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-//             onPressed: () => state.setFocus(null),
-//             child: const Icon(Icons.add),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<LibraAppState>();
+    final state = context.watch<EditRulesState>();
+    final rules = (type == ExpenseType.income) ? appState.rules.income : appState.rules.expense;
+
+    /// The IndexedStack preserves the scroll state of the scroll I think...
+    return IndexedStack(
+      index: (state.isFocused) ? 0 : 1,
+      children: [
+        // _EditRule(
+        //   /// this prevents the IndexedStack from reusing the form editor, which causes a flicker
+        //   key: ObjectKey(state.focused),
+        // ),
+        Placeholder(),
+        Scaffold(
+          body: ReorderableListView(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            onReorder: (oldIndex, newIndex) {},
+            children: [
+              for (int i = 0; i < rules.length; i++)
+                _RuleRow(
+                  rule: rules[i],
+                  key: ObjectKey(rules[i]),
+                  isLast: i == rules.length - 1,
+                )
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            onPressed: () => state.setFocus(null),
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RuleRow extends StatelessWidget {
+  const _RuleRow({
+    super.key,
+    required this.rule,
+    required this.isLast,
+  });
+
+  final CategoryRule rule;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {}, // TODO
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 10,
+              child: Text(
+                rule.pattern,
+                maxLines: 1,
+              ),
+            ),
+            Container(
+              width: 4,
+              height: 20,
+              color: rule.category?.color ?? Colors.transparent,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              flex: 5,
+              child: Text(
+                rule.category?.name ?? '',
+                maxLines: 1,
+              ),
+            ),
+            const SizedBox(width: 40), // this is where the drag handle is added
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 // /// Account details form
 // class _EditTag extends StatelessWidget {

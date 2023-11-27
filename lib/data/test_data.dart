@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -58,6 +60,11 @@ final testTags = [
   Tag(key: 0, name: 'Tag 1', color: Colors.amber),
   Tag(key: 1, name: 'Tag 2', color: Colors.green),
   Tag(key: 2, name: 'Tag 3', color: Colors.blue),
+];
+
+final testRules = [
+  CategoryRule(pattern: "THIASDF ASDF LKASDJF ASDFKLJ  ASKLJFKLJAS", category: testCategories[0]),
+  CategoryRule(pattern: "4320558230495890358", category: testCategories[1]),
 ];
 
 final testAllocations = [

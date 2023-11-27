@@ -2,6 +2,7 @@
 
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
+import 'package:libra_sheet/data/test_data.dart';
 
 /// Helper module for handling the category rules
 class RuleState {
@@ -12,7 +13,7 @@ class RuleState {
   RuleState(this.appState);
 
   final List<CategoryRule> income = [];
-  final List<CategoryRule> expense = [];
+  final List<CategoryRule> expense = testRules;
 
   //----------------------------------------------------------------------------
   // Modification Functions
