@@ -18,4 +18,13 @@ class CategoryRule {
     pattern: "",
     category: null,
   );
+
+  CategoryRule copyWith({required int key}) {
+    return CategoryRule(
+      key: key,
+      pattern: pattern,
+      category: category,
+      account: account,
+    );
+  }
 }

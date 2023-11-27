@@ -215,4 +215,17 @@ extension CategoryList on List<Category> {
     });
     return out;
   }
+
+  void _addToKeyMap(Map<int, Category> map) {
+    forEach((cat) {
+      map[cat.key] = cat;
+      cat.subCats._addToKeyMap(map);
+    });
+  }
+
+  Map<int, Category> createKeyMap() {
+    final out = <int, Category>{};
+    _addToKeyMap(out);
+    return out;
+  }
 }

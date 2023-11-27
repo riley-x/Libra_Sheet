@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
-import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
-import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
@@ -20,7 +17,8 @@ class EditRulesState extends ChangeNotifier {
 
   EditRulesState(this.appState);
 
-  /// State for editing a target rule
+  /// State for editing a target rule. All fields are saved to [focused], on form.save(),
+  /// which edits it in place!
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isFocused = false;
   CategoryRule focused = CategoryRule.empty;
@@ -61,7 +59,7 @@ class EditRulesState extends ChangeNotifier {
 
   void save() async {
     if (formKey.currentState?.validate() ?? false) {
-      formKey.currentState?.save();
+      formKey.currentState?.save(); // this saves all fields to [focused]
       if (focused.key == 0) {
         appState.rules.add(focused);
       } else {
