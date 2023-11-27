@@ -67,6 +67,7 @@ class _SettingsTabState extends State<SettingsTab> {
     };
 
     return MultiProvider(
+      /// The providers need to be above the LayoutBuilder to survive a screen switch
       providers: [
         ChangeNotifierProvider<EditAccountState>(
             create: (context) => EditAccountState(context.read<LibraAppState>())),

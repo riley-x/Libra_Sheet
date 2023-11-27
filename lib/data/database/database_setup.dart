@@ -47,7 +47,8 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
       "`pattern` TEXT NOT NULL, "
       "`categoryKey` INTEGER NOT NULL, "
-      "`isIncome` INTEGER NOT NULL, "
+      "`accountKey` INTEGER NOT NULL, "
+      "`type` TEXT NOT NULL, "
       "`listIndex` INTEGER NOT NULL)");
   await db.execute(createCategoryHistoryTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS `transaction_table` "

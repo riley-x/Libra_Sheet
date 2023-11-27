@@ -63,8 +63,8 @@ final testTags = [
 ];
 
 final testRules = [
-  CategoryRule(pattern: "THIASDF ASDF LKASDJF ASDFKLJ  ASKLJFKLJAS", category: testCategories[0]),
-  CategoryRule(pattern: "4320558230495890358", category: testCategories[1]),
+  CategoryRule(key: 1, pattern: "THIASDF ASDF LKASDJF ASDFKLJ", category: testCategories[0]),
+  CategoryRule(key: 2, pattern: "4320558230495890358", category: testCategories[1]),
 ];
 
 final testAllocations = [
