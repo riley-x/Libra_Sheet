@@ -1,4 +1,3 @@
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
@@ -41,6 +40,7 @@ class _MainScreen extends StatelessWidget {
             rowSpacing,
           ],
         ),
+        const Expanded(child: _CsvGrid()),
       ],
     );
   }
@@ -75,6 +75,34 @@ class _FileCard extends StatelessWidget {
                   child: Text(state.file!.name),
                 ),
         ),
+      ),
+    );
+  }
+}
+
+class _CsvGrid extends StatelessWidget {
+  const _CsvGrid({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
+    if (state.file == null) return const SizedBox();
+    return SingleChildScrollView(
+      child: Table(
+        border: TableBorder.all(width: 0.3),
+        children: state.rawLines.map((row) {
+          return TableRow(
+            children: row.map((item) {
+              return Padding(
+                padding: const EdgeInsets.all(1),
+                child: Text(
+                  item.toString(),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              );
+            }).toList(),
+          );
+        }).toList(),
       ),
     );
   }
