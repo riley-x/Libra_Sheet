@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:libra_sheet/data/database/accounts.dart';
+import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/tags.dart';
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -47,21 +49,8 @@ FutureOr<void> _createDatabse14(Database db) async {
   await db.execute(createCategoryHistoryTableSql);
   await db.execute(createRulesTableSql);
   await db.execute(createTagsTableSql);
-  await db.execute("CREATE TABLE IF NOT EXISTS `transaction_table` "
-      "(`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-      "`name` TEXT NOT NULL, "
-      "`date` INTEGER NOT NULL, "
-      "`accountKey` INTEGER NOT NULL, "
-      "`categoryKey` INTEGER NOT NULL, "
-      "`value` INTEGER NOT NULL, "
-      "`valueAfterReimbursements` INTEGER NOT NULL)");
-  await db.execute("CREATE TABLE IF NOT EXISTS `allocations` ("
-      "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-      "`name` TEXT NOT NULL, "
-      "`transactionKey` INTEGER NOT NULL, "
-      "`categoryKey` INTEGER NOT NULL, "
-      "`value` INTEGER NOT NULL, "
-      "`listIndex` INTEGER NOT NULL)");
+  await db.execute(createTransactionsTableSql);
+  await db.execute(createAllocationsTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS `reimbursements` ("
       "`expenseId` INTEGER NOT NULL, "
       "`incomeId` INTEGER NOT NULL, "
