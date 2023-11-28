@@ -35,10 +35,12 @@ class PreviewTransactionsScreen extends StatelessWidget {
               const SizedBox(
                 width: 450,
                 child: _TransactionDetails(),
-              )
+              ),
             ],
           ),
         ),
+        const Divider(height: 1, thickness: 1),
+        const _BottomBar(),
       ],
     );
   }
@@ -82,5 +84,54 @@ class _TransactionDetails extends StatelessWidget {
         ),
       );
     }
+  }
+}
+
+class _BottomBar extends StatelessWidget {
+  const _BottomBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
+    return Container(
+      height: 35,
+      color: Theme.of(context).colorScheme.primaryContainer.withAlpha(70),
+      child: Row(
+        children: [
+          const SizedBox(width: 10),
+          TextButton(
+            onPressed: state.clearTransactions,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 5),
+                Icon(
+                  Icons.navigate_before,
+                  size: 26,
+                ),
+                SizedBox(width: 5),
+                Text('Back'),
+              ],
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: () {}, // TODO
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 5),
+                Text('Save'),
+                Icon(
+                  Icons.navigate_next,
+                  size: 26,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 5),
+        ],
+      ),
+    );
   }
 }
