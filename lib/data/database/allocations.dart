@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:libra_sheet/data/objects/transaction.dart' as lt;
 
@@ -40,6 +41,15 @@ Map<String, dynamic> _toMap(lt.Transaction parent, Allocation a, int listIndex) 
   return map;
 }
 
+Allocation _fromMap(Map<int, Category> categories, Map<String, dynamic> map) {
+  return Allocation(
+    key: map[_key],
+    name: map[_name],
+    category: categories[map[_category]],
+    value: map[_value],
+  );
+}
+
 /// This modifies the allocation's key in-place!
 FutureOr<void> insertAllocation(
   lt.Transaction parent,
@@ -55,4 +65,39 @@ FutureOr<void> insertAllocation(
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
   return;
+}
+
+/// Returns a map from transaction key to the allocations.
+Future<Map<int, List<Allocation>>> loadAllocations(
+  Map<int, Category> categories, {
+  DatabaseExecutor? db,
+}) async {
+  final out = <int, List<Allocation>>{};
+
+  db = db ?? libraDatabase;
+  if (db == null) return out;
+
+  final maps = await db.query(
+    allocationsTable,
+    orderBy: "$_transaction, $_index",
+  );
+
+  int currentTransaction = -1;
+  List<Allocation> currentList = [];
+
+  void checkSaveList(int nextId) {
+    if (currentTransaction != -1 && currentTransaction != nextId) {
+      out[currentTransaction] = currentList;
+      currentTransaction = nextId;
+      currentList = [];
+    }
+  }
+
+  for (final row in maps) {
+    checkSaveList(row[_transaction] as int);
+    currentList.add(_fromMap(categories, row));
+  }
+  checkSaveList(-1);
+
+  return out;
 }
