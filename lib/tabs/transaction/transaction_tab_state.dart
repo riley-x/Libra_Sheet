@@ -34,6 +34,7 @@ class TransactionTabState extends ChangeNotifier {
   void loadTransactions() async {
     notifyListeners();
     filters.categories = categoryFilterSelected.activeKeys();
+    filters.accounts = accountFilterSelected.map((e) => e.key);
     transactions = await service.load(filters);
     notifyListeners();
   }

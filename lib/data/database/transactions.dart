@@ -148,8 +148,9 @@ class TransactionFilters {
   int? maxValue;
   DateTime? startTime;
   DateTime? endTime;
-  Account? account;
+  Iterable<int>? accounts;
   Iterable<int>? categories;
+  Iterable<int>? tags; // TODO
   int? limit;
 
   TransactionFilters({
@@ -157,7 +158,7 @@ class TransactionFilters {
     this.maxValue,
     this.startTime,
     this.endTime,
-    this.account,
+    this.accounts,
     this.categories,
     this.limit = 300,
   });
@@ -178,7 +179,8 @@ class TransactionFilters {
     LEFT OUTER JOIN 
       $allocationsTable a on a.$allocationsTransaction = t.$_key
   ''';
-  // GROUP_CONCAT(a.$allocationsKey) as allocs --> null or "1,2,3"
+
+  List args = [];
 
   var firstWhere = true;
   void add(String query) {
@@ -190,7 +192,14 @@ class TransactionFilters {
     }
   }
 
-  List args = [];
+  /// No list support in sqflite
+  void addList(String column, Iterable<int>? list) {
+    if (list != null && list.isNotEmpty) {
+      add("$column in (${List.filled(list.length, '?').join(',')})");
+      args.addAll(list);
+    }
+  }
+
   if (filters.minValue != null) {
     add("$_value >= ?");
     args.add(filters.minValue);
@@ -207,16 +216,9 @@ class TransactionFilters {
     add("$_date <= ?");
     args.add(filters.endTime!.millisecondsSinceEpoch);
   }
-  if (filters.account != null) {
-    add("$_account = ?");
-    args.add(filters.account!.key);
-  }
-  if (filters.categories != null && filters.categories!.isNotEmpty) {
-    /// No list support in sqflite
-    final n = filters.categories!.length;
-    add("$_category in (${List.filled(n, '?').join(',')})");
-    args.addAll(filters.categories!);
-  }
+  addList(_account, filters.accounts);
+  addList(_category, filters.categories);
+
   q += " GROUP BY t.$_key";
 
   q += " ORDER BY date DESC";
