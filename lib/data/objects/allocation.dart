@@ -44,7 +44,7 @@ class MutableAllocation implements Allocation {
     return "MAllocation($key, $name, $value, ${category?.name})";
   }
 
-  Allocation withKey(int key) {
-    return Allocation(key: key, name: name, category: category, value: value);
+  Allocation freeze([int? key]) {
+    return Allocation(key: key ?? this.key, name: name, category: category, value: value);
   }
 }

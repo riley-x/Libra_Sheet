@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
@@ -15,8 +16,10 @@ class TransactionService extends ChangeNotifier {
   // Database Interface
   //----------------------------------------------------------------------------
   Future<void> saveAll(List<Transaction> transactions) async {
-    for (final t in transactions) {
-      insertTransaction(t);
-    }
+    libraDatabase?.transaction((txn) async {
+      for (final t in transactions) {
+        await insertTransaction(t, txn: txn);
+      }
+    });
   }
 }

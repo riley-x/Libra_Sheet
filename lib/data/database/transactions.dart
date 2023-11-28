@@ -60,7 +60,7 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
 
   if (t.allocations != null) {
     for (int i = 0; i < (t.allocations!.length); i++) {
-      await insertAllocation(t, t.allocations![i], listIndex: i);
+      await insertAllocation(t, t.allocations![i], listIndex: i, database: txn);
     }
   }
 

@@ -31,6 +31,7 @@ class TransactionDetailsState extends ChangeNotifier {
   /// Updated values for the respective editors. These are used to save the values retrieved from
   /// the various FormFields' onSave methods. They don't contain any UI state, so don't need to
   /// notifyListeners.
+  /// TODO replace these with the now non-const version of the class
   final MutableAllocation updatedAllocation = MutableAllocation();
   final MutableReimbursement updatedReimbursement = MutableReimbursement();
 
@@ -156,11 +157,11 @@ class TransactionDetailsState extends ChangeNotifier {
     if (allocationFormKey.currentState?.validate() ?? false) {
       allocationFormKey.currentState?.save();
       if (focusedAllocation == null) {
-        allocations.add(updatedAllocation);
+        allocations.add(updatedAllocation.freeze());
       } else {
         for (int i = 0; i < allocations.length; i++) {
           if (allocations[i] == focusedAllocation) {
-            allocations[i] = updatedAllocation.withKey(allocations[i].key);
+            allocations[i] = updatedAllocation.freeze(allocations[i].key);
             break;
           }
         }
