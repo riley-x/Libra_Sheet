@@ -162,12 +162,12 @@ class _SettingsTab extends StatelessWidget {
                   onTap: () => onSelect?.call(SettingsScreen.rules),
                 ),
                 const SizedBox(height: 8),
-                SettingsCard(
-                  text: 'Transactions',
-                  subText: "Add new transactions.",
-                  onTap: () => onSelect?.call(SettingsScreen.transactions),
-                ),
-                const SizedBox(height: 8),
+                // SettingsCard(
+                //   text: 'Transactions',
+                //   subText: "Add new transactions.",
+                //   onTap: () => onSelect?.call(SettingsScreen.transactions),
+                // ),
+                // const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Database',
                   subText: "Backup or restore the app database.",

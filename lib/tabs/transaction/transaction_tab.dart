@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_filters.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class TransactionTab extends StatelessWidget {
   const TransactionTab({super.key});
@@ -38,9 +39,29 @@ class _TransactionTab extends StatelessWidget {
                       fixedColumns: 1,
                       onSelect: context.read<LibraAppState>().focusTransaction,
                     ),
-                    floatingActionButton: FloatingActionButton(
-                      onPressed: () {}, // TODO
-                      child: const Icon(Icons.add),
+                    floatingActionButton: SpeedDial(
+                      icon: Icons.add,
+                      activeIcon: Icons.close,
+                      useRotationAnimation: true,
+                      spacing: 3,
+                      renderOverlay: false,
+                      children: [
+                        SpeedDialChild(
+                          child: const Icon(Icons.brush),
+                          backgroundColor: Colors.deepOrange,
+                          foregroundColor: Colors.white,
+                          label: 'Add CSV',
+                          onTap: () => debugPrint('SECOND CHILD'),
+                        ),
+                        SpeedDialChild(
+                          child: const Icon(Icons.margin),
+                          backgroundColor: Colors.indigo,
+                          foregroundColor: Colors.white,
+                          label: 'Add manual',
+                          visible: true,
+                          onTap: () => {},
+                        ),
+                      ],
                     ),
                   ),
                 ),

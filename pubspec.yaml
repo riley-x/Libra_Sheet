@@ -45,6 +45,7 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.8.3
   sqflite_common_ffi:
+  flutter_speed_dial: ^7.0.0
 
 
 dev_dependencies:
