@@ -146,7 +146,10 @@ class TransactionDetailsState extends ChangeNotifier {
     }
     focusedAllocation = alloc;
     focus = TransactionDetailActiveFocus.allocation;
-    notifyListeners();
+    resetAllocation();
+    // it's important to call reset() here so the forms don't keep stale data from previous focuses.
+    // this is orthogonal to the Key(initial) used by the forms; if the initial state didn't change
+    // (i.e. both null when adding accounts back to back), only the reset above will clear the form.
   }
 
   void saveAllocation() {
@@ -173,6 +176,7 @@ class TransactionDetailsState extends ChangeNotifier {
 
   void resetAllocation() {
     allocationFormKey.currentState?.reset();
+    notifyListeners();
   }
 
   void setReimbursementTarget(Transaction? it) {

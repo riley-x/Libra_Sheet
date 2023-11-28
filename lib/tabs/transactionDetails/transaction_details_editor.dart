@@ -29,150 +29,156 @@ class TransactionDetailsEditor extends StatelessWidget {
     /// Form rebuilds every FormField descendant on every change of one of the fields (i.e. it calls
     /// their respective builder functions). (Tested and noted in the onChange() callback).
     /// This may not be ideal...
-    return Form(
-      key: state.formKey,
-      child: Column(
-        children: [
-          Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FixedColumnWidth(250),
-            },
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        child: Form(
+          key: state.formKey,
+          child: Column(
             children: [
-              labelRow(
-                context,
-                'Account',
-                AccountSelectionFormField(
-                  height: 35,
-                  initial: state.seed?.account,
-                  onSave: (it) => state.account = it,
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Name',
-                LibraTextFormField(
-                  initial: state.seed?.name,
-                  minLines: 3,
-                  maxLines: 3,
-                  validator: (it) => null,
-                  onSave: (it) => state.name = it,
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Date',
-                _DateField(
-                  initial: state.seed?.date,
-                  onSave: (it) => state.date = it,
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Value',
-                ValueField(
-                  initial: state.seed?.value,
-                  onSave: (it) => state.value = it,
-                  onChanged: state.onValueChanged,
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                  context,
-                  'Category',
-                  CategorySelectionFormField(
-                    height: 35,
-                    initial: state.seed?.category,
-                    onSave: (it) => state.category = it,
-                    type: state.expenseType,
+              Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                columnWidths: const {
+                  0: IntrinsicColumnWidth(),
+                  1: FixedColumnWidth(250),
+                },
+                children: [
+                  labelRow(
+                    context,
+                    'Account',
+                    AccountSelectionFormField(
+                      height: 35,
+                      initial: state.seed?.account,
+                      onSave: (it) => state.account = it,
+                    ),
                   ),
-                  tooltip: "Choose the 'Ignore' category to not count this\n"
-                      "transaction in your income or expenses."),
-              rowSpacing,
-              labelRow(
-                context,
-                'Tags',
-                _TagSelector(
-                  tags: state.tags,
-                  onChanged: state.onTagChanged,
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Note',
-                LibraTextFormField(
-                  initial: state.seed?.note,
-                  validator: (it) => null,
-                  onSave: (it) => state.note = it,
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Allocations',
-                Column(
-                  children: [
-                    for (final alloc in state.allocations) ...[
-                      AllocationCard(
-                        alloc,
-                        onTap: (it) => state.focusAllocation(it),
-                      ),
-                      const SizedBox(height: 6)
-                    ],
-                    AllocationCard(
-                      null,
-                      onTap: (it) => state.focusAllocation(it),
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Name',
+                    LibraTextFormField(
+                      initial: state.seed?.name,
+                      minLines: 3,
+                      maxLines: 3,
+                      validator: (it) => null,
+                      onSave: (it) => state.name = it,
                     ),
-                  ],
-                ),
-                labelAlign: TableCellVerticalAlignment.top,
-                tooltip: "An allocation assigns a portion of the\n"
-                    "transaction's value to a separate category.",
-              ),
-              rowSpacing,
-              rowSpacing,
-              labelRow(
-                context,
-                'Reimbursements',
-                Column(
-                  children: [
-                    for (final r in state.reimbursements) ...[
-                      ReimbursementCard(
-                        r,
-                        onTap: (it) => state.focusReimbursement(it),
-                      ),
-                      const SizedBox(height: 6)
-                    ],
-                    ReimbursementCard(
-                      null,
-                      onTap: (it) => state.focusReimbursement(it),
+                  ),
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Date',
+                    _DateField(
+                      initial: state.seed?.date,
+                      onSave: (it) => state.date = it,
                     ),
-                  ],
-                ),
-                labelAlign: TableCellVerticalAlignment.top,
-                tooltip: "A reimbursement cancels a specified amount\n"
-                    "from two opposite transactions. For example,\n"
-                    "a \$100 dining transaction can be reimbursed\n"
-                    "by four \$20 Venmo payments. The net effect \n"
-                    "is a \$20 addition to the dining category.",
+                  ),
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Value',
+                    ValueField(
+                      initial: state.seed?.value,
+                      onSave: (it) => state.value = it,
+                      onChanged: state.onValueChanged,
+                    ),
+                  ),
+                  rowSpacing,
+                  labelRow(
+                      context,
+                      'Category',
+                      CategorySelectionFormField(
+                        height: 35,
+                        initial: state.seed?.category,
+                        onSave: (it) => state.category = it,
+                        type: state.expenseType,
+                      ),
+                      tooltip: "Choose the 'Ignore' category to not count this\n"
+                          "transaction in your income or expenses."),
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Tags',
+                    _TagSelector(
+                      tags: state.tags,
+                      onChanged: state.onTagChanged,
+                    ),
+                  ),
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Note',
+                    LibraTextFormField(
+                      initial: state.seed?.note,
+                      validator: (it) => null,
+                      onSave: (it) => state.note = it,
+                    ),
+                  ),
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Allocations',
+                    Column(
+                      children: [
+                        for (final alloc in state.allocations) ...[
+                          AllocationCard(
+                            alloc,
+                            onTap: (it) => state.focusAllocation(it),
+                          ),
+                          const SizedBox(height: 6)
+                        ],
+                        AllocationCard(
+                          null,
+                          onTap: (it) => state.focusAllocation(it),
+                        ),
+                      ],
+                    ),
+                    labelAlign: TableCellVerticalAlignment.top,
+                    tooltip: "An allocation assigns a portion of the\n"
+                        "transaction's value to a separate category.",
+                  ),
+                  rowSpacing,
+                  rowSpacing,
+                  labelRow(
+                    context,
+                    'Reimbursements',
+                    Column(
+                      children: [
+                        for (final r in state.reimbursements) ...[
+                          ReimbursementCard(
+                            r,
+                            onTap: (it) => state.focusReimbursement(it),
+                          ),
+                          const SizedBox(height: 6)
+                        ],
+                        ReimbursementCard(
+                          null,
+                          onTap: (it) => state.focusReimbursement(it),
+                        ),
+                      ],
+                    ),
+                    labelAlign: TableCellVerticalAlignment.top,
+                    tooltip: "A reimbursement cancels a specified amount\n"
+                        "from two opposite transactions. For example,\n"
+                        "a \$100 dining transaction can be reimbursed\n"
+                        "by four \$20 Venmo payments. The net effect \n"
+                        "is a \$20 addition to the dining category.",
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              FormButtons(
+                // showCancel: false,
+                allowDelete: (state.seed != null),
+                onCancel: () => onCancel?.call() ?? context.read<LibraAppState>().popBackStack,
+                onDelete: state.delete,
+                onReset: state.reset,
+                onSave: state.save,
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          FormButtons(
-            // showCancel: false,
-            allowDelete: (state.seed != null),
-            onCancel: () => onCancel?.call() ?? context.read<LibraAppState>().popBackStack,
-            onDelete: state.delete,
-            onReset: state.reset,
-            onSave: state.save,
-          ),
-        ],
+        ),
       ),
     );
   }

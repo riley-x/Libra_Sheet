@@ -38,13 +38,7 @@ class _TransactionDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const mainEditor = SingleChildScrollView(
-      physics: ClampingScrollPhysics(),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        child: TransactionDetailsEditor(),
-      ),
-    );
+    const mainEditor = TransactionDetailsEditor();
 
     final focus =
         context.select<TransactionDetailsState, TransactionDetailActiveFocus>((it) => it.focus);
