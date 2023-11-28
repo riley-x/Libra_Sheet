@@ -8,6 +8,7 @@ class FocusTextField extends StatefulWidget {
   final bool active;
   final int? minLines;
   final int? maxLines;
+  final TextStyle? style;
   final Function(String?)? onChanged;
 
   const FocusTextField({
@@ -18,6 +19,7 @@ class FocusTextField extends StatefulWidget {
     this.active = false,
     this.minLines,
     this.maxLines = 1,
+    this.style,
     this.onChanged,
   });
 
@@ -50,8 +52,8 @@ class _FocusTextFieldState extends State<FocusTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
+    return LimitedBox(
+      maxWidth: 100,
       child: TextField(
         decoration: InputDecoration(
           filled: widget.active && !widget.error,
@@ -69,6 +71,7 @@ class _FocusTextFieldState extends State<FocusTextField> {
         focusNode: _focus,
         maxLines: widget.maxLines,
         minLines: widget.minLines,
+        style: widget.style,
       ),
     );
   }

@@ -1,10 +1,13 @@
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 
 enum CsvField { date, name, value, note, none }
 
 class AddCsvState extends ChangeNotifier {
+  Account? account;
+
   XFile? file;
   List<List<String>> rawLines = [];
   int nCols = 0;
@@ -31,6 +34,11 @@ class AddCsvState extends ChangeNotifier {
     rawLines = converter.convert(input);
     nCols = rawLines.firstOrNull?.length ?? 0;
     columnTypes = List.filled(nCols, CsvField.none);
+    notifyListeners();
+  }
+
+  void setAccount(Account? acc) {
+    account = acc;
     notifyListeners();
   }
 

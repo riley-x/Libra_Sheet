@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
+import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
@@ -22,6 +24,7 @@ class _MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
     return Column(
       children: [
         const CommonBackBar(leftText: 'Add CSV'),
@@ -39,8 +42,33 @@ class _MainScreen extends StatelessWidget {
               const _FileCard(),
             ),
             rowSpacing,
-            // Account
-            // Date format
+            labelRow(
+              context,
+              'Account',
+              AccountSelectionMenu(
+                height: 35,
+                selected: state.account,
+                onChanged: state.setAccount,
+              ),
+            ),
+            rowSpacing,
+            labelRow(
+              context,
+              'Date Format',
+              SizedBox(
+                height: 30,
+                child: FocusTextField(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  hint: "Default",
+                  onChanged: (it) => print(it),
+                ),
+              ),
+              tooltip: "If the default date parsing doesn't work, you can input\n"
+                  "a manual date format here. The format code follows the\n"
+                  "Java SimpleDateFormat patterns.",
+              // TODO try to link to https://docs.unidata.ucar.edu/tds/4.6/adminguide/reference/collections/SimpleDateFormat.html
+              // but richTooltip is possibly bugged?
+            ),
             // Invert values
           ],
         ),

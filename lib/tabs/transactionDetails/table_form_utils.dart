@@ -7,6 +7,7 @@ TableRow labelRow(
   Widget? right, {
   TableCellVerticalAlignment? labelAlign,
   String? tooltip,
+  InlineSpan? richTooltip,
 }) {
   Widget text = Text(
     label,
@@ -23,6 +24,8 @@ TableRow labelRow(
             child: (tooltip != null)
                 ? Tooltip(
                     message: tooltip,
+                    richMessage:
+                        richTooltip, // POSSIBLE BUG? This doesn't work, maybe because inside the table/tablerow/tablecell?
                     textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onInverseSurface,
                           fontSize: 14,

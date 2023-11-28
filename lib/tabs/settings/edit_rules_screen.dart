@@ -237,14 +237,15 @@ class _EditRule extends StatelessWidget {
             },
             children: [
               labelRow(
-                  context,
-                  'Pattern',
-                  LibraTextFormField(
-                    initial: state.focused.pattern,
-                    validator: (it) => (it?.isEmpty == true) ? '' : null,
-                    onSave: (it) => state.focused.pattern = it ?? '',
-                  ),
-                  tooltip: "Patterns are not case sensitive."),
+                context,
+                'Pattern',
+                LibraTextFormField(
+                  initial: state.focused.pattern,
+                  validator: (it) => (it?.isEmpty == true) ? '' : null,
+                  onSave: (it) => state.focused.pattern = it ?? '',
+                ),
+                tooltip: "Patterns are not case sensitive.",
+              ),
               rowSpacing,
               labelRow(
                 context,
