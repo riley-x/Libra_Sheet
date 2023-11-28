@@ -20,6 +20,7 @@ class CommonBackBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(height: 5),
         Row(
           children: [
             IconButton(
