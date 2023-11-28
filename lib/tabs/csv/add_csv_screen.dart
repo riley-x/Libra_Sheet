@@ -75,7 +75,60 @@ class _MainScreen extends StatelessWidget {
         const SizedBox(height: 10),
         const Divider(height: 1, thickness: 1),
         const Expanded(child: _CsvGrid()),
+        const _BottomBar(),
       ],
+    );
+  }
+}
+
+class _BottomBar extends StatelessWidget {
+  const _BottomBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
+    return Container(
+      height: 35,
+      color: Theme.of(context).colorScheme.primaryContainer.withAlpha(70),
+      child: Row(
+        children: [
+          const SizedBox(width: 10),
+          if (state.errorMsg.isNotEmpty) ...[
+            Icon(
+              Icons.report_outlined,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              state.errorMsg,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+            ),
+          ],
+          if (state.errorMsg.isEmpty && state.nRowsOk > 0)
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 5),
+                      Text('Preview(${state.nRowsOk})'),
+                      const Icon(
+                        Icons.navigate_next,
+                        size: 26,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(width: 5),
+        ],
+      ),
     );
   }
 }
@@ -176,7 +229,7 @@ class _Cell extends StatelessWidget {
     final state = context.watch<AddCsvState>();
     final color = switch (state.tryParse(text, column)) {
       null => null,
-      true => Colors.green.shade600,
+      true => null,
       false => Colors.red.shade800,
     };
     // Highlighting the background of a cell is really annoying actually, because if every cell is
@@ -188,8 +241,8 @@ class _Cell extends StatelessWidget {
         // color: color,
         child: Text(
           text,
-          // maxLines: 1,
-          // overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
         ),
       ),
