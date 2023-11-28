@@ -27,7 +27,16 @@ class _MainScreen extends StatelessWidget {
     final state = context.watch<AddCsvState>();
     return Column(
       children: [
-        const CommonBackBar(leftText: 'Add CSV'),
+        const CommonBackBar(
+          leftText: 'Add CSV',
+          rightChild: Tooltip(
+            message: "After uploading a CSV file, set the column types using\n"
+                "the column headers at the top of the table. Fields that\n"
+                "can't be parsed will be highlighted in red. Once you're\n"
+                "ready, click the preview button at the bottom right.",
+            child: Icon(Icons.question_mark),
+          ),
+        ),
         const SizedBox(height: 10),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,

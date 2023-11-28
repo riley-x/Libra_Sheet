@@ -136,8 +136,8 @@ class AddCsvState extends ChangeNotifier {
     for (int row = 0; row < rowOk.length; row++) {
       bool ok = true;
       for (int col = 0; col < columnTypes.length; col++) {
-        if (tryParse(rawLines[row][col], col) != true) {
-          rowOk[row] = false;
+        if (tryParse(rawLines[row][col], col) == false) {
+          ok = false;
           break;
         }
       }

@@ -7,13 +7,15 @@ class CommonBackBar extends StatelessWidget {
   final String? leftText;
   final String? rightText;
   final TextStyle? rightStyle;
+  final Widget? rightChild;
   final Function()? onBack;
   const CommonBackBar({
     super.key,
     this.leftText,
     this.rightText,
-    this.onBack,
     this.rightStyle,
+    this.rightChild,
+    this.onBack,
   });
 
   @override
@@ -35,10 +37,12 @@ class CommonBackBar extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const Spacer(),
-            Text(
-              rightText ?? '',
-              style: rightStyle ?? Theme.of(context).textTheme.headlineMedium,
-            ),
+            if (rightChild != null) rightChild!,
+            if (rightChild == null)
+              Text(
+                rightText ?? '',
+                style: rightStyle ?? Theme.of(context).textTheme.headlineMedium,
+              ),
             const SizedBox(width: 15),
           ],
         ),
