@@ -13,23 +13,24 @@ class TransactionTabState extends ChangeNotifier {
   TransactionTabState(this.service) {
     loadTransactions();
   }
-
   final TransactionService service;
+
+  /// Mutable filter list
   final db.TransactionFilters filters = db.TransactionFilters();
 
+  /// Error state for the text boxes
   bool startTimeError = false;
   bool endTimeError = false;
-
   bool minValueError = false;
   bool maxValueError = false;
 
-  Set<ExpenseType> expenseFilterSelected = {};
+  /// States for the dropdown checkbox filters
   Set<Account> accountFilterSelected = {};
   CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
   final List<Tag> tags = [];
 
+  /// Loaded transactions
   List<Transaction> transactions = [];
-  Transaction? focusedTransaction;
 
   void loadTransactions() async {
     notifyListeners();
@@ -37,16 +38,6 @@ class TransactionTabState extends ChangeNotifier {
     filters.accounts = accountFilterSelected.map((e) => e.key);
     transactions = await service.load(filters);
     notifyListeners();
-  }
-
-  void focus(Transaction? trans) {
-    focusedTransaction = trans;
-    notifyListeners();
-  }
-
-  void setExpenseFilter(Set<ExpenseType> newSelection) {
-    expenseFilterSelected = newSelection;
-    loadTransactions();
   }
 
   void setAccountFilter(Account account, bool? selected) {
@@ -57,23 +48,6 @@ class TransactionTabState extends ChangeNotifier {
     }
     loadTransactions();
   }
-
-  // void setCategoryFilter(Category cat, bool? selected) {
-  //   if (selected == true) {
-  //     categoryFilterSelected[cat.key] = true;
-  //     for (final subCat in cat.subCats ?? []) {
-  //       categoryFilterSelected[subCat.key] = true;
-  //     }
-  //   } else if (selected == null) {
-  //     categoryFilterSelected[cat.key] = false;
-  //     for (final subCat in cat.subCats ?? []) {
-  //       categoryFilterSelected.remove(subCat.key);
-  //     }
-  //   } else {
-  //     categoryFilterSelected.remove(cat.key);
-  //   }
-  //   notifyListeners();
-  // }
 
   void setMinValue(String? text) {
     int? value;
@@ -154,6 +128,6 @@ class TransactionTabState extends ChangeNotifier {
     } else {
       tags.remove(tag);
     }
-    notifyListeners();
+    loadTransactions();
   }
 }

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
-import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
@@ -24,9 +23,7 @@ class TransactionTabFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionTabState>();
     final textStyle = Theme.of(context).textTheme.titleMedium;
-
     return Align(
       alignment: Alignment.topCenter,
       child: SingleChildScrollView(
@@ -40,13 +37,13 @@ class TransactionTabFilters extends StatelessWidget {
                 "Filter",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-              const SizedBox(height: 10),
-              Text("Type", style: textStyle),
-              const SizedBox(height: 5),
-              ExpenseTypeFilter(
-                state.expenseFilterSelected,
-                onSelect: state.setExpenseFilter,
-              ),
+              // const SizedBox(height: 10),
+              // Text("Type", style: textStyle),
+              // const SizedBox(height: 5),
+              // ExpenseTypeFilter(
+              //   state.expenseFilterSelected,
+              //   onSelect: state.setExpenseFilter,
+              // ),
 
               /// Date
               const SizedBox(height: 15),
