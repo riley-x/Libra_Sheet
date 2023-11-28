@@ -53,15 +53,17 @@ class _TransactionDetails extends StatelessWidget {
     if (state.focusedTransIndex == -1) {
       return const SizedBox();
     } else {
-      /// It's kind of slow to recreate the Notifier everytime here, but not the end of the world.
-      /// Not sure where one could call TransactionDetailsState.replaceSeed.
+      /// It's kind of slow on clicking a transaction, probably because we're recreating the
+      /// Notifier everytime here? but not the end of the world.
+      /// Could elevate to above widget and call TransactionDetailsState.replaceSeed in addition
+      /// to state.focusTransaction.
       final trans = state.transactions[state.focusedTransIndex];
       return ChangeNotifierProvider(
         key: ObjectKey(trans),
         create: (context) => TransactionDetailsState(
           trans,
-          onSave: (t) => print(t),
-          onDelete: (t) => print(t),
+          onSave: state.saveTransaction,
+          onDelete: (t) => state.deleteTransaction(),
         ),
         builder: (context, child) {
           final focus = context

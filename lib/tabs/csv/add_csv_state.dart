@@ -169,9 +169,6 @@ class AddCsvState extends ChangeNotifier {
     notifyListeners();
   }
 
-  //---------------------------------------------------------------------------
-  // Parsers
-  //---------------------------------------------------------------------------
   bool? tryParse(String text, int column) {
     switch (columnTypes[column]) {
       case CsvField.date:
@@ -195,10 +192,11 @@ class AddCsvState extends ChangeNotifier {
     }
   }
 
+  //---------------------------------------------------------------------------
+  // Transactions
+  //---------------------------------------------------------------------------
   void createTransactions() {
-    final rules = appState.rules.expense;
     transactions.clear();
-
     for (int row = 0; row < rowOk.length; row++) {
       String name = '';
       String note = '';
@@ -251,8 +249,20 @@ class AddCsvState extends ChangeNotifier {
     notifyListeners();
   }
 
-  focusTransaction(int i) {
+  void focusTransaction(int i) {
     focusedTransIndex = i;
+    notifyListeners();
+  }
+
+  void saveTransaction(Transaction t) {
+    transactions[focusedTransIndex] = t;
+    focusedTransIndex = -1;
+    notifyListeners();
+  }
+
+  void deleteTransaction() {
+    transactions.removeAt(focusedTransIndex);
+    focusedTransIndex = -1;
     notifyListeners();
   }
 }

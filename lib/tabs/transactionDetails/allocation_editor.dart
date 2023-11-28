@@ -49,6 +49,7 @@ class AllocationEditor extends StatelessWidget {
                   onSave: (it) => state.updatedAllocation.value = it,
                   positiveOnly: true,
                 ),
+                tooltip: "Value should always be positive.",
               ),
               rowSpacing,
               labelRow(

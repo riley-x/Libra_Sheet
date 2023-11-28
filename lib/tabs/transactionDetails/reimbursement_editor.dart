@@ -41,6 +41,7 @@ class ReimbursementEditor extends StatelessWidget {
                   onSave: (it) => state.updatedReimbursement.value = it,
                   positiveOnly: true,
                 ),
+                tooltip: "Value should always be positive.",
               ),
               rowSpacing,
               labelRow(
