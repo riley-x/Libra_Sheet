@@ -41,4 +41,16 @@ class TagState {
     appState.notifyListeners();
     await updateTag(tag);
   }
+
+  //----------------------------------------------------------------------------
+  // Retrieval
+  //----------------------------------------------------------------------------
+
+  Map<int, Tag> createKeyMap() {
+    final out = <int, Tag>{};
+    for (final tag in list) {
+      out[tag.key] = tag;
+    }
+    return out;
+  }
 }

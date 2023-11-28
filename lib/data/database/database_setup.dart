@@ -57,11 +57,15 @@ FutureOr<void> _createDatabse14(Database db) async {
       "`incomeId` INTEGER NOT NULL, "
       "`value` INTEGER NOT NULL, "
       "PRIMARY KEY(`expenseId`, `incomeId`))");
-  await db.execute("CREATE TABLE IF NOT EXISTS `tag_join` ("
-      "`transactionKey` INTEGER NOT NULL, "
-      "`tagKey` INTEGER NOT NULL, "
-      "PRIMARY KEY(`transactionKey`, `tagKey`))");
-  await db.execute('''
+  await db.execute(createTagJoinTableSql);
+  await db.execute(createDefaultCategories);
+  if (kDebugMode) {
+    await db.execute(_createTestAccounts);
+    await db.execute(_createTestTags);
+  }
+}
+
+const createDefaultCategories = '''
 INSERT INTO "categories" ("key", "name", "colorLong", "parentKey", "listIndex") VALUES
 ('1', 'Paycheck', '4279939415', '-1', '0'),
 ('2', 'Cash Back', '4278607389', '-1', '1'),
@@ -101,12 +105,7 @@ INSERT INTO "categories" ("key", "name", "colorLong", "parentKey", "listIndex") 
 ('36', 'Hotels', '4287322772', '35', '0'),
 ('37', 'Taxes', '4289687417', '35', '1'),
 ('38', 'Services', '4287460443', '35', '2');
-''');
-  if (kDebugMode) {
-    await db.execute(_createTestAccounts);
-    await db.execute(_createTestTags);
-  }
-}
+''';
 
 const _createTestAccounts = '''
 INSERT INTO "accounts" ("key", "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex", "balance") VALUES

@@ -138,6 +138,7 @@ class CategoryState {
     }
   }
 
+  // TODO cache this?
   Map<int, Category> createKeyMap() {
     final out = <int, Category>{};
     _updateKeyMap(out, income);

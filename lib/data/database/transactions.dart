@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as db;
 
@@ -46,7 +47,20 @@ Transaction _fromMap(
   Map<String, dynamic> map, {
   Map<int, Account>? accounts,
   Map<int, Category>? categories,
+  Map<int, Tag>? tags,
 }) {
+  String? tagString = map['tags'];
+  List<Tag> tagList = [];
+  if (tags != null && tagString != null) {
+    for (final strkey in tagString.split(',')) {
+      final intKey = int.tryParse(strkey);
+      if (intKey == null) continue;
+      final tag = tags[intKey];
+      if (tag == null) continue;
+      tagList.add(tag);
+    }
+  }
+
   return Transaction(
     key: map[_key],
     name: map[_name],
@@ -55,6 +69,7 @@ Transaction _fromMap(
     value: map[_value],
     account: accounts?[map[_account]],
     category: categories?[map[_category]],
+    tags: tagList,
     nAllocations: map["nAllocs"],
   );
 }
@@ -75,6 +90,11 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   // update balance
   // update category history
 
+  if (t.tags != null) {
+    for (final tag in t.tags!) {
+      await insertTagJoin(t, tag, db: txn);
+    }
+  }
   if (t.allocations != null) {
     for (int i = 0; i < (t.allocations!.length); i++) {
       await insertAllocation(t, t.allocations![i], listIndex: i, database: txn);
@@ -101,6 +121,7 @@ Future<List<Transaction>> loadTransactions(
   TransactionFilters filters, {
   Map<int, Account>? accounts,
   Map<int, Category>? categories,
+  Map<int, Tag>? tags,
 }) async {
   List<Transaction> out = [];
   if (libraDatabase == null) return out;
@@ -111,7 +132,12 @@ Future<List<Transaction>> loadTransactions(
   });
 
   for (final row in rows) {
-    out.add(_fromMap(row, accounts: accounts, categories: categories));
+    out.add(_fromMap(
+      row,
+      accounts: accounts,
+      categories: categories,
+      tags: tags,
+    ));
   }
 
   return out;

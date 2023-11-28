@@ -26,6 +26,7 @@ class TransactionService extends ChangeNotifier {
       filters,
       accounts: appState.createAccountMap(),
       categories: appState.categories.createKeyMap(),
+      tags: appState.tags.createKeyMap(),
     );
     return ts;
   }

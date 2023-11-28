@@ -90,6 +90,7 @@ class LibraAppState extends ChangeNotifier {
     db.updateAccount(acc);
   }
 
+  // TODO cache this?
   Map<int, Account> createAccountMap() {
     final out = <int, Account>{};
     for (final acc in accounts) {
