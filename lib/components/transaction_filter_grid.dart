@@ -67,6 +67,7 @@ class TransactionGrid extends StatelessWidget {
     this.maxRowsForName = 1,
     this.fixedColumns,
     this.onSelect,
+    this.padding,
     super.key,
   });
 
@@ -74,6 +75,9 @@ class TransactionGrid extends StatelessWidget {
   final int? maxRowsForName;
   final int? fixedColumns;
   final Function(Transaction t, int index)? onSelect;
+
+  /// Padding needs to be added inside the ListView so that the scrollbar isn't weirdly offset.
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +90,7 @@ class TransactionGrid extends StatelessWidget {
         final numRows = (transactions.length + numCols - 1) ~/ numCols;
         return ListView.builder(
           itemCount: numRows,
+          padding: padding,
           itemBuilder: (context, index) {
             final startIndex = index * numCols;
             if (startIndex >= transactions.length) return null;

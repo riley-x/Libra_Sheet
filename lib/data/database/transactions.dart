@@ -67,22 +67,23 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   // reimbursements
 }
 
-Map<int, Transaction> load(TransactionFilters filters) {
+Future<Map<int, Transaction>> loadTransactions(TransactionFilters filters) async {
   Map<int, Transaction> out = {};
   final q = _createQuery(filters);
 
-  libraDatabase?.transaction((txn) async {
+  await libraDatabase?.transaction((txn) async {
     final rows = txn.rawQuery(q.$1, q.$2);
     print(rows);
   });
+
   return out;
 }
 
 class TransactionFilters {
   int? minValue;
   int? maxValue;
-  DateTime? startDate;
-  DateTime? endDate;
+  DateTime? startTime;
+  DateTime? endTime;
   Account? account;
   Category? category;
   int? limit;
@@ -90,8 +91,8 @@ class TransactionFilters {
   TransactionFilters({
     this.minValue,
     this.maxValue,
-    this.startDate,
-    this.endDate,
+    this.startTime,
+    this.endTime,
     this.account,
     this.category,
     this.limit = 300,
@@ -128,13 +129,13 @@ class TransactionFilters {
     add("$_value <= ?");
     args.add(filters.maxValue);
   }
-  if (filters.startDate != null) {
+  if (filters.startTime != null) {
     add("$_date >= ?");
-    args.add(filters.startDate!.millisecondsSinceEpoch);
+    args.add(filters.startTime!.millisecondsSinceEpoch);
   }
-  if (filters.endDate != null) {
+  if (filters.endTime != null) {
     add("$_date <= ?");
-    args.add(filters.endDate!.millisecondsSinceEpoch);
+    args.add(filters.endTime!.millisecondsSinceEpoch);
   }
   if (filters.account != null) {
     add("$_account = ?");

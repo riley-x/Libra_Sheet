@@ -4,7 +4,9 @@ import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
-/// Helper class for managing transactions
+/// Helper class for managing transactions. Every widget that monitors transactions should probably
+/// watch this service, so that they can be notified when transactions are added or edited (which,
+/// because of reimbursements, can affect all other transactions).
 class TransactionService extends ChangeNotifier {
   //----------------------------------------------------------------------------
   // Fields
@@ -16,10 +18,11 @@ class TransactionService extends ChangeNotifier {
   // Database Interface
   //----------------------------------------------------------------------------
   Future<void> saveAll(List<Transaction> transactions) async {
-    libraDatabase?.transaction((txn) async {
+    await libraDatabase?.transaction((txn) async {
       for (final t in transactions) {
         await insertTransaction(t, txn: txn);
       }
     });
+    notifyListeners();
   }
 }

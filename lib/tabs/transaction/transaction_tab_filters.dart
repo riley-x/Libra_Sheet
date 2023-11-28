@@ -162,7 +162,7 @@ class _ValueRange extends StatelessWidget {
       children: [
         FocusTextField(
           label: 'Min',
-          active: state.minValue != null,
+          active: state.filters.minValue != null,
           error: state.minValueError,
           onChanged: state.setMinValue,
         ),
@@ -175,7 +175,7 @@ class _ValueRange extends StatelessWidget {
         const SizedBox(width: 5),
         FocusTextField(
           label: 'Max',
-          active: state.maxValue != null,
+          active: state.filters.maxValue != null,
           error: state.maxValueError,
           onChanged: state.setMaxValue,
         ),
@@ -195,7 +195,7 @@ class _DateFilter extends StatelessWidget {
       children: [
         FocusTextField(
           label: 'Start',
-          active: state.startTime != null,
+          active: state.filters.startTime != null,
           error: state.startTimeError,
           hint: 'MM/DD/YY',
           onChanged: state.setStartTime,
@@ -209,7 +209,7 @@ class _DateFilter extends StatelessWidget {
         const SizedBox(width: 5),
         FocusTextField(
           label: 'End',
-          active: state.endTime != null,
+          active: state.filters.endTime != null,
           error: state.endTimeError,
           hint: 'MM/DD/YY',
           onChanged: state.setEndTime,

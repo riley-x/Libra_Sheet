@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/database/transactions.dart' as db;
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionTabState extends ChangeNotifier {
-  DateTime? startTime;
-  DateTime? endTime;
+  TransactionTabState(this.service) {
+    loadTransactions();
+  }
+
+  final TransactionService service;
+  final db.TransactionFilters filters = db.TransactionFilters();
+
   bool startTimeError = false;
   bool endTimeError = false;
 
-  double? minValue;
-  double? maxValue;
   bool minValueError = false;
   bool maxValueError = false;
 
@@ -23,8 +28,13 @@ class TransactionTabState extends ChangeNotifier {
   CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
   final List<Tag> tags = [];
 
-  List<Transaction> transactions = testTransactions;
+  List<Transaction> transactions = [];
   Transaction? focusedTransaction;
+
+  void loadTransactions() async {
+    await db.loadTransactions(filters);
+    notifyListeners();
+  }
 
   void focus(Transaction? trans) {
     focusedTransaction = trans;
@@ -33,7 +43,7 @@ class TransactionTabState extends ChangeNotifier {
 
   void setExpenseFilter(Set<ExpenseType> newSelection) {
     expenseFilterSelected = newSelection;
-    notifyListeners();
+    loadTransactions();
   }
 
   void setAccountFilter(Account account, bool? selected) {
@@ -42,7 +52,7 @@ class TransactionTabState extends ChangeNotifier {
     } else {
       accountFilterSelected.remove(account);
     }
-    notifyListeners();
+    loadTransactions();
   }
 
   // void setCategoryFilter(Category cat, bool? selected) {
@@ -62,43 +72,36 @@ class TransactionTabState extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  (double?, bool) _strToDbl(String? text) {
-    double? val;
-    bool error = false;
-    if (text == null || text.isEmpty) {
-      // pass
-    } else {
-      val = double.tryParse(text);
-      if (val == null) {
-        error = true;
-      }
-    }
-    debugPrint('TransactionTabState::_strToDbl() text:$text val=$val error=$error');
-    return (val, error);
-  }
-
   void setMinValue(String? text) {
-    final val = _strToDbl(text);
-    if (minValue != val.$1) {
-      // TODO load transactions
-      minValue = val.$1;
-      minValueError = val.$2;
-      notifyListeners();
-    } else if (minValueError != val.$2) {
-      minValueError = val.$2;
+    int? value;
+    if (text == null || text.isEmpty) {
+      value = null;
+      minValueError = false;
+    } else {
+      value = text.toIntDollar();
+      minValueError = value == null;
+    }
+    if (!minValueError) {
+      filters.minValue = value;
+      loadTransactions();
+    } else {
       notifyListeners();
     }
   }
 
   void setMaxValue(String? text) {
-    final val = _strToDbl(text);
-    if (maxValue != val.$1) {
-      // TODO load transactions
-      maxValue = val.$1;
-      maxValueError = val.$2;
-      notifyListeners();
-    } else if (maxValueError != val.$2) {
-      maxValueError = val.$2;
+    int? value;
+    if (text == null || text.isEmpty) {
+      value = null;
+      maxValueError = false;
+    } else {
+      value = text.toIntDollar();
+      maxValueError = value == null;
+    }
+    if (!maxValueError) {
+      filters.maxValue = value;
+      loadTransactions();
+    } else {
       notifyListeners();
     }
   }
@@ -122,26 +125,22 @@ class TransactionTabState extends ChangeNotifier {
 
   void setStartTime(String? text) {
     final val = _parseDate(text);
-    if (startTime != val.$1) {
-      // TODO load transactions
-      startTime = val.$1;
-      startTimeError = val.$2;
-      notifyListeners();
-    } else if (startTimeError != val.$2) {
-      startTimeError = val.$2;
+    startTimeError = val.$2;
+    if (!startTimeError) {
+      filters.startTime = val.$1;
+      loadTransactions();
+    } else {
       notifyListeners();
     }
   }
 
   void setEndTime(String? text) {
     final val = _parseDate(text);
-    if (endTime != val.$1) {
-      // TODO load transactions
-      endTime = val.$1;
-      endTimeError = val.$2;
-      notifyListeners();
-    } else if (endTimeError != val.$2) {
-      endTimeError = val.$2;
+    endTimeError = val.$2;
+    if (!endTimeError) {
+      filters.endTime = val.$1;
+      loadTransactions();
+    } else {
       notifyListeners();
     }
   }
