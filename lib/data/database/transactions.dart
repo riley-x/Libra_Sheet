@@ -107,7 +107,7 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
 /// Note that this leaves the following null:
 ///     account, if not present in [accounts]
 ///     category, if not present in [categories]
-///     tags
+///     tags[i], for each tag not present in [tags]
 ///     allocations (but sets nAllocs)
 ///     reimbursements (but sets nReimbs)
 ///
@@ -167,9 +167,14 @@ class TransactionFilters {
   var q = '''
     SELECT 
       t.*,
+      GROUP_CONCAT(tag.$tagKey) as tags,
       COUNT(a.$allocationsKey) as nAllocs
     FROM 
       $transactionsTable t
+    LEFT OUTER JOIN 
+      $tagJoinTable tag_join on tag_join.$tagJoinTrans = t.$_key
+    LEFT OUTER JOIN
+      $tagsTable tag on tag.$tagKey = tag_join.$tagJoinTag
     LEFT OUTER JOIN 
       $allocationsTable a on a.$allocationsTransaction = t.$_key
   ''';

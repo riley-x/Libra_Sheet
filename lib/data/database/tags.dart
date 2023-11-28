@@ -8,20 +8,33 @@ import 'package:sqflite/sqlite_api.dart';
 const tagsTable = '`tags`';
 const tagJoinTable = '`tag_join`';
 
-const _key = "key";
+const tagKey = _key;
+
+const _key = "id";
 const _name = "name";
 const _color = "color";
+const _index = "list_index";
 
 const createTagsTableSql = "CREATE TABLE IF NOT EXISTS $tagsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "$_name TEXT NOT NULL, "
     "$_color INTEGER NOT NULL, "
-    "list_index INTEGER NOT NULL DEFAULT -1)";
+    "$_index INTEGER NOT NULL DEFAULT -1)";
+
+const tagJoinTag = "tag_id";
+const tagJoinTrans = "transaction_id";
 
 const createTagJoinTableSql = "CREATE TABLE IF NOT EXISTS $tagJoinTable ("
-    "transaction_id INTEGER NOT NULL, "
-    "tag_id INTEGER NOT NULL, "
-    "PRIMARY KEY(transaction_id, tag_id))";
+    "$tagJoinTrans INTEGER NOT NULL, "
+    "$tagJoinTag INTEGER NOT NULL, "
+    "PRIMARY KEY($tagJoinTrans, $tagJoinTag))";
+
+const createTestTagsSql = '''
+INSERT INTO $tagsTable ($_key, $_name, $_color, $_index) VALUES
+(1, 'Tag 1', 4283934904, -1),
+(2, 'Taggier 2', 4292463774, -1),
+(3, 'Tagalicious 3', 4291442848, -1);
+''';
 
 Map<String, dynamic> _toMap(Tag tag) {
   final map = {

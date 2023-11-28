@@ -61,7 +61,7 @@ FutureOr<void> _createDatabse14(Database db) async {
   await db.execute(createDefaultCategories);
   if (kDebugMode) {
     await db.execute(_createTestAccounts);
-    await db.execute(_createTestTags);
+    await db.execute(createTestTagsSql);
   }
 }
 
@@ -112,11 +112,4 @@ INSERT INTO "accounts" ("key", "name", "description", "type", "csvPattern", "scr
 (1, 'Cash', '', 'Cash', '', '', 4279542308, 0, 0),
 (2, 'Checkings', '', 'Bank', '', '', 4280391411, 1, 0),
 (3, 'Savings', '', 'Bank', '', '', 4290126323, 2, 0);
-''';
-
-const _createTestTags = '''
-INSERT INTO "tags" ("key", "name", "color", "listIndex") VALUES
-(1, 'Tag 1', 4283934904, -1),
-(2, 'Taggier 2', 4292463774, -1),
-(3, 'Tagalicious 3', 4291442848, -1);
 ''';
