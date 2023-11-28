@@ -116,7 +116,19 @@ class _BottomBar extends StatelessWidget {
           ),
           const Spacer(),
           TextButton(
-            onPressed: () {}, // TODO
+            onPressed: () {
+              state.saveTransactions();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Center(child: Text('Saved ${state.transactions.length} transactions.')),
+                  width: 280.0,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                ),
+              );
+            },
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [

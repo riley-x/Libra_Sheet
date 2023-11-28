@@ -265,4 +265,9 @@ class AddCsvState extends ChangeNotifier {
     focusedTransIndex = -1;
     notifyListeners();
   }
+
+  Future<void> saveTransactions() async {
+    appState.popBackStack();
+    await appState.transactions.saveAll(transactions);
+  }
 }
