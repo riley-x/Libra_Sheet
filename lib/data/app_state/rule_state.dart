@@ -1,7 +1,5 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
-import 'dart:math';
-
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/rules.dart';
@@ -79,5 +77,19 @@ class RuleState {
         await updateRule(rule, listIndex: newIndex, db: txn);
       }
     });
+  }
+
+  //----------------------------------------------------------------------------
+  // Parsing
+  //----------------------------------------------------------------------------
+  CategoryRule? match(String text, ExpenseType type) {
+    final list = (type == ExpenseType.expense) ? expense : income;
+
+    for (final rule in list) {
+      if (text.contains(rule.pattern)) {
+        return rule;
+      }
+    }
+    return null;
   }
 }

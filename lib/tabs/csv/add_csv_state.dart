@@ -2,8 +2,12 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum CsvField {
   date('Date'),
@@ -22,6 +26,12 @@ final List<DateFormat> _dateFormats = [
 ];
 
 class AddCsvState extends ChangeNotifier {
+  final LibraAppState appState;
+  AddCsvState(this.appState);
+
+  //---------------------------------------------------------------------------
+  // Fields
+  //---------------------------------------------------------------------------
   Account? account;
   DateFormat? dateFormat;
   String errorMsg = '';
@@ -34,6 +44,11 @@ class AddCsvState extends ChangeNotifier {
   List<bool> rowOk = [];
   int nRowsOk = 0;
 
+  List<Transaction> transactions = [];
+
+  //---------------------------------------------------------------------------
+  // File Processing
+  //---------------------------------------------------------------------------
   void selectFile() async {
     const XTypeGroup typeGroup = XTypeGroup(
       label: 'CSV Files',
@@ -62,6 +77,9 @@ class AddCsvState extends ChangeNotifier {
     notifyListeners();
   }
 
+  //---------------------------------------------------------------------------
+  // Setter Callbacks
+  //---------------------------------------------------------------------------
   void setAccount(Account? acc) {
     account = acc;
     notifyListeners();
@@ -84,6 +102,9 @@ class AddCsvState extends ChangeNotifier {
     _validate();
   }
 
+  //---------------------------------------------------------------------------
+  // Validating
+  //---------------------------------------------------------------------------
   void _validate() {
     if (!_validateFields()) {
       notifyListeners();
@@ -147,6 +168,9 @@ class AddCsvState extends ChangeNotifier {
     notifyListeners();
   }
 
+  //---------------------------------------------------------------------------
+  // Parsers
+  //---------------------------------------------------------------------------
   bool? tryParse(String text, int column) {
     switch (columnTypes[column]) {
       case CsvField.date:
@@ -168,5 +192,61 @@ class AddCsvState extends ChangeNotifier {
       }
       return null;
     }
+  }
+
+  void createTransactions() {
+    final rules = appState.rules.expense;
+    transactions.clear();
+
+    for (int row = 0; row < rowOk.length; row++) {
+      String name = '';
+      String note = '';
+      DateTime? date;
+      int? value;
+
+      for (int col = 0; col < columnTypes.length; col++) {
+        final text = rawLines[row][col];
+        switch (columnTypes[col]) {
+          case CsvField.date:
+            date = _parseDate(text);
+          case CsvField.value:
+            value = text.toIntDollar();
+          case CsvField.name:
+            if (name.isNotEmpty) {
+              name += ' $text';
+            } else {
+              name = text;
+            }
+          case CsvField.note:
+            if (note.isNotEmpty) {
+              note += ' $text';
+            } else {
+              note = text;
+            }
+          case CsvField.none:
+        }
+      }
+
+      if (date == null || value == null) continue;
+      final rule = appState.rules.match(
+        name,
+        (value < 0) ? ExpenseType.expense : ExpenseType.income,
+      );
+      Transaction t = Transaction(
+        name: name,
+        date: date,
+        value: value,
+        account: account,
+        category: rule?.category,
+        note: note,
+      );
+      transactions.add(t);
+    }
+    notifyListeners();
+  }
+
+  void clearTransactions() {
+    transactions.clear();
+    notifyListeners();
   }
 }

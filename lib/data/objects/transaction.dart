@@ -6,7 +6,7 @@ import 'package:libra_sheet/data/objects/tag.dart';
 
 class Transaction {
   const Transaction({
-    this.key = -1,
+    this.key = 0,
     required this.name,
     required this.date,
     required this.value,

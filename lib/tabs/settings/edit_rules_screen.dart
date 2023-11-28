@@ -244,7 +244,7 @@ class _EditRule extends StatelessWidget {
                   validator: (it) => (it?.isEmpty == true) ? '' : null,
                   onSave: (it) => state.focused.pattern = it ?? '',
                 ),
-                tooltip: "Patterns are not case sensitive.",
+                tooltip: "Patterns are case sensitive!",
               ),
               rowSpacing,
               labelRow(

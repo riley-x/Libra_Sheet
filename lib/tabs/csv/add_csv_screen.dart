@@ -3,7 +3,9 @@ import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/account_selection_menu.dart';
 import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
+import 'package:libra_sheet/tabs/csv/preview_transactions_screen.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
@@ -13,8 +15,15 @@ class AddCsvScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => AddCsvState(),
-      child: const _MainScreen(),
+      create: (context) => AddCsvState(context.read<LibraAppState>()),
+      builder: (context, child) {
+        final state = context.watch<AddCsvState>();
+        if (state.transactions.isEmpty) {
+          return const _MainScreen();
+        } else {
+          return const PreviewTransactionsScreen();
+        }
+      },
     );
   }
 }
@@ -59,6 +68,8 @@ class _MainScreen extends StatelessWidget {
                 selected: state.account,
                 onChanged: state.setAccount,
               ),
+              tooltip: "You can only input for one account at a time. If your CSV has\n"
+                  "multiple accounts, try filtering your CSV first in Excel.",
             ),
             rowSpacing,
             labelRow(
@@ -69,7 +80,7 @@ class _MainScreen extends StatelessWidget {
                 child: FocusTextField(
                   style: Theme.of(context).textTheme.bodyMedium,
                   hint: "Default",
-                  onChanged: (it) => print(it),
+                  onChanged: state.setDateFormat,
                 ),
               ),
               tooltip: "If the default date parsing doesn't work, you can input\n"
@@ -120,7 +131,7 @@ class _BottomBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: state.createTransactions,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
