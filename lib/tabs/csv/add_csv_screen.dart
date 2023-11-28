@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
+import 'package:libra_sheet/components/selectors/libra_dropdown_menu.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,7 @@ class _MainScreen extends StatelessWidget {
     return Column(
       children: [
         const CommonBackBar(leftText: 'Add CSV'),
-        const SizedBox(height: 15),
+        const SizedBox(height: 10),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           columnWidths: const {
@@ -35,11 +36,15 @@ class _MainScreen extends StatelessWidget {
             labelRow(
               context,
               'CSV File',
-              _FileCard(),
+              const _FileCard(),
             ),
             rowSpacing,
+            // Account
+            // Date format
+            // Invert values
           ],
         ),
+        const SizedBox(height: 10),
         const Expanded(child: _CsvGrid()),
       ],
     );
@@ -86,23 +91,52 @@ class _CsvGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
-    if (state.file == null) return const SizedBox();
+    if (state.file == null || state.rawLines.isEmpty) return const SizedBox();
+
     return SingleChildScrollView(
       child: Table(
         border: TableBorder.all(width: 0.3),
-        children: state.rawLines.map((row) {
-          return TableRow(
-            children: row.map((item) {
-              return Padding(
-                padding: const EdgeInsets.all(1),
-                child: Text(
-                  item.toString(),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              );
-            }).toList(),
-          );
-        }).toList(),
+        children: [
+          TableRow(
+            children: [
+              for (int i = 0; i < state.nCols; i++) _ColumnHeader(i),
+            ],
+          ),
+          for (final row in state.rawLines)
+            TableRow(
+              children: [
+                for (final item in row)
+                  Padding(
+                    padding: const EdgeInsets.all(1),
+                    child: Text(
+                      item,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColumnHeader extends StatelessWidget {
+  final int column;
+
+  const _ColumnHeader(this.column, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
+    return LibraDropdownMenu(
+      selected: state.columnTypes[column],
+      items: CsvField.values,
+      isDense: true,
+      onChanged: (it) => state.setColumn(column, it),
+      builder: (it) => Text(
+        it?.name ?? '',
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
   }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Dropdown button for selecting an object of class [T].
 /// P.S. Don't try switching to a DropdownButtonFormField -- a lot of trouble getting the underline
-/// hidden.
+/// hidden. Also not worth undoing the nullable T?'s because both the DropdownMenu and FormField
+/// makes callbacks/inputs nullable
 class LibraDropdownMenu<T> extends StatelessWidget {
   final T? selected;
   final List<T?> items;
@@ -10,6 +11,8 @@ class LibraDropdownMenu<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double height;
   final Widget Function(T?) builder;
+
+  final bool isDense;
 
   const LibraDropdownMenu({
     super.key,
@@ -19,6 +22,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
     this.onChanged,
     this.borderRadius,
     this.height = 30,
+    this.isDense = false,
   });
 
   @override
@@ -61,6 +65,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
             value: selected,
             items: menuItems,
             onChanged: onChanged,
+            isDense: isDense,
           ),
         ),
       ),
