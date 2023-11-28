@@ -73,6 +73,7 @@ class _MainScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
+        const Divider(height: 1, thickness: 1),
         const Expanded(child: _CsvGrid()),
       ],
     );
@@ -124,6 +125,7 @@ class _CsvGrid extends StatelessWidget {
     return SingleChildScrollView(
       child: Table(
         border: TableBorder.all(width: 0.3),
+        // border: TableBorder.all(width: 1, color: Theme.of(context).colorScheme.outlineVariant),
         children: [
           TableRow(
             children: [
@@ -133,14 +135,7 @@ class _CsvGrid extends StatelessWidget {
           for (final row in state.rawLines)
             TableRow(
               children: [
-                for (final item in row)
-                  Padding(
-                    padding: const EdgeInsets.all(1),
-                    child: Text(
-                      item,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
+                for (int i = 0; i < state.nCols; i++) _Cell(row[i], i),
               ],
             ),
         ],
@@ -163,8 +158,40 @@ class _ColumnHeader extends StatelessWidget {
       isDense: true,
       onChanged: (it) => state.setColumn(column, it),
       builder: (it) => Text(
-        it?.name ?? '',
+        (it != CsvField.none) ? it?.title ?? '' : '',
         style: Theme.of(context).textTheme.labelMedium,
+      ),
+    );
+  }
+}
+
+class _Cell extends StatelessWidget {
+  const _Cell(this.text, this.column, {super.key});
+
+  final String text;
+  final int column;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
+    final color = switch (state.tryParse(text, column)) {
+      null => null,
+      true => Colors.green.shade600,
+      false => Colors.red.shade800,
+    };
+    // Highlighting the background of a cell is really annoying actually, because if every cell is
+    // TableCellVerticalAlignment.fill, then the row will have 0 height.
+    return TableCell(
+      // verticalAlignment: (column > 0) ? TableCellVerticalAlignment.fill : null,
+      child: Container(
+        padding: const EdgeInsets.all(1),
+        // color: color,
+        child: Text(
+          text,
+          // maxLines: 1,
+          // overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
+        ),
       ),
     );
   }
