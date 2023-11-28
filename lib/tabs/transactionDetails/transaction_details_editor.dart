@@ -15,8 +15,11 @@ import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.da
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
 
+/// This lays out the single-column form for the fields of one transaction.
 class TransactionDetailsEditor extends StatelessWidget {
-  const TransactionDetailsEditor({super.key});
+  const TransactionDetailsEditor({super.key, this.onCancel});
+
+  final Function()? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -163,8 +166,8 @@ class TransactionDetailsEditor extends StatelessWidget {
           const SizedBox(height: 20),
           FormButtons(
             // showCancel: false,
-            allowDelete: (state.seed?.key ?? 0) > 0,
-            onCancel: context.read<LibraAppState>().popBackStack,
+            allowDelete: (state.seed != null),
+            onCancel: () => onCancel?.call() ?? context.read<LibraAppState>().popBackStack,
             onDelete: state.delete,
             onReset: state.reset,
             onSave: state.save,

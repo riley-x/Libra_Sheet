@@ -9,10 +9,16 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum TransactionDetailActiveFocus { none, allocation, reimbursement }
 
+/// This state handles the TransactionDetailsEditor, allowing editing the state of a single
+/// transaction.
 class TransactionDetailsState extends ChangeNotifier {
-  TransactionDetailsState(this.seed) {
+  TransactionDetailsState(this.seed, {this.onSave, this.onDelete}) {
     _init();
   }
+
+  final Function(Transaction)? onSave;
+  final Function(Transaction)? onDelete;
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> allocationFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> reimbursementFormKey = GlobalKey<FormState>();
@@ -28,7 +34,7 @@ class TransactionDetailsState extends ChangeNotifier {
   final MutableAllocation updatedAllocation = MutableAllocation();
   final MutableReimbursement updatedReimbursement = MutableReimbursement();
 
-  /// These variables are saved to by the relevant FormFields. Don't need to manage via SetState.
+  /// These variables are saved to by the relevant FormFields. Don't need to notifyListeners.
   Account? account;
   String? name;
   DateTime? date;
@@ -55,11 +61,17 @@ class TransactionDetailsState extends ChangeNotifier {
     }
   }
 
+  void replaceSeed(Transaction? t) {
+    seed = t;
+    reset();
+  }
+
   void reset() {
     formKey.currentState?.reset();
     tags.clear();
     allocations.clear();
     reimbursements.clear();
+    clearFocus();
     _init();
     notifyListeners();
   }
@@ -83,12 +95,14 @@ class TransactionDetailsState extends ChangeNotifier {
         reimbursements: reimbursements,
         tags: tags,
       );
-      print(t); // TODO save transaction
+      onSave?.call(t);
+      // TODO save transaction; remember this state is used from the CSV screen too.
     }
   }
 
   void delete() {
-    // TODO
+    if (seed != null) onDelete?.call(seed!);
+    // TODO remember this state is used from the CSV screen too.
   }
 
   void onValueChanged(int? val) {

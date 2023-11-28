@@ -45,6 +45,7 @@ class AddCsvState extends ChangeNotifier {
   int nRowsOk = 0;
 
   List<Transaction> transactions = [];
+  int focusedTransIndex = -1;
 
   //---------------------------------------------------------------------------
   // File Processing
@@ -247,6 +248,11 @@ class AddCsvState extends ChangeNotifier {
 
   void clearTransactions() {
     transactions.clear();
+    notifyListeners();
+  }
+
+  focusTransaction(int i) {
+    focusedTransIndex = i;
     notifyListeners();
   }
 }

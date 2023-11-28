@@ -53,7 +53,7 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
             widget.transactions,
             maxRowsForName: widget.maxRowsForName,
             fixedColumns: widget.fixedColumns,
-            onSelect: widget.onSelect,
+            onSelect: (t, i) => widget.onSelect?.call(t),
           ),
         ),
       ],
@@ -73,7 +73,7 @@ class TransactionGrid extends StatelessWidget {
   final List<Transaction> transactions;
   final int? maxRowsForName;
   final int? fixedColumns;
-  final Function(Transaction)? onSelect;
+  final Function(Transaction t, int index)? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class TransactionGrid extends StatelessWidget {
                           child: TransactionCard(
                             trans: transactions[i],
                             maxRowsForName: maxRowsForName,
-                            onSelect: onSelect,
+                            onSelect: (onSelect != null) ? (it) => onSelect!(it, i) : null,
                           ),
                         ),
               ],

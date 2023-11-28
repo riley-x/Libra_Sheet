@@ -37,7 +37,7 @@ class _TransactionTab extends StatelessWidget {
                       state.transactions,
                       maxRowsForName: 3,
                       fixedColumns: 1,
-                      onSelect: context.read<LibraAppState>().focusTransaction,
+                      onSelect: (t, i) => context.read<LibraAppState>().focusTransaction(t),
                     ),
                     floatingActionButton: SpeedDial(
                       icon: Icons.add,
