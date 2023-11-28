@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
-import 'package:libra_sheet/data/app_state/transaction_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
@@ -22,13 +21,11 @@ class LibraAppState extends ChangeNotifier {
   late final CategoryState categories;
   late final TagState tags;
   late final RuleState rules;
-  late final TransactionState transactions;
 
   LibraAppState() {
     categories = CategoryState(this);
     tags = TagState(this);
     rules = RuleState(this);
-    transactions = TransactionState(this);
 
     _init();
   }

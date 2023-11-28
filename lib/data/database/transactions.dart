@@ -25,15 +25,15 @@ const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTabl
     "$_category INTEGER NOT NULL)";
 
 class TransactionFilters {
-  final int? minValue;
-  final int? maxValue;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final Account? account;
-  final Category? category;
-  final int? limit;
+  int? minValue;
+  int? maxValue;
+  DateTime? startDate;
+  DateTime? endDate;
+  Account? account;
+  Category? category;
+  int? limit;
 
-  const TransactionFilters({
+  TransactionFilters({
     this.minValue,
     this.maxValue,
     this.startDate,

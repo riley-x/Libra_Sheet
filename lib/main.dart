@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/transactions_service.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
@@ -27,19 +28,24 @@ Future<void> main() async {
 
   /// Top level state
   final state = LibraAppState();
+  final transactionService = TransactionService(state);
 
-  runApp(LibraApp(state));
+  runApp(LibraApp(state, transactionService));
 }
 
 class LibraApp extends StatelessWidget {
   final LibraAppState state;
+  final TransactionService service;
 
-  const LibraApp(this.state, {super.key});
+  const LibraApp(this.state, this.service, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: state,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<LibraAppState>.value(value: state),
+        ChangeNotifierProvider<TransactionService>.value(value: service),
+      ],
       child: MaterialApp(
         title: 'Libra Sheet',
         theme: ThemeData(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/transactions_service.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/allocation_editor.dart';
 import 'package:libra_sheet/tabs/transactionDetails/reimbursement_editor.dart';
@@ -117,7 +119,8 @@ class _BottomBar extends StatelessWidget {
           const Spacer(),
           TextButton(
             onPressed: () {
-              state.saveTransactions();
+              context.read<LibraAppState>().popBackStack();
+              context.read<TransactionService>().saveAll(state.transactions);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Center(child: Text('Saved ${state.transactions.length} transactions.')),
