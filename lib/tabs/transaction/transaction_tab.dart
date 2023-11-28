@@ -26,32 +26,22 @@ class _TransactionTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
+        const Expanded(child: _TransactionList()),
+        const VerticalDivider(width: 1, thickness: 1),
+        SizedBox(
+          width: 300,
           child: Column(
             children: [
-              const Expanded(child: _TransactionList()),
+              const Expanded(
+                child: TransactionTabFilters(
+                  interiorPadding: EdgeInsets.symmetric(horizontal: 10),
+                ),
+              ),
               Text(
                 "Results are limited to the first 300 transactions",
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
-          ),
-        ),
-
-        /// Separator
-        const SizedBox(width: 10),
-        Container(
-          width: 1,
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-
-        /// Filters
-        const SizedBox(
-          width: 300,
-          child: Center(
-            child: TransactionTabFilters(
-              interiorPadding: EdgeInsets.symmetric(horizontal: 10),
-            ),
           ),
         ),
       ],
@@ -68,7 +58,7 @@ class _TransactionList extends StatelessWidget {
     return Scaffold(
       body: TransactionGrid(
         state.transactions,
-        padding: const EdgeInsets.only(top: 10, left: 10),
+        padding: const EdgeInsets.only(top: 10, left: 10, bottom: 10, right: 10),
         maxRowsForName: 3,
         fixedColumns: 1,
         onSelect: (t, i) => context.read<LibraAppState>().focusTransaction(t),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/objects/account.dart';
+import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as db;
@@ -42,6 +43,17 @@ Map<String, dynamic> _toMap(Transaction t) {
   return map;
 }
 
+Transaction _fromMap(Map<String, dynamic> map) {
+  return Transaction(
+    key: map[_key],
+    name: map[_name],
+    date: DateTime.fromMillisecondsSinceEpoch(map[_date]),
+    note: map[_note],
+    value: map[_value],
+    nAllocations: map["nAllocs"],
+  );
+}
+
 /// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
 /// set the transaction's key in-place!
 FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
@@ -67,13 +79,21 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   // reimbursements
 }
 
-Future<Map<int, Transaction>> loadTransactions(TransactionFilters filters) async {
-  Map<int, Transaction> out = {};
+/// Returns a map from transaction key to the object. Note that this leaves the following null:
+///     account
+///     category
+///     tags
+///     allocations (but sets nAllocs)
+///     reimbursements (but sets nReimbs)
+Future<List<Transaction>> loadTransactions(TransactionFilters filters) async {
+  List<Transaction> out = [];
   final q = _createQuery(filters);
 
   await libraDatabase?.transaction((txn) async {
-    final rows = txn.rawQuery(q.$1, q.$2);
-    print(rows);
+    final rows = await txn.rawQuery(q.$1, q.$2);
+    for (final row in rows) {
+      out.add(_fromMap(row));
+    }
   });
 
   return out;
@@ -103,20 +123,21 @@ class TransactionFilters {
   var q = '''
     SELECT 
       t.*,
-      GROUP_CONCAT(a.$allocationsKey) 
+      COUNT(a.$allocationsKey) as nAllocs
     FROM 
       $transactionsTable t
-    INNER JOIN 
+    LEFT OUTER JOIN 
       $allocationsTable a on a.$allocationsTransaction = t.$_key
   ''';
+  // GROUP_CONCAT(a.$allocationsKey) as allocs --> null or "1,2,3"
 
   var firstWhere = true;
   void add(String query) {
     if (firstWhere) {
-      q += " WHERE $query";
+      q += " WHERE t.$query";
       firstWhere = false;
     } else {
-      q += " AND $query";
+      q += " AND t.$query";
     }
   }
 
@@ -145,7 +166,7 @@ class TransactionFilters {
     add("$_category = ?");
     args.add(filters.category!.key);
   }
-  q += " GROUP BY a.$allocationsTransaction";
+  q += " GROUP BY t.$_key";
 
   q += " ORDER BY date DESC";
   if (filters.limit != null) {
