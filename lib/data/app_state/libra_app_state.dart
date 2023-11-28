@@ -14,6 +14,7 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 enum DetailScreen {
   account,
   transaction,
+  addCsv,
 }
 
 class LibraAppState extends ChangeNotifier {
@@ -135,6 +136,11 @@ class LibraAppState extends ChangeNotifier {
 
   void focusTransaction(Transaction? t) {
     backStack.add((DetailScreen.transaction, t));
+    notifyListeners();
+  }
+
+  void navigateToAddCsvScreen() {
+    backStack.add((DetailScreen.addCsv, null));
     notifyListeners();
   }
 }

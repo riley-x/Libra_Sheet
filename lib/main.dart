@@ -70,6 +70,8 @@ class LibraHomePage extends StatelessWidget {
           page = AccountScreen(account: focusPage.$2 as Account);
         case DetailScreen.transaction:
           page = TransactionDetailsScreen(focusPage.$2 as transaction.Transaction?);
+        case DetailScreen.addCsv:
+          page = Placeholder();
       }
     } else {
       switch (LibraNavDestination.values[currentTab]) {
