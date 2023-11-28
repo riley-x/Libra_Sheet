@@ -1,12 +1,12 @@
 import 'package:libra_sheet/data/objects/category.dart';
 
 class Allocation {
-  final int key;
-  final String name;
-  final Category? category;
-  final int value;
+  int key;
+  String name;
+  Category? category;
+  int value;
 
-  const Allocation({
+  Allocation({
     this.key = 0,
     required this.name,
     required this.category,

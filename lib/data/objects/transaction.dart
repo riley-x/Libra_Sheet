@@ -5,7 +5,7 @@ import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 
 class Transaction {
-  const Transaction({
+  Transaction({
     this.key = 0,
     required this.name,
     required this.date,
@@ -18,7 +18,7 @@ class Transaction {
     this.tags,
   });
 
-  final int key;
+  int key;
   final String name;
   final DateTime date;
   final int value;
