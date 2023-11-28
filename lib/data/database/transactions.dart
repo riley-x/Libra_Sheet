@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as db;
@@ -105,7 +104,7 @@ class TransactionFilters {
   DateTime? startTime;
   DateTime? endTime;
   Account? account;
-  Category? category;
+  Iterable<int>? categories;
   int? limit;
 
   TransactionFilters({
@@ -114,7 +113,7 @@ class TransactionFilters {
     this.startTime,
     this.endTime,
     this.account,
-    this.category,
+    this.categories,
     this.limit = 300,
   });
 }
@@ -162,9 +161,11 @@ class TransactionFilters {
     add("$_account = ?");
     args.add(filters.account!.key);
   }
-  if (filters.category != null) {
-    add("$_category = ?");
-    args.add(filters.category!.key);
+  if (filters.categories != null && filters.categories!.isNotEmpty) {
+    /// No list support in sqflite
+    final n = filters.categories!.length;
+    add("$_category in (${List.filled(n, '?').join(',')})");
+    args.addAll(filters.categories!);
   }
   q += " GROUP BY t.$_key";
 

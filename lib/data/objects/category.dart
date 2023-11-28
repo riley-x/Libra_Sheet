@@ -161,26 +161,32 @@ class CategoryHistory {
 /// Only categories with children can have the dashed state. Selecting the checked state for such
 /// categories will automatically add all its children, while switching to the dashed state will
 /// remove the children.
+///
+/// This makes it easy to test for inclusion in the filter just by using contains().
 class CategoryTristateMap {
   Map<int, bool> _map = {};
 
   void set(Category cat, bool? selected) {
     if (selected == true) {
       _map[cat.key] = true;
-      for (final subCat in cat.subCats) {
-        _map[subCat.key] = true;
+      if (cat.level == 1) {
+        for (final subCat in cat.subCats) {
+          _map[subCat.key] = true;
+        }
       }
     } else if (selected == null) {
       _map[cat.key] = false;
-      for (final subCat in cat.subCats) {
-        _map.remove(subCat.key);
+      if (cat.level == 1) {
+        for (final subCat in cat.subCats) {
+          _map.remove(subCat.key);
+        }
       }
     } else {
       _map.remove(cat.key);
     }
   }
 
-  bool? get(Category cat) {
+  bool? checkboxState(Category cat) {
     final val = _map[cat.key];
     if (val == true) {
       return true;
@@ -189,6 +195,14 @@ class CategoryTristateMap {
     } else {
       return false;
     }
+  }
+
+  bool isActive(Category cat) {
+    return _map.containsKey(cat.key);
+  }
+
+  Iterable<int> activeKeys() {
+    return _map.keys;
   }
 }
 

@@ -137,14 +137,14 @@ class _CategoryChips extends StatelessWidget {
           right: DropdownCategoryMenu(
             categories: categories,
             map: state.categoryFilterSelected,
-            notify: state.notifyListeners,
+            notify: state.loadTransactions,
           ),
         ),
         const SizedBox(height: 5),
         CategoryFilterChips(
           categories: categories,
           map: state.categoryFilterSelected,
-          notify: state.notifyListeners,
+          notify: state.loadTransactions,
         ),
       ],
     );

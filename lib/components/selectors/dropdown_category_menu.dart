@@ -25,7 +25,7 @@ class CategoryFilterChips extends StatelessWidget {
       runSpacing: 4,
       children: [
         for (final cat in categories)
-          if (map.get(cat) != false)
+          if (map.isActive(cat))
             LibraChip(
               cat.name,
               color: cat.color,
@@ -70,7 +70,7 @@ class DropdownCategoryMenu extends StatelessWidget {
       icon: Icons.add,
       items: categories,
       builder: dropdownCategoryBuilder,
-      isChecked: map.get,
+      isChecked: map.checkboxState,
       isTristate: (cat) => cat.subCats.isNotEmpty,
       onChanged: (cat, selected) {
         map.set(cat, selected);
