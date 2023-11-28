@@ -130,4 +130,18 @@ class CategoryState {
     }
     return out;
   }
+
+  void _updateKeyMap(Map<int, Category> map, Category cat) {
+    map[cat.key] = cat;
+    for (final subCat in cat.subCats) {
+      _updateKeyMap(map, subCat);
+    }
+  }
+
+  Map<int, Category> createKeyMap() {
+    final out = <int, Category>{};
+    _updateKeyMap(out, income);
+    _updateKeyMap(out, expense);
+    return out;
+  }
 }

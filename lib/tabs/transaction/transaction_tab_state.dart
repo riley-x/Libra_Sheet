@@ -32,8 +32,9 @@ class TransactionTabState extends ChangeNotifier {
   Transaction? focusedTransaction;
 
   void loadTransactions() async {
+    notifyListeners();
     filters.categories = categoryFilterSelected.activeKeys();
-    transactions = await db.loadTransactions(filters);
+    transactions = await service.load(filters);
     notifyListeners();
   }
 

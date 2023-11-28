@@ -42,13 +42,19 @@ Map<String, dynamic> _toMap(Transaction t) {
   return map;
 }
 
-Transaction _fromMap(Map<String, dynamic> map) {
+Transaction _fromMap(
+  Map<String, dynamic> map, {
+  Map<int, Account>? accounts,
+  Map<int, Category>? categories,
+}) {
   return Transaction(
     key: map[_key],
     name: map[_name],
     date: DateTime.fromMillisecondsSinceEpoch(map[_date]),
     note: map[_note],
     value: map[_value],
+    account: accounts?[map[_account]],
+    category: categories?[map[_category]],
     nAllocations: map["nAllocs"],
   );
 }
@@ -78,22 +84,35 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   // reimbursements
 }
 
-/// Returns a map from transaction key to the object. Note that this leaves the following null:
-///     account
-///     category
+/// Note that this leaves the following null:
+///     account, if not present in [accounts]
+///     category, if not present in [categories]
 ///     tags
 ///     allocations (but sets nAllocs)
 ///     reimbursements (but sets nReimbs)
-Future<List<Transaction>> loadTransactions(TransactionFilters filters) async {
+///
+/// WARNING! Do not attempt to change this to an isolate using `compute()`. The database can't be
+/// accessed. Looks like will have to live with jank for now...could maybe move the _fromMap
+/// stuff to an isolate though.
+///
+/// https://stackoverflow.com/questions/56343611/insert-sqlite-flutter-without-freezing-the-interface
+/// https://github.com/flutter/flutter/issues/13937
+Future<List<Transaction>> loadTransactions(
+  TransactionFilters filters, {
+  Map<int, Account>? accounts,
+  Map<int, Category>? categories,
+}) async {
   List<Transaction> out = [];
-  final q = _createQuery(filters);
+  if (libraDatabase == null) return out;
 
-  await libraDatabase?.transaction((txn) async {
-    final rows = await txn.rawQuery(q.$1, q.$2);
-    for (final row in rows) {
-      out.add(_fromMap(row));
-    }
+  final q = _createQuery(filters);
+  final rows = await libraDatabase!.transaction((txn) async {
+    return await txn.rawQuery(q.$1, q.$2);
   });
+
+  for (final row in rows) {
+    out.add(_fromMap(row, accounts: accounts, categories: categories));
+  }
 
   return out;
 }
@@ -174,6 +193,6 @@ class TransactionFilters {
     q += " LIMIT ?";
     args.add(filters.limit);
   }
-  debugPrint("TransactionFilters::createQuery() $q");
+  // debugPrint("TransactionFilters::createQuery() $q");
   return (q, args);
 }

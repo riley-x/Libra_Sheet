@@ -7,6 +7,7 @@ import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum CsvField {
@@ -236,7 +237,7 @@ class AddCsvState extends ChangeNotifier {
         date: date,
         value: value,
         account: account,
-        category: rule?.category,
+        category: rule?.category ?? ((value > 0) ? Category.income : Category.expense),
         note: note,
       );
       transactions.add(t);

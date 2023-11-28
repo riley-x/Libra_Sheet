@@ -90,6 +90,14 @@ class LibraAppState extends ChangeNotifier {
     db.updateAccount(acc);
   }
 
+  Map<int, Account> createAccountMap() {
+    final out = <int, Account>{};
+    for (final acc in accounts) {
+      out[acc.key] = acc;
+    }
+    return out;
+  }
+
   //--------------------------------------------------------------------------------
   // Net worth
   //--------------------------------------------------------------------------------
