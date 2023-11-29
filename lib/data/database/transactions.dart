@@ -221,6 +221,15 @@ class TransactionFilters {
 
   q += " GROUP BY t.$_key";
 
+  if (filters.tags != null && filters.tags!.isNotEmpty) {
+    q += " HAVING max( CASE tag.$tagKey";
+    for (final tag in filters.tags!) {
+      q += " WHEN ? THEN 1";
+      args.add(tag);
+    }
+    q += " ELSE 0 END ) = 1";
+  }
+
   q += " ORDER BY date DESC";
   if (filters.limit != null) {
     q += " LIMIT ?";

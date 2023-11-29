@@ -25,8 +25,8 @@ class TransactionTabState extends ChangeNotifier {
   bool maxValueError = false;
 
   /// States for the dropdown checkbox filters
-  Set<Account> accountFilterSelected = {};
-  CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
+  final Set<Account> accountFilterSelected = {};
+  final CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
   final List<Tag> tags = [];
 
   /// Loaded transactions
@@ -36,6 +36,7 @@ class TransactionTabState extends ChangeNotifier {
     notifyListeners();
     filters.categories = categoryFilterSelected.activeKeys();
     filters.accounts = accountFilterSelected.map((e) => e.key);
+    filters.tags = tags.map((e) => e.key);
     transactions = await service.load(filters);
     notifyListeners();
   }
