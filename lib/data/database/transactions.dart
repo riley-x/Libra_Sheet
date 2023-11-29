@@ -155,7 +155,7 @@ Future<List<Transaction>> loadTransactions(
 Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categories) async {
   await libraDatabase!.transaction((txn) async {
     t.allocations = await loadAllocations(t.key, categories, txn);
-    // t.reimbursements = await ;
+    t.reimbursements = []; // TODO
   });
 }
 
