@@ -48,6 +48,14 @@ class LibraAppState extends ChangeNotifier {
     // TODO
   }
 
+  void reloadAfterTransactions() async {
+    var futures = <Future>[];
+    futures.add(_loadAccounts());
+    _loadNetWorth(); // not needed downstream, no need to await (but do place before the await below)
+    await Future.wait(futures);
+    notifyListeners();
+  }
+
   final List<TimeValue> chartData = [
     TimeValue.monthStart(2019, 1, 35),
     TimeValue.monthStart(2019, 2, 28),
@@ -67,6 +75,7 @@ class LibraAppState extends ChangeNotifier {
   final List<Account> accounts = [];
 
   Future<void> _loadAccounts() async {
+    accounts.clear();
     accounts.addAll(await db.getAccounts());
     if (!kReleaseMode) {
       for (final acc in accounts) {

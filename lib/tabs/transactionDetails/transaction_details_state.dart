@@ -92,9 +92,9 @@ class TransactionDetailsState extends ChangeNotifier {
         category: category,
         account: account,
         note: note!,
-        allocations: allocations,
-        reimbursements: reimbursements,
-        tags: tags,
+        allocations: List.from(allocations),
+        reimbursements: List.from(reimbursements),
+        tags: List.from(tags),
       );
       onSave?.call(t);
     }

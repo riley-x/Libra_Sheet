@@ -32,20 +32,27 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> save(Transaction t) async {
-    await insertTransaction(t);
+    if (t.key == 0) {
+      await insertTransaction(t);
+    } else {
+      // update
+    }
     notifyListeners();
+    appState.reloadAfterTransactions();
   }
 
-  Future<void> saveAll(List<Transaction> transactions) async {
+  Future<void> addAll(List<Transaction> transactions) async {
     await libraDatabase?.transaction((txn) async {
       for (final t in transactions) {
         await insertTransaction(t, txn: txn);
       }
     });
     notifyListeners();
+    appState.reloadAfterTransactions();
   }
 
   Future<void> delete(Transaction t) async {
     print('delete!');
+    appState.reloadAfterTransactions();
   }
 }

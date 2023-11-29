@@ -57,7 +57,6 @@ class Transaction {
     if (tags == null) return false;
     if (allocations == null) return false;
     if (reimbursements == null) return false;
-    if (nAllocations != allocations!.length) return false;
     return true;
   }
 }

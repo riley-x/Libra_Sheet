@@ -120,7 +120,7 @@ class _BottomBar extends StatelessWidget {
           TextButton(
             onPressed: () {
               context.read<LibraAppState>().popBackStack();
-              context.read<TransactionService>().saveAll(state.transactions);
+              context.read<TransactionService>().addAll(state.transactions);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Center(child: Text('Saved ${state.transactions.length} transactions.')),
