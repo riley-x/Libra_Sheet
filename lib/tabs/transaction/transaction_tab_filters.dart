@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
-import 'package:libra_sheet/components/selectors/dropdown_category_menu.dart';
+import 'package:libra_sheet/components/selectors/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
@@ -131,7 +131,7 @@ class _CategoryChips extends StatelessWidget {
       children: [
         TitleRow(
           title: Text("Category", style: Theme.of(context).textTheme.titleMedium),
-          right: DropdownCategoryMenu(
+          right: CategoryCheckboxMenu(
             categories: categories,
             map: state.categoryFilterSelected,
             notify: state.loadTransactions,

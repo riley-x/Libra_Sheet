@@ -1,0 +1,6 @@
+- Saving and deleting reimbursements
+- Load category history for heat map/bar graph
+- Load transactions in account screen (FilterTransactionGrid)
+- Load balance history in account screen
+- Dark theme
+- Replace income/expense categories with a single "uncategorized"

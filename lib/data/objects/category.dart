@@ -82,13 +82,18 @@ class Category {
         subCats: subCats ?? this.subCats);
   }
 
+  /// Placeholder for initializing non-null fields, and also to indicate an uncategorized entity.
+  /// I.e. it stands in for [income] or [expense] when the value is not known. This is also shown in
+  /// the UI in preference of [income] and [expense], since those two can be a bit confusing.
   static final empty = Category._manual(
     key: 0,
-    name: '',
+    name: 'Uncategorized',
     color: Colors.transparent,
     type: ExpenseType.expense,
     level: 0,
   );
+
+  // TODO repeal the need for separate income vs expense categories. Just use empty for all.
 
   /// The main super-category corresponding to income transactions. This category includes all
   /// un-categorized transactions with positive value. Note that all income categories must refer
@@ -164,7 +169,7 @@ class CategoryHistory {
 ///
 /// This makes it easy to test for inclusion in the filter just by using contains().
 class CategoryTristateMap {
-  Map<int, bool> _map = {};
+  final Map<int, bool> _map = {};
 
   void set(Category cat, bool? selected) {
     if (selected == true) {
@@ -205,21 +210,6 @@ class CategoryTristateMap {
     return _map.keys;
   }
 }
-
-// class CategoryWithTransactions extends Category<CategoryWithTransactions> {
-//   final List<Transaction> transactions;
-
-//   const CategoryWithTransactions({
-//     super.key,
-//     required super.name,
-//     super.color,
-//     super.subCats,
-//     required this.transactions,
-//   });
-
-//   CategoryWithTransactions.fromCategory(other, {required this.transactions})
-//       : super(key: other.key, color: other.color, name: other.name);
-// }
 
 extension CategoryList on List<Category> {
   int countFlattened() {
