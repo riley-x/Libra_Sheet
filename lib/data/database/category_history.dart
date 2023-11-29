@@ -63,20 +63,16 @@ FutureOr<int> updateCategoryHistory({
   required int category,
   required DateTime date,
   required int delta,
-  DatabaseExecutor? db,
+  required Transaction txn,
 }) async {
-  if (db == null) {
-    if (libraDatabase == null) return 0;
-    return libraDatabase!.transaction(
-      (txn) async => await updateCategoryHistory(
-          account: account, category: category, date: date, delta: delta, db: txn),
-    );
-  }
-
   final data = _CategoryHistory(
-      account: account, category: category, date: startOfMonth(date), delta: delta);
-  await _insertCategoryHistory(data, db);
-  return await _updateCategoryHistory(data, db);
+    account: account,
+    category: category,
+    date: startOfMonth(date),
+    delta: delta,
+  );
+  await _insertCategoryHistory(data, txn);
+  return await _updateCategoryHistory(data, txn);
 }
 
 Future<List<TimeIntValue>> getNetWorth() async {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -51,20 +52,48 @@ Allocation _fromMap(Map<int, Category> categories, Map<String, dynamic> map) {
 }
 
 /// This modifies the allocation's key in-place!
-FutureOr<void> insertAllocation(
-  lt.Transaction parent,
-  Allocation allocation, {
+FutureOr<void> _insertAllocation({
+  required lt.Transaction parent,
+  required Allocation allocation,
   required int listIndex,
-  DatabaseExecutor? database,
+  required DatabaseExecutor db,
 }) async {
-  database = database ?? libraDatabase;
-  if (database == null) return;
-  allocation.key = await database.insert(
+  allocation.key = await db.insert(
     allocationsTable,
     _toMap(parent, allocation, listIndex),
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
   return;
+}
+
+/// This modifies the allocation's key in-place!
+FutureOr<void> addAllocation({
+  required lt.Transaction parent,
+  required int index,
+  required Transaction txn,
+}) async {
+  if (parent.account == null) return;
+  if (parent.category == null) return;
+  if (parent.allocations == null) return;
+  if (index >= parent.allocations!.length) return;
+  final alloc = parent.allocations![index];
+  if (alloc.category == null) return;
+
+  await _insertAllocation(parent: parent, allocation: alloc, listIndex: index, db: txn);
+  await updateCategoryHistory(
+    account: parent.account!.key,
+    category: parent.category!.key,
+    date: parent.date,
+    delta: -alloc.value,
+    txn: txn,
+  );
+  await updateCategoryHistory(
+    account: parent.account!.key,
+    category: alloc.category!.key,
+    date: parent.date,
+    delta: alloc.value,
+    txn: txn,
+  );
 }
 
 /// Returns a map from transaction key to the allocations.

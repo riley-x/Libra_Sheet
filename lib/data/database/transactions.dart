@@ -93,7 +93,12 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   );
   await updateBalance(t.account!.key, t.value, db: txn);
   await updateCategoryHistory(
-      account: t.account!.key, category: t.category!.key, date: t.date, delta: t.value, db: txn);
+    account: t.account!.key,
+    category: t.category!.key,
+    date: t.date,
+    delta: t.value,
+    txn: txn,
+  );
 
   if (t.tags != null) {
     for (final tag in t.tags!) {
@@ -101,8 +106,8 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
     }
   }
   if (t.allocations != null) {
-    for (int i = 0; i < (t.allocations!.length); i++) {
-      await insertAllocation(t, t.allocations![i], listIndex: i, database: txn);
+    for (int i = 0; i < t.allocations!.length; i++) {
+      await addAllocation(parent: t, index: i, txn: txn);
     }
   }
 
