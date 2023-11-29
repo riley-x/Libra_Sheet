@@ -1,17 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
+import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
+import 'package:provider/provider.dart';
 
-class CashFlowTab extends StatefulWidget {
+class CashFlowTab extends StatelessWidget {
   const CashFlowTab({super.key});
 
   @override
-  State<CashFlowTab> createState() => _CashFlowTabState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => CashFlowState(context.read<LibraAppState>()),
+      child: const _CashFlowTab(),
+    );
+  }
+}
+
+class _CashFlowTab extends StatefulWidget {
+  const _CashFlowTab({super.key});
+
+  @override
+  State<_CashFlowTab> createState() => _CashFlowTabState();
 }
 
 enum _TimeFrame { oneYear, lastYear, all }
 
-class _CashFlowTabState extends State<CashFlowTab> {
+class _CashFlowTabState extends State<_CashFlowTab> {
   _TimeFrame timeFrame = _TimeFrame.all;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

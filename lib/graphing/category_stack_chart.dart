@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -27,13 +28,13 @@ class CategoryStackChart extends StatelessWidget {
       ),
       series: <ChartSeries>[
         for (final categoryHistory in chartData1)
-          StackedColumnSeries<TimeValue, String>(
+          StackedColumnSeries<TimeIntValue, String>(
             animationDuration: 300,
             dataSource: categoryHistory.values.sublist(range.$1, range.$2),
             name: categoryHistory.category.name,
             color: categoryHistory.category.color,
-            xValueMapper: (TimeValue data, _) => format.format(data.time),
-            yValueMapper: (TimeValue data, _) => data.value,
+            xValueMapper: (TimeIntValue data, _) => format.format(data.time),
+            yValueMapper: (TimeIntValue data, _) => data.value.asDollarDouble(),
           ),
       ],
     );
@@ -44,25 +45,25 @@ final chartData1 = [
   CategoryHistory(
     testCategories[0],
     [
-      TimeValue(time: DateTime(2010), value: 100),
-      TimeValue(time: DateTime(2011), value: 200),
-      TimeValue(time: DateTime(2012), value: 300),
+      TimeIntValue(time: DateTime(2010), value: 100),
+      TimeIntValue(time: DateTime(2011), value: 200),
+      TimeIntValue(time: DateTime(2012), value: 300),
     ],
   ),
   CategoryHistory(
     testCategories[1],
     [
-      TimeValue(time: DateTime(2010), value: 500),
-      TimeValue(time: DateTime(2011), value: 200),
-      TimeValue(time: DateTime(2012), value: 300),
+      TimeIntValue(time: DateTime(2010), value: 500),
+      TimeIntValue(time: DateTime(2011), value: 200),
+      TimeIntValue(time: DateTime(2012), value: 300),
     ],
   ),
   CategoryHistory(
     testCategories[2],
     [
-      TimeValue(time: DateTime(2010), value: 400),
-      TimeValue(time: DateTime(2011), value: 200),
-      TimeValue(time: DateTime(2012), value: 300),
+      TimeIntValue(time: DateTime(2010), value: 400),
+      TimeIntValue(time: DateTime(2011), value: 200),
+      TimeIntValue(time: DateTime(2012), value: 300),
     ],
   ),
 ];

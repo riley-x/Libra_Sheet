@@ -93,7 +93,10 @@ class Category {
     level: 0,
   );
 
-  // TODO repeal the need for separate income vs expense categories. Just use empty for all.
+  // TODO repeal the need for separate income vs expense categories. Just use empty for all. This
+  // may mess up places that expect categories to be either positive or negative though. And things
+  // like category history may want to filter on one or the other. Maybe just on UI side, but makes
+  // filtering/selecting a bit more annoying?
 
   /// The main super-category corresponding to income transactions. This category includes all
   /// un-categorized transactions with positive value. Note that all income categories must refer
@@ -151,7 +154,7 @@ class Category {
 
 class CategoryHistory {
   final Category category;
-  final List<TimeValue> values;
+  final List<TimeIntValue> values;
 
   const CategoryHistory(
     this.category,
