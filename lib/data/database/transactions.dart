@@ -63,14 +63,19 @@ Transaction _fromMap(
     }
   }
 
+  final value = map[_value];
+
+  /// This can happen if the category has been deleted.
+  final defaultCategory = (value > 0) ? Category.income : Category.expense;
+
   return Transaction(
     key: map[_key],
     name: map[_name],
     date: DateTime.fromMillisecondsSinceEpoch(map[_date], isUtc: true),
     note: map[_note],
-    value: map[_value],
+    value: value,
     account: accounts?[map[_account]],
-    category: categories?[map[_category]],
+    category: categories?[map[_category]] ?? defaultCategory,
     tags: tagList,
     nAllocations: map["nAllocs"],
   );
@@ -126,15 +131,21 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
   }
   await deleteAllTags(t, db: txn);
 
-  await updateBalance(t.account!.key, -t.value, db: txn);
-  await updateCategoryHistory(
-    account: t.account!.key,
-    category: t.category!.key,
-    date: t.date,
-    delta: -t.value,
-    txn: txn,
-  );
-
+  if (t.account != null) {
+    // TODO this can happen if the account is deleted, should delete all corresponding transactions
+    await updateBalance(t.account!.key, -t.value, db: txn);
+  }
+  if (t.account != null && t.category != null) {
+    // TODO this can happen if the category is deleted, should switch all affected transactions/allocs
+    // to default category (in database? or soft?). And delete all rules.
+    await updateCategoryHistory(
+      account: t.account!.key,
+      category: t.category!.key,
+      date: t.date,
+      delta: -t.value,
+      txn: txn,
+    );
+  }
   await txn.delete(
     transactionsTable,
     where: "$_key = ?",

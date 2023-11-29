@@ -46,7 +46,7 @@ Allocation _fromMap(Map<int, Category> categories, Map<String, dynamic> map) {
   return Allocation(
     key: map[_key],
     name: map[_name],
-    category: categories[map[_category]],
+    category: categories[map[_category]] ?? Category.empty,
     value: map[_value],
   );
 }

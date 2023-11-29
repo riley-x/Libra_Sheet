@@ -117,7 +117,8 @@ class LibraAppState extends ChangeNotifier {
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
-    netWorthData = await getNetWorth();
+    /// TODO this is wrong, need to cummulate
+    netWorthData = await getMonthlyNet();
     notifyListeners();
   }
 

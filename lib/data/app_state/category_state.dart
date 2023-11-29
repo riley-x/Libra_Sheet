@@ -140,7 +140,9 @@ class CategoryState {
 
   // TODO cache this?
   Map<int, Category> createKeyMap() {
-    final out = <int, Category>{};
+    final out = <int, Category>{
+      Category.ignore.key: Category.ignore,
+    };
     _updateKeyMap(out, income);
     _updateKeyMap(out, expense);
     return out;

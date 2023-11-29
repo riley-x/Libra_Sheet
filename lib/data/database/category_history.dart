@@ -75,7 +75,10 @@ FutureOr<int> updateCategoryHistory({
   return await _updateCategoryHistory(data, txn);
 }
 
-Future<List<TimeIntValue>> getNetWorth() async {
+/// Returns the monthly net change across all acounts. WARNING: the dates are returned using the
+/// local timezone, do not use for anything other than the syncfusion charts. Also, there may be
+/// gaps in the timeline.
+Future<List<TimeIntValue>> getMonthlyNet() async {
   final List<Map<String, dynamic>> maps = await libraDatabase!.query(
     categoryHistoryTable,
     columns: [_date, "SUM($_value) as $_value"],
