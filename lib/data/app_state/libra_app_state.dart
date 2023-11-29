@@ -112,6 +112,8 @@ class LibraAppState extends ChangeNotifier {
   //--------------------------------------------------------------------------------
   // Net worth
   //--------------------------------------------------------------------------------
+  /// Warning this data contains dates using the local time zone because that's what the syncfusion
+  /// charts expect. Don't use to save to database!
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {

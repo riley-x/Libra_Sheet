@@ -66,7 +66,7 @@ Transaction _fromMap(
   return Transaction(
     key: map[_key],
     name: map[_name],
-    date: DateTime.fromMillisecondsSinceEpoch(map[_date]),
+    date: DateTime.fromMillisecondsSinceEpoch(map[_date], isUtc: true),
     note: map[_note],
     value: map[_value],
     account: accounts?[map[_account]],

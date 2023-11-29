@@ -173,7 +173,8 @@ class TransactionDetailsEditor extends StatelessWidget {
                 onCancel: () => onCancel?.call() ?? context.read<LibraAppState>().popBackStack(),
                 onDelete: state.delete,
                 onReset: state.reset,
-                onSave: state.save,
+                // disable save when the allocation/reimb editor is open
+                onSave: (state.focus == TransactionDetailActiveFocus.none) ? state.save : null,
               ),
             ],
           ),
@@ -203,13 +204,13 @@ class _DateField extends StatelessWidget {
       validator: (String? value) {
         if (value == null || value.isEmpty) return ''; // No message to not take up sapce
         try {
-          _dateFormat.parse(value);
+          _dateFormat.parse(value, true);
           return null;
         } on FormatException {
           return '';
         }
       },
-      onSave: (it) => onSave?.call(_dateFormat.parse(it!)),
+      onSave: (it) => onSave?.call(_dateFormat.parse(it!, true)),
     );
   }
 }

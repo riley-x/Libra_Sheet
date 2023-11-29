@@ -84,11 +84,13 @@ Future<List<TimeIntValue>> getNetWorth() async {
     orderBy: _date,
   );
 
-  return List.generate(
-    maps.length,
-    (i) => TimeIntValue(
-      time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
+  return List.generate(maps.length, (i) {
+    // The syncfusion charts expect local timezone, so convert manually
+    final utcTime = DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true);
+    final localTime = DateTime(utcTime.year, utcTime.month, utcTime.day);
+    return TimeIntValue(
+      time: localTime,
       value: maps[i][_value],
-    ),
-  );
+    );
+  });
 }
