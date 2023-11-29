@@ -6,21 +6,26 @@ extension IntDollar on int {
   }
 
   String dollarString({int decimals = 2, bool dollarSign = true}) {
+    final absVal = abs();
     final formatter = NumberFormat((dollarSign) ? '\$#,###' : '#,###');
-    final integer = formatter.format(this ~/ 10000);
+    final integer = formatter.format(absVal ~/ 10000);
+
     final int fraction;
     switch (decimals) {
       case 0:
-        return integer;
+        return (isNegative) ? "-$integer" : integer;
       case 2:
-        fraction = (this ~/ 100) % 100;
+        fraction = (absVal ~/ 100) % 100;
       case 4:
-        fraction = this % 10000;
+        fraction = absVal % 10000;
       default:
         throw UnimplementedError('dollarString() unknown decimals $decimals');
     }
-    final String factionStr = fraction.toString().padRight(2, '0');
-    return "$integer.$factionStr";
+    final factionStr = fraction.toString().padLeft(decimals, '0');
+
+    var out = "$integer.$factionStr";
+    if (isNegative) return "-$out";
+    return out;
   }
 }
 

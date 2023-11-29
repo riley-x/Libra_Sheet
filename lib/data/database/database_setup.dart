@@ -60,7 +60,7 @@ FutureOr<void> _createDatabse14(Database db) async {
   await db.execute(createTagJoinTableSql);
   await db.execute(createDefaultCategories);
   if (kDebugMode) {
-    await db.execute(_createTestAccounts);
+    await db.execute(createTestAccountsSql);
     await db.execute(createTestTagsSql);
   }
 }
@@ -105,11 +105,4 @@ INSERT INTO "categories" ("key", "name", "colorLong", "parentKey", "listIndex") 
 ('36', 'Hotels', '4287322772', '35', '0'),
 ('37', 'Taxes', '4289687417', '35', '1'),
 ('38', 'Services', '4287460443', '35', '2');
-''';
-
-const _createTestAccounts = '''
-INSERT INTO "accounts" ("key", "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex", "balance") VALUES
-(1, 'Cash', '', 'Cash', '', '', 4279542308, 0, 0),
-(2, 'Checkings', '', 'Bank', '', '', 4280391411, 1, 0),
-(3, 'Savings', '', 'Bank', '', '', 4290126323, 2, 0);
 ''';

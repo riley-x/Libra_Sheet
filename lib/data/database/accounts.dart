@@ -5,7 +5,7 @@ import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-const accountsTable = '`accounts`';
+const accountsTable = 'accounts';
 
 const _key = "id";
 const _balance = "balance";
@@ -20,6 +20,13 @@ const createAccountsTableSql = "CREATE TABLE IF NOT EXISTS `accounts` ("
     "`colorLong` INTEGER NOT NULL, "
     "`listIndex` INTEGER NOT NULL, "
     "$_balance INTEGER NOT NULL)";
+
+const createTestAccountsSql = '''
+INSERT INTO $accountsTable ($_key, "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex", $_balance) VALUES
+(1, 'Cash', '', 'Cash', '', '', 4279542308, 0, 0),
+(2, 'Checkings', '', 'Bank', '', '', 4280391411, 1, 0),
+(3, 'Savings', '', 'Bank', '', '', 4290126323, 2, 0);
+''';
 
 Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
   final out = {

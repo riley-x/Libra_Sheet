@@ -93,7 +93,7 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   );
   await updateBalance(t.account!.key, t.value, db: txn);
   await updateCategoryHistory(
-      account: t.account!.key, category: t.category!.key, date: t.date, delta: t.value);
+      account: t.account!.key, category: t.category!.key, date: t.date, delta: t.value, db: txn);
 
   if (t.tags != null) {
     for (final tag in t.tags!) {

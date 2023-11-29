@@ -53,7 +53,7 @@ Future<int> _updateCategoryHistory(_CategoryHistory data, DatabaseExecutor db) a
   return db.rawUpdate(
     "UPDATE $categoryHistoryTable SET $_value = $_value + ?"
     " WHERE $_account = ? AND $_category = ? AND $_date = ?",
-    [data.delta, data.account, data.category, startOfMonth(data.date).millisecondsSinceEpoch],
+    [data.delta, data.account, data.category, data.date.millisecondsSinceEpoch],
   );
 }
 
@@ -73,7 +73,8 @@ FutureOr<int> updateCategoryHistory({
     );
   }
 
-  final data = _CategoryHistory(account: account, category: category, date: date, delta: delta);
+  final data = _CategoryHistory(
+      account: account, category: category, date: startOfMonth(date), delta: delta);
   await _insertCategoryHistory(data, db);
   return await _updateCategoryHistory(data, db);
 }
