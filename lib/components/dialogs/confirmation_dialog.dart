@@ -35,11 +35,16 @@ void showConfirmationDialog({
   String? title,
   String? msg,
   Function(bool confirmed)? onClose,
+  Function()? onConfirmed,
 }) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return ConfirmationDialog(title: title, msg: msg);
     },
-  ).then((msg) => onClose?.call(msg == 'Ok'));
+  ).then((msg) {
+    final confirmed = msg == 'Ok';
+    if (onClose != null) onClose(confirmed);
+    if (confirmed && onConfirmed != null) onConfirmed();
+  });
 }

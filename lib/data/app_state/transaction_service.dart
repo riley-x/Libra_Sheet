@@ -31,6 +31,11 @@ class TransactionService extends ChangeNotifier {
     return ts;
   }
 
+  Future<void> save(Transaction t) async {
+    await insertTransaction(t);
+    notifyListeners();
+  }
+
   Future<void> saveAll(List<Transaction> transactions) async {
     await libraDatabase?.transaction((txn) async {
       for (final t in transactions) {
@@ -38,5 +43,9 @@ class TransactionService extends ChangeNotifier {
       }
     });
     notifyListeners();
+  }
+
+  Future<void> delete(Transaction t) async {
+    print('delete!');
   }
 }

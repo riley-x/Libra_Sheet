@@ -97,13 +97,11 @@ class TransactionDetailsState extends ChangeNotifier {
         tags: tags,
       );
       onSave?.call(t);
-      // TODO save transaction; remember this state is used from the CSV screen too.
     }
   }
 
   void delete() {
     if (seed != null) onDelete?.call(seed!);
-    // TODO remember this state is used from the CSV screen too.
   }
 
   void onValueChanged(int? val) {

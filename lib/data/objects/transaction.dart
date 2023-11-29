@@ -50,6 +50,16 @@ class Transaction {
         " reimb=${reimbursements?.length ?? 0}";
     return out;
   }
+
+  bool relationsAreLoaded() {
+    if (account == null) return false;
+    if (category == null) return false;
+    if (tags == null) return false;
+    if (allocations == null) return false;
+    if (reimbursements == null) return false;
+    if (nAllocations != allocations!.length) return false;
+    return true;
+  }
 }
 
 final dummyTransaction = Transaction(name: '___TEST___', date: DateTime(1987), value: 10000);
