@@ -255,7 +255,7 @@ class AddCsvState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveTransaction(Transaction t) {
+  void saveTransaction(Transaction? old, Transaction t) {
     transactions[focusedTransIndex] = t;
     focusedTransIndex = -1;
     notifyListeners();

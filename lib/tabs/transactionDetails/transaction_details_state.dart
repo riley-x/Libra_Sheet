@@ -23,7 +23,7 @@ class TransactionDetailsState extends ChangeNotifier {
   }
 
   final TransactionService service;
-  final Function(Transaction)? onSave;
+  final Function(Transaction?, Transaction)? onSave;
   final Function(Transaction)? onDelete;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -104,7 +104,7 @@ class TransactionDetailsState extends ChangeNotifier {
         reimbursements: List.from(reimbursements),
         tags: List.from(tags),
       );
-      onSave?.call(t);
+      onSave?.call(seed, t);
     }
   }
 

@@ -142,6 +142,14 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
   );
 }
 
+Future<void> updateTransaction(Transaction old, Transaction nu, {db.Transaction? txn}) async {
+  if (txn == null) {
+    return libraDatabase?.transaction((txn) async => await updateTransaction(old, nu, txn: txn));
+  }
+  await deleteTransaction(old, txn: txn);
+  await insertTransaction(nu, txn: txn);
+}
+
 /// Note that this leaves the following null:
 ///     account, if not present in [accounts]
 ///     category, if not present in [categories]

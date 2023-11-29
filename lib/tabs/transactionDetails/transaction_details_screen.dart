@@ -27,8 +27,8 @@ class TransactionDetailsScreen extends StatelessWidget {
       create: (context) => TransactionDetailsState(
         transaction,
         service: context.read<TransactionService>(),
-        onSave: (t) {
-          context.read<TransactionService>().save(t);
+        onSave: (old, nu) {
+          context.read<TransactionService>().save(old, nu);
           context.read<LibraAppState>().popBackStack();
         },
         onDelete: (t) {

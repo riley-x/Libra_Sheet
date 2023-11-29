@@ -31,12 +31,13 @@ class TransactionService extends ChangeNotifier {
     return ts;
   }
 
-  Future<void> save(Transaction t) async {
-    debugPrint("TransactionService::save() $t");
-    if (t.key == 0) {
-      await insertTransaction(t);
+  Future<void> save(Transaction? old, Transaction nu) async {
+    debugPrint("TransactionService::save() $nu");
+    if (old == null) {
+      assert(nu.key == 0);
+      await insertTransaction(nu);
     } else {
-      // update
+      await updateTransaction(old, nu);
     }
     notifyListeners();
     appState.reloadAfterTransactions();
