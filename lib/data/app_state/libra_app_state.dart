@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
@@ -152,7 +153,10 @@ class LibraAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void focusTransaction(Transaction? t) {
+  void focusTransaction(Transaction? t) async {
+    if (t != null && !t.relationsAreLoaded()) {
+      await loadTransactionRelations(t, categories.createKeyMap());
+    }
     backStack.add((DetailScreen.transaction, t));
     notifyListeners();
   }
