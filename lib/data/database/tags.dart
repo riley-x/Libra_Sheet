@@ -103,3 +103,23 @@ Future<int> insertTagJoin(lt.Transaction trans, Tag tag, {DatabaseExecutor? db})
     },
   );
 }
+
+Future<int> deleteTagJoin(lt.Transaction trans, Tag tag, {DatabaseExecutor? db}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.delete(
+    tagJoinTable,
+    where: "transaction_id = ? AND tag_id = ?",
+    whereArgs: [trans.key, tag.key],
+  );
+}
+
+Future<int> deleteAllTags(lt.Transaction trans, {DatabaseExecutor? db}) async {
+  db = db ?? libraDatabase;
+  if (db == null) return 0;
+  return db.delete(
+    tagJoinTable,
+    where: "transaction_id = ?",
+    whereArgs: [trans.key],
+  );
+}

@@ -118,31 +118,28 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
   }
 
   // TODO reimbursements
+
   if (t.allocations != null) {
     for (int i = 0; i < t.allocations!.length; i++) {
       await deleteAllocation(parent: t, index: i, txn: txn);
     }
   }
-  // if (t.tags != null) {
-  //   for (final tag in t.tags!) {
-  //     await deleteTagJoin(t, tag, db: txn);
-  //   }
-  // }
+  await deleteAllTags(t, db: txn);
 
-  // await updateBalance(t.account!.key, t.value, db: txn);
-  // await updateCategoryHistory(
-  //   account: t.account!.key,
-  //   category: t.category!.key,
-  //   date: t.date,
-  //   delta: t.value,
-  //   txn: txn,
-  // );
+  await updateBalance(t.account!.key, -t.value, db: txn);
+  await updateCategoryHistory(
+    account: t.account!.key,
+    category: t.category!.key,
+    date: t.date,
+    delta: -t.value,
+    txn: txn,
+  );
 
-  //   t.key = await txn.insert(
-  //   transactionsTable,
-  //   _toMap(t),
-  //   conflictAlgorithm: db.ConflictAlgorithm.replace,
-  // );
+  await txn.delete(
+    transactionsTable,
+    where: "$_key = ?",
+    whereArgs: [t.key],
+  );
 }
 
 /// Note that this leaves the following null:
