@@ -50,7 +50,7 @@ class CategoryState {
       if (deleteFromDatabase) {
         await deleteCategory(cat, db: txn);
       }
-      await shiftListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1, db: txn);
+      await shiftCategoryListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1, db: txn);
     });
   }
 
@@ -77,10 +77,10 @@ class CategoryState {
 
     await libraDatabase?.transaction((txn) async {
       if (newIndex > oldIndex) {
-        await shiftListIndicies(parent.key, oldIndex, newIndex, -1, db: txn);
+        await shiftCategoryListIndicies(parent.key, oldIndex, newIndex, -1, db: txn);
         await updateCategory(cat, listIndex: newIndex - 1, db: txn);
       } else {
-        await shiftListIndicies(parent.key, newIndex, oldIndex, 1, db: txn);
+        await shiftCategoryListIndicies(parent.key, newIndex, oldIndex, 1, db: txn);
         await updateCategory(cat, listIndex: newIndex, db: txn);
       }
     });

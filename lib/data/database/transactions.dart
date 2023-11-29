@@ -112,6 +112,39 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   // TODO reimbursements
 }
 
+Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
+  if (txn == null) {
+    return libraDatabase?.transaction((txn) async => await deleteTransaction(t, txn: txn));
+  }
+
+  // TODO reimbursements
+  if (t.allocations != null) {
+    for (int i = 0; i < t.allocations!.length; i++) {
+      await deleteAllocation(parent: t, index: i, txn: txn);
+    }
+  }
+  // if (t.tags != null) {
+  //   for (final tag in t.tags!) {
+  //     await deleteTagJoin(t, tag, db: txn);
+  //   }
+  // }
+
+  // await updateBalance(t.account!.key, t.value, db: txn);
+  // await updateCategoryHistory(
+  //   account: t.account!.key,
+  //   category: t.category!.key,
+  //   date: t.date,
+  //   delta: t.value,
+  //   txn: txn,
+  // );
+
+  //   t.key = await txn.insert(
+  //   transactionsTable,
+  //   _toMap(t),
+  //   conflictAlgorithm: db.ConflictAlgorithm.replace,
+  // );
+}
+
 /// Note that this leaves the following null:
 ///     account, if not present in [accounts]
 ///     category, if not present in [categories]

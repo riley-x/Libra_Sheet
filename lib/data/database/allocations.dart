@@ -12,8 +12,8 @@ const allocationsTable = "allocations";
 const createAllocationsTableSql = "CREATE TABLE IF NOT EXISTS $allocationsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "$_name TEXT NOT NULL, "
-    "$_transaction INTEGER NOT NULL, "
-    "$_category INTEGER NOT NULL, "
+    "$_transaction INTEGER NOT NULL, " // id into transaction table
+    "$_category INTEGER NOT NULL, " // id into category table
     "$_value INTEGER NOT NULL, "
     "$_index INTEGER NOT NULL)";
 
@@ -66,6 +66,13 @@ FutureOr<void> _insertAllocation({
   return;
 }
 
+Future<int> _deleteAllocation({
+  required Allocation allocation,
+  required DatabaseExecutor db,
+}) async {
+  return db.delete(allocationsTable, where: "$_key = ?", whereArgs: [allocation.key]);
+}
+
 /// This modifies the allocation's key in-place!
 FutureOr<void> addAllocation({
   required lt.Transaction parent,
@@ -94,6 +101,45 @@ FutureOr<void> addAllocation({
     category: alloc.category!.key,
     date: parent.date,
     delta: signedValue,
+    txn: txn,
+  );
+}
+
+FutureOr<void> deleteAllocation({
+  required lt.Transaction parent,
+  required int index,
+  required Transaction txn,
+}) async {
+  if (parent.account == null) return;
+  if (parent.category == null) return;
+  if (parent.allocations == null) return;
+  if (index >= parent.allocations!.length) return;
+  final alloc = parent.allocations![index];
+  if (alloc.category == null) return;
+
+  await _deleteAllocation(allocation: alloc, db: txn);
+
+  await shiftAllocationListIndicies(
+    transKey: parent.key,
+    start: index,
+    end: parent.allocations!.length,
+    delta: -1,
+    txn: txn,
+  );
+
+  final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
+  await updateCategoryHistory(
+    account: parent.account!.key,
+    category: parent.category!.key,
+    date: parent.date,
+    delta: signedValue,
+    txn: txn,
+  );
+  await updateCategoryHistory(
+    account: parent.account!.key,
+    category: alloc.category!.key,
+    date: parent.date,
+    delta: -signedValue,
     txn: txn,
   );
 }
@@ -145,4 +191,20 @@ Future<Map<int, List<Allocation>>> loadAllAllocations(
   checkSaveList(-1);
 
   return out;
+}
+
+/// Start is inclusive, end is exclusive
+FutureOr<int> shiftAllocationListIndicies({
+  required int transKey,
+  required int start,
+  required int end,
+  required int delta,
+  required Transaction txn,
+}) async {
+  return txn.rawUpdate(
+    "UPDATE $allocationsTable "
+    "SET $_index = $_index + ? "
+    "WHERE $_transaction = ? AND $_index >= ? AND $_index < ?",
+    [delta, transKey, start, end],
+  );
 }

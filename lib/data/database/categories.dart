@@ -50,7 +50,7 @@ FutureOr<int> deleteCategory(
   );
 }
 
-FutureOr<int> shiftListIndicies(
+FutureOr<int> shiftCategoryListIndicies(
   int parentKey,
   int start,
   int end,
