@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -12,10 +14,16 @@ enum TransactionDetailActiveFocus { none, allocation, reimbursement }
 /// This state handles the TransactionDetailsEditor, allowing editing the state of a single
 /// transaction.
 class TransactionDetailsState extends ChangeNotifier {
-  TransactionDetailsState(this.seed, {this.onSave, this.onDelete}) {
+  TransactionDetailsState(
+    this.seed, {
+    required this.service,
+    this.onSave,
+    this.onDelete,
+  }) {
     _init();
   }
 
+  final TransactionService service;
   final Function(Transaction)? onSave;
   final Function(Transaction)? onDelete;
 
@@ -53,8 +61,9 @@ class TransactionDetailsState extends ChangeNotifier {
   /// Active target of the reimbursement editor
   Transaction? reimburseTarget;
 
-  void _init() {
+  void _init() async {
     if (seed != null) {
+      if (!seed!.relationsAreLoaded()) await service.loadRelations(seed!);
       expenseType = _valToFilterType(seed?.value);
       tags.insertAll(0, seed?.tags ?? const []);
       allocations.insertAll(0, seed?.allocations ?? const []);

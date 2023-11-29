@@ -55,4 +55,8 @@ class TransactionService extends ChangeNotifier {
     print('delete!');
     appState.reloadAfterTransactions();
   }
+
+  Future<void> loadRelations(Transaction t) {
+    return loadTransactionRelations(t, appState.categories.createKeyMap());
+  }
 }

@@ -98,8 +98,22 @@ FutureOr<void> addAllocation({
   );
 }
 
-/// Returns a map from transaction key to the allocations.
-Future<Map<int, List<Allocation>>> loadAllocations(
+Future<List<Allocation>> loadAllocations(
+  int transactionKey,
+  Map<int, Category> categories,
+  DatabaseExecutor db,
+) async {
+  final maps = await db.query(
+    allocationsTable,
+    where: "$_transaction = ?",
+    whereArgs: [transactionKey],
+    orderBy: _index,
+  );
+  return [for (final map in maps) _fromMap(categories, map)];
+}
+
+/// Returns every allocation as a map from transaction key to the allocations. Probably excessive...
+Future<Map<int, List<Allocation>>> loadAllAllocations(
   Map<int, Category> categories, {
   DatabaseExecutor? db,
 }) async {

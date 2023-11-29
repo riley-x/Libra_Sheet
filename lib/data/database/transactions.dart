@@ -151,6 +151,14 @@ Future<List<Transaction>> loadTransactions(
   return out;
 }
 
+/// Loads the allocations and reimbursements for this transaction, modifies in-place.
+Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categories) async {
+  await libraDatabase!.transaction((txn) async {
+    t.allocations = await loadAllocations(t.key, categories, txn);
+    // t.reimbursements = await ;
+  });
+}
+
 class TransactionFilters {
   int? minValue;
   int? maxValue;

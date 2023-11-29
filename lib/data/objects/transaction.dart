@@ -16,8 +16,8 @@ class Transaction {
     this.allocations,
     this.reimbursements,
     this.tags,
-    this.nAllocations = 0,
-  });
+    nAllocations = 0,
+  }) : _nAllocations = nAllocations;
 
   int key;
   final String name;
@@ -29,12 +29,16 @@ class Transaction {
   final Category? category;
 
   final List<Tag>? tags;
-  final List<Allocation>? allocations;
-  final List<Reimbursement>? reimbursements;
+  List<Allocation>? allocations;
+  List<Reimbursement>? reimbursements;
 
   /// We don't load all the allocations with the transaction in list view, but we do count how many
-  /// there are. This field is equal to allocations.length when [allocations] is not null.
-  int nAllocations;
+  /// there are. This field is not used when [allocations] is not null.
+  final int _nAllocations;
+  int get nAllocations {
+    if (allocations == null) return _nAllocations;
+    return allocations!.length;
+  }
 
   @override
   String toString() {

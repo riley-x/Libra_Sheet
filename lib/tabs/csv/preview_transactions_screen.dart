@@ -66,6 +66,7 @@ class _TransactionDetails extends StatelessWidget {
         key: ObjectKey(trans),
         create: (context) => TransactionDetailsState(
           trans,
+          service: context.read<TransactionService>(),
           onSave: state.saveTransaction,
           onDelete: (t) => state.deleteTransaction(),
         ),
