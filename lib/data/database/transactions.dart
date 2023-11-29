@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
+import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';
@@ -77,6 +79,9 @@ Transaction _fromMap(
 /// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
 /// set the transaction's key in-place!
 FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
+  if (t.account == null) return;
+  if (t.category == null) return;
+
   if (txn == null) {
     return libraDatabase?.transaction((txn) async => await insertTransaction(t, txn: txn));
   }
@@ -86,9 +91,9 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
     _toMap(t),
     conflictAlgorithm: db.ConflictAlgorithm.replace,
   );
-
-  // update balance
-  // update category history
+  await updateBalance(t.account!.key, t.value, db: txn);
+  await updateCategoryHistory(
+      account: t.account!.key, category: t.category!.key, date: t.date, delta: t.value);
 
   if (t.tags != null) {
     for (final tag in t.tags!) {
@@ -101,7 +106,7 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
     }
   }
 
-  // reimbursements
+  // TODO reimbursements
 }
 
 /// Note that this leaves the following null:
@@ -150,7 +155,7 @@ class TransactionFilters {
   DateTime? endTime;
   Iterable<int>? accounts;
   Iterable<int>? categories;
-  Iterable<int>? tags; // TODO
+  Iterable<int>? tags;
   int? limit;
 
   TransactionFilters({
@@ -182,6 +187,7 @@ class TransactionFilters {
 
   List args = [];
 
+  /// Add a single query to a global WHERE-AND clause ///
   var firstWhere = true;
   void add(String query) {
     if (firstWhere) {
@@ -192,7 +198,7 @@ class TransactionFilters {
     }
   }
 
-  /// No list support in sqflite
+  /// No list support in sqflite, so make our own ///
   void addList(String column, Iterable<int>? list) {
     if (list != null && list.isNotEmpty) {
       add("$column in (${List.filled(list.length, '?').join(',')})");
@@ -200,6 +206,7 @@ class TransactionFilters {
     }
   }
 
+  /// Basic filters ///
   if (filters.minValue != null) {
     add("$_value >= ?");
     args.add(filters.minValue);
@@ -219,8 +226,12 @@ class TransactionFilters {
   addList(_account, filters.accounts);
   addList(_category, filters.categories);
 
+  /// Group by transaction (so aggregate the tags/allocs per transaction) ///
   q += " GROUP BY t.$_key";
 
+  /// Tags ///
+  // Here rows with the correct tags are assigned 1, and then we max over each transaction to see
+  // if there was at least one 1. Might be a better way with temporary table?
   if (filters.tags != null && filters.tags!.isNotEmpty) {
     q += " HAVING max( CASE tag.$tagKey";
     for (final tag in filters.tags!) {
@@ -230,11 +241,11 @@ class TransactionFilters {
     q += " ELSE 0 END ) = 1";
   }
 
+  /// Order and limit ///
   q += " ORDER BY date DESC";
   if (filters.limit != null) {
     q += " LIMIT ?";
     args.add(filters.limit);
   }
-  // debugPrint("TransactionFilters::createQuery() $q");
   return (q, args);
 }

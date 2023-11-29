@@ -71,26 +71,6 @@ class Account {
   String toString() {
     return "Account($key: $name $type $color)";
   }
-
-  Map<String, dynamic> toMap({int? listIndex}) {
-    final out = {
-      'name': name,
-      'description': description,
-      'type': type.label,
-      'csvPattern': csvFormat,
-      'colorLong': color?.value ?? 0,
-      'balance': balance,
-    };
-
-    /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
-    if (key != 0) {
-      out['key'] = key;
-    }
-    if (listIndex != null) {
-      out['listIndex'] = listIndex;
-    }
-    return out;
-  }
 }
 
 class MutableAccount {
