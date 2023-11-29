@@ -32,6 +32,7 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> save(Transaction t) async {
+    debugPrint("TransactionService::save() $t");
     if (t.key == 0) {
       await insertTransaction(t);
     } else {

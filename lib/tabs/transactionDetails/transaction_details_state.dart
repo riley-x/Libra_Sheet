@@ -68,6 +68,7 @@ class TransactionDetailsState extends ChangeNotifier {
       tags.insertAll(0, seed?.tags ?? const []);
       allocations.insertAll(0, seed?.allocations ?? const []);
       reimbursements.insertAll(0, seed?.reimbursements ?? const []);
+      notifyListeners();
     }
   }
 
