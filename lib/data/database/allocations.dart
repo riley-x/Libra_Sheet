@@ -80,18 +80,20 @@ FutureOr<void> addAllocation({
   if (alloc.category == null) return;
 
   await _insertAllocation(parent: parent, allocation: alloc, listIndex: index, db: txn);
+
+  final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
   await updateCategoryHistory(
     account: parent.account!.key,
     category: parent.category!.key,
     date: parent.date,
-    delta: -alloc.value,
+    delta: -signedValue,
     txn: txn,
   );
   await updateCategoryHistory(
     account: parent.account!.key,
     category: alloc.category!.key,
     date: parent.date,
-    delta: alloc.value,
+    delta: signedValue,
     txn: txn,
   );
 }
