@@ -6,6 +6,7 @@ import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum CategoryTabTimeFrame { current, oneYear, all }
@@ -22,6 +23,7 @@ class CategoryTabState extends ChangeNotifier {
   CategoryTabTimeFrame timeFrame = CategoryTabTimeFrame.all;
   ExpenseType expenseType = ExpenseType.expense;
   final Set<Account> accounts = {};
+  // final Set<Tag> tags = {}; TODO not trivial
   bool showSubCategories = false;
 
   void setExpenseType(ExpenseType x) {
@@ -62,7 +64,10 @@ class CategoryTabState extends ChangeNotifier {
       CategoryTabTimeFrame.current => appState.monthList.lastOrNull,
       CategoryTabTimeFrame.oneYear => appState.monthList[max(0, appState.monthList.length - 12)]
     };
-    values = await getCategoryTotals(startTime, accounts.map((e) => e.key));
+    values = await getCategoryTotals(
+      start: startTime,
+      accounts: accounts.map((e) => e.key),
+    );
 
     /// Aggregate
     for (final cat in appState.categories.income.subCats) {

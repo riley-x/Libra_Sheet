@@ -143,18 +143,23 @@ Future<Map<int, List<TimeIntValue>>> getCategoryHistory() async {
 }
 
 /// Returns a map categoryId -> total, from the given [start] time (inclusive) and [accounts].
-Future<Map<int, int>> getCategoryTotals(DateTime? start, Iterable<int> accounts) async {
+Future<Map<int, int>> getCategoryTotals({
+  DateTime? start,
+  Iterable<int>? accounts,
+  Iterable<int>? tags, // TODO not sorted by tag...manually add transactions?
+}) async {
   String where = "";
   List args = <dynamic>[];
   if (start != null) {
     where = "$_date >= ?";
     args.add(start.millisecondsSinceEpoch);
   }
-  if (accounts.isNotEmpty) {
+  if (accounts != null && accounts.isNotEmpty) {
     if (where.isNotEmpty) where += " AND ";
     where += "$_account in (${List.filled(accounts.length, '?').join(',')})";
     args.addAll(accounts);
   }
+
   final maps = await libraDatabase!.query(
     categoryHistoryTable,
     columns: [_category, "SUM($_value) as $_value"],

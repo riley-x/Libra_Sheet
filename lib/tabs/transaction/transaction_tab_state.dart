@@ -26,7 +26,7 @@ class TransactionTabState extends ChangeNotifier {
   /// States for the dropdown checkbox filters
   final Set<Account> accountFilterSelected = {};
   final CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
-  final List<Tag> tags = [];
+  final Set<Tag> tags = {};
 
   /// Loaded transactions
   List<Transaction> transactions = [];
