@@ -64,7 +64,7 @@ class ReimbursementEditor extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         FormButtons(
-          allowDelete: state.focusedReimbursement != null,
+          showDelete: state.focusedReimbursement != null,
           onDelete: state.deleteReimbursement,
           onReset: state.resetReimbursement,
           onSave: state.saveReimbursement,
@@ -80,7 +80,7 @@ class ReimbursementEditor extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: TransactionFilterGrid(
-              testTransactions + testTransactions + testTransactions,
+              initialFilters: null, // TODO
               title: Text(
                 'Select target transaction',
                 style: Theme.of(context).textTheme.titleMedium,

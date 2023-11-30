@@ -9,13 +9,16 @@ import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionFilterState extends ChangeNotifier {
-  TransactionFilterState(this.service) {
+  TransactionFilterState(this.service,
+      [db.TransactionFilters? initialFilters, this.doLoads = true]) {
+    if (initialFilters != null) filters = initialFilters;
     loadTransactions();
   }
   final TransactionService service;
+  final bool doLoads;
 
   /// Mutable filter list
-  final db.TransactionFilters filters = db.TransactionFilters();
+  db.TransactionFilters filters = db.TransactionFilters();
 
   /// Error state for the text boxes
   bool startTimeError = false;
@@ -32,7 +35,8 @@ class TransactionFilterState extends ChangeNotifier {
   List<Transaction> transactions = [];
 
   void loadTransactions() async {
-    notifyListeners();
+    notifyListeners(); // for the UI form state
+    if (!doLoads) return;
     filters.categories = categoryFilterSelected.activeKeys();
     filters.accounts = accountFilterSelected.map((e) => e.key);
     filters.tags = tags.map((e) => e.key);

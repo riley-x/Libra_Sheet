@@ -68,7 +68,7 @@ class AllocationEditor extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         FormButtons(
-          allowDelete: state.focusedAllocation != null,
+          showDelete: state.focusedAllocation != null,
           // showCancel: state.focusedAllocation == null,
           onDelete: state.deleteAllocation,
           onReset: state.resetAllocation,

@@ -53,7 +53,7 @@ class _Body extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(),
             child: TransactionFilterGrid(
-              context.watch<CategoryTabState>().categoryFocusedTransactions,
+              initialFilters: null, // TODO
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: context.read<LibraAppState>().focusTransaction,

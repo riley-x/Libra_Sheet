@@ -4,16 +4,14 @@ import 'package:flutter/material.dart';
 class FormButtons extends StatelessWidget {
   const FormButtons({
     super.key,
-    required this.allowDelete,
-    this.showCancel = true,
+    this.showDelete = false,
     this.onDelete,
     this.onReset,
     this.onCancel,
     this.onSave,
   });
 
-  final bool allowDelete;
-  final bool showCancel;
+  final bool showDelete;
   final Function()? onDelete;
   final Function()? onReset;
   final Function()? onCancel;
@@ -24,7 +22,7 @@ class FormButtons extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (allowDelete) ...[
+        if (showDelete || onDelete != null) ...[
           ElevatedButton(
             onPressed: onDelete,
             style: ElevatedButton.styleFrom(
@@ -35,7 +33,7 @@ class FormButtons extends StatelessWidget {
           ),
           const SizedBox(width: 20),
         ],
-        if (showCancel) ...[
+        if (onCancel != null) ...[
           ElevatedButton(
             onPressed: onCancel,
             style: ElevatedButton.styleFrom(
@@ -46,15 +44,17 @@ class FormButtons extends StatelessWidget {
           ),
           const SizedBox(width: 20),
         ],
-        ElevatedButton(
-          onPressed: onReset,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.errorContainer,
-            foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+        if (onReset != null) ...[
+          ElevatedButton(
+            onPressed: onReset,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+            child: const Text('Reset'),
           ),
-          child: const Text('Reset'),
-        ),
-        const SizedBox(width: 20),
+          const SizedBox(width: 20),
+        ],
         ElevatedButton(
           onPressed: onSave,
           child: const Text('Save'),

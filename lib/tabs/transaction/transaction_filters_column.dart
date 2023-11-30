@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/selectors/account_checkbox_menu.dart';
 import 'package:libra_sheet/components/selectors/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -17,7 +18,19 @@ class TransactionFiltersColumn extends StatelessWidget {
   /// else the scroll bar is oddly offset.
   final EdgeInsetsGeometry? interiorPadding;
 
-  const TransactionFiltersColumn({super.key, this.interiorPadding});
+  final bool showConfirmationButtons;
+  final Function()? onReset;
+  final Function()? onCancel;
+  final Function()? onSave;
+
+  const TransactionFiltersColumn({
+    super.key,
+    this.interiorPadding,
+    this.showConfirmationButtons = false,
+    this.onCancel,
+    this.onReset,
+    this.onSave,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +42,7 @@ class TransactionFiltersColumn extends StatelessWidget {
         child: Padding(
           padding: interiorPadding ?? EdgeInsets.zero,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               /// Title
               const SizedBox(height: 10),
@@ -70,6 +84,17 @@ class TransactionFiltersColumn extends StatelessWidget {
               const SizedBox(height: 15),
               const _TagSelector(),
               const SizedBox(height: 10),
+
+              /// Confirmation Buttons
+              if (showConfirmationButtons) ...[
+                const SizedBox(height: 30),
+                FormButtons(
+                  showDelete: false,
+                  onCancel: onCancel,
+                  onReset: onReset,
+                  onSave: onSave,
+                )
+              ]
             ],
           ),
         ),

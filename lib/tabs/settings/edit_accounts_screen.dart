@@ -200,7 +200,8 @@ class _EditAccount extends StatelessWidget {
         ),
         const SizedBox(height: 15),
         FormButtons(
-          allowDelete: state.focused != null,
+          showDelete: state.focused != null,
+          onDelete: null, // TODO
           onCancel: state.clearFocus,
           onReset: state.reset,
           onSave: state.save,

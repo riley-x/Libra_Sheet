@@ -172,7 +172,7 @@ class _EditTag extends StatelessWidget {
         ),
         const SizedBox(height: 15),
         FormButtons(
-          allowDelete: state.focused.key != 0,
+          showDelete: state.focused.key != 0,
           onCancel: state.clearFocus,
           onReset: state.reset,
           onSave: state.save,

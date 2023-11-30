@@ -1,13 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_card.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filters_column.dart';
 import 'package:provider/provider.dart';
 
-class TransactionFilterGrid extends StatefulWidget {
-  const TransactionFilterGrid(
-    this.transactions, {
+class TransactionFilterGrid extends StatelessWidget {
+  const TransactionFilterGrid({
+    super.key,
+    this.initialFilters,
+    this.title,
+    this.maxRowsForName = 1,
+    this.fixedColumns,
+    this.onSelect,
+  });
+
+  final Widget? title;
+  final TransactionFilters? initialFilters;
+  final int? maxRowsForName;
+  final int? fixedColumns;
+  final Function(Transaction)? onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => TransactionFilterState(context.read(), initialFilters),
+      child: _TransactionFilterGrid(
+        title: title,
+        maxRowsForName: maxRowsForName,
+        fixedColumns: fixedColumns,
+        onSelect: onSelect,
+      ),
+    );
+  }
+}
+
+class _TransactionFilterGrid extends StatelessWidget {
+  const _TransactionFilterGrid({
     super.key,
     this.title,
     this.maxRowsForName = 1,
@@ -16,38 +46,19 @@ class TransactionFilterGrid extends StatefulWidget {
   });
 
   final Widget? title;
-  final List<Transaction> transactions;
   final int? maxRowsForName;
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
 
   @override
-  State<TransactionFilterGrid> createState() => _TransactionFilterGridState();
-}
-
-class _TransactionFilterGridState extends State<TransactionFilterGrid> {
-  // TODO put current filter state here, do the actual filtering
-  late final LibraAppState appState;
-  TransactionFilters filters = TransactionFilters();
-
-  @override
-  void initState() {
-    super.initState();
-    appState = context.read();
-
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   appState = context.read();
-    // });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
     return Column(
       children: [
         Row(
           children: [
-            (widget.title != null)
-                ? widget.title!
+            (title != null)
+                ? title!
                 : Text(
                     "Recent Transactions",
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -56,9 +67,9 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
             IconButton(
               onPressed: () => showDialog(
                   context: context,
-                  builder: (context) {
-                    return _FitlerDialog();
-                  }),
+                  builder: (context) => _FitlerDialog(
+                        initialFilters: state.filters,
+                      )),
               icon: Icon(
                 Icons.filter_list,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -68,10 +79,10 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
         ),
         Expanded(
           child: TransactionGrid(
-            widget.transactions,
-            maxRowsForName: widget.maxRowsForName,
-            fixedColumns: widget.fixedColumns,
-            onSelect: (t, i) => widget.onSelect?.call(t),
+            state.transactions,
+            maxRowsForName: maxRowsForName,
+            fixedColumns: fixedColumns,
+            onSelect: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
           ),
         ),
       ],
@@ -134,26 +145,30 @@ class TransactionGrid extends StatelessWidget {
 }
 
 class _FitlerDialog extends StatelessWidget {
-  const _FitlerDialog({super.key});
+  const _FitlerDialog({
+    super.key,
+    required this.initialFilters,
+    this.onSave,
+  });
+
+  final TransactionFilters initialFilters;
+  final Function(TransactionFilters)? onSave;
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('This is a typical dialog.'),
-            const SizedBox(height: 15),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Close'),
+    return ChangeNotifierProvider(
+      create: (context) => TransactionFilterState(context.read(), initialFilters),
+      builder: (context, child) => Dialog(
+        child: SizedBox(
+          width: 300,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TransactionFiltersColumn(
+              showConfirmationButtons: true,
+              onCancel: () => Navigator.pop(context),
+              onSave: () => onSave?.call(context.read<TransactionFilterState>().filters),
             ),
-          ],
+          ),
         ),
       ),
     );

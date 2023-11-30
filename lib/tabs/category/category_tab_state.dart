@@ -85,13 +85,12 @@ class CategoryTabState extends ChangeNotifier {
 
   /// The list contains the nesting of category focuses, since you can focus a subcategory from a parent.
   List<Category> categoriesFocused = [];
-  List<Transaction> categoryFocusedTransactions = [];
 
   void clearFocus() {
     if (categoriesFocused.isEmpty) return;
     categoriesFocused.removeLast();
     if (categoriesFocused.isEmpty) {
-      categoryFocusedTransactions.clear();
+      // TODO
     } else {
       _loadCategoryDetails(categoriesFocused.last);
     }

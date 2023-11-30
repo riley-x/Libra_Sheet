@@ -18,8 +18,6 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var transactions = testTransactions; // TODO
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -35,7 +33,7 @@ class AccountScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(),
                   child: TransactionFilterGrid(
-                    transactions ?? [],
+                    initialFilters: null, // TODO
                     fixedColumns: 1,
                     maxRowsForName: 3,
                     onSelect: context.read<LibraAppState>().focusTransaction,
