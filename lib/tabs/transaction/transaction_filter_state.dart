@@ -27,9 +27,9 @@ class TransactionFilterState extends ChangeNotifier {
   bool maxValueError = false;
 
   /// States for the dropdown checkbox filters
-  final Set<Account> accountFilterSelected = {};
-  final CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
-  final Set<Tag> tags = {};
+  Set<Account> accountFilterSelected = {};
+  CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
+  Set<Tag> tags = {};
 
   /// Loaded transactions
   List<Transaction> transactions = [];
@@ -115,5 +115,22 @@ class TransactionFilterState extends ChangeNotifier {
     } else {
       notifyListeners();
     }
+  }
+
+  void setFilters({
+    required db.TransactionFilters filters,
+    required Set<Account> accounts,
+    required Set<Tag> tags,
+    required CategoryTristateMap categories,
+  }) {
+    this.filters = filters;
+    accountFilterSelected = accounts;
+    categoryFilterSelected = categories;
+    this.tags = tags;
+    startTimeError = false;
+    endTimeError = false;
+    minValueError = false;
+    maxValueError = false;
+    loadTransactions();
   }
 }

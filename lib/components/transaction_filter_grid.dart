@@ -3,8 +3,9 @@ import 'package:libra_sheet/components/transaction_card.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_filters_column.dart';
 import 'package:provider/provider.dart';
+
+import 'dialogs/transaction_filter_dialog.dart';
 
 class TransactionFilterGrid extends StatelessWidget {
   const TransactionFilterGrid({
@@ -67,8 +68,9 @@ class _TransactionFilterGrid extends StatelessWidget {
             IconButton(
               onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => _FitlerDialog(
+                  builder: (context) => TransactionFilterDialog(
                         initialFilters: state.filters,
+                        onSave: state.setFilters,
                       )),
               icon: Icon(
                 Icons.filter_list,
@@ -140,37 +142,6 @@ class TransactionGrid extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-class _FitlerDialog extends StatelessWidget {
-  const _FitlerDialog({
-    super.key,
-    required this.initialFilters,
-    this.onSave,
-  });
-
-  final TransactionFilters initialFilters;
-  final Function(TransactionFilters)? onSave;
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => TransactionFilterState(context.read(), initialFilters),
-      builder: (context, child) => Dialog(
-        child: SizedBox(
-          width: 300,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TransactionFiltersColumn(
-              showConfirmationButtons: true,
-              onCancel: () => Navigator.pop(context),
-              onSave: () => onSave?.call(context.read<TransactionFilterState>().filters),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
