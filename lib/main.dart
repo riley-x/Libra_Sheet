@@ -28,23 +28,21 @@ Future<void> main() async {
 
   /// Top level state
   final state = LibraAppState();
-  final transactionService = state.transactions;
-
-  runApp(LibraApp(state, transactionService));
+  runApp(LibraApp(state));
 }
 
 class LibraApp extends StatelessWidget {
   final LibraAppState state;
-  final TransactionService service;
 
-  const LibraApp(this.state, this.service, {super.key});
+  const LibraApp(this.state, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<LibraAppState>.value(value: state),
-        ChangeNotifierProvider<TransactionService>.value(value: service),
+        ChangeNotifierProvider<TransactionService>.value(value: state.transactions),
+        // TODO add more states here, that subscribe to state.transactions if needed.
       ],
       child: MaterialApp(
         title: 'Libra Sheet',

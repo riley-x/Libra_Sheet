@@ -5,7 +5,7 @@ import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 
-// TODO is this class even necessary
+// TODO is this class even necessary? Just update listeners for the appState?
 
 /// Helper class for managing transactions. Every widget that monitors transactions should probably
 /// watch this service, so that they can be notified when transactions are added or edited (which,

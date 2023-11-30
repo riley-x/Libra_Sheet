@@ -47,6 +47,7 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<CategoryTabState>();
     return Row(
       children: [
         const SizedBox(width: 10),
@@ -56,6 +57,7 @@ class _Body extends StatelessWidget {
             child: TransactionFilterGrid(
               initialFilters: TransactionFilters(
                 categories: CategoryTristateMap({category}),
+                accounts: state.accounts,
               ),
               fixedColumns: 1,
               maxRowsForName: 3,
@@ -77,7 +79,7 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: DateTimeGraph([]),
+                  child: DateTimeGraph([]), // TODO
                 ),
               ),
               if (category.subCats.isNotEmpty) ...[
