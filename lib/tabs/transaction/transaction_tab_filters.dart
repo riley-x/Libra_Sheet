@@ -33,11 +33,14 @@ class TransactionTabFilters extends StatelessWidget {
           padding: interiorPadding ?? EdgeInsets.zero,
           child: Column(
             children: [
+              /// Title
               const SizedBox(height: 10),
               Text(
                 "Filter",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
+
+              /// Not needed? Since already have a value filter
               // const SizedBox(height: 10),
               // Text("Type", style: textStyle),
               // const SizedBox(height: 5),
