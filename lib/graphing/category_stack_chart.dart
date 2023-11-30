@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/test_data.dart';
@@ -22,19 +23,22 @@ class CategoryStackChart extends StatelessWidget {
       trackballBehavior: TrackballBehavior(
         enable: true,
         activationMode: ActivationMode.singleTap,
+        // tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
         tooltipSettings: const InteractiveTooltip(
           format: 'series.name: \$point.y',
         ),
       ),
       series: <ChartSeries>[
-        for (final categoryHistory in chartData1)
+        for (final categoryHistory in data)
           StackedColumnSeries<TimeIntValue, String>(
             animationDuration: 300,
             dataSource: categoryHistory.values.sublist(range.$1, range.$2),
             name: categoryHistory.category.name,
             color: categoryHistory.category.color,
             xValueMapper: (TimeIntValue data, _) => format.format(data.time),
-            yValueMapper: (TimeIntValue data, _) => data.value.asDollarDouble(),
+            yValueMapper: (TimeIntValue data, _) =>
+                data.value.asDollarDouble() *
+                ((categoryHistory.category.type == ExpenseType.expense) ? -1 : 1),
           ),
       ],
     );

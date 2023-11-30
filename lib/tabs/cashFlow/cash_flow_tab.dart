@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
@@ -35,11 +37,12 @@ class _CashFlowTabState extends State<_CashFlowTab> {
 
   @override
   Widget build(BuildContext context) {
-    final n = chartData1.first.values.length;
+    final state = context.watch<CashFlowState>();
+    final nDates = context.watch<LibraAppState>().monthList.length;
     final range = switch (timeFrame) {
-      _TimeFrame.oneYear => (0, 2),
-      _TimeFrame.lastYear => (0, 1),
-      _TimeFrame.all => (0, n),
+      _TimeFrame.oneYear => (max(0, nDates - 12), nDates),
+      _TimeFrame.lastYear => (max(0, nDates - 24), (max(0, nDates - 12))),
+      _TimeFrame.all => (0, nDates),
     };
     return Column(
       children: [
@@ -47,12 +50,12 @@ class _CashFlowTabState extends State<_CashFlowTab> {
           "Income",
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-        Expanded(child: CategoryStackChart(chartData1, range)),
+        Expanded(child: CategoryStackChart(state.incomeData, range)),
         Text(
           "Expenses",
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-        Expanded(child: CategoryStackChart(chartData1, range)),
+        Expanded(child: CategoryStackChart(state.expenseData, range)),
         SegmentedButton<_TimeFrame>(
           showSelectedIcon: false,
           segments: const <ButtonSegment<_TimeFrame>>[

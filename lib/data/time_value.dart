@@ -20,6 +20,20 @@ class TimeValue {
   }
 }
 
+/// Assumes [x] and [y] have the same time entries, and adds their values together
+List<TimeIntValue> addParallel(
+  List<TimeIntValue> x,
+  List<TimeIntValue> y,
+) {
+  return List.generate(
+    x.length,
+    (i) => TimeIntValue(
+      time: x[i].time,
+      value: x[i].value + y[i].value,
+    ),
+  );
+}
+
 /// Returns a list based on [original] but with padded entries so that they align with [times].
 /// If [original] is missing a value, it will add an entry with value 0 or a cumulative value if
 /// [cumulate]. This function assumes [original] and [times] are sorted by time value already!
