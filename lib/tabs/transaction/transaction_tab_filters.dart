@@ -6,6 +6,7 @@ import 'package:libra_sheet/components/selectors/account_checkbox_menu.dart';
 import 'package:libra_sheet/components/selectors/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
+import 'package:libra_sheet/components/selectors/tag_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -194,37 +195,9 @@ class _TagSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionTabState>();
-    return Column(
-      children: [
-        TitleRow(
-          title: Text("Tags", style: Theme.of(context).textTheme.titleMedium),
-          right: DropdownCheckboxMenu<Tag>(
-            icon: Icons.add,
-            items: context.watch<LibraAppState>().tags.list,
-            builder: (context, tag) => Text(
-              tag.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            isChecked: (it) => state.tags.contains(it),
-            onChanged: state.onTagChanged,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            for (final tag in state.tags)
-              LibraChip(
-                tag.name,
-                color: tag.color,
-                onTap: () => state.onTagChanged(tag, false),
-              ),
-          ],
-        ),
-      ],
+    return TagFilterSection(
+      selected: state.tags,
+      whenChanged: (_, __) => state.loadTransactions(),
     );
   }
 }

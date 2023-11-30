@@ -112,13 +112,4 @@ class TransactionTabState extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  void onTagChanged(Tag tag, bool? selected) {
-    if (selected == true) {
-      tags.add(tag);
-    } else {
-      tags.remove(tag);
-    }
-    loadTransactions();
-  }
 }
