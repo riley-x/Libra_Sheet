@@ -1,16 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
-import 'package:libra_sheet/data/database/transactions.dart' as db;
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
+class TransactionFilters {
+  int? minValue;
+  int? maxValue;
+  DateTime? startTime;
+  DateTime? endTime;
+  Set<Account> accounts;
+  CategoryTristateMap categories;
+  Set<Tag> tags;
+  int? limit;
+
+  TransactionFilters({
+    this.minValue,
+    this.maxValue,
+    this.startTime,
+    this.endTime,
+    Set<Account>? accounts,
+    Set<Tag>? tags,
+    CategoryTristateMap? categories,
+    this.limit = 300,
+  })  : accounts = accounts ?? {},
+        tags = tags ?? {},
+        categories = categories ?? CategoryTristateMap();
+}
+
 class TransactionFilterState extends ChangeNotifier {
-  TransactionFilterState(this.service,
-      [db.TransactionFilters? initialFilters, this.doLoads = true]) {
+  TransactionFilterState(this.service, [TransactionFilters? initialFilters, this.doLoads = true]) {
     if (initialFilters != null) filters = initialFilters;
     loadTransactions();
   }
@@ -18,7 +40,7 @@ class TransactionFilterState extends ChangeNotifier {
   final bool doLoads;
 
   /// Mutable filter list
-  db.TransactionFilters filters = db.TransactionFilters();
+  TransactionFilters filters = TransactionFilters();
 
   /// Error state for the text boxes
   bool startTimeError = false;
@@ -109,7 +131,7 @@ class TransactionFilterState extends ChangeNotifier {
     }
   }
 
-  void setFilters(db.TransactionFilters filters) {
+  void setFilters(TransactionFilters filters) {
     this.filters = filters;
     startTimeError = false;
     endTimeError = false;

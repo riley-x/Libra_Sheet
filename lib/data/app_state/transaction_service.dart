@@ -3,6 +3,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 
 // TODO is this class even necessary
 

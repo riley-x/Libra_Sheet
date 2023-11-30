@@ -9,6 +9,7 @@ import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as db;
 
 const transactionsTable = "`transactions_table`";
@@ -206,30 +207,6 @@ Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categori
     t.allocations = await loadAllocations(t.key, categories, txn);
     t.reimbursements = []; // TODO
   });
-}
-
-class TransactionFilters {
-  int? minValue;
-  int? maxValue;
-  DateTime? startTime;
-  DateTime? endTime;
-  Set<Account> accounts;
-  CategoryTristateMap categories;
-  Set<Tag> tags;
-  int? limit;
-
-  TransactionFilters({
-    this.minValue,
-    this.maxValue,
-    this.startTime,
-    this.endTime,
-    Set<Account>? accounts,
-    Set<Tag>? tags,
-    CategoryTristateMap? categories,
-    this.limit = 300,
-  })  : accounts = accounts ?? {},
-        tags = tags ?? {},
-        categories = categories ?? CategoryTristateMap();
 }
 
 (String, List) _createQuery(TransactionFilters filters) {
