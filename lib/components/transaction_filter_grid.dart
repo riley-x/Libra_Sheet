@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_card.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:provider/provider.dart';
 
 class TransactionFilterGrid extends StatefulWidget {
   const TransactionFilterGrid(
@@ -24,7 +27,18 @@ class TransactionFilterGrid extends StatefulWidget {
 
 class _TransactionFilterGridState extends State<TransactionFilterGrid> {
   // TODO put current filter state here, do the actual filtering
-  var myInt = 0;
+  late final LibraAppState appState;
+  TransactionFilters filters = TransactionFilters();
+
+  @override
+  void initState() {
+    super.initState();
+    appState = context.read();
+
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   appState = context.read();
+    // });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +54,11 @@ class _TransactionFilterGridState extends State<TransactionFilterGrid> {
                   ),
             const Spacer(),
             IconButton(
-              onPressed: () => print('TODO filter transactions'), // TODO
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) {
+                    return _FitlerDialog();
+                  }),
               icon: Icon(
                 Icons.filter_list,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -111,6 +129,33 @@ class TransactionGrid extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _FitlerDialog extends StatelessWidget {
+  const _FitlerDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('This is a typical dialog.'),
+            const SizedBox(height: 15),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

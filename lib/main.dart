@@ -28,7 +28,7 @@ Future<void> main() async {
 
   /// Top level state
   final state = LibraAppState();
-  final transactionService = TransactionService(state);
+  final transactionService = state.transactions;
 
   runApp(LibraApp(state, transactionService));
 }

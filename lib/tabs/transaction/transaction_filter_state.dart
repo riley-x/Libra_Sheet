@@ -8,8 +8,8 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
-class TransactionTabState extends ChangeNotifier {
-  TransactionTabState(this.service) {
+class TransactionFilterState extends ChangeNotifier {
+  TransactionFilterState(this.service) {
     loadTransactions();
   }
   final TransactionService service;

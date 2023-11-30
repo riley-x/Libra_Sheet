@@ -1,26 +1,23 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/components/libra_chip.dart';
 import 'package:libra_sheet/components/selectors/account_checkbox_menu.dart';
 import 'package:libra_sheet/components/selectors/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/selectors/tag_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/objects/tag.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_tab_state.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
 
 /// Creates the column that holds all the option selectors for the transaction tab.
-class TransactionTabFilters extends StatelessWidget {
+class TransactionFiltersColumn extends StatelessWidget {
   /// Padding to be applied to the central column. Don't use padding outside the Scroll class, or
   /// else the scroll bar is oddly offset.
   final EdgeInsetsGeometry? interiorPadding;
 
-  const TransactionTabFilters({super.key, this.interiorPadding});
+  const TransactionFiltersColumn({super.key, this.interiorPadding});
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +83,7 @@ class _AccountChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionTabState>();
+    final state = context.watch<TransactionFilterState>();
     return AccountChips(
       selected: state.accountFilterSelected,
       whenChanged: (_, __) => state.loadTransactions(),
@@ -99,7 +96,7 @@ class _CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionTabState>();
+    final state = context.watch<TransactionFilterState>();
     var categories =
         context.select<LibraAppState, List<Category>>((it) => it.categories.flattenedCategories());
     categories = [Category.ignore, Category.income, Category.expense] + categories;
@@ -129,7 +126,7 @@ class _ValueRange extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionTabState>();
+    final state = context.watch<TransactionFilterState>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -162,7 +159,7 @@ class _DateFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionTabState>();
+    final state = context.watch<TransactionFilterState>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -197,7 +194,7 @@ class _TagSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionTabState>();
+    final state = context.watch<TransactionFilterState>();
     return TagFilterSection(
       selected: state.tags,
       whenChanged: (_, __) => state.loadTransactions(),
