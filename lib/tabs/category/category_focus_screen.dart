@@ -26,7 +26,7 @@ class CategoryFocusScreen extends StatelessWidget {
         const SizedBox(height: 5),
         CommonBackBar(
           leftText: category.name,
-          rightText: state.values[category.key]?.dollarString() ?? '',
+          rightText: state.values[category.key]?.abs().dollarString() ?? '',
           onBack: () {
             context.read<CategoryTabState>().clearFocus();
           },
