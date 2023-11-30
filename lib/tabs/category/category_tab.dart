@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/tabs/category/category_focus_screen.dart';
@@ -15,7 +17,7 @@ class CategoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => CategoryTabState(),
+      create: (context) => CategoryTabState(context.read<LibraAppState>()),
       child: Consumer<CategoryTabState>(
         builder: (context, state, child) {
           if (state.categoriesFocused.isNotEmpty) {
@@ -36,28 +38,23 @@ class _CategoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
-        const SizedBox(width: 20),
-        const Expanded(
+        SizedBox(width: 20),
+        Expanded(
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              Expanded(
-                child: _HeatMap(),
-              ),
-              const SizedBox(height: 10),
+              SizedBox(height: 20),
+              Expanded(child: _HeatMap()),
+              SizedBox(height: 10),
             ],
           ),
         ),
-        const SizedBox(width: 20),
-        Container(
-          width: 1,
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-        const SizedBox(width: 20),
-        const CategoryTabFilters(),
-        const SizedBox(width: 20),
+        SizedBox(width: 20),
+        VerticalDivider(width: 1, thickness: 1),
+        SizedBox(width: 20),
+        CategoryTabFilters(),
+        SizedBox(width: 20),
       ],
     );
   }
@@ -68,13 +65,15 @@ class _HeatMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<LibraAppState>();
     final state = context.watch<CategoryTabState>();
+    final categories = (state.expenseType == ExpenseType.expense)
+        ? appState.categories.expense.subCats
+        : appState.categories.income.subCats;
     return CategoryHeatMap(
-      categories: testCategories,
-      values: testCategoryValues,
-      onSelect: (it) {
-        context.read<CategoryTabState>().focusCategory(it);
-      },
+      categories: categories,
+      values: state.values,
+      onSelect: (it) => context.read<CategoryTabState>().focusCategory(it),
       showSubCategories: state.showSubCategories,
     );
   }

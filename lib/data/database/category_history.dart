@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -139,5 +140,33 @@ Future<Map<int, List<TimeIntValue>>> getCategoryHistory() async {
     ));
   }
   out[currentCategory] = currentValues;
+  return out;
+}
+
+/// Returns a map categoryId -> total, from the given [start] time (inclusive) and [accounts].
+Future<Map<int, int>> getCategoryTotals(DateTime? start, Iterable<int> accounts) async {
+  String where = "";
+  List args = <dynamic>[];
+  if (start != null) {
+    where = "$_date >= ?";
+    args.add(start.millisecondsSinceEpoch);
+  }
+  if (accounts.isNotEmpty) {
+    if (where.isNotEmpty) where += " AND ";
+    where += "$_account in (${List.filled(accounts.length, '?').join(',')})";
+    args.addAll(accounts);
+  }
+  final maps = await libraDatabase!.query(
+    categoryHistoryTable,
+    columns: [_category, "SUM($_value) as $_value"],
+    where: (where.isNotEmpty) ? where : null,
+    whereArgs: args,
+    groupBy: _category,
+  );
+
+  final out = <int, int>{};
+  for (final map in maps) {
+    out[map[_category] as int] = map[_value] as int;
+  }
   return out;
 }
