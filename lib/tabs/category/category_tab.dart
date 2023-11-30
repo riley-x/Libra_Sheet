@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/tabs/category/category_focus_screen.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
@@ -53,7 +52,7 @@ class _CategoryTab extends StatelessWidget {
         SizedBox(width: 20),
         VerticalDivider(width: 1, thickness: 1),
         SizedBox(width: 20),
-        CategoryTabFilters(),
+        SizedBox(width: 250, child: CategoryTabFilters()),
         SizedBox(width: 20),
       ],
     );

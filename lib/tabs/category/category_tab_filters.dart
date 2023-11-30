@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
-import 'package:libra_sheet/data/objects/account.dart';
+import 'package:libra_sheet/components/selectors/account_checkbox_menu.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
-
-import '../../components/selectors/account_selection_menu.dart';
 
 /// Creates the column that holds all the option selectors for the category tab.
 class CategoryTabFilters extends StatelessWidget {
@@ -36,14 +34,9 @@ class CategoryTabFilters extends StatelessWidget {
         const _TimeFrameSelector(),
 
         const SizedBox(height: 15),
-        const Text("Account"),
-        const SizedBox(height: 5),
-        AccountSelectionMenu(
-          includeNone: true,
-          selected: state.account,
-          onChanged: (Account? value) {
-            state.setAccount(value);
-          },
+        AccountChips(
+          selected: state.accounts,
+          whenChanged: (_, __) => state.loadValues(),
         ),
 
         // TODO add Tag filter

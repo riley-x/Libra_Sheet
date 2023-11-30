@@ -6,7 +6,6 @@ import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 enum CategoryTabTimeFrame { current, oneYear, all }
@@ -14,7 +13,7 @@ enum CategoryTabTimeFrame { current, oneYear, all }
 class CategoryTabState extends ChangeNotifier {
   final LibraAppState appState;
   CategoryTabState(this.appState) {
-    _loadValues();
+    loadValues();
   }
 
   //--------------------------------------------------------------------------
@@ -22,7 +21,7 @@ class CategoryTabState extends ChangeNotifier {
   //--------------------------------------------------------------------------
   CategoryTabTimeFrame timeFrame = CategoryTabTimeFrame.all;
   ExpenseType expenseType = ExpenseType.expense;
-  Account? account;
+  final Set<Account> accounts = {};
   bool showSubCategories = false;
 
   //--------------------------------------------------------------------------
@@ -41,14 +40,14 @@ class CategoryTabState extends ChangeNotifier {
     values[parent.key] = val;
   }
 
-  void _loadValues() async {
+  void loadValues() async {
     if (appState.monthList.isEmpty) return;
     final startTime = switch (timeFrame) {
       CategoryTabTimeFrame.all => null,
       CategoryTabTimeFrame.current => appState.monthList.lastOrNull,
       CategoryTabTimeFrame.oneYear => appState.monthList[max(0, appState.monthList.length - 12)]
     };
-    values = await getCategoryTotals(startTime, const []); // TODO accounts
+    values = await getCategoryTotals(startTime, accounts.map((e) => e.key));
 
     /// Aggregate
     for (final cat in appState.categories.income.subCats) {
@@ -91,12 +90,7 @@ class CategoryTabState extends ChangeNotifier {
 
   void setTimeFrame(CategoryTabTimeFrame x) {
     timeFrame = x;
-    _loadValues();
-  }
-
-  void setAccount(Account? x) {
-    account = x;
-    _loadValues();
+    loadValues();
   }
 
   void shouldShowSubCategories(bool x) {
