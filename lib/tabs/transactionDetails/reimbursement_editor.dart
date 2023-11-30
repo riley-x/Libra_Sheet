@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/transaction_card.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
-import 'package:libra_sheet/data/test_data.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
@@ -80,7 +81,11 @@ class ReimbursementEditor extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: TransactionFilterGrid(
-              initialFilters: null, // TODO
+              initialFilters: switch (state.expenseType) {
+                ExpenseFilterType.expense => TransactionFilters(minValue: 0),
+                ExpenseFilterType.income => TransactionFilters(maxValue: 0),
+                ExpenseFilterType.all => null
+              },
               title: Text(
                 'Select target transaction',
                 style: Theme.of(context).textTheme.titleMedium,
