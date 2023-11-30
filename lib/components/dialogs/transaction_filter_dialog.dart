@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
-import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/objects/category.dart';
-import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_filters_column.dart';
 import 'package:provider/provider.dart';
@@ -15,12 +12,7 @@ class TransactionFilterDialog extends StatelessWidget {
   });
 
   final TransactionFilters initialFilters;
-  final Function({
-    required TransactionFilters filters,
-    required Set<Account> accounts,
-    required Set<Tag> tags,
-    required CategoryTristateMap categories,
-  })? onSave;
+  final Function(TransactionFilters filters)? onSave;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +30,7 @@ class TransactionFilterDialog extends StatelessWidget {
                   ? null
                   : () {
                       final state = context.read<TransactionFilterState>();
-                      onSave!.call(
-                        filters: state.filters,
-                        accounts: state.accountFilterSelected,
-                        categories: state.categoryFilterSelected,
-                        tags: state.tags,
-                      );
+                      onSave!.call(state.filters);
                       Navigator.pop(context);
                     },
             ),

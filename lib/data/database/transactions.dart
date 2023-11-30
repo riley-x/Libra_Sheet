@@ -213,9 +213,9 @@ class TransactionFilters {
   int? maxValue;
   DateTime? startTime;
   DateTime? endTime;
-  Iterable<int>? accounts;
-  Iterable<int>? categories;
-  Iterable<int>? tags;
+  Set<Account> accounts;
+  CategoryTristateMap categories;
+  Set<Tag> tags;
   int? limit;
 
   TransactionFilters({
@@ -223,10 +223,13 @@ class TransactionFilters {
     this.maxValue,
     this.startTime,
     this.endTime,
-    this.accounts,
-    this.categories,
+    Set<Account>? accounts,
+    Set<Tag>? tags,
+    CategoryTristateMap? categories,
     this.limit = 300,
-  });
+  })  : accounts = accounts ?? {},
+        tags = tags ?? {},
+        categories = categories ?? CategoryTristateMap();
 }
 
 (String, List) _createQuery(TransactionFilters filters) {
@@ -259,8 +262,8 @@ class TransactionFilters {
   }
 
   /// No list support in sqflite, so make our own ///
-  void addList(String column, Iterable<int>? list) {
-    if (list != null && list.isNotEmpty) {
+  void addList(String column, Iterable<int> list) {
+    if (list.isNotEmpty) {
       add("$column in (${List.filled(list.length, '?').join(',')})");
       args.addAll(list);
     }
@@ -283,8 +286,8 @@ class TransactionFilters {
     add("$_date <= ?");
     args.add(filters.endTime!.millisecondsSinceEpoch);
   }
-  addList(_account, filters.accounts);
-  addList(_category, filters.categories);
+  addList(_account, filters.accounts.map((e) => e.key));
+  addList(_category, filters.categories.activeKeys());
 
   /// Group by transaction (so aggregate the tags/allocs per transaction) ///
   q += " GROUP BY t.$_key";
@@ -292,9 +295,9 @@ class TransactionFilters {
   /// Tags ///
   // Here rows with the correct tags are assigned 1, and then we max over each transaction to see
   // if there was at least one 1. Might be a better way with temporary table?
-  if (filters.tags != null && filters.tags!.isNotEmpty) {
+  if (filters.tags.isNotEmpty) {
     q += " HAVING max( CASE tag.$tagKey";
-    for (final tag in filters.tags!) {
+    for (final tag in filters.tags) {
       q += " WHEN ? THEN 1";
       args.add(tag);
     }

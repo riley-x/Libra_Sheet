@@ -26,20 +26,12 @@ class TransactionFilterState extends ChangeNotifier {
   bool minValueError = false;
   bool maxValueError = false;
 
-  /// States for the dropdown checkbox filters
-  Set<Account> accountFilterSelected = {};
-  CategoryTristateMap categoryFilterSelected = CategoryTristateMap();
-  Set<Tag> tags = {};
-
   /// Loaded transactions
   List<Transaction> transactions = [];
 
   void loadTransactions() async {
     notifyListeners(); // for the UI form state
     if (!doLoads) return;
-    filters.categories = categoryFilterSelected.activeKeys();
-    filters.accounts = accountFilterSelected.map((e) => e.key);
-    filters.tags = tags.map((e) => e.key);
     transactions = await service.load(filters);
     notifyListeners();
   }
@@ -117,16 +109,8 @@ class TransactionFilterState extends ChangeNotifier {
     }
   }
 
-  void setFilters({
-    required db.TransactionFilters filters,
-    required Set<Account> accounts,
-    required Set<Tag> tags,
-    required CategoryTristateMap categories,
-  }) {
+  void setFilters(db.TransactionFilters filters) {
     this.filters = filters;
-    accountFilterSelected = accounts;
-    categoryFilterSelected = categories;
-    this.tags = tags;
     startTimeError = false;
     endTimeError = false;
     minValueError = false;

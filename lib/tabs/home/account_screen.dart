@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -33,7 +34,7 @@ class AccountScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(),
                   child: TransactionFilterGrid(
-                    initialFilters: null, // TODO
+                    initialFilters: TransactionFilters(accounts: {account}),
                     fixedColumns: 1,
                     maxRowsForName: 3,
                     onSelect: context.read<LibraAppState>().focusTransaction,

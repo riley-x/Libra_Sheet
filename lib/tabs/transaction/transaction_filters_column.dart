@@ -110,7 +110,7 @@ class _AccountChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<TransactionFilterState>();
     return AccountChips(
-      selected: state.accountFilterSelected,
+      selected: state.filters.accounts,
       whenChanged: (_, __) => state.loadTransactions(),
     );
   }
@@ -131,14 +131,14 @@ class _CategoryChips extends StatelessWidget {
           title: Text("Category", style: Theme.of(context).textTheme.titleMedium),
           right: CategoryCheckboxMenu(
             categories: categories,
-            map: state.categoryFilterSelected,
+            map: state.filters.categories,
             notify: state.loadTransactions,
           ),
         ),
         const SizedBox(height: 5),
         CategoryFilterChips(
           categories: categories,
-          map: state.categoryFilterSelected,
+          map: state.filters.categories,
           notify: state.loadTransactions,
         ),
       ],
@@ -221,7 +221,7 @@ class _TagSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<TransactionFilterState>();
     return TagFilterSection(
-      selected: state.tags,
+      selected: state.filters.tags,
       whenChanged: (_, __) => state.loadTransactions(),
     );
   }
