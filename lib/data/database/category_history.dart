@@ -33,6 +33,16 @@ class _CategoryHistory {
   });
 }
 
+// @Query("SELECT MIN(date) FROM $categoryHistoryTable WHERE value != 0")
+FutureOr<DateTime> getEarliestMonth() async {
+  final out = await libraDatabase!.query(
+    categoryHistoryTable,
+    columns: ["MIN($_date) as $_date"],
+    where: "$_value != 0",
+  );
+  return DateTime.fromMillisecondsSinceEpoch(out.first[_date] as int, isUtc: true);
+}
+
 /// Inserts a category history entry with value = 0. Will ignore conflicts, so useful to make sure
 /// an entry exists already.
 Future<int> _insertCategoryHistory(_CategoryHistory data, DatabaseExecutor db) async {
@@ -96,4 +106,38 @@ Future<List<TimeIntValue>> getMonthlyNet() async {
       value: maps[i][_value],
     );
   });
+}
+
+/// Returns a map: category -> list of the value history in that month. This function does not pad
+/// the lists to equal length or accumulate them.
+Future<Map<int, List<TimeIntValue>>> getCategoryHistory() async {
+  if (libraDatabase == null) return {};
+
+  final rows = await libraDatabase!.query(
+    categoryHistoryTable,
+    columns: [_date, _category, "SUM($_value) as $_value"],
+    where: "$_value != 0",
+    groupBy: "$_date, $_category",
+    orderBy: "$_category, $_date",
+  );
+
+  Map<int, List<TimeIntValue>> out = {};
+  if (rows.isEmpty) return out;
+
+  int currentCategory = rows[0][_category] as int;
+  var currentValues = <TimeIntValue>[];
+  for (final row in rows) {
+    final cat = row[_category] as int;
+    if (cat != currentCategory) {
+      out[currentCategory] = currentValues;
+      currentValues = [];
+      currentCategory = cat;
+    }
+    currentValues.add(TimeIntValue(
+      time: DateTime.fromMillisecondsSinceEpoch(row[_date] as int, isUtc: true),
+      value: row[_value] as int,
+    ));
+  }
+  out[currentCategory] = currentValues;
+  return out;
 }

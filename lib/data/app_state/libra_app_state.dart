@@ -40,6 +40,7 @@ class LibraAppState extends ChangeNotifier {
     futures.add(_loadAccounts());
     futures.add(categories.load());
     futures.add(tags.load());
+    futures.add(_loadMonths());
     _loadNetWorth(); // not needed downstream, no need to await (but do place before the await below)
     await Future.wait(futures);
 
@@ -110,8 +111,30 @@ class LibraAppState extends ChangeNotifier {
   }
 
   //--------------------------------------------------------------------------------
-  // Net worth
+  // Time data
   //--------------------------------------------------------------------------------
+  List<DateTime> monthList = [];
+
+  Future<void> _loadMonths() async {
+    final now = DateTime.now();
+    final earliestMonth = await getEarliestMonth();
+
+    // no easy way to do this in dart, so do manually
+    final current = (now.year, now.month);
+    var iter = (earliestMonth.year, earliestMonth.month);
+
+    monthList = [];
+    while (iter.$1 <= current.$1 && iter.$2 <= current.$2) {
+      monthList.add(DateTime.utc(iter.$1, iter.$2));
+      if (iter.$2 == 12) {
+        iter = (iter.$1 + 1, 1);
+      } else {
+        iter = (iter.$1, iter.$2 + 1);
+      }
+    }
+    debugPrint("LibraAppState::_loadMonths() $monthList");
+  }
+
   /// Warning this data contains dates using the local time zone because that's what the syncfusion
   /// charts expect. Don't use to save to database!
   List<TimeIntValue> netWorthData = [];
