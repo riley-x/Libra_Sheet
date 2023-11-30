@@ -8,6 +8,7 @@ import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
 
 class CategoryFocusScreen extends StatelessWidget {
@@ -53,7 +54,9 @@ class _Body extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(),
             child: TransactionFilterGrid(
-              initialFilters: null, // TODO
+              initialFilters: TransactionFilters(
+                categories: CategoryTristateMap({category}),
+              ),
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: context.read<LibraAppState>().focusTransaction,

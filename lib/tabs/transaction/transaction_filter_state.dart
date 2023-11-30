@@ -32,7 +32,11 @@ class TransactionFilters {
 }
 
 class TransactionFilterState extends ChangeNotifier {
-  TransactionFilterState(this.service, [TransactionFilters? initialFilters, this.doLoads = true]) {
+  TransactionFilterState(
+    this.service, [
+    TransactionFilters? initialFilters,
+    this.doLoads = true,
+  ]) {
     if (initialFilters != null) filters = initialFilters;
     loadTransactions();
   }

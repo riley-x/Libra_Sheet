@@ -163,21 +163,33 @@ class CategoryHistory {
 }
 
 /// A tristate map for checkboxes. Categories can have three states:
-///       - checked (map true, returns true)
-///       - dashed (map false, returns null)
-///       - off (map null, returns false)
+///       - checked (_map true, returns true)
+///       - dashed (_map false, returns null)
+///       - off (_map null, returns false)
 /// Only categories with children can have the dashed state. Selecting the checked state for such
 /// categories will automatically add all its children, while switching to the dashed state will
 /// remove the children.
 ///
 /// This makes it easy to test for inclusion in the filter just by using contains().
 class CategoryTristateMap {
+  /// [initial]: An initial set of categories to be marked as selected.
+  /// [withSubcats]: If true, automatically adds the subcats of [initial] too.
+  CategoryTristateMap([Iterable<Category> initial = const {}, bool withSubcats = true]) {
+    for (final cat in initial) {
+      if (withSubcats) {
+        set(cat, true);
+      } else {
+        _map[cat.key] = !isTristate(cat);
+      }
+    }
+  }
+
   final Map<int, bool> _map = {};
 
   void set(Category cat, bool? selected) {
     if (selected == true) {
       _map[cat.key] = true;
-      if (cat.level == 1) {
+      if (isTristate(cat)) {
         for (final subCat in cat.subCats) {
           _map[subCat.key] = true;
         }
@@ -207,6 +219,10 @@ class CategoryTristateMap {
 
   bool isActive(Category cat) {
     return _map.containsKey(cat.key);
+  }
+
+  bool isTristate(Category cat) {
+    return cat.level == 1 && cat.subCats.isNotEmpty;
   }
 
   Iterable<int> activeKeys() {
