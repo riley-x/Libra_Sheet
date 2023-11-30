@@ -41,15 +41,6 @@ class TransactionTabState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAccountFilter(Account account, bool? selected) {
-    if (selected == true) {
-      accountFilterSelected.add(account);
-    } else {
-      accountFilterSelected.remove(account);
-    }
-    loadTransactions();
-  }
-
   void setMinValue(String? text) {
     int? value;
     if (text == null || text.isEmpty) {

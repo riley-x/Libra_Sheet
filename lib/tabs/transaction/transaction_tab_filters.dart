@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_chip.dart';
+import 'package:libra_sheet/components/selectors/account_checkbox_menu.dart';
 import 'package:libra_sheet/components/selectors/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
@@ -83,37 +84,9 @@ class _AccountChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionTabState>();
-    final accounts = context.watch<LibraAppState>().accounts;
-    return Column(
-      children: [
-        TitleRow(
-          title: Text("Accounts", style: Theme.of(context).textTheme.titleMedium),
-          right: DropdownCheckboxMenu<Account>(
-            icon: Icons.add,
-            items: accounts,
-            builder: (context, acc) => Text(
-              acc.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            isChecked: (it) => state.accountFilterSelected.contains(it),
-            onChanged: state.setAccountFilter,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            for (final acc in state.accountFilterSelected)
-              LibraChip(
-                acc.name,
-                onTap: () => state.setAccountFilter(acc, false),
-              ),
-          ],
-        ),
-      ],
+    return AccountChips(
+      selected: state.accountFilterSelected,
+      whenChanged: (_, __) => state.loadTransactions(),
     );
   }
 }
