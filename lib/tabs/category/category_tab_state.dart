@@ -24,6 +24,21 @@ class CategoryTabState extends ChangeNotifier {
   final Set<Account> accounts = {};
   bool showSubCategories = false;
 
+  void setExpenseType(ExpenseType x) {
+    expenseType = x;
+    notifyListeners(); // no need to reload values
+  }
+
+  void setTimeFrame(CategoryTabTimeFrame x) {
+    timeFrame = x;
+    loadValues();
+  }
+
+  void shouldShowSubCategories(bool x) {
+    showSubCategories = x;
+    notifyListeners(); // no need to reload values
+  }
+
   //--------------------------------------------------------------------------
   // Values
   //--------------------------------------------------------------------------
@@ -60,6 +75,8 @@ class CategoryTabState extends ChangeNotifier {
   }
 
   //--------------------------------------------------------------------------
+  // Navigation
+  //--------------------------------------------------------------------------
 
   /// The list contains the nesting of category focuses, since you can focus a subcategory from a parent.
   List<Category> categoriesFocused = [];
@@ -71,30 +88,18 @@ class CategoryTabState extends ChangeNotifier {
     if (categoriesFocused.isEmpty) {
       categoryFocusedTransactions.clear();
     } else {
-      // TODO load transactions and history
+      _loadCategoryDetails(categoriesFocused.last);
     }
-
     notifyListeners();
   }
 
   void focusCategory(Category category) {
     categoriesFocused.add(category);
-    // TODO load transactions and history
+    _loadCategoryDetails(category);
     notifyListeners();
   }
 
-  void setExpenseType(ExpenseType x) {
-    expenseType = x;
-    notifyListeners(); // no need to reload values
-  }
-
-  void setTimeFrame(CategoryTabTimeFrame x) {
-    timeFrame = x;
-    loadValues();
-  }
-
-  void shouldShowSubCategories(bool x) {
-    showSubCategories = x;
-    notifyListeners(); // no need to reload values
+  void _loadCategoryDetails(Category category) {
+    // TODO
   }
 }
