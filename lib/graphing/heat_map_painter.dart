@@ -33,7 +33,7 @@ List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
 /// group to recalculate the child's position including the amount of volume lost to white space.
 ///
 /// [data] should be sorted by decreasing value already. You can optionally pass in [reverseCumValues]
-/// if they are precalculated.
+/// if they are precalculated. Values should all be positive.
 ///
 /// [padding] is the amount of pixel padding to space between the boxes. It is a dumb padding that
 /// simply removes space from the interior sides of each rectangle. As such for large values of
@@ -55,9 +55,6 @@ List<Rect> layoutHeatMapGrid<T>({
     paddingY = padding;
   }
   final output = <Rect>[];
-
-  // data = List.from(data);
-
   final cumValues = reverseCumValues ?? reverseCumSum(data, valueMapper);
 
   bool aprEq(double x, double y) {
@@ -213,7 +210,7 @@ class HeatMapPainter<T> extends CustomPainter {
     }
 
     /// Sort largest to smallest.
-    this.data = data.where((it) => valueMapper(it) != 0).toList();
+    this.data = data.where((it) => valueMapper(it) > 0).toList();
     if (!dataAlreadySorted) {
       this.data.sort((a, b) {
         final diff = valueMapper(b) - valueMapper(a);
@@ -265,8 +262,9 @@ class HeatMapPainter<T> extends CustomPainter {
       paddingY: padding.$2,
     );
     for (int i = 0; i < seriesData.length; i++) {
-      final childData = nestedData?.call(seriesData[i]);
-      if (childData != null) {
+      final childData =
+          nestedData?.call(seriesData[i])?.where((it) => valueMapper(it) > 0).toList();
+      if (childData != null && childData.isNotEmpty) {
         _paintSeries(childData, seriesDepth + 1, canvas, positions[i]);
       } else {
         _paintEntry(seriesData[i], canvas, positions[i]);

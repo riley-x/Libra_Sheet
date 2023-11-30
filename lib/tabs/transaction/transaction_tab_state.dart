@@ -5,7 +5,6 @@ import 'package:libra_sheet/data/database/transactions.dart' as db;
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
-import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
