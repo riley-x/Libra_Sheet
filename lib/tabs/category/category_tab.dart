@@ -16,18 +16,12 @@ class CategoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CategoryTabState(context.read<LibraAppState>()),
-      child: Consumer<CategoryTabState>(
-        builder: (context, state, child) {
-          if (state.categoriesFocused.isNotEmpty) {
-            return const CategoryFocusScreen();
-          } else {
-            return const _CategoryTab();
-          }
-        },
-      ),
-    );
+    final state = context.watch<CategoryTabState>();
+    if (state.categoriesFocused.isNotEmpty) {
+      return const CategoryFocusScreen();
+    } else {
+      return const _CategoryTab();
+    }
   }
 }
 

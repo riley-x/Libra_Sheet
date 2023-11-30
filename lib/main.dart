@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/test_data.dart';
+import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
@@ -42,6 +43,7 @@ class LibraApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<LibraAppState>.value(value: state),
         ChangeNotifierProvider<TransactionService>.value(value: state.transactions),
+        ChangeNotifierProvider<CategoryTabState>(create: (_) => CategoryTabState(state))
         // TODO add more states here, that subscribe to state.transactions if needed.
       ],
       child: MaterialApp(

@@ -12,6 +12,7 @@ enum CategoryTabTimeFrame { current, oneYear, all }
 class CategoryTabState extends ChangeNotifier {
   final LibraAppState appState;
   CategoryTabState(this.appState) {
+    appState.transactions.addListener(loadValues);
     loadValues();
   }
 
