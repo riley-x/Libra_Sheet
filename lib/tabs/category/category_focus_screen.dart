@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
@@ -10,6 +11,7 @@ import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CategoryFocusScreen extends StatelessWidget {
   const CategoryFocusScreen({super.key});
@@ -79,7 +81,14 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: DateTimeGraph([]), // TODO
+                  child: DateTimeGraph([
+                    LineSeries<TimeIntValue, DateTime>(
+                      animationDuration: 300,
+                      dataSource: state.categoryFocusedHistory,
+                      xValueMapper: (TimeIntValue sales, _) => sales.time,
+                      yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
+                    ),
+                  ]),
                 ),
               ),
               if (category.subCats.isNotEmpty) ...[

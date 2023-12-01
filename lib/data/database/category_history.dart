@@ -104,9 +104,28 @@ Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
   });
 }
 
+/// Returns the monthly net change for the sum of certain categories
+Future<List<TimeIntValue>> getCategoryHistory(List<int> categories) async {
+  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
+    categoryHistoryTable,
+    columns: [_date, "SUM($_value) as $_value"],
+    where: "$_value != 0 AND $_category in (${List.filled(categories.length, '?').join(',')})",
+    whereArgs: categories,
+    groupBy: _date,
+    orderBy: _date,
+  );
+
+  return List.generate(maps.length, (i) {
+    return TimeIntValue(
+      time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
+      value: maps[i][_value],
+    );
+  });
+}
+
 /// Returns a map: category -> list of the value history in that month. This function does not pad
 /// the lists to equal length or accumulate them.
-Future<Map<int, List<TimeIntValue>>> getCategoryHistory() async {
+Future<Map<int, List<TimeIntValue>>> getAllCategoryHistory() async {
   if (libraDatabase == null) return {};
 
   final rows = await libraDatabase!.query(

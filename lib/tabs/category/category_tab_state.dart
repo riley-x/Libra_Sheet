@@ -6,6 +6,7 @@ import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/time_value.dart';
 
 enum CategoryTabTimeFrame { current, oneYear, all }
 
@@ -84,13 +85,13 @@ class CategoryTabState extends ChangeNotifier {
 
   /// The list contains the nesting of category focuses, since you can focus a subcategory from a parent.
   List<Category> categoriesFocused = [];
+  List<TimeIntValue> categoryFocusedHistory = [];
 
   void clearFocus() {
     if (categoriesFocused.isEmpty) return;
     categoriesFocused.removeLast();
-    if (categoriesFocused.isEmpty) {
-      // TODO
-    } else {
+    categoryFocusedHistory = [];
+    if (categoriesFocused.isNotEmpty) {
       _loadCategoryDetails(categoriesFocused.last);
     }
     notifyListeners();
@@ -102,7 +103,13 @@ class CategoryTabState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _loadCategoryDetails(Category category) {
-    // TODO
+  void _loadCategoryDetails(Category category) async {
+    final categories = [category.key];
+    categories.addAll(category.subCats.map((e) => e.key));
+    var newData = await getCategoryHistory(categories);
+    newData = alignTimes(newData, appState.monthList, cumulate: true);
+    newData = replaceWithLocalDates(newData);
+    categoryFocusedHistory = newData;
+    notifyListeners();
   }
 }

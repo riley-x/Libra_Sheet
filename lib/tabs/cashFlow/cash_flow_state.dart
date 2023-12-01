@@ -44,7 +44,7 @@ class CashFlowState extends fnd.ChangeNotifier {
   }
 
   Future<void> _init() async {
-    final categoryHistory = await getCategoryHistory();
+    final categoryHistory = await getAllCategoryHistory();
 
     incomeData.clear();
     _loadList(incomeData, categoryHistory, appState.categories.income);

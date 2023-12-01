@@ -25,6 +25,7 @@ class TransactionFilterGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
+      key: ObjectKey(initialFilters),
       create: (context) => TransactionFilterState(context.read(), initialFilters),
       child: _TransactionFilterGrid(
         title: title,
