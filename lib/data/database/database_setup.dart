@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
@@ -52,11 +53,7 @@ FutureOr<void> _createDatabse14(Database db) async {
   await db.execute(createTagsTableSql);
   await db.execute(createTransactionsTableSql);
   await db.execute(createAllocationsTableSql);
-  await db.execute("CREATE TABLE IF NOT EXISTS `reimbursements` ("
-      "`expenseId` INTEGER NOT NULL, "
-      "`incomeId` INTEGER NOT NULL, "
-      "`value` INTEGER NOT NULL, "
-      "PRIMARY KEY(`expenseId`, `incomeId`))");
+  await db.execute(createReimbursementsTableSql);
   await db.execute(createTagJoinTableSql);
   await db.execute(createDefaultCategories);
   if (kDebugMode) {

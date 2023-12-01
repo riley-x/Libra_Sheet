@@ -40,7 +40,7 @@ class TransactionDetailsState extends ChangeNotifier {
   /// notifyListeners.
   /// TODO replace these with the now non-const version of the class
   final MutableAllocation updatedAllocation = MutableAllocation();
-  final MutableReimbursement updatedReimbursement = MutableReimbursement();
+  int reimbursementValue = 0;
 
   /// These variables are saved to by the relevant FormFields. Don't need to notifyListeners.
   Account? account;
@@ -196,7 +196,7 @@ class TransactionDetailsState extends ChangeNotifier {
       focusedAllocation = null;
     }
     focusedReimbursement = it;
-    reimburseTarget = it?.otherTransaction;
+    reimburseTarget = it?.target;
     focus = TransactionDetailActiveFocus.reimbursement;
     notifyListeners();
   }
@@ -209,15 +209,14 @@ class TransactionDetailsState extends ChangeNotifier {
   void saveReimbursement() {
     if (validateReimbursement()) {
       reimbursementFormKey.currentState?.save();
-      updatedReimbursement.otherTransaction = reimburseTarget;
-      updatedReimbursement.parentTransaction = seed;
+      final reimb = Reimbursement(target: reimburseTarget, value: reimbursementValue);
 
       if (focusedReimbursement == null) {
-        reimbursements.add(updatedReimbursement);
+        reimbursements.add(reimb);
       } else {
         for (int i = 0; i < reimbursements.length; i++) {
           if (reimbursements[i] == focusedReimbursement) {
-            reimbursements[i] = updatedReimbursement.freeze();
+            reimbursements[i] = reimb;
             break;
           }
         }
@@ -234,6 +233,6 @@ class TransactionDetailsState extends ChangeNotifier {
 
   void resetReimbursement() {
     reimbursementFormKey.currentState?.reset();
-    reimburseTarget = focusedReimbursement?.otherTransaction;
+    reimburseTarget = focusedReimbursement?.target;
   }
 }

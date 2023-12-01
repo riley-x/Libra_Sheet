@@ -39,7 +39,7 @@ class ReimbursementEditor extends StatelessWidget {
                 'Value',
                 ValueField(
                   initial: state.focusedReimbursement?.value,
-                  onSave: (it) => state.updatedReimbursement.value = it,
+                  onSave: (it) => state.reimbursementValue = it,
                   positiveOnly: true,
                 ),
                 tooltip: "Value should always be positive.",
