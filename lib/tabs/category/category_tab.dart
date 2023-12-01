@@ -61,11 +61,12 @@ class _HeatMap extends StatelessWidget {
     final appState = context.watch<LibraAppState>();
     final state = context.watch<CategoryTabState>();
     final categories = (state.expenseType == ExpenseType.expense)
-        ? appState.categories.expense.subCats
-        : appState.categories.income.subCats;
+        ? [appState.categories.expense, ...appState.categories.expense.subCats]
+        : [appState.categories.income, ...appState.categories.income.subCats];
     return CategoryHeatMap(
       categories: categories,
-      values: state.values,
+      individualValues: state.individualValues,
+      aggregateValues: state.aggregateValues,
       onSelect: (it) => context.read<CategoryTabState>().focusCategory(it),
       showSubCategories: state.showSubCategories,
     );

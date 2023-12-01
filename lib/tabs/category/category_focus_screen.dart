@@ -28,7 +28,7 @@ class CategoryFocusScreen extends StatelessWidget {
         const SizedBox(height: 5),
         CommonBackBar(
           leftText: category.name,
-          rightText: state.values[category.key]?.abs().dollarString() ?? '',
+          rightText: state.aggregateValues[category.key]?.abs().dollarString() ?? '',
           onBack: () {
             context.read<CategoryTabState>().clearFocus();
           },
@@ -91,7 +91,7 @@ class _Body extends StatelessWidget {
                   ]),
                 ),
               ),
-              if (category.subCats.isNotEmpty) ...[
+              if (category.level == 1 && category.subCats.isNotEmpty) ...[
                 const SizedBox(height: 5),
                 Container(
                   height: 1,
@@ -102,7 +102,9 @@ class _Body extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: CategoryHeatMap(
                       categories: category.subCats,
-                      values: context.watch<CategoryTabState>().values,
+                      individualValues: context.watch<CategoryTabState>().individualValues,
+                      aggregateValues: context.watch<CategoryTabState>().individualValues,
+                      // individual here because the focus screen is always nested categories
                       onSelect: (it) {
                         context.read<CategoryTabState>().focusCategory(it);
                       },
