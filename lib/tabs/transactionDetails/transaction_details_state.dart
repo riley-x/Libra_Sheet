@@ -209,7 +209,7 @@ class TransactionDetailsState extends ChangeNotifier {
   void saveReimbursement() {
     if (validateReimbursement()) {
       reimbursementFormKey.currentState?.save();
-      final reimb = Reimbursement(target: reimburseTarget, value: reimbursementValue);
+      final reimb = Reimbursement(target: reimburseTarget!, value: reimbursementValue);
 
       if (focusedReimbursement == null) {
         reimbursements.add(reimb);

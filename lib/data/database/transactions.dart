@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -21,6 +22,14 @@ const _value = "value";
 const _note = "note";
 const _account = "account_id";
 const _category = "category_id";
+
+const transactionKey = _key;
+const transactionName = _name;
+const transactionDate = _date;
+const transactionValue = _value;
+const transactionNote = _note;
+const transactionAccount = _account;
+const transactionCategory = _category;
 
 const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
@@ -113,8 +122,11 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
       await addAllocation(parent: t, index: i, txn: txn);
     }
   }
-
-  // TODO reimbursements
+  if (t.reimbursements != null) {
+    for (final r in t.reimbursements!) {
+      await addReimbursement(r, parent: t, txn: txn);
+    }
+  }
 }
 
 Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
@@ -122,8 +134,11 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
     return libraDatabase?.transaction((txn) async => await deleteTransaction(t, txn: txn));
   }
 
-  // TODO reimbursements
-
+  if (t.reimbursements != null) {
+    for (final r in t.reimbursements!) {
+      await deleteReimbursement(r, parent: t, txn: txn);
+    }
+  }
   if (t.allocations != null) {
     for (int i = 0; i < t.allocations!.length; i++) {
       await deleteAllocation(parent: t, index: i, txn: txn);
@@ -204,7 +219,7 @@ Future<List<Transaction>> loadTransactions(
 Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categories) async {
   await libraDatabase!.transaction((txn) async {
     t.allocations = await loadAllocations(t.key, categories, txn);
-    t.reimbursements = []; // TODO
+    t.reimbursements = await loadReimbursements(t, categories, txn);
   });
 }
 
