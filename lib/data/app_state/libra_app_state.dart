@@ -132,7 +132,7 @@ class LibraAppState extends ChangeNotifier {
   Future<void> _loadNetWorth() async {
     var newData = await getMonthlyNet();
     newData = alignTimes(newData, monthList, cumulate: true);
-    netWorthData = replaceWithLocalDates(newData);
+    netWorthData = fixForCharts(newData);
     notifyListeners();
   }
 

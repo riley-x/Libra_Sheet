@@ -84,8 +84,12 @@ List<TimeIntValue> alignTimes(
 
 /// Assuming [original] uses UTC dates, replaces the times with local timezone dates. This is needed
 /// for Syncfusion datetime charts since they assume dates are in the local timezone.
-List<TimeIntValue> replaceWithLocalDates(List<TimeIntValue> original) {
+List<TimeIntValue> fixForCharts(List<TimeIntValue> original, {bool absValues = false}) {
   return [
-    for (final tv in original) TimeIntValue(time: tv.time.asLocalDate(), value: tv.value),
+    for (final tv in original)
+      TimeIntValue(
+        time: tv.time.asLocalDate(),
+        value: (absValues) ? tv.value.abs() : tv.value,
+      ),
   ];
 }

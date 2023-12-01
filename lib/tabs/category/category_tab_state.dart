@@ -114,8 +114,8 @@ class CategoryTabState extends ChangeNotifier {
     final categories = [category.key];
     categories.addAll(category.subCats.map((e) => e.key));
     var newData = await getCategoryHistory(categories);
-    newData = alignTimes(newData, appState.monthList, cumulate: true);
-    newData = replaceWithLocalDates(newData);
+    newData = alignTimes(newData, appState.monthList);
+    newData = fixForCharts(newData, absValues: true);
     categoryFocusedHistory = newData;
     notifyListeners();
   }
