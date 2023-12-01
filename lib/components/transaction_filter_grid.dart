@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/components/transaction_card.dart';
+import 'package:libra_sheet/components/cards/transaction_card.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:provider/provider.dart';

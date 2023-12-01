@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/reimbursement.dart';
 
+/// Somewhat similar to [TransactionCard], displays the details of a reimbursement transaction
+/// but lists the reimbursement value instead. Also includes a "Add a reimbursement" card when
+/// [reimbursement] is null.
 class ReimbursementCard extends StatelessWidget {
   final Reimbursement? reimbursement;
   final Function(Reimbursement?)? onTap;

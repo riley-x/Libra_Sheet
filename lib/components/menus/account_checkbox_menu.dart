@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/components/libra_chip.dart';
-import 'package:libra_sheet/components/selectors/dropdown_checkbox_menu.dart';
+import 'package:libra_sheet/components/cards/libra_chip.dart';
+import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';

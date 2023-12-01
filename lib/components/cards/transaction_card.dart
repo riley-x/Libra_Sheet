@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:libra_sheet/components/libra_chip.dart';
+import 'package:libra_sheet/components/cards/libra_chip.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 

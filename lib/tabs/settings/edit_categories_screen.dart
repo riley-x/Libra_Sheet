@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/components/selectors/category_selection_menu.dart';
+import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/show_color_picker.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
