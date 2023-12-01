@@ -11,6 +11,12 @@ extension DateTimeUtils on DateFormat {
   }
 }
 
+extension DateTimeUtils2 on DateTime {
+  DateTime asLocalDate() {
+    return DateTime(year, month, day);
+  }
+}
+
 DateTime startOfMonth(DateTime x) {
   return DateTime.utc(x.year, x.month, 1);
 }

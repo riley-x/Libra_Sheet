@@ -1,3 +1,5 @@
+import 'package:libra_sheet/data/date_time_utils.dart';
+
 class TimeIntValue {
   final DateTime time;
   final int value;
@@ -78,4 +80,12 @@ List<TimeIntValue> alignTimes(
   }
 
   return out;
+}
+
+/// Assuming [original] uses UTC dates, replaces the times with local timezone dates. This is needed
+/// for Syncfusion datetime charts since they assume dates are in the local timezone.
+List<TimeIntValue> replaceWithLocalDates(List<TimeIntValue> original) {
+  return [
+    for (final tv in original) TimeIntValue(time: tv.time.asLocalDate(), value: tv.value),
+  ];
 }

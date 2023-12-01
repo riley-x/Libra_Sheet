@@ -1,5 +1,4 @@
 - Saving and deleting reimbursements
-- Filter transactions include allocations for category
 - Load balance history in account screen
 - Category tab load history
 - Elevate tab states to parent level, so you don't lose state when switching tabs or popping the back stack. Note that can manually subscribe to the TransactionService with addListener, no need to worry about widget-level.

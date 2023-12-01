@@ -163,8 +163,6 @@ class LibraAppState extends ChangeNotifier {
   }
 
   void focusAccount(Account x) {
-    // TODO maybe load the transactions here? And change to AccountWithTransactions?
-    // Or maybe async load on Widget create...is that possible?
     backStack.add((DetailScreen.account, x));
     notifyListeners();
   }

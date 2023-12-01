@@ -85,24 +85,20 @@ FutureOr<int> updateCategoryHistory({
   return await _updateCategoryHistory(data, txn);
 }
 
-/// Returns the monthly net change across all acounts. WARNING: the dates are returned using the
-/// local timezone, do not use for anything other than the syncfusion charts. Also, there may be
-/// gaps in the timeline.
-Future<List<TimeIntValue>> getMonthlyNet() async {
+/// Returns the monthly net change across all acounts or [accoundId].
+Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
   final List<Map<String, dynamic>> maps = await libraDatabase!.query(
     categoryHistoryTable,
     columns: [_date, "SUM($_value) as $_value"],
-    where: "$_value != 0",
+    where: "$_value != 0${(accountId != null) ? " AND $_account = ?" : ""}",
+    whereArgs: (accountId != null) ? [accountId] : null,
     groupBy: _date,
     orderBy: _date,
   );
 
   return List.generate(maps.length, (i) {
-    // The syncfusion charts expect local timezone, so convert manually
-    final utcTime = DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true);
-    final localTime = DateTime(utcTime.year, utcTime.month, utcTime.day);
     return TimeIntValue(
-      time: localTime,
+      time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
       value: maps[i][_value],
     );
   });
