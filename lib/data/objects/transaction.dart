@@ -72,9 +72,6 @@ class Transaction {
   }
 
   bool relationsAreLoaded() {
-    if (account == null) return false;
-    if (category == null) return false;
-    if (tags == null) return false;
     if (allocations == null) return false;
     if (reimbursements == null) return false;
     return true;

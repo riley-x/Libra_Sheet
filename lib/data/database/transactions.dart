@@ -85,7 +85,6 @@ Transaction _fromMap(
 /// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
 /// set the transaction's key in-place!
 FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
-  assert(t.relationsAreLoaded());
   if (txn == null) {
     return libraDatabase?.transaction((txn) async => await insertTransaction(t, txn: txn));
   }
