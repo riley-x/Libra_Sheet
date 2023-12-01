@@ -1,6 +1,8 @@
 - Saving and deleting reimbursements
 - Prettify dropdown menus
 - Account last updated
+- Save account CSV format
+- Filters for cash flow tab?
 - Double sided stack column chart
 - Dark theme
-- Replace income/expense categories with a single "uncategorized"?
+- Replace income/expense categories in filters with a single "uncategorized"

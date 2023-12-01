@@ -50,38 +50,38 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
 
   @override
   Widget build(BuildContext context) {
-    int getValue(Category cat) {
+    int getValue(Category cat, int depth) {
       int? val;
-      if (widget.showSubCategories) {
-        val = widget.individualValues[cat.key];
-      } else {
+      if (depth == 0) {
         val = widget.aggregateValues[cat.key];
+      } else {
+        val = widget.individualValues[cat.key];
       }
       return val?.abs() ?? 0;
     }
 
-    List<Category>? getNested(Category cat) {
-      if (cat.level == 1 && cat.subCats.isNotEmpty) {
+    List<Category>? getNested(Category cat, int depth) {
+      if (depth == 0 && cat.level == 1 && cat.subCats.isNotEmpty) {
         return List.of(cat.subCats) + [cat];
       } else {
         return null;
       }
     }
 
-    String labelMapper(Category cat) {
+    String labelMapper(Category cat, int depth) {
       String name;
       if (cat.level == 0) {
         name = "Uncategorized";
       } else {
         name = cat.name;
       }
-      return "$name\n${getValue(cat).dollarString()}";
+      return "$name\n${getValue(cat, depth).dollarString()}";
     }
 
     final painter = HeatMapPainter<Category>(
       widget.categories,
-      valueMapper: (it) => getValue(it).asDollarDouble(),
-      colorMapper: (it) => it.color,
+      valueMapper: (it, depth) => getValue(it, depth).asDollarDouble(),
+      colorMapper: (it, depth) => it.color,
       labelMapper: labelMapper,
       nestedData: (widget.showSubCategories) ? getNested : null,
       textStyle: Theme.of(context).textTheme.labelLarge,

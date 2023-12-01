@@ -170,10 +170,10 @@ List<Rect> layoutHeatMapGrid<T>({
 /// This painter class draw a heat map of values. See [layoutHeatMapGrid].
 class HeatMapPainter<T> extends CustomPainter {
   late final List<T> data;
-  final Color? Function(T)? colorMapper;
-  final double Function(T) valueMapper;
-  final String Function(T)? labelMapper;
-  final List<T>? Function(T)? nestedData;
+  final Color? Function(T, int depth)? colorMapper;
+  final double Function(T, int depth) valueMapper;
+  final String Function(T, int depth)? labelMapper;
+  final List<T>? Function(T, int depth)? nestedData;
 
   final TextStyle? textStyle;
 
@@ -198,7 +198,6 @@ class HeatMapPainter<T> extends CustomPainter {
     double paddingY = 0,
     (double, double) Function(int depth)? paddingMapper,
     this.minSameAxisRatio = 0.6,
-    bool dataAlreadySorted = false,
     this.textStyle,
   }) {
     if (paddingMapper != null) {
@@ -209,25 +208,28 @@ class HeatMapPainter<T> extends CustomPainter {
       this.paddingMapper = (_) => (paddingX, paddingY);
     }
 
-    /// Sort largest to smallest.
-    this.data = data.where((it) => valueMapper(it) > 0).toList();
-    if (!dataAlreadySorted) {
-      this.data.sort((a, b) {
-        final diff = valueMapper(b) - valueMapper(a);
-        if (diff < 0) {
-          return -1;
-        } else if (diff == 0) {
-          return 0;
-        } else {
-          return 1;
-        }
-      });
-    }
+    this.data = _sortAndFilterData(data, 0)!;
+  }
+
+  List<T>? _sortAndFilterData(List<T>? orig, int depth) {
+    if (orig == null) return null;
+    var out = orig.where((it) => valueMapper(it, depth) > 0).toList();
+    out.sort((a, b) {
+      final diff = valueMapper(b, depth) - valueMapper(a, depth);
+      if (diff < 0) {
+        return -1;
+      } else if (diff == 0) {
+        return 0;
+      } else {
+        return 1;
+      }
+    });
+    return out;
   }
 
   /// Paints a single entry (rectangle).
-  void _paintEntry(T entry, Canvas canvas, Rect rect) {
-    Paint brush = Paint()..color = colorMapper?.call(entry) ?? Colors.teal;
+  void _paintEntry(T entry, int seriesDepth, Canvas canvas, Rect rect) {
+    Paint brush = Paint()..color = colorMapper?.call(entry, seriesDepth) ?? Colors.transparent;
     canvas.drawRect(rect, brush);
     positions.add((rect, entry));
 
@@ -235,7 +237,7 @@ class HeatMapPainter<T> extends CustomPainter {
     if (labelMapper != null) {
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
-          text: labelMapper!.call(entry),
+          text: labelMapper!.call(entry, seriesDepth),
           style: textStyle?.copyWith(color: adaptiveTextColor(brush.color)),
         ),
         textAlign: TextAlign.center,
@@ -256,18 +258,18 @@ class HeatMapPainter<T> extends CustomPainter {
       offset: rect.topLeft,
       size: rect.size,
       data: seriesData,
-      valueMapper: valueMapper,
+      valueMapper: (it) => valueMapper(it, seriesDepth),
       minSameAxisRatio: minSameAxisRatio,
       paddingX: padding.$1,
       paddingY: padding.$2,
     );
     for (int i = 0; i < seriesData.length; i++) {
-      final childData =
-          nestedData?.call(seriesData[i])?.where((it) => valueMapper(it) > 0).toList();
+      var childData = nestedData?.call(seriesData[i], seriesDepth);
+      childData = _sortAndFilterData(childData, seriesDepth + 1);
       if (childData != null && childData.isNotEmpty) {
         _paintSeries(childData, seriesDepth + 1, canvas, positions[i]);
       } else {
-        _paintEntry(seriesData[i], canvas, positions[i]);
+        _paintEntry(seriesData[i], seriesDepth, canvas, positions[i]);
       }
     }
   }
