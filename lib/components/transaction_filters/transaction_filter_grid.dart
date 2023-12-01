@@ -14,6 +14,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.maxRowsForName = 1,
     this.fixedColumns,
     this.onSelect,
+    this.padding,
   });
 
   final Widget? title;
@@ -21,6 +22,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final int? maxRowsForName;
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,7 @@ class TransactionFilterGrid extends StatelessWidget {
       key: ObjectKey(initialFilters),
       create: (context) => TransactionFilterState(context.read(), initialFilters),
       child: _TransactionFilterGrid(
+        padding: padding,
         title: title,
         maxRowsForName: maxRowsForName,
         fixedColumns: fixedColumns,
@@ -44,12 +47,14 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.maxRowsForName = 1,
     this.fixedColumns,
     this.onSelect,
+    this.padding,
   });
 
   final Widget? title;
   final int? maxRowsForName;
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +87,7 @@ class _TransactionFilterGrid extends StatelessWidget {
         Expanded(
           child: TransactionGrid(
             state.transactions,
+            padding: padding,
             maxRowsForName: maxRowsForName,
             fixedColumns: fixedColumns,
             onSelect: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,

@@ -63,11 +63,21 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
       }
     }
 
+    String labelMapper(Category cat) {
+      String name;
+      if (cat.level == 0 || (widget.showSubCategories && cat.level == 1)) {
+        name = "Uncategorized";
+      } else {
+        name = cat.name;
+      }
+      return "$name\n${getValue(cat).dollarString()}";
+    }
+
     final painter = HeatMapPainter<Category>(
       widget.categories,
       valueMapper: (it) => getValue(it).asDollarDouble(),
       colorMapper: (it) => it.color,
-      labelMapper: (it) => "${it.name}\n${getValue(it).dollarString()}",
+      labelMapper: labelMapper,
       nestedData: (widget.showSubCategories) ? getNested : null,
       textStyle: Theme.of(context).textTheme.labelLarge,
       paddingMapper: (depth) => (widget.showSubCategories && depth == 0) ? (5, 5) : (2, 2),

@@ -52,11 +52,11 @@ class _Body extends StatelessWidget {
     final state = context.watch<CategoryTabState>();
     return Row(
       children: [
-        const SizedBox(width: 10),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(),
+            padding: const EdgeInsets.only(left: 10), // this offsets the title
             child: TransactionFilterGrid(
+              padding: const EdgeInsets.only(right: 10),
               initialFilters: TransactionFilters(
                 categories: CategoryTristateMap({category}),
                 accounts: state.accounts,
@@ -67,7 +67,6 @@ class _Body extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 5),
         Container(
           width: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
@@ -91,7 +90,7 @@ class _Body extends StatelessWidget {
                   ]),
                 ),
               ),
-              if (category.level == 1 && category.subCats.isNotEmpty) ...[
+              if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
                 const SizedBox(height: 5),
                 Container(
                   height: 1,
@@ -101,12 +100,12 @@ class _Body extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CategoryHeatMap(
-                      categories: category.subCats,
-                      individualValues: context.watch<CategoryTabState>().individualValues,
-                      aggregateValues: context.watch<CategoryTabState>().individualValues,
+                      categories: category.subCats + [category],
+                      individualValues: state.individualValues,
+                      aggregateValues: state.individualValues,
                       // individual here because the focus screen is always nested categories
                       onSelect: (it) {
-                        context.read<CategoryTabState>().focusCategory(it);
+                        if (it != category) context.read<CategoryTabState>().focusCategory(it);
                       },
                     ),
                   ),
