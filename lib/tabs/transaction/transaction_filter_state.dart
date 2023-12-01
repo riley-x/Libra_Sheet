@@ -38,6 +38,7 @@ class TransactionFilterState extends ChangeNotifier {
     this.doLoads = true,
   ]) {
     if (initialFilters != null) filters = initialFilters;
+    service.addListener(loadTransactions);
     loadTransactions();
   }
 

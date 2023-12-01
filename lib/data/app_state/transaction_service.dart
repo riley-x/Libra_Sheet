@@ -51,6 +51,7 @@ class TransactionService extends ChangeNotifier {
   Future<void> delete(Transaction t) async {
     debugPrint("TransactionService::delete() $t");
     await deleteTransaction(t);
+    notifyListeners();
     appState.reloadAfterTransactions();
   }
 

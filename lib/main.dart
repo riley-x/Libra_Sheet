@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
+import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -41,10 +41,11 @@ class LibraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<LibraAppState>.value(value: state),
-        ChangeNotifierProvider<TransactionService>.value(value: state.transactions),
-        ChangeNotifierProvider<CategoryTabState>(create: (_) => CategoryTabState(state))
-        // TODO add more states here, that subscribe to state.transactions if needed.
+        ChangeNotifierProvider.value(value: state),
+        ChangeNotifierProvider.value(value: state.transactions),
+        ChangeNotifierProvider(create: (_) => CategoryTabState(state)),
+        // used by the transaction tab
+        ChangeNotifierProvider(create: (_) => TransactionFilterState(state.transactions)),
       ],
       child: MaterialApp(
         title: 'Libra Sheet',
