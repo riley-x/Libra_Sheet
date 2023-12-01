@@ -59,6 +59,11 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> loadRelations(Transaction t) {
-    return loadTransactionRelations(t, appState.categories.createKeyMap());
+    return loadTransactionRelations(
+      t,
+      accounts: appState.createAccountMap(),
+      categories: appState.categories.createKeyMap(),
+      tags: appState.tags.createKeyMap(),
+    );
   }
 }

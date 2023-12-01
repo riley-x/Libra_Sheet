@@ -55,7 +55,7 @@ Map<String, dynamic> _toMap(Transaction t) {
   return map;
 }
 
-Transaction _fromMap(
+Transaction transactionFromMap(
   Map<String, dynamic> map, {
   Map<int, Account>? accounts,
   Map<int, Category>? categories,
@@ -88,6 +88,7 @@ Transaction _fromMap(
     category: categories?[map[_category]] ?? defaultCategory,
     tags: tagList,
     nAllocations: map["nAllocs"],
+    nReimbursements: map["nReimbs"],
   );
 }
 
@@ -204,7 +205,7 @@ Future<List<Transaction>> loadTransactions(
   });
 
   for (final row in rows) {
-    out.add(_fromMap(
+    out.add(transactionFromMap(
       row,
       accounts: accounts,
       categories: categories,
@@ -216,7 +217,12 @@ Future<List<Transaction>> loadTransactions(
 }
 
 /// Loads the allocations and reimbursements for this transaction, modifies in-place.
-Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categories) async {
+Future<void> loadTransactionRelations(
+  Transaction t, {
+  required Map<int, Account> accounts,
+  required Map<int, Category> categories,
+  required Map<int, Tag> tags,
+}) async {
   await libraDatabase!.transaction((txn) async {
     if (t.nAllocations > 0) {
       t.allocations = await loadAllocations(t.key, categories, txn);
@@ -224,7 +230,13 @@ Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categori
       t.allocations = [];
     }
     if (t.nReimbursements > 0) {
-      t.reimbursements = await loadReimbursements(t, categories, txn);
+      t.reimbursements = await loadReimbursements(
+        parent: t,
+        accounts: accounts,
+        categories: categories,
+        tags: tags,
+        db: txn,
+      );
     } else {
       t.reimbursements = [];
     }

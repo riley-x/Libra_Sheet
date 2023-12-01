@@ -170,7 +170,7 @@ class LibraAppState extends ChangeNotifier {
 
   void focusTransaction(Transaction? t) async {
     if (t != null && !t.relationsAreLoaded()) {
-      await loadTransactionRelations(t, categories.createKeyMap());
+      await transactions.loadRelations(t);
     }
     backStack.add((DetailScreen.transaction, t));
     notifyListeners();

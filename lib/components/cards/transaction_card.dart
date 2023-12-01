@@ -140,7 +140,7 @@ class _TextElements extends StatelessWidget {
                   const SizedBox(width: 10),
                 ],
                 if (trans.nReimbursements > 0) ...[
-                  _NumberIndicator(trans.nReimbursements, true),
+                  _NumberIndicator(trans.nReimbursements, false),
                   const SizedBox(width: 10),
                 ],
                 Text(

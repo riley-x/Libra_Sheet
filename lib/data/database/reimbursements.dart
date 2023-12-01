@@ -2,8 +2,10 @@ import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/reimbursement.dart';
+import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart' as lt;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -169,21 +171,23 @@ Future<void> deleteReimbursement(
   }
 }
 
-Future<List<Reimbursement>> loadReimbursements(
-  lt.Transaction t,
-  Map<int, Category> categories,
-  DatabaseExecutor db,
-) async {
-  final parentColumn = (t.value > 0) ? _income : _expense;
-  final targetColumn = (t.value > 0) ? _expense : _income;
+Future<List<Reimbursement>> loadReimbursements({
+  required lt.Transaction parent,
+  required Map<int, Account> accounts,
+  required Map<int, Category> categories,
+  required Map<int, Tag> tags,
+  required DatabaseExecutor db,
+}) async {
+  final parentColumn = (parent.value > 0) ? _income : _expense;
+  final targetColumn = (parent.value > 0) ? _expense : _income;
   final maps = await db.rawQuery(
     """
     SELECT 
       t.*,
       GROUP_CONCAT(tag.$tagKey) as tags,
       COUNT(a.$allocationsKey) as nAllocs,
-      COUNT(r1.*) + COUNT(r2.*) as nReimbs,
-      reimbs.$_value
+      COUNT(r1.$reimbExpense) + COUNT(r2.$reimbExpense) as nReimbs,
+      reimbs.$_value as reimb_value
     FROM (
         SELECT $targetColumn, $_value FROM $reimbursementsTable WHERE $parentColumn = ?
       ) reimbs
@@ -200,9 +204,19 @@ Future<List<Reimbursement>> loadReimbursements(
     LEFT OUTER JOIN
       $reimbursementsTable r2 ON r2.$reimbIncome = t.$transactionKey
     """,
-    [t.key],
+    [parent.key],
   );
-  print(maps);
-  return [];
-  // return [for (final map in maps) _fromMap(categories, map)];
+  print("LOADREIMBS $maps");
+  return [
+    for (final map in maps)
+      Reimbursement(
+        target: transactionFromMap(
+          map,
+          accounts: accounts,
+          categories: categories,
+          tags: tags,
+        ),
+        value: map["reimb_value"] as int,
+      ),
+  ];
 }
