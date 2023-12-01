@@ -51,7 +51,7 @@ class LibraAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reloadAfterTransactions() async {
+  Future<void> reloadAfterTransactions() async {
     var futures = <Future>[];
     futures.add(_loadMonths());
     futures.add(_loadAccounts());

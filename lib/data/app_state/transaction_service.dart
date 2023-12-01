@@ -16,6 +16,12 @@ class TransactionService extends ChangeNotifier {
   final LibraAppState appState;
   TransactionService(this.appState);
 
+  void _onUpdate() async {
+    // This updates the monthsList, which is used downstream
+    await appState.reloadAfterTransactions();
+    notifyListeners();
+  }
+
   Future<List<Transaction>> load(TransactionFilters filters) async {
     final ts = await loadTransactions(
       filters,
@@ -34,8 +40,7 @@ class TransactionService extends ChangeNotifier {
     } else {
       await updateTransaction(old, nu);
     }
-    notifyListeners();
-    appState.reloadAfterTransactions();
+    _onUpdate();
   }
 
   Future<void> addAll(List<Transaction> transactions) async {
@@ -44,15 +49,13 @@ class TransactionService extends ChangeNotifier {
         await insertTransaction(t, txn: txn);
       }
     });
-    notifyListeners();
-    appState.reloadAfterTransactions();
+    _onUpdate();
   }
 
   Future<void> delete(Transaction t) async {
     debugPrint("TransactionService::delete() $t");
     await deleteTransaction(t);
-    notifyListeners();
-    appState.reloadAfterTransactions();
+    _onUpdate();
   }
 
   Future<void> loadRelations(Transaction t) {
