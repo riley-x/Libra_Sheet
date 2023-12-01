@@ -238,14 +238,6 @@ Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categori
     }
   }
 
-  /// No list support in sqflite, so make our own ///
-  void addList(String column, Iterable<int> list) {
-    if (list.isNotEmpty) {
-      add("$column in (${List.filled(list.length, '?').join(',')})");
-      args.addAll(list);
-    }
-  }
-
   /// Basic filters ///
   if (filters.minValue != null) {
     add("$_value >= ?");
@@ -263,20 +255,46 @@ Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categori
     add("$_date <= ?");
     args.add(filters.endTime!.millisecondsSinceEpoch);
   }
-  addList(_account, filters.accounts.map((e) => e.key));
-  addList(_category, filters.categories.activeKeys());
+  if (filters.accounts.isNotEmpty) {
+    add("$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
+    args.addAll(filters.accounts.map((e) => e.key));
+  }
 
   /// Group by transaction (so aggregate the tags/allocs per transaction) ///
   q += " GROUP BY t.$_key";
 
-  /// Tags ///
-  // Here rows with the correct tags are assigned 1, and then we max over each transaction to see
-  // if there was at least one 1. Might be a better way with temporary table?
+  /// Tags and Categories ///
+  // Here rows with the correct tag/alloc are assigned 1, and then we max over each transaction to
+  // see if there was at least one 1.
+  final categories = filters.categories.activeKeys();
+  bool firstHaving = true;
+  if (categories.isNotEmpty) {
+    firstHaving = false;
+
+    /// When transaction category is in the list
+    q += " HAVING (t.$_category in (${List.filled(categories.length, '?').join(',')})";
+    args.addAll(categories);
+
+    /// When transaction has an allocation category in the list
+    q += " OR max(CASE a.$allocationsCategory";
+    for (final cat in categories) {
+      q += " WHEN ? THEN 1";
+      args.add(cat);
+    }
+    q += " ELSE 0 END) = 1)";
+  }
+
   if (filters.tags.isNotEmpty) {
-    q += " HAVING max( CASE tag.$tagKey";
+    if (firstHaving) {
+      firstHaving = false;
+      q += " HAVING";
+    } else {
+      q += " AND";
+    }
+    q += " max( CASE tag.$tagKey";
     for (final tag in filters.tags) {
       q += " WHEN ? THEN 1";
-      args.add(tag);
+      args.add(tag.key);
     }
     q += " ELSE 0 END ) = 1";
   }

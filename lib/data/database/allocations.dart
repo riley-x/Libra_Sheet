@@ -26,6 +26,7 @@ const _index = "listIndex";
 
 const allocationsKey = _key;
 const allocationsTransaction = _transaction;
+const allocationsCategory = _category;
 
 Map<String, dynamic> _toMap(lt.Transaction parent, Allocation a, int listIndex) {
   assert(parent.key != 0 && a.category != null);
