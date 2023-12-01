@@ -58,6 +58,7 @@ class CategoryTabState extends ChangeNotifier {
   }
 
   void loadValues() async {
+    notifyListeners();
     if (appState.monthList.isEmpty) return;
     final startTime = switch (timeFrame) {
       CategoryTabTimeFrame.all => null,

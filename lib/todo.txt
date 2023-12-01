@@ -1,3 +1,5 @@
 - Saving and deleting reimbursements
+- Account last updated
+- Double sided stack column chart
 - Dark theme
 - Replace income/expense categories with a single "uncategorized"?

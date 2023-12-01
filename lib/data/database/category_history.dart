@@ -33,13 +33,13 @@ class _CategoryHistory {
   });
 }
 
-// @Query("SELECT MIN(date) FROM $categoryHistoryTable WHERE value != 0")
-FutureOr<DateTime> getEarliestMonth() async {
+FutureOr<DateTime?> getEarliestMonth() async {
   final out = await libraDatabase!.query(
     categoryHistoryTable,
     columns: ["MIN($_date) as $_date"],
     where: "$_value != 0",
   );
+  if (out.first[_date] == null) return null; // This happens when the database is empty
   return DateTime.fromMillisecondsSinceEpoch(out.first[_date] as int, isUtc: true);
 }
 

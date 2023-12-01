@@ -171,7 +171,9 @@ class _NumberIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: BoxDecoration(
-        color: (isAlloc) ? const Color(0xffde237a) : const Color(0xff4a1bcc),
+        color: (isAlloc)
+            ? const Color.fromARGB(255, 221, 79, 145)
+            : const Color.fromARGB(255, 100, 65, 197),
         shape: BoxShape.circle,
         // border: Border.all(
         //   color: Colors.white,

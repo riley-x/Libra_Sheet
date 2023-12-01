@@ -44,18 +44,19 @@ class LibraAppState extends ChangeNotifier {
     futures.add(categories.load());
     futures.add(tags.load());
     futures.add(_loadMonths());
-    _loadNetWorth(); // not needed downstream, no need to await (but do place before the await below)
     await Future.wait(futures);
 
+    _loadNetWorth(); // not needed downstream, but needs months
     rules.load(); // not needed until adding transactions/editing rules
     notifyListeners();
   }
 
   void reloadAfterTransactions() async {
     var futures = <Future>[];
+    futures.add(_loadMonths());
     futures.add(_loadAccounts());
-    _loadNetWorth(); // not needed downstream, no need to await (but do place before the await below)
     await Future.wait(futures);
+    _loadNetWorth(); // not needed downstream, no need to await
     notifyListeners();
   }
 
@@ -106,6 +107,7 @@ class LibraAppState extends ChangeNotifier {
   Future<void> _loadMonths() async {
     final now = DateTime.now();
     final earliestMonth = await getEarliestMonth();
+    if (earliestMonth == null) return;
 
     // no easy way to do this in dart, so do manually
     final current = (now.year, now.month);
