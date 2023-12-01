@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
-import 'package:libra_sheet/components/transaction_filter_grid.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';

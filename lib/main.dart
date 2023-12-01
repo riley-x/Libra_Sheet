@@ -4,7 +4,7 @@ import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/database/transactions.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_filters_column.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:provider/provider.dart';
 
 class TransactionFilterDialog extends StatelessWidget {

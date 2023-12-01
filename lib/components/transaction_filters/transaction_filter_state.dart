@@ -31,6 +31,8 @@ class TransactionFilters {
         categories = categories ?? CategoryTristateMap();
 }
 
+/// This class stores the common state for a TransactionFilterColumn and its corresponding transactions.
+/// It handles the loading of the transactions and the UI state of the filter fields.
 class TransactionFilterState extends ChangeNotifier {
   TransactionFilterState(
     this.service, [

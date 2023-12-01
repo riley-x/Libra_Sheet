@@ -9,10 +9,14 @@ import 'package:libra_sheet/components/menus/tag_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/tabs/transaction/transaction_filter_state.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
 
-/// Creates the column that holds all the option selectors for the transaction tab.
+/// Creates the column that holds all the option selectors for filtering transactions. Relies on having
+/// a TransactionFilterState provided in the Widget tree, which holds the UI state for the column
+/// and is linked on all the callbacks.
+///
+/// This class is used both in the transaction tab's main screen, as well as [TransactionFilterDialog].
 class TransactionFiltersColumn extends StatelessWidget {
   /// Padding to be applied to the central column. Don't use padding outside the Scroll class, or
   /// else the scroll bar is oddly offset.
