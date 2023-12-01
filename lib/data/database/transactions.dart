@@ -218,8 +218,16 @@ Future<List<Transaction>> loadTransactions(
 /// Loads the allocations and reimbursements for this transaction, modifies in-place.
 Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categories) async {
   await libraDatabase!.transaction((txn) async {
-    t.allocations = await loadAllocations(t.key, categories, txn);
-    t.reimbursements = await loadReimbursements(t, categories, txn);
+    if (t.nAllocations > 0) {
+      t.allocations = await loadAllocations(t.key, categories, txn);
+    } else {
+      t.allocations = [];
+    }
+    if (t.nReimbursements > 0) {
+      t.reimbursements = await loadReimbursements(t, categories, txn);
+    } else {
+      t.reimbursements = [];
+    }
   });
 }
 
@@ -228,15 +236,20 @@ Future<void> loadTransactionRelations(Transaction t, Map<int, Category> categori
     SELECT 
       t.*,
       GROUP_CONCAT(tag.$tagKey) as tags,
-      COUNT(a.$allocationsKey) as nAllocs
+      COUNT(a.$allocationsKey) as nAllocs,
+      COUNT(r1.$reimbExpense) + COUNT(r2.$reimbExpense) as nReimbs
     FROM 
       $transactionsTable t
     LEFT OUTER JOIN 
-      $tagJoinTable tag_join on tag_join.$tagJoinTrans = t.$_key
+      $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
     LEFT OUTER JOIN
-      $tagsTable tag on tag.$tagKey = tag_join.$tagJoinTag
+      $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
     LEFT OUTER JOIN 
-      $allocationsTable a on a.$allocationsTransaction = t.$_key
+      $allocationsTable a ON a.$allocationsTransaction = t.$_key
+    LEFT OUTER JOIN
+      $reimbursementsTable r1 ON r1.$reimbExpense = t.$_key
+    LEFT OUTER JOIN
+      $reimbursementsTable r2 ON r2.$reimbIncome = t.$_key
   ''';
 
   List args = [];
