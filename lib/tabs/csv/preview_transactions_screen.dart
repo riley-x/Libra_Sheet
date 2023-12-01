@@ -93,6 +93,21 @@ class _TransactionDetails extends StatelessWidget {
 class _BottomBar extends StatelessWidget {
   const _BottomBar({super.key});
 
+  void save(BuildContext context, AddCsvState state) {
+    context.read<LibraAppState>().popBackStack();
+    context.read<TransactionService>().addAll(state.transactions);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Center(child: Text('Saved ${state.transactions.length} transactions.')),
+        width: 280.0,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
@@ -119,20 +134,7 @@ class _BottomBar extends StatelessWidget {
           ),
           const Spacer(),
           TextButton(
-            onPressed: () {
-              context.read<LibraAppState>().popBackStack();
-              context.read<TransactionService>().addAll(state.transactions);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Center(child: Text('Saved ${state.transactions.length} transactions.')),
-                  width: 280.0,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-              );
-            },
+            onPressed: (state.focusedTransIndex == -1) ? () => save(context, state) : null,
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
