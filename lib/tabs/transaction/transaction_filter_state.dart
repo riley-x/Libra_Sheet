@@ -40,8 +40,37 @@ class TransactionFilterState extends ChangeNotifier {
     if (initialFilters != null) filters = initialFilters;
     loadTransactions();
   }
+
+  //----------------------------------------------------------------------
+  // Config
+  //----------------------------------------------------------------------
   final TransactionService service;
   final bool doLoads;
+
+  //----------------------------------------------------------------------
+  // Overrides
+  //----------------------------------------------------------------------
+  /// This is necessary because the [TransactionFilterState] is often disposed when navigating between
+  /// different screent that use a [TransactionFilterGrid], so [notifyListeners] might be called
+  /// after being disposed.
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
+  //----------------------------------------------------------------------
+  // UI State
+  //----------------------------------------------------------------------
 
   /// Mutable filter list
   TransactionFilters filters = TransactionFilters();
