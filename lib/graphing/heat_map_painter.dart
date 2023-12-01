@@ -24,14 +24,6 @@ List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
 /// full width of the cross axis. In the opposite case, the group is laid out along the full length
 /// of the smaller axis.
 ///
-/// The algorithm does a reverse pass to calculate the padding if [padding] is not 0. It adjusts the
-/// rectangle sizes to fit the required padding, but won't change the layout order as defined above.
-/// Each group passes back the amount of padding it currently uses as a tuple (x, y) as a fraction
-/// of its alloted volume.
-/// Keep in mind that y padding is constant with height but increases with width and vice versa.
-/// This allows the parent
-/// group to recalculate the child's position including the amount of volume lost to white space.
-///
 /// [data] should be sorted by decreasing value already. You can optionally pass in [reverseCumValues]
 /// if they are precalculated. Values should all be positive.
 ///
@@ -167,7 +159,15 @@ List<Rect> layoutHeatMapGrid<T>({
   return output;
 }
 
-/// This painter class draw a heat map of values. See [layoutHeatMapGrid].
+/// This painter class draw a heat map of values obtained from [valueMapper]. See [layoutHeatMapGrid].
+/// This class will strip non-positive entries.
+///
+/// This class can recurse to an arbitrary depth: after laying out the first pass from [data], it
+/// goes through each entry and checks [nestedData]. If the returned list is null or empty, it
+/// simply paints that rectangle using [colorMapper] and [labelMapper]. But if the list is not empty,
+/// the painter then repeats [layoutHeatMapGrid] in the entry's rectangle with the new list. The next
+/// pass will have depth += 1. Note that the nested data's values do not have to sum to the parent,
+/// and depth starts at 0.
 class HeatMapPainter<T> extends CustomPainter {
   late final List<T> data;
   final Color? Function(T, int depth)? colorMapper;
@@ -181,8 +181,8 @@ class HeatMapPainter<T> extends CustomPainter {
   /// row/column to align it with the row.
   final double minSameAxisRatio;
 
-  /// The pixel (width, height) of the border around each rectangle, indexed by the series level.
-  late final (double, double) Function(int series) paddingMapper;
+  /// The pixel (width, height) of the border around each rectangle, indexed by the series depth.
+  late final (double, double) Function(int depth) paddingMapper;
 
   /// Position of each entry, used for hit testing. This is replaced every call to [paint].
   List<(Rect, T)> positions = [];
@@ -266,6 +266,7 @@ class HeatMapPainter<T> extends CustomPainter {
     for (int i = 0; i < seriesData.length; i++) {
       var childData = nestedData?.call(seriesData[i], seriesDepth);
       childData = _sortAndFilterData(childData, seriesDepth + 1);
+      // must filter before checking the next condition
       if (childData != null && childData.isNotEmpty) {
         _paintSeries(childData, seriesDepth + 1, canvas, positions[i]);
       } else {
