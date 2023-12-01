@@ -15,7 +15,9 @@ import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.da
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
 
-/// This lays out a single-column form for the fields of one transaction.
+/// This lays out a single-column form for the fields of one transaction. This is used both in the
+/// full-screen [TransactionDetailsScreen], and in the half-column of [PreviewTransactionsScreen]
+/// when adding CSVs.
 class TransactionDetailsEditor extends StatelessWidget {
   const TransactionDetailsEditor({super.key, this.onCancel});
 

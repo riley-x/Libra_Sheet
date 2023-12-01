@@ -133,10 +133,22 @@ class _TextElements extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              trans.value.dollarString(),
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: (trans.value < 0) ? Colors.red : Colors.green),
+            Row(
+              children: [
+                if (trans.nAllocations > 0) ...[
+                  _NumberIndicator(trans.nAllocations, true),
+                  const SizedBox(width: 10),
+                ],
+                if (trans.nReimbursements > 0) ...[
+                  _NumberIndicator(trans.nReimbursements, true),
+                  const SizedBox(width: 10),
+                ],
+                Text(
+                  trans.value.dollarString(),
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: (trans.value < 0) ? Colors.red : Colors.green),
+                ),
+              ],
             ),
             Text(
               _dtFormat.format(trans.date),
@@ -144,6 +156,39 @@ class _TextElements extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _NumberIndicator extends StatelessWidget {
+  const _NumberIndicator(this.n, this.isAlloc, {super.key});
+
+  final int n;
+  final bool isAlloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
+      decoration: BoxDecoration(
+        color: (isAlloc) ? const Color(0xffde237a) : const Color(0xff4a1bcc),
+        shape: BoxShape.circle,
+        // border: Border.all(
+        //   color: Colors.white,
+        //   width: 5.0,
+        //   style: BorderStyle.solid,
+        // ),
+      ),
+      child: Center(
+        child: Text(
+          (n < 10)
+              ? '$n'
+              : (isAlloc)
+                  ? 'A'
+                  : 'R',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.white),
+        ),
+      ),
     );
   }
 }

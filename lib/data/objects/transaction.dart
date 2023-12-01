@@ -4,6 +4,14 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 
+/// Transactions should not be updated in-place, but passed to TransactionServices.update().
+/// Pointers to transactions should not be kept in memory outside of UI state. Data processing
+/// should always be retrieved through the database.
+///
+/// However, we do update the [allocations] and [reimbursements] lists after creation, because
+/// transactions are not initally loaded with them. Instead [nAllocations] and [nReimbursements]
+/// are used in the interim. These are shown in the [TransactionCard]s, while the actual allocs/
+/// reimbs are only shown and loaded in the [TransactionDetailsEditor].
 class Transaction {
   Transaction({
     this.key = 0,
@@ -16,8 +24,10 @@ class Transaction {
     this.allocations,
     this.reimbursements,
     this.tags,
-    nAllocations = 0,
-  }) : _nAllocations = nAllocations;
+    int nAllocations = 0,
+    int nReimbursements = 0,
+  })  : _nAllocations = nAllocations,
+        _nReimbursements = nReimbursements;
 
   int key;
   final String name;
@@ -33,11 +43,17 @@ class Transaction {
   List<Reimbursement>? reimbursements;
 
   /// We don't load all the allocations with the transaction in list view, but we do count how many
-  /// there are. This field is not used when [allocations] is not null.
+  /// there are. This field is not used when [allocations] is not null. Similarly for reimbursements.
   final int _nAllocations;
   int get nAllocations {
     if (allocations == null) return _nAllocations;
     return allocations!.length;
+  }
+
+  final int _nReimbursements;
+  int get nReimbursements {
+    if (reimbursements == null) return _nReimbursements;
+    return reimbursements!.length;
   }
 
   @override
