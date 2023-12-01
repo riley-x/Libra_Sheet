@@ -7,13 +7,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 
 import 'package:libra_sheet/main.dart';
 
 void main() {
+  final state = LibraAppState();
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const LibraApp());
+    await tester.pumpWidget(LibraApp(state));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

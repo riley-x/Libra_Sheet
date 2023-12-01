@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';

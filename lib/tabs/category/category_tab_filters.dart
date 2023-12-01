@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
-import 'package:libra_sheet/components/menus/tag_checkbox_menu.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 
