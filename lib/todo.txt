@@ -1,4 +1,3 @@
 - Saving and deleting reimbursements
-- Elevate tab states to parent level, so you don't lose state when switching tabs or popping the back stack. Note that can manually subscribe to the TransactionService with addListener, no need to worry about widget-level.
 - Dark theme
 - Replace income/expense categories with a single "uncategorized"?

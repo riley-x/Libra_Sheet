@@ -48,9 +48,7 @@ class LibraAppState extends ChangeNotifier {
     await Future.wait(futures);
 
     rules.load(); // not needed until adding transactions/editing rules
-
     notifyListeners();
-    // TODO
   }
 
   void reloadAfterTransactions() async {
@@ -130,8 +128,9 @@ class LibraAppState extends ChangeNotifier {
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
-    /// TODO this is wrong, need to cummulate
-    netWorthData = await getMonthlyNet();
+    var newData = await getMonthlyNet();
+    newData = alignTimes(newData, monthList, cumulate: true);
+    netWorthData = replaceWithLocalDates(newData);
     notifyListeners();
   }
 
