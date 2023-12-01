@@ -12,6 +12,11 @@ import 'package:libra_sheet/graphing/heat_map_painter.dart';
 ///
 /// The latter is used when not [showSubCategories], while for former is needed to show the
 /// "un-sub-categorized" leftovers when [showSubCategories].
+///
+/// P.S. remember this is used to paint level = 1 nested heatmaps too...which doesn't need
+/// aggregateValues.
+///
+/// TODO maybe also better to switch to accepting a single parent instead of [categories].
 class CategoryHeatMap extends StatefulWidget {
   final Function(Category)? onSelect;
   final bool showSubCategories;
@@ -65,7 +70,7 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
 
     String labelMapper(Category cat) {
       String name;
-      if (cat.level == 0 || (widget.showSubCategories && cat.level == 1)) {
+      if (cat.level == 0) {
         name = "Uncategorized";
       } else {
         name = cat.name;
