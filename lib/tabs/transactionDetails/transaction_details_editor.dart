@@ -179,6 +179,15 @@ class TransactionDetailsEditor extends StatelessWidget {
                 // disable save when the allocation/reimb editor is open
                 onSave: (state.focus == TransactionDetailActiveFocus.none) ? state.save : null,
               ),
+              const SizedBox(height: 10),
+              if (state.errorMessage != null)
+                SizedBox(
+                  width: 300,
+                  child: Text(
+                    state.errorMessage!,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                )
             ],
           ),
         ),

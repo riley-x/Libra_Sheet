@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -11,7 +12,9 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 enum TransactionDetailActiveFocus { none, allocation, reimbursement }
 
 /// This state handles the TransactionDetailsEditor, allowing editing the state of a single
-/// transaction.
+/// transaction. Fields are initialized to [seed]. If null, assumes we're creating a new transaction
+/// and fields are empty. If not null, assumes we're editing a transaction and fields are initialized
+/// to the values in [seed].
 class TransactionDetailsState extends ChangeNotifier {
   TransactionDetailsState(
     this.seed, {
@@ -22,44 +25,62 @@ class TransactionDetailsState extends ChangeNotifier {
     _init();
   }
 
+  //---------------------------------------------------------------------------------------------
+  // Config
+  //---------------------------------------------------------------------------------------------
   final TransactionService service;
   final Function(Transaction?, Transaction)? onSave;
   final Function(Transaction)? onDelete;
 
+  //---------------------------------------------------------------------------------------------
+  // Form keys. These enable callbacks to the form state, like calling save() and reset().
+  //---------------------------------------------------------------------------------------------
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> allocationFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> reimbursementFormKey = GlobalKey<FormState>();
 
-  /// Initial values for the respective editors. Don't edit these; they're used to reset.
+  //---------------------------------------------------------------------------------------------
+  // Initial values for the respective editors. Don't edit these; they're used to reset.
+  //---------------------------------------------------------------------------------------------
   Transaction? seed;
   Allocation? focusedAllocation;
   Reimbursement? focusedReimbursement;
 
-  /// Updated values for the respective editors. These are used to save the values retrieved from
-  /// the various FormFields' onSave methods. They don't contain any UI state, so don't need to
-  /// notifyListeners.
-  /// TODO replace these with the now non-const version of the class
-  final MutableAllocation updatedAllocation = MutableAllocation();
-  int reimbursementValue = 0;
-
-  /// These variables are saved to by the relevant FormFields. Don't need to notifyListeners.
+  //---------------------------------------------------------------------------------------------
+  // Updated values for the respective forms. These are used to save the values retrieved from
+  // the various FormFields' onSave methods. They don't contain any UI state, so don't need to
+  // notifyListeners.
+  //---------------------------------------------------------------------------------------------
   Account? account;
   String? name;
   DateTime? date;
   int? value;
   Category? category;
   String? note;
+  int reimbursementValue = 0;
 
-  /// These variables are the state for the relevant fields
+  final MutableAllocation updatedAllocation =
+      MutableAllocation(); // TODO replace these with the now non-const version of the class
+
+  //---------------------------------------------------------------------------------------------
+  // These variables are the UI state for the relevant fields. They are used to finalize the output
+  // transaction too.
+  //---------------------------------------------------------------------------------------------
+
+  /// This is used to determine which categories to show in the dropdown lists, and the intial
+  /// filter state of the reimbursement targets. It is set on each [onValueChanged].
   ExpenseFilterType expenseType = ExpenseFilterType.all;
+  TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
+  String? errorMessage;
+
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
   final List<Reimbursement> reimbursements = [];
-  TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
-
-  /// Active target of the reimbursement editor
   Transaction? reimburseTarget;
 
+  //---------------------------------------------------------------------------------------------
+  // Inits and resets
+  //---------------------------------------------------------------------------------------------
   void _init() async {
     if (seed != null) {
       expenseType = _valToFilterType(seed?.value);
@@ -85,13 +106,89 @@ class TransactionDetailsState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void save() {
-    if (formKey.currentState?.validate() ?? false) {
-      formKey.currentState?.save();
-      if (name == null || date == null || value == null || note == null) {
-        debugPrint("TransactionDetailsState:save() ERROR found null values!");
-        return;
+  /// Reset just the allocation editor
+  void resetAllocation() {
+    allocationFormKey.currentState?.reset();
+    notifyListeners();
+  }
+
+  /// Reset just the reimbursement editor
+  void resetReimbursement() {
+    reimbursementFormKey.currentState?.reset();
+    reimburseTarget = focusedReimbursement?.target;
+    notifyListeners();
+  }
+
+  //---------------------------------------------------------------------------------------------
+  // Deleting
+  //---------------------------------------------------------------------------------------------
+  void delete() {
+    if (seed != null) onDelete?.call(seed!);
+  }
+
+  void deleteAllocation() {
+    allocations.remove(focusedAllocation);
+    clearFocus();
+  }
+
+  void deleteReimbursement() {
+    reimbursements.remove(focusedReimbursement);
+    reimburseTarget = null;
+    clearFocus();
+  }
+
+  //---------------------------------------------------------------------------------------------
+  // Saving
+  //---------------------------------------------------------------------------------------------
+  String? _validate() {
+    if (formKey.currentState?.validate() != true) return "";
+    // Need to save the form first to get the values. This doesn't do anything other than set the
+    // save sink members above.
+    formKey.currentState?.save();
+
+    if (name == null ||
+        date == null ||
+        value == null ||
+        note == null ||
+        category == null ||
+        account == null) {
+      debugPrint("TransactionDetailsState:_validate() ERROR found null values!");
+      return "Null values";
+    }
+
+    // Same category type
+    if (!sameType(expenseType, category!.type)) {
+      return "Specified value does not have the correct sign for category ${category!.name}.";
+    }
+
+    // Here we check to make sure the allocations and reimbursements don't exceed the total value,
+    // or otherwise lead to negative category values.
+    var totalAdjustments = 0;
+    for (final alloc in allocations) {
+      if (!sameType(expenseType, alloc.category!.type)) {
+        return "Allocation ${alloc.name} must be an ${expenseType.name} category.";
       }
+      totalAdjustments += alloc.value;
+    }
+    for (final reimb in reimbursements) {
+      if (reimb.value * value! > 0) {
+        return "Reimbursement ${reimb.target.name} must have a value of the opposite sign.";
+      }
+      totalAdjustments += reimb.value;
+    }
+    if (totalAdjustments > value!.abs()) {
+      return "Total allocations and reimbursements (${totalAdjustments.dollarString()}) exceeds transaction value.";
+    }
+
+    return null;
+  }
+
+  void save() {
+    String? err = _validate();
+    if (err != null) {
+      errorMessage = err;
+      notifyListeners();
+    } else {
       var t = Transaction(
         key: seed?.key ?? 0,
         name: name!,
@@ -108,37 +205,56 @@ class TransactionDetailsState extends ChangeNotifier {
     }
   }
 
-  void delete() {
-    if (seed != null) onDelete?.call(seed!);
-  }
-
-  void onValueChanged(int? val) {
-    var newType = _valToFilterType(val);
-    if (newType != expenseType) {
-      expenseType = newType;
-      notifyListeners();
+  /// Save a single allocation from the allocation editor in [allocations]
+  void saveAllocation() {
+    if (allocationFormKey.currentState?.validate() ?? false) {
+      allocationFormKey.currentState?.save();
+      if (focusedAllocation == null) {
+        allocations.add(updatedAllocation.freeze());
+      } else {
+        for (int i = 0; i < allocations.length; i++) {
+          if (allocations[i] == focusedAllocation) {
+            allocations[i] = updatedAllocation.freeze(allocations[i].key);
+            break;
+          }
+        }
+      }
+      clearFocus();
     }
   }
 
-  void onTagChanged(Tag tag, bool? selected) {
-    if (selected == true) {
-      tags.add(tag);
-    } else {
-      tags.remove(tag);
-    }
-    notifyListeners();
+  bool validateReimbursement() {
+    if (reimbursementFormKey.currentState?.validate() != true) return false;
+    // Need to save the form first to get the values. This doesn't do anything other than set the
+    // save sink members above.
+    reimbursementFormKey.currentState?.save();
+    if (reimburseTarget == null) return false;
+    if (_valToFilterType(reimburseTarget!.value) == expenseType) return false;
+    return true;
   }
 
-  ExpenseFilterType _valToFilterType(int? val) {
-    if (val == null || val == 0) {
-      return ExpenseFilterType.all;
-    } else if (val > 0) {
-      return ExpenseFilterType.income;
-    } else {
-      return ExpenseFilterType.expense;
+  /// Save a single reimbursement from the allocation editor in [reimbursements]
+  void saveReimbursement() {
+    if (validateReimbursement()) {
+      final reimb = Reimbursement(target: reimburseTarget!, value: reimbursementValue);
+
+      if (focusedReimbursement == null) {
+        reimbursements.add(reimb);
+      } else {
+        for (int i = 0; i < reimbursements.length; i++) {
+          if (reimbursements[i] == focusedReimbursement) {
+            reimbursements[i] = reimb;
+            break;
+          }
+        }
+      }
+      clearFocus();
     }
   }
 
+  //---------------------------------------------------------------------------------------------
+  // Navigation
+  //---------------------------------------------------------------------------------------------
   void clearFocus() {
     focusedAllocation = null;
     focusedReimbursement = null;
@@ -159,38 +275,6 @@ class TransactionDetailsState extends ChangeNotifier {
     // (i.e. both null when adding accounts back to back), only the reset above will clear the form.
   }
 
-  void saveAllocation() {
-    if (allocationFormKey.currentState?.validate() ?? false) {
-      allocationFormKey.currentState?.save();
-      if (focusedAllocation == null) {
-        allocations.add(updatedAllocation.freeze());
-      } else {
-        for (int i = 0; i < allocations.length; i++) {
-          if (allocations[i] == focusedAllocation) {
-            allocations[i] = updatedAllocation.freeze(allocations[i].key);
-            break;
-          }
-        }
-      }
-      clearFocus();
-    }
-  }
-
-  void deleteAllocation() {
-    allocations.remove(focusedAllocation);
-    clearFocus();
-  }
-
-  void resetAllocation() {
-    allocationFormKey.currentState?.reset();
-    notifyListeners();
-  }
-
-  void setReimbursementTarget(Transaction? it) {
-    reimburseTarget = it;
-    notifyListeners();
-  }
-
   void focusReimbursement(Reimbursement? it) {
     if (focus == TransactionDetailActiveFocus.allocation) {
       focusedAllocation = null;
@@ -198,41 +282,44 @@ class TransactionDetailsState extends ChangeNotifier {
     focusedReimbursement = it;
     reimburseTarget = it?.target;
     focus = TransactionDetailActiveFocus.reimbursement;
-    notifyListeners();
+    resetReimbursement();
+    // it's important to call reset() here so the forms don't keep stale data from previous focuses.
+    // this is orthogonal to the Key(initial) used by the forms; if the initial state didn't change
+    // (i.e. both null when adding accounts back to back), only the reset above will clear the form.
   }
 
-  bool validateReimbursement() {
-    bool out = reimbursementFormKey.currentState?.validate() ?? false;
-    return out && reimburseTarget != null;
-  }
-
-  void saveReimbursement() {
-    if (validateReimbursement()) {
-      reimbursementFormKey.currentState?.save();
-      final reimb = Reimbursement(target: reimburseTarget!, value: reimbursementValue);
-
-      if (focusedReimbursement == null) {
-        reimbursements.add(reimb);
-      } else {
-        for (int i = 0; i < reimbursements.length; i++) {
-          if (reimbursements[i] == focusedReimbursement) {
-            reimbursements[i] = reimb;
-            break;
-          }
-        }
-      }
-      clearFocus();
+  //---------------------------------------------------------------------------------------------
+  // Callbacks
+  //---------------------------------------------------------------------------------------------
+  ExpenseFilterType _valToFilterType(int? val) {
+    if (val == null || val == 0) {
+      return ExpenseFilterType.all;
+    } else if (val > 0) {
+      return ExpenseFilterType.income;
+    } else {
+      return ExpenseFilterType.expense;
     }
   }
 
-  void deleteReimbursement() {
-    reimbursements.remove(focusedReimbursement);
-    reimburseTarget = null;
-    clearFocus();
+  void onValueChanged(int? val) {
+    var newType = _valToFilterType(val);
+    if (newType != expenseType) {
+      expenseType = newType;
+      notifyListeners();
+    }
   }
 
-  void resetReimbursement() {
-    reimbursementFormKey.currentState?.reset();
-    reimburseTarget = focusedReimbursement?.target;
+  void onTagChanged(Tag tag, bool? selected) {
+    if (selected == true) {
+      tags.add(tag);
+    } else {
+      tags.remove(tag);
+    }
+    notifyListeners();
+  }
+
+  void setReimbursementTarget(Transaction? it) {
+    reimburseTarget = it;
+    notifyListeners();
   }
 }
