@@ -3,6 +3,7 @@
 - Account last updated
 - Save account CSV format
 - Filters for cash flow tab?
+- Hover on heatmap
 - Double sided stack column chart
 - Dark theme
 - Replace income/expense categories in filters with a single "uncategorized"
