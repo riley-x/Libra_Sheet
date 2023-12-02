@@ -1,5 +1,3 @@
-- Make sure if edit transaction to change signs, reimbursements are deleted. 
-- Account last updated
 - Save account CSV format
 - Filters for cash flow tab?
 - Hover on heatmap

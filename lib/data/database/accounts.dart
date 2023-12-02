@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -49,6 +50,7 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
 }
 
 Account _fromMap(Map<String, dynamic> map) {
+  int? lastUpdated = map['last_updated'];
   return Account(
     type: AccountType.fromString(map['type']),
     key: map[_key],
@@ -57,6 +59,9 @@ Account _fromMap(Map<String, dynamic> map) {
     description: map['description'],
     color: Color(map['colorLong']),
     csvFormat: map['csvPattern'],
+    lastUpdated: (lastUpdated == null)
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(lastUpdated, isUtc: true),
   );
 }
 
@@ -80,8 +85,10 @@ Future<void> updateAccount(Account acc, {int? listIndex}) async {
 
 Future<List<Account>> getAccounts() async {
   final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    accountsTable,
+    "$accountsTable a LEFT OUTER JOIN $transactionsTable t ON t.$transactionAccount = a.$_key",
+    columns: ["a.*, MAX(t.$transactionDate) as last_updated"],
     orderBy: "listIndex",
+    groupBy: "a.$_key",
   );
   return List.generate(maps.length, (i) => _fromMap(maps[i]));
 }
