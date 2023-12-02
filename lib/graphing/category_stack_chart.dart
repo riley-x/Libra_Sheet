@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+/// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
+/// from bottom to top.
+///
+/// [range] can be optionally specified to make filtering on [data] simple. These are the [start, end)
+/// indices in [data] to sublist. In this case each entry in [data.values] must have the same length.
+/// Settings it to null will use the full range.
 class CategoryStackChart extends StatelessWidget {
   final List<CategoryHistory> data;
   final (int, int)? range;
