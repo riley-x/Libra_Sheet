@@ -21,7 +21,7 @@ final _backupDateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
 
 class LibraDatabase {
   //-------------------------------------------------------------------------------------
-  // Singleton setup
+  // Singleton setup (is this even needed? everything is static)
   //-------------------------------------------------------------------------------------
   LibraDatabase._internal();
   static final LibraDatabase _instance = LibraDatabase._internal();
@@ -32,10 +32,10 @@ class LibraDatabase {
   //-------------------------------------------------------------------------------------
   // Members
   //-------------------------------------------------------------------------------------
-  Database? _database;
-  static Database get database {
-    if (_instance._database == null) throw StateError("Database not initialized");
-    return _instance._database!;
+  static Database? _database;
+  static Database get db {
+    if (_database == null) throw StateError("Database not initialized");
+    return _database!;
   }
 
   //-------------------------------------------------------------------------------------
@@ -53,17 +53,17 @@ class LibraDatabase {
     final path = join(await getDatabasesPath(), 'libra_sheet.db');
     debugPrint('LibraDatabase::init() path=$path');
 
-    _instance._database = await openDatabase(
+    _database = await openDatabase(
       path,
       onCreate: _createDatabse,
       version: 14,
     );
-    libraDatabase = _instance._database;
+    libraDatabase = _database;
   }
 
   static Future<void> backup() async {
     final timestamp = _backupDateFormat.format(DateTime.now());
-    String origPath = database.path;
+    String origPath = db.path;
     String newPath;
     if (origPath.endsWith('.db')) {
       newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp";
@@ -79,7 +79,8 @@ class LibraDatabase {
 
   // Don't try to set a state member like `executor = txn` because that might mess up async methods.
   Future<T> transaction<T>(Future<T> Function(Transaction) action) async {
-    return database.transaction((txn) async {
+    return db.transaction((txn) async {
+      // TODO backup or something
       final result = await action(txn);
       return result;
     });

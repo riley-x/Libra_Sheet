@@ -118,14 +118,23 @@ class EditCategoriesScreen extends StatelessWidget {
           /// this prevents the IndexedStack from reusing the form editor, which causes a flicker
           key: ObjectKey(state.focused),
         ),
-        const SingleChildScrollView(
-          child: Column(
-            children: [
-              _CategorySection(false),
-              SizedBox(height: 30),
-              _CategorySection(true),
-            ],
-          ),
+        // The overlay is needed as a workaround to this bug:
+        // https://github.com/flutter/flutter/issues/88570
+        // https://stackoverflow.com/questions/70308654/flutter-in-reorderablelistview-cannot-find-the-correct-provider-when-drag
+        Overlay(
+          initialEntries: [
+            OverlayEntry(
+              builder: (context) => const SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _CategorySection(false),
+                    SizedBox(height: 30),
+                    _CategorySection(true),
+                  ],
+                ),
+              ),
+            )
+          ],
         ),
       ],
     );
