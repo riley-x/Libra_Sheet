@@ -30,7 +30,7 @@ class TransactionCard extends StatelessWidget {
       // color: Color.alphaBlend(
       //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
       //     Theme.of(context).colorScheme.surface),
-      // surfaceTintColor: trans.category?.color,
+      surfaceTintColor: trans.category?.color,
       // shadowColor: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),

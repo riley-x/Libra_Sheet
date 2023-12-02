@@ -171,8 +171,13 @@ class TransactionDetailsState extends ChangeNotifier {
       totalAdjustments += alloc.value;
     }
     for (final reimb in reimbursements) {
-      if (reimb.value * value! > 0) {
-        return "Reimbursement ${reimb.target.name} must have a value of the opposite sign.";
+      if (reimb.target.value * value! > 0) {
+        const maxNameLength = 30;
+        var name = reimb.target.name;
+        if (name.length > maxNameLength) {
+          name = '${name.substring(0, maxNameLength)}...';
+        }
+        return "Reimbursement $name must have a value of the opposite sign.";
       }
       totalAdjustments += reimb.value;
     }
