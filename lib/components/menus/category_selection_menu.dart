@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/menus/category_menu_builder.dart';
 import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
@@ -38,7 +39,11 @@ class CategorySelectionMenu extends StatelessWidget {
     return LibraDropdownMenu<Category?>(
       selected: selected,
       items: cats!,
-      builder: (cat) => _builder(context, cat, superAsNone),
+      builder: (cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
+      selectedBuilder: (context) => [
+        for (final cat in cats)
+          categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true)
+      ],
       onChanged: onChanged,
       borderRadius: borderRadius,
       height: height,
@@ -81,7 +86,11 @@ class CategorySelectionFormField extends StatelessWidget {
     return LibraDropdownFormField<Category?>(
       initial: initial,
       items: cats,
-      builder: (cat) => _builder(context, cat, superAsNone),
+      builder: (cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
+      selectedBuilder: (context) => [
+        for (final cat in cats!)
+          categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true)
+      ],
       borderRadius: borderRadius,
       height: height,
       onSave: onSave,
@@ -101,14 +110,4 @@ List<Category?> _items(LibraAppState state, ExpenseFilterType type) {
       items = <Category?>[Category.ignore, Category.income, Category.expense] + items;
   }
   return items;
-}
-
-Widget _builder(BuildContext context, Category? cat, bool superAsNone) {
-  if (superAsNone && cat?.level == 0) cat = null;
-  return Text(
-    cat?.name ?? 'None',
-    style: (cat == null)
-        ? Theme.of(context).textTheme.labelLarge?.copyWith(fontStyle: FontStyle.italic)
-        : Theme.of(context).textTheme.labelLarge,
-  );
 }

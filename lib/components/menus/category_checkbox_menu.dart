@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
+import 'package:libra_sheet/components/menus/category_menu_builder.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/data/objects/category.dart';
-
-Widget dropdownCategoryBuilder(BuildContext context, Category? cat) {
-  return Padding(
-    padding: EdgeInsets.only(left: ((cat?.level ?? 0) > 1) ? 20 : 0),
-    child: Text(
-      cat?.name ?? '',
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.labelLarge,
-    ),
-  );
-}
 
 /// Select multiple categories in a dropdown checklist.
 class CategoryCheckboxMenu extends StatelessWidget {
@@ -33,7 +22,7 @@ class CategoryCheckboxMenu extends StatelessWidget {
     return DropdownCheckboxMenu<Category>(
       icon: Icons.add,
       items: categories,
-      builder: dropdownCategoryBuilder,
+      builder: categoryMenuBuilder,
       isChecked: map.checkboxState,
       isTristate: (cat) => cat.level == 1 && cat.subCats.isNotEmpty,
       onChanged: (cat, selected) {

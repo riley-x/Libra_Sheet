@@ -11,6 +11,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double height;
   final Widget Function(T?) builder;
+  final List<Widget> Function(BuildContext)? selectedBuilder;
 
   final bool isDense;
 
@@ -18,6 +19,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
     super.key,
     required this.items,
     required this.builder,
+    this.selectedBuilder,
     this.selected,
     this.onChanged,
     this.borderRadius,
@@ -59,6 +61,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
           child: DropdownButton<T?>(
             padding: const EdgeInsets.symmetric(horizontal: 9),
             borderRadius: borderRadius ?? BorderRadius.circular(4),
+            selectedItemBuilder: selectedBuilder,
 
             /// this is the color of the button when it has keyboard focus
             focusColor: Theme.of(context).colorScheme.background,
@@ -79,6 +82,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
     this.initial,
     required this.items,
     required this.builder,
+    this.selectedBuilder,
     this.borderRadius,
     this.height = 30,
     this.onSave,
@@ -92,6 +96,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double height;
   final Widget Function(T?) builder;
+  final List<Widget> Function(BuildContext)? selectedBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +116,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
             selected: state.value,
             items: items,
             builder: builder,
+            selectedBuilder: selectedBuilder,
             height: height,
             borderRadius: borderRadius,
             onChanged: state.didChange,

@@ -37,7 +37,7 @@ class DropdownCheckboxMenu<T> extends StatelessWidget {
       menuChildren: [
         for (int i = 0; i < items.length; i++)
           SizedBox(
-            width: 220,
+            width: 250,
             child: CheckboxListTile(
               dense: true,
               title: builder(context, items[i]),
