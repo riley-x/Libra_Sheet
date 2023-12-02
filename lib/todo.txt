@@ -1,5 +1,6 @@
 - Save account CSV format, CSV column layout/scroll
-- Transaction screen filter values get deleted on tab switch and return
+- Tabbing on forms
+- Transaction screen filter values get deleted on tab switch and return, weird in filter grids too
 - Filters for cash flow tab?
 - Hover on heatmap
 - Double sided stack column chart

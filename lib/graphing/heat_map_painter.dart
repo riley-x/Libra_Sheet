@@ -252,7 +252,7 @@ class HeatMapPainter<T> extends CustomPainter {
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
       );
-      textPainter.layout();
+      textPainter.layout(maxWidth: rect.width);
       final textSize = Offset(textPainter.width, textPainter.height);
       if (textSize.dx < rect.width && textSize.dy < rect.height) {
         textPainter.paint(canvas, rect.center - textSize / 2);
