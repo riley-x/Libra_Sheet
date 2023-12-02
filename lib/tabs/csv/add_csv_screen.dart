@@ -208,7 +208,8 @@ class _CsvGrid extends StatelessWidget {
           for (final row in state.rawLines)
             TableRow(
               children: [
-                for (int i = 0; i < state.nCols; i++) _Cell(row[i], i),
+                for (int i = 0; i < state.nCols; i++)
+                  (i < row.length) ? _Cell(row[i], i) : const SizedBox(),
               ],
             ),
         ],

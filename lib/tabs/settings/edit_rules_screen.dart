@@ -34,7 +34,7 @@ class EditRulesState extends ChangeNotifier {
 
   void setFocus(CategoryRule? it, ExpenseType type) {
     if (it == null) {
-      focused = CategoryRule(pattern: "", category: Category.empty, type: type);
+      focused = CategoryRule(pattern: "", category: null, type: type);
     } else {
       focused = it;
     }

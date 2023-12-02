@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
@@ -71,9 +73,10 @@ class AddCsvState extends ChangeNotifier {
       shouldParseNumbers: false,
     );
     rawLines = converter.convert(input);
+    nCols = rawLines.fold(0, (m, it) => max(m, it.length));
+
     rowOk = List.filled(rawLines.length, false);
     nRowsOk = 0;
-    nCols = rawLines.firstOrNull?.length ?? 0;
     columnTypes = List.filled(nCols, CsvField.none);
     errorMsg = '';
     notifyListeners();

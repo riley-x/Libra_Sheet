@@ -5,7 +5,7 @@ import 'package:libra_sheet/data/objects/category.dart';
 class CategoryRule {
   final int key;
   String pattern;
-  Category? category; // TODO make these non-nullable
+  Category? category; // TODO make these non-nullable, but forms need to remain nullable
   Account? account;
 
   /// We need to store this separately from the category because of generic super categories like
@@ -19,7 +19,7 @@ class CategoryRule {
     required this.type,
     this.account,
   }) {
-    assert(category!.level == 0 || type == category!.type);
+    assert(category == null || category!.level == 0 || type == category!.type);
   }
 
   static final empty = CategoryRule(
