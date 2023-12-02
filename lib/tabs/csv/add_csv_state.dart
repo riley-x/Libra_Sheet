@@ -178,7 +178,7 @@ class AddCsvState extends ChangeNotifier {
       case CsvField.date:
         return _parseDate(text) != null;
       case CsvField.value:
-        return double.tryParse(text) != null;
+        return text.toIntDollar() != null;
       default:
         return null;
     }
@@ -202,12 +202,15 @@ class AddCsvState extends ChangeNotifier {
   void createTransactions() {
     transactions.clear();
     for (int row = 0; row < rowOk.length; row++) {
+      if (!rowOk[row]) continue;
+
       String name = '';
       String note = '';
       DateTime? date;
       int? value;
 
       for (int col = 0; col < columnTypes.length; col++) {
+        if (col >= rawLines[row].length) continue;
         final text = rawLines[row][col];
         switch (columnTypes[col]) {
           case CsvField.date:
