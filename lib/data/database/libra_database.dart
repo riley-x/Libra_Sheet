@@ -14,13 +14,12 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+/// TODO deprecated
 Database? libraDatabase;
 
 final _backupDateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
 
 class LibraDatabase {
-  Database? db;
-
   //-------------------------------------------------------------------------------------
   // Singleton setup
   //-------------------------------------------------------------------------------------
@@ -28,6 +27,15 @@ class LibraDatabase {
   static final LibraDatabase _instance = LibraDatabase._internal();
   factory LibraDatabase() {
     return _instance;
+  }
+
+  //-------------------------------------------------------------------------------------
+  // Members
+  //-------------------------------------------------------------------------------------
+  Database? _database;
+  static Database get database {
+    if (_instance._database == null) throw StateError("Database not initialized");
+    return _instance._database!;
   }
 
   //-------------------------------------------------------------------------------------
@@ -45,18 +53,17 @@ class LibraDatabase {
     final path = join(await getDatabasesPath(), 'libra_sheet.db');
     debugPrint('LibraDatabase::init() path=$path');
 
-    _instance.db = await openDatabase(
+    _instance._database = await openDatabase(
       path,
       onCreate: _createDatabse,
       version: 14,
     );
-    libraDatabase = _instance.db;
+    libraDatabase = _instance._database;
   }
 
   static Future<void> backup() async {
-    if (_instance.db == null) return;
     final timestamp = _backupDateFormat.format(DateTime.now());
-    String origPath = _instance.db!.path;
+    String origPath = database.path;
     String newPath;
     if (origPath.endsWith('.db')) {
       newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp";
@@ -64,6 +71,18 @@ class LibraDatabase {
       newPath = "${origPath}_$timestamp";
     }
     await File(origPath).copy(newPath);
+  }
+
+  //-------------------------------------------------------------------------------------
+  // Database operations
+  //-------------------------------------------------------------------------------------
+
+  // Don't try to set a state member like `executor = txn` because that might mess up async methods.
+  Future<T> transaction<T>(Future<T> Function(Transaction) action) async {
+    return database.transaction((txn) async {
+      final result = await action(txn);
+      return result;
+    });
   }
 }
 

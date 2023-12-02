@@ -254,7 +254,7 @@ class HeatMapPainter<T> extends CustomPainter {
       );
       textPainter.layout(maxWidth: rect.width);
       final textSize = Offset(textPainter.width, textPainter.height);
-      if (textSize.dx < rect.width && textSize.dy < rect.height) {
+      if (textSize.dy < rect.height) {
         textPainter.paint(canvas, rect.center - textSize / 2);
       }
     }
