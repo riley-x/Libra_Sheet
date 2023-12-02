@@ -45,10 +45,8 @@ class CategorySelectionMenu extends StatelessWidget {
       selected: selected,
       items: cats!,
       builder: (cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
-      selectedBuilder: (context) => [
-        for (final cat in cats)
-          categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true)
-      ],
+      selectedBuilder: (context, cat) =>
+          categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true),
       onChanged: onChanged,
       borderRadius: borderRadius,
       height: height,
@@ -94,10 +92,8 @@ class CategorySelectionFormField extends StatelessWidget {
       initial: initial,
       items: cats,
       builder: (cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
-      selectedBuilder: (context) => [
-        for (final cat in cats!)
-          categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true)
-      ],
+      selectedBuilder: (context, cat) =>
+          categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true),
       borderRadius: borderRadius,
       height: height,
       onSave: onSave,

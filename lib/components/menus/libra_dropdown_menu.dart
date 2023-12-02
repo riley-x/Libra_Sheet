@@ -11,7 +11,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double height;
   final Widget Function(T?) builder;
-  final List<Widget> Function(BuildContext)? selectedBuilder;
+  final Widget Function(BuildContext, T? item)? selectedBuilder;
 
   final bool isDense;
 
@@ -49,6 +49,11 @@ class LibraDropdownMenu<T> extends StatelessWidget {
       ));
     }
 
+    List<Widget> selectedItemBuilder(BuildContext context) {
+      if (selectedBuilder == null) return [];
+      return [for (final item in menuItems) selectedBuilder!(context, item.value)];
+    }
+
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: height),
       child: Theme(
@@ -61,7 +66,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
           child: DropdownButton<T?>(
             padding: const EdgeInsets.symmetric(horizontal: 9),
             borderRadius: borderRadius ?? BorderRadius.circular(4),
-            selectedItemBuilder: selectedBuilder,
+            selectedItemBuilder: (selectedBuilder == null) ? null : selectedItemBuilder,
 
             /// this is the color of the button when it has keyboard focus
             focusColor: Theme.of(context).colorScheme.background,
@@ -96,7 +101,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double height;
   final Widget Function(T?) builder;
-  final List<Widget> Function(BuildContext)? selectedBuilder;
+  final Widget Function(BuildContext, T?)? selectedBuilder;
 
   @override
   Widget build(BuildContext context) {
