@@ -127,8 +127,10 @@ class CategoryTabState extends ChangeNotifier {
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
     );
     _addCategoryHistory(category, map);
-    for (final subCat in category.subCats) {
-      _addCategoryHistory(subCat, map);
+    if (category.level == 1) {
+      for (final subCat in category.subCats) {
+        _addCategoryHistory(subCat, map);
+      }
     }
     notifyListeners();
   }
