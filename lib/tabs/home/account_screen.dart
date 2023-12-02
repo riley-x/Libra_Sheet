@@ -29,8 +29,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> loadData() async {
     final appState = context.read<LibraAppState>();
     var newData = await getMonthlyNet(accountId: widget.account.key);
-    newData = alignTimes(newData, appState.monthList, cumulate: true);
-    newData = fixForCharts(newData);
+    newData = newData.withAlignedTimes(appState.monthList, cumulate: true).fixedForCharts();
     setState(() {
       data = newData;
     });

@@ -5,6 +5,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
+import 'package:libra_sheet/graphing/category_stack_chart.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
@@ -80,14 +81,10 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: DateTimeGraph([
-                    LineSeries<TimeIntValue, DateTime>(
-                      animationDuration: 300,
-                      dataSource: state.categoryFocusedHistory,
-                      xValueMapper: (TimeIntValue sales, _) => sales.time,
-                      yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
-                    ),
-                  ]),
+                  child: CategoryStackChart(
+                    state.categoryFocusedHistory,
+                    null,
+                  ),
                 ),
               ),
               if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[

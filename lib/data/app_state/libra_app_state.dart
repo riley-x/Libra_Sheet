@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
-import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
@@ -130,9 +129,8 @@ class LibraAppState extends ChangeNotifier {
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
-    var newData = await getMonthlyNet();
-    newData = alignTimes(newData, monthList, cumulate: true);
-    netWorthData = fixForCharts(newData);
+    final newData = await getMonthlyNet();
+    netWorthData = newData.withAlignedTimes(monthList, cumulate: true).fixedForCharts();
     notifyListeners();
   }
 

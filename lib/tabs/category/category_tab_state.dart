@@ -97,7 +97,7 @@ class CategoryTabState extends ChangeNotifier {
 
   /// The list contains the nesting of category focuses, since you can focus a subcategory from a parent.
   List<Category> categoriesFocused = [];
-  List<TimeIntValue> categoryFocusedHistory = [];
+  List<CategoryHistory> categoryFocusedHistory = [];
 
   void clearFocus() {
     if (categoriesFocused.isEmpty) return;
@@ -115,13 +115,21 @@ class CategoryTabState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _addCategoryHistory(Category category, Map<int, List<TimeIntValue>> map) {
+    final history = map[category.key];
+    if (history == null) return;
+    categoryFocusedHistory.add(CategoryHistory(category, history));
+  }
+
   void _loadCategoryDetails(Category category) async {
-    final categories = [category.key];
-    categories.addAll(category.subCats.map((e) => e.key));
-    var newData = await getCategoryHistory(categories);
-    newData = alignTimes(newData, appState.monthList);
-    newData = fixForCharts(newData, absValues: true);
-    categoryFocusedHistory = newData;
+    final map = await getCategoryHistory(
+      callback: (_, vals) =>
+          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
+    );
+    _addCategoryHistory(category, map);
+    for (final subCat in category.subCats) {
+      _addCategoryHistory(subCat, map);
+    }
     notifyListeners();
   }
 }

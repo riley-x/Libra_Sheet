@@ -9,7 +9,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CategoryStackChart extends StatelessWidget {
   final List<CategoryHistory> data;
-  final (int, int) range;
+  final (int, int)? range;
   const CategoryStackChart(this.data, this.range, {super.key});
 
   @override
@@ -32,13 +32,13 @@ class CategoryStackChart extends StatelessWidget {
         for (final categoryHistory in data)
           StackedColumnSeries<TimeIntValue, String>(
             animationDuration: 300,
-            dataSource: categoryHistory.values.sublist(range.$1, range.$2),
+            dataSource: (range != null)
+                ? categoryHistory.values.sublist(range!.$1, range!.$2)
+                : categoryHistory.values,
             name: categoryHistory.category.name,
             color: categoryHistory.category.color,
             xValueMapper: (TimeIntValue data, _) => format.format(data.time),
-            yValueMapper: (TimeIntValue data, _) =>
-                data.value.asDollarDouble() *
-                ((categoryHistory.category.type == ExpenseType.expense) ? -1 : 1),
+            yValueMapper: (TimeIntValue data, _) => data.value.asDollarDouble(),
           ),
       ],
     );

@@ -21,20 +21,16 @@ class CashFlowState extends fnd.ChangeNotifier {
   ) {
     final parentVals = categoryHistory[parent.key];
     if (parentVals != null) {
-      list.add(CategoryHistory(parent, alignTimes(parentVals, appState.monthList)));
+      list.add(CategoryHistory(parent, parentVals));
     }
 
     for (final cat in parent.subCats) {
       var vals = categoryHistory[cat.key];
-      if (vals != null) {
-        vals = alignTimes(vals, appState.monthList);
-      }
 
       /// Add values from subcategories too. Only need to recurse once since max level = 2.
       for (final subCat in cat.subCats) {
         var subVals = categoryHistory[subCat.key];
         if (subVals == null) continue;
-        subVals = alignTimes(subVals, appState.monthList);
         vals = (vals == null) ? subVals : addParallel(vals, subVals);
       }
       if (vals != null) {
@@ -44,7 +40,10 @@ class CashFlowState extends fnd.ChangeNotifier {
   }
 
   Future<void> _init() async {
-    final categoryHistory = await getAllCategoryHistory();
+    final categoryHistory = await getCategoryHistory(
+      callback: (_, vals) =>
+          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
+    );
 
     incomeData.clear();
     _loadList(incomeData, categoryHistory, appState.categories.income);

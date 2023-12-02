@@ -1,4 +1,4 @@
-- Saving and deleting reimbursements. Make sure is edit transaction to change signs, reimbursements are deleted. 
+- Saving and deleting reimbursements. Make sure if edit transaction to change signs, reimbursements are deleted. 
 - Prettify dropdown menus
 - Account last updated
 - Save account CSV format

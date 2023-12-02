@@ -105,7 +105,7 @@ Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
 }
 
 /// Returns the monthly net change for the sum of certain categories
-Future<List<TimeIntValue>> getCategoryHistory(List<int> categories) async {
+Future<List<TimeIntValue>> getCategoryHistorySum(List<int> categories) async {
   final List<Map<String, dynamic>> maps = await libraDatabase!.query(
     categoryHistoryTable,
     columns: [_date, "SUM($_value) as $_value"],
@@ -124,14 +124,28 @@ Future<List<TimeIntValue>> getCategoryHistory(List<int> categories) async {
 }
 
 /// Returns a map: category -> list of the value history in that month. This function does not pad
-/// the lists to equal length or accumulate them.
-Future<Map<int, List<TimeIntValue>>> getAllCategoryHistory() async {
+/// the lists to equal length or accumulate them. You can specify [callback] to handle some common
+/// processing options easily though.
+///
+/// Returns the categories in [categories], or all categories if the list is empty.
+Future<Map<int, List<TimeIntValue>>> getCategoryHistory({
+  List<int> categories = const [],
+  List<TimeIntValue> Function(int category, List<TimeIntValue> history)? callback,
+}) async {
   if (libraDatabase == null) return {};
+
+  var where = "$_value != 0";
+  List? whereArgs;
+  if (categories.isNotEmpty) {
+    where += " AND $_category in (${List.filled(categories.length, '?').join(',')})";
+    whereArgs = categories;
+  }
 
   final rows = await libraDatabase!.query(
     categoryHistoryTable,
     columns: [_date, _category, "SUM($_value) as $_value"],
-    where: "$_value != 0",
+    where: where,
+    whereArgs: whereArgs,
     groupBy: "$_date, $_category",
     orderBy: "$_category, $_date",
   );
@@ -139,12 +153,21 @@ Future<Map<int, List<TimeIntValue>>> getAllCategoryHistory() async {
   Map<int, List<TimeIntValue>> out = {};
   if (rows.isEmpty) return out;
 
+  /// Per-entry accumulators ///
   int currentCategory = rows[0][_category] as int;
   var currentValues = <TimeIntValue>[];
+  void _addEntry() {
+    if (callback != null) {
+      currentValues = callback(currentCategory, currentValues);
+    }
+    out[currentCategory] = currentValues;
+  }
+
+  /// Loop per category ///
   for (final row in rows) {
     final cat = row[_category] as int;
     if (cat != currentCategory) {
-      out[currentCategory] = currentValues;
+      _addEntry();
       currentValues = [];
       currentCategory = cat;
     }
@@ -153,7 +176,7 @@ Future<Map<int, List<TimeIntValue>>> getAllCategoryHistory() async {
       value: row[_value] as int,
     ));
   }
-  out[currentCategory] = currentValues;
+  _addEntry(); // last category is dangling, so add here
   return out;
 }
 

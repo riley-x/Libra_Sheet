@@ -36,60 +36,58 @@ List<TimeIntValue> addParallel(
   );
 }
 
-/// Returns a list based on [original] but with padded entries so that they align with [times].
-/// If [original] is missing a value, it will add an entry with value 0 or a cumulative value if
-/// [cumulate]. This function assumes [original] and [times] are sorted by time value already!
-List<TimeIntValue> alignTimes(
-  List<TimeIntValue> original,
-  List<DateTime> times, {
-  bool cumulate = false,
-}) {
-  List<TimeIntValue> out = [];
-  int iOrig = 0;
-  int iTime = 0;
+extension TimeValueList on List<TimeIntValue> {
+  /// Returns a list based on [this] but with padded entries so that they align with [times].
+  /// If [this] is missing a value, it will add an entry with value 0 or a cumulative value if
+  /// [cumulate]. This function assumes [this] and [times] are sorted by time value already!
+  List<TimeIntValue> withAlignedTimes(List<DateTime> times, {bool cumulate = false}) {
+    List<TimeIntValue> out = [];
+    int iOrig = 0;
+    int iTime = 0;
 
-  while (iOrig < original.length && iTime < times.length) {
-    final orig = original[iOrig];
-    final time = times[iTime];
-    if (orig.time.isAtSameMomentAs(time)) {
-      if (cumulate) {
-        out.add(TimeIntValue(
-          time: time,
-          value: orig.value + (out.lastOrNull?.value ?? 0),
-        ));
+    while (iOrig < length && iTime < times.length) {
+      final orig = this[iOrig];
+      final time = times[iTime];
+      if (orig.time.isAtSameMomentAs(time)) {
+        if (cumulate) {
+          out.add(TimeIntValue(
+            time: time,
+            value: orig.value + (out.lastOrNull?.value ?? 0),
+          ));
+        } else {
+          out.add(orig);
+        }
+        iOrig++;
+        iTime++;
+      } else if (orig.time.isBefore(time)) {
+        // Skip this entry, was not part of [times]
+        iOrig++;
       } else {
-        out.add(orig);
+        // Pad with this current time value
+        final val = (cumulate) ? out.lastOrNull?.value ?? 0 : 0;
+        out.add(TimeIntValue(time: time, value: val));
+        iTime++;
       }
-      iOrig++;
-      iTime++;
-    } else if (orig.time.isBefore(time)) {
-      // Skip this entry, was not part of [times]
-      iOrig++;
-    } else {
-      // Pad with this current time value
+    }
+
+    while (iTime < times.length) {
       final val = (cumulate) ? out.lastOrNull?.value ?? 0 : 0;
-      out.add(TimeIntValue(time: time, value: val));
+      out.add(TimeIntValue(time: times[iTime], value: val));
       iTime++;
     }
+
+    return out;
   }
 
-  while (iTime < times.length) {
-    final val = (cumulate) ? out.lastOrNull?.value ?? 0 : 0;
-    out.add(TimeIntValue(time: times[iTime], value: val));
-    iTime++;
+  /// Assuming [this] uses UTC dates, replaces the times with local timezone dates. This is needed
+  /// for Syncfusion datetime charts since they assume dates are in the local timezone.
+  List<TimeIntValue> fixedForCharts({bool absValues = false}) {
+    return [
+      for (final tv in this)
+        TimeIntValue(
+          time: tv.time.asLocalDate(),
+          value: (absValues) ? tv.value.abs() : tv.value,
+        ),
+    ];
   }
-
-  return out;
-}
-
-/// Assuming [original] uses UTC dates, replaces the times with local timezone dates. This is needed
-/// for Syncfusion datetime charts since they assume dates are in the local timezone.
-List<TimeIntValue> fixForCharts(List<TimeIntValue> original, {bool absValues = false}) {
-  return [
-    for (final tv in original)
-      TimeIntValue(
-        time: tv.time.asLocalDate(),
-        value: (absValues) ? tv.value.abs() : tv.value,
-      ),
-  ];
 }
