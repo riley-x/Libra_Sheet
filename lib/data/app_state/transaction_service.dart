@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -50,6 +51,7 @@ class TransactionService extends ChangeNotifier {
       }
     });
     _onUpdate();
+    LibraDatabase().backupDatabase();
   }
 
   Future<void> delete(Transaction t) async {

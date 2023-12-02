@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/tags.dart';
@@ -22,7 +23,8 @@ FutureOr<void> initDatabase() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  /// /Users/riley/Library/Containers/com.example.libraSheet/Data/Documents/libra_sheet.db
+  /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
+  /// Mac: /Users/riley/Library/Containers/com.example.libraSheet/Data/Documents/libra_sheet.db
   final path = join(await getDatabasesPath(), 'libra_sheet.db');
   debugPrint('initDatabase() path=$path');
 
@@ -31,6 +33,8 @@ FutureOr<void> initDatabase() async {
     onCreate: _createDatabse,
     version: 14,
   );
+  print(libraDatabase!.path);
+  LibraDatabase().db = libraDatabase;
 }
 
 FutureOr<void> _createDatabse(Database db, int version) {
