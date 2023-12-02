@@ -27,7 +27,7 @@ Map<String, dynamic> _toMap(CategoryRule rule, [int? listIndex]) {
     _pattern: rule.pattern,
     _category: rule.category?.key ?? 0,
     _account: rule.account?.key ?? 0,
-    _type: rule.category?.type.name ?? ExpenseType.expense.name,
+    _type: rule.type,
   };
   if (rule.key != 0) {
     map[_key] = rule.key;
@@ -38,11 +38,12 @@ Map<String, dynamic> _toMap(CategoryRule rule, [int? listIndex]) {
   return map;
 }
 
-CategoryRule _fromMap(Map<String, dynamic> map, Map<int, Category> categoryMap) {
+CategoryRule _fromMap(Map<String, dynamic> map, Map<int, Category> categoryMap, ExpenseType type) {
   return CategoryRule(
     key: map[_key],
     pattern: map[_pattern],
     category: categoryMap[map[_category]],
+    type: type,
   );
 }
 
@@ -85,7 +86,7 @@ Future<List<CategoryRule>> getRules(ExpenseType type, Map<int, Category> categor
   );
   return List.generate(
     maps.length,
-    (i) => _fromMap(maps[i], categoryMap),
+    (i) => _fromMap(maps[i], categoryMap, type),
   );
 }
 

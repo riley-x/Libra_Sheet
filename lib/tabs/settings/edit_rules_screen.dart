@@ -5,6 +5,7 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
@@ -31,9 +32,9 @@ class EditRulesState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setFocus(CategoryRule? it) {
+  void setFocus(CategoryRule? it, ExpenseType type) {
     if (it == null) {
-      focused = CategoryRule(pattern: "", category: null);
+      focused = CategoryRule(pattern: "", category: Category.empty, type: type);
     } else {
       focused = it;
     }
@@ -149,7 +150,7 @@ class EditRulesScreen extends StatelessWidget {
           floatingActionButton: FloatingActionButton(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            onPressed: () => state.setFocus(null),
+            onPressed: () => state.setFocus(null, type),
             child: const Icon(Icons.add),
           ),
         ),
@@ -171,7 +172,7 @@ class _RuleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.read<EditRulesState>().setFocus(rule),
+      onTap: () => context.read<EditRulesState>().setFocus(rule, rule.type),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
         decoration: BoxDecoration(
@@ -222,7 +223,6 @@ class _EditRule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<LibraAppState>();
     final state = context.watch<EditRulesState>();
     return Column(
       children: [
