@@ -13,9 +13,11 @@ Widget categoryMenuBuilder(
 }) {
   var style = Theme.of(context).textTheme.labelLarge;
   var text = cat?.name ?? 'None';
+  var color = cat?.color;
   if (cat == null || (superAsNone && cat.level == 0)) {
     text = 'None';
     style = style?.copyWith(fontStyle: FontStyle.italic);
+    color = null;
   }
 
   return LimitedBox(
@@ -26,7 +28,7 @@ Widget categoryMenuBuilder(
     child: Row(
       children: [
         if ((cat?.level ?? 0) > 1 && !selected) const SizedBox(width: 20),
-        Container(color: cat?.color, width: 4, height: 24),
+        Container(color: color, width: 4, height: 24),
         const SizedBox(width: 6),
 
         /// This is necessary to make sure the text clips properly
