@@ -76,7 +76,7 @@ class _TimeFrameSelector extends StatelessWidget {
       segments: const <ButtonSegment<CategoryTabTimeFrame>>[
         ButtonSegment<CategoryTabTimeFrame>(
           value: CategoryTabTimeFrame.current,
-          label: Text('Month'),
+          label: Text('This Mo.'),
         ),
         ButtonSegment<CategoryTabTimeFrame>(
           value: CategoryTabTimeFrame.oneYear,

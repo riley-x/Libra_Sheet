@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
@@ -53,12 +55,19 @@ List<Rect> layoutHeatMapGrid<T>({
     return (x - y).abs() < 1;
   }
 
+  /// The min/max here make sure the padding doesn't cause the Rect to have negative size
   void add(Rect rect) {
     output.add(Rect.fromLTRB(
-      offset.dx + ((rect.left == 0) ? 0 : rect.left + paddingX),
-      offset.dy + ((rect.top == 0) ? 0 : rect.top + paddingY),
-      offset.dx + ((aprEq(rect.right, size.width)) ? rect.right : rect.right - paddingX),
-      offset.dy + ((aprEq(rect.bottom, size.height)) ? rect.bottom : rect.bottom - paddingY),
+      offset.dx + ((rect.left == 0) ? 0 : min(rect.left + paddingX, rect.center.dx)),
+      offset.dy + ((rect.top == 0) ? 0 : min(rect.top + paddingY, rect.center.dy)),
+      offset.dx +
+          ((aprEq(rect.right, size.width))
+              ? rect.right
+              : max(rect.right - paddingX, rect.center.dx)),
+      offset.dy +
+          ((aprEq(rect.bottom, size.height))
+              ? rect.bottom
+              : max(rect.bottom - paddingY, rect.center.dy)),
     ));
   }
 
