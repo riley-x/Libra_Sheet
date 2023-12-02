@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:sqflite/sqlite_api.dart';

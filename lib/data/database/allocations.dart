@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:libra_sheet/data/database/category_history.dart';
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';

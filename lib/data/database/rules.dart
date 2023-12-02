@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';

@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const accountsTable = 'accounts';

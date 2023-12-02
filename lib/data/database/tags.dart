@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart' as lt;
 import 'package:sqflite/sqlite_api.dart';

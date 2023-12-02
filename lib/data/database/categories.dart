@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/objects/category.dart';
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const categoryTable = '`categories`';

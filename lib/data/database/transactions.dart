@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
-import 'package:libra_sheet/data/database/database_setup.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';
