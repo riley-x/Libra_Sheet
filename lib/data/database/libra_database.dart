@@ -21,14 +21,18 @@ final _backupDateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
 class LibraDatabase {
   Database? db;
 
+  //-------------------------------------------------------------------------------------
+  // Singleton setup
+  //-------------------------------------------------------------------------------------
+  LibraDatabase._internal();
   static final LibraDatabase _instance = LibraDatabase._internal();
-
   factory LibraDatabase() {
     return _instance;
   }
 
-  LibraDatabase._internal();
-
+  //-------------------------------------------------------------------------------------
+  // Database setup
+  //-------------------------------------------------------------------------------------
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
     if (Platform.isWindows || Platform.isLinux) {

@@ -36,6 +36,7 @@ FutureOr<int> updateCategory(
   );
 }
 
+// TODO delete all matched rules, unlink relevant transactions.
 FutureOr<int> deleteCategory(
   Category cat, {
   int? listIndex,

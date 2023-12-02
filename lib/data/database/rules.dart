@@ -38,11 +38,13 @@ Map<String, dynamic> _toMap(CategoryRule rule, [int? listIndex]) {
   return map;
 }
 
-CategoryRule _fromMap(Map<String, dynamic> map, Map<int, Category> categoryMap, ExpenseType type) {
+CategoryRule? _fromMap(Map<String, dynamic> map, Map<int, Category> categoryMap, ExpenseType type) {
+  final cat = categoryMap[map[_category]];
+  if (cat == null) return null;
   return CategoryRule(
     key: map[_key],
     pattern: map[_pattern],
-    category: categoryMap[map[_category]],
+    category: cat,
     type: type,
   );
 }
@@ -84,10 +86,12 @@ Future<List<CategoryRule>> getRules(ExpenseType type, Map<int, Category> categor
     whereArgs: [type.name],
     orderBy: _index,
   );
-  return List.generate(
-    maps.length,
-    (i) => _fromMap(maps[i], categoryMap, type),
-  );
+  final out = <CategoryRule>[];
+  for (final map in maps) {
+    final r = _fromMap(map, categoryMap, type);
+    if (r != null) out.add(r);
+  }
+  return out;
 }
 
 Future<int> shiftRuleIndicies(

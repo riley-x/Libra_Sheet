@@ -38,7 +38,7 @@ extension IntDollarDouble on double {
 extension IntDollarString on String {
   int? toIntDollar() {
     var str = replaceAll(',', '');
-    if (isEmpty) return null;
+    if (str.isEmpty) return null;
 
     final parts = str.split('.');
     if (parts.length > 2) return null;
@@ -57,7 +57,7 @@ extension IntDollarString on String {
       fracPart = val;
     }
 
-    if (intPart < 0) {
+    if (intPart < 0 || (intPart == 0 && str[0] == '-')) {
       return intPart * 10000 - fracPart;
     } else {
       return intPart * 10000 + fracPart;
