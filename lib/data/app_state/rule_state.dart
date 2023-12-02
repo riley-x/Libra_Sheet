@@ -6,7 +6,6 @@ import 'package:libra_sheet/data/database/database_setup.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
-import 'package:libra_sheet/data/objects/category.dart';
 
 /// Helper module for handling the category rules
 class RuleState {
@@ -23,10 +22,9 @@ class RuleState {
   // Modification Functions
   //----------------------------------------------------------------------------
   Future<void> load() async {
-    income.addAll(
-        await getRules(ExpenseType.income, appState.categories.income.subCats.createKeyMap()));
-    expense.addAll(
-        await getRules(ExpenseType.expense, appState.categories.expense.subCats.createKeyMap()));
+    final map = appState.categories.createKeyMap();
+    income.addAll(await getRules(ExpenseType.income, map));
+    expense.addAll(await getRules(ExpenseType.expense, map));
     appState.notifyListeners();
   }
 
