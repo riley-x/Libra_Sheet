@@ -27,7 +27,7 @@ class _HomeTab extends StatelessWidget {
         const SizedBox(
           width: 370,
           child: AccountList(
-            padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+            padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
           ),
         ),
         Container(

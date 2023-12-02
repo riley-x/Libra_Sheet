@@ -55,17 +55,14 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               const SizedBox(width: 10),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(),
-                  child: TransactionFilterGrid(
-                    initialFilters: TransactionFilters(accounts: {widget.account}),
-                    fixedColumns: 1,
-                    maxRowsForName: 3,
-                    onSelect: context.read<LibraAppState>().focusTransaction,
-                  ),
+                child: TransactionFilterGrid(
+                  padding: const EdgeInsets.only(right: 10, bottom: 10),
+                  initialFilters: TransactionFilters(accounts: {widget.account}),
+                  fixedColumns: 1,
+                  maxRowsForName: 3,
+                  onSelect: context.read<LibraAppState>().focusTransaction,
                 ),
               ),
-              const SizedBox(width: 5),
               Container(
                 width: 1,
                 color: Theme.of(context).colorScheme.outlineVariant,
