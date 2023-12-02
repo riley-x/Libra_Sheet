@@ -206,7 +206,6 @@ Future<List<Reimbursement>> loadReimbursements({
     """,
     [parent.key],
   );
-  print("LOADREIMBS $maps");
   return [
     for (final map in maps)
       Reimbursement(

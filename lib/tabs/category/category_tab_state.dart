@@ -84,6 +84,11 @@ class CategoryTabState extends ChangeNotifier {
       _aggregateSubCatVals(cat);
     }
     notifyListeners();
+
+    /// History
+    if (categoriesFocused.isNotEmpty) {
+      _loadCategoryDetails(categoriesFocused.last);
+    }
   }
 
   //--------------------------------------------------------------------------
