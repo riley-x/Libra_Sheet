@@ -252,7 +252,8 @@ class _EditRule extends StatelessWidget {
                 'Category',
                 CategorySelectionFormField(
                   initial: state.focused.category,
-                  categories: appState.categories.flattenedCategories(toFilterType(type)),
+                  type: type.toFilterType(),
+                  showUncategorized: false,
                   onSave: (it) => state.focused.category = it,
                   validator: (it) {
                     if (it == null) {

@@ -9,6 +9,14 @@ enum ExpenseType {
       return ExpenseType.expense;
     }
   }
+
+  ExpenseFilterType toFilterType() {
+    if (this == ExpenseType.income) {
+      return ExpenseFilterType.income;
+    } else {
+      return ExpenseFilterType.expense;
+    }
+  }
 }
 
 enum ExpenseFilterType { income, expense, all }
