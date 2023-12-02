@@ -85,7 +85,11 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
       labelMapper: labelMapper,
       nestedData: (widget.showSubCategories) ? getNested : null,
       textStyle: Theme.of(context).textTheme.labelLarge,
-      paddingMapper: (depth) => (widget.showSubCategories && depth == 0) ? (5, 5) : (2, 2),
+      paddingMapper: (depth) => (!widget.showSubCategories)
+          ? (3, 3)
+          : (depth == 0)
+              ? (3, 3)
+              : (1, 1),
     );
     return GestureDetector(
       onTapUp: (it) => _onTapUp(painter, it),
