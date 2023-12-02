@@ -157,7 +157,7 @@ class TransactionDetailsState extends ChangeNotifier {
     }
 
     // Same category type
-    if (!sameType(expenseType, category!.type)) {
+    if (!expenseType.inclusiveEqual(category!.type)) {
       return "Specified value does not have the correct sign for category ${category!.name}.";
     }
 
@@ -165,7 +165,7 @@ class TransactionDetailsState extends ChangeNotifier {
     // or otherwise lead to negative category values.
     var totalAdjustments = 0;
     for (final alloc in allocations) {
-      if (!sameType(expenseType, alloc.category!.type)) {
+      if (!expenseType.inclusiveEqual(alloc.category!.type)) {
         return "Allocation ${alloc.name} must be an ${expenseType.name} category.";
       }
       totalAdjustments += alloc.value;

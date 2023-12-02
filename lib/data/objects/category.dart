@@ -16,7 +16,7 @@ class Category {
   final List<Category> subCats = [];
 
   /// This must be consistent with parent!
-  final ExpenseType type;
+  final ExpenseFilterType type;
 
   /// Level of category. Should be [parent.level] + 1.
   ///   0: fixed categories (income/expense/ignore)
@@ -89,7 +89,7 @@ class Category {
     key: 0,
     name: 'Uncategorized',
     color: Colors.transparent,
-    type: ExpenseType.expense,
+    type: ExpenseFilterType.all,
     level: 0,
   );
 
@@ -105,7 +105,7 @@ class Category {
     key: -1,
     name: 'Income',
     color: const Color(0xFF004940),
-    type: ExpenseType.income,
+    type: ExpenseFilterType.income,
     level: 0,
   );
 
@@ -116,7 +116,7 @@ class Category {
     key: -2,
     name: 'Expense',
     color: const Color(0xFF5C1604),
-    type: ExpenseType.expense,
+    type: ExpenseFilterType.expense,
     level: 0,
   );
 
@@ -124,7 +124,7 @@ class Category {
     key: -3,
     name: 'Ignore',
     color: Colors.transparent,
-    type: ExpenseType.expense,
+    type: ExpenseFilterType.all,
     level: 0,
   );
 

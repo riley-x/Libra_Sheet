@@ -5,7 +5,6 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';

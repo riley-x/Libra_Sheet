@@ -119,12 +119,12 @@ class CategoryState {
   /// the corresponding super category to [current.type].
   List<Category> getPotentialParents(Category current) {
     List<Category> out = [];
-    if (current.type case ExpenseType.expense) {
+    if (current.type case ExpenseFilterType.expense) {
       out.add(Category.expense);
       for (final cat in Category.expense.subCats) {
         if (cat != current) out.add(cat);
       }
-    } else if (current.type case ExpenseType.income) {
+    } else if (current.type case ExpenseFilterType.income) {
       out.add(Category.income);
       for (final cat in Category.income.subCats) {
         if (cat != current) out.add(cat);

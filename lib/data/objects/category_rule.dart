@@ -19,7 +19,7 @@ class CategoryRule {
     required this.type,
     this.account,
   }) {
-    assert(category == null || category!.level == 0 || type == category!.type);
+    assert(category == null || category!.level == 0 || inclusive(type, category!.type));
   }
 
   static final empty = CategoryRule(

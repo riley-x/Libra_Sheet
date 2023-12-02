@@ -1,4 +1,4 @@
-- Save account CSV format
+- Save account CSV format, CSV column layout/scroll
 - Filters for cash flow tab?
 - Hover on heatmap
 - Double sided stack column chart
