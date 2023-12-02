@@ -6,7 +6,23 @@ class Printer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Printer! $test');
+    debugPrint('Printer! $test');
     return Placeholder();
+  }
+}
+
+class ConstraintsPrinter extends StatelessWidget {
+  const ConstraintsPrinter(this.child, {super.key});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstraintsTransformBox(
+      constraintsTransform: (it) {
+        debugPrint("Incoming constraints: $it");
+        return it;
+      },
+      child: child,
+    );
   }
 }
