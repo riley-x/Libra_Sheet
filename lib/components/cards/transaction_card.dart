@@ -20,7 +20,7 @@ class TransactionCard extends StatelessWidget {
   final EdgeInsets? margin;
   final bool showTags;
 
-  static const double colorIndicatorWidth = 6;
+  static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
 
   @override
@@ -30,7 +30,7 @@ class TransactionCard extends StatelessWidget {
       // color: Color.alphaBlend(
       //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
       //     Theme.of(context).colorScheme.surface),
-      surfaceTintColor: trans.category?.color,
+      // surfaceTintColor: trans.category?.color,
       // shadowColor: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
@@ -39,16 +39,16 @@ class TransactionCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: Stack(
             children: [
-              // Positioned(
-              //   left: 0,
-              //   width: colorIndicatorWidth,
-              //   top: 0,
-              //   bottom: 0,
-              //   child: Container(color: trans.category?.color ?? Colors.transparent),
-              // ),
+              Positioned(
+                left: 0,
+                width: colorIndicatorWidth,
+                top: 0,
+                bottom: 0,
+                child: Container(color: trans.category?.color ?? Colors.transparent),
+              ),
               Padding(
-                // padding: const EdgeInsets.only(left: colorIndicatorWidth + colorIndicatorOffset),
-                padding: const EdgeInsets.only(),
+                padding: const EdgeInsets.only(left: colorIndicatorWidth + colorIndicatorOffset),
+                // padding: const EdgeInsets.only(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

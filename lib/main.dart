@@ -71,32 +71,21 @@ class LibraHomePage extends StatelessWidget {
     final focusPage =
         context.select<LibraAppState, (DetailScreen, Object?)?>((it) => it.backStack.lastOrNull);
 
-    Widget page;
-    if (focusPage != null) {
-      switch (focusPage.$1) {
-        case DetailScreen.account:
-          page = AccountScreen(account: focusPage.$2 as Account);
-        case DetailScreen.transaction:
-          page = TransactionDetailsScreen(focusPage.$2 as transaction.Transaction?);
-        case DetailScreen.addCsv:
-          page = const AddCsvScreen();
-      }
-    } else {
-      switch (LibraNavDestination.values[currentTab]) {
-        case LibraNavDestination.home:
-          page = const HomeTab();
-        case LibraNavDestination.cashFlows:
-          page = const CashFlowTab();
-        case LibraNavDestination.categories:
-          page = const CategoryTab();
-        case LibraNavDestination.transactions:
-          page = const TransactionTab();
-        case LibraNavDestination.settings:
-          page = const SettingsTab();
-        default:
-          page = const Placeholder();
-      }
-    }
+    Widget focusPageWidget = switch (focusPage?.$1) {
+      null => const Placeholder(),
+      DetailScreen.account => AccountScreen(account: focusPage!.$2 as Account),
+      DetailScreen.transaction =>
+        TransactionDetailsScreen(focusPage!.$2 as transaction.Transaction?),
+      DetailScreen.addCsv => const AddCsvScreen()
+    };
+
+    Widget mainTab = switch (LibraNavDestination.values[currentTab]) {
+      LibraNavDestination.home => const HomeTab(),
+      LibraNavDestination.cashFlows => const CashFlowTab(),
+      LibraNavDestination.categories => const CategoryTab(),
+      LibraNavDestination.transactions => const TransactionTab(),
+      LibraNavDestination.settings => const SettingsTab(),
+    };
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
@@ -110,9 +99,13 @@ class LibraHomePage extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Container(
-                // color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
+              child: IndexedStack(
+                index: (focusPage == null) ? 0 : 1,
+                sizing: StackFit.expand,
+                children: [
+                  mainTab,
+                  focusPageWidget,
+                ],
               ),
             ),
           ],
