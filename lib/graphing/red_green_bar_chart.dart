@@ -16,8 +16,12 @@ class RedGreenBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return SfCartesianChart(
       primaryXAxis: CategoryAxis(
-          // visibleMinimum: 0.5,
-          // visibleMaximum: 1.5,
+          // These options move the axis the y=0, but it looks bad because the boxes overlap it.
+          // placeLabelsNearAxisLine: false,
+          // crossesAt: 0,
+          // axisLine: const AxisLine(color: Colors.black, width: 2),
+          // majorTickLines: const MajorTickLines(size: 0),
+          // majorGridLines: const MajorGridLines(width: 0),
           ),
       trackballBehavior: TrackballBehavior(
         enable: true,
@@ -27,6 +31,7 @@ class RedGreenBarChart extends StatelessWidget {
         //   format: 'series.name: \$point.y', // This totally messes up the tooltip for some reason
         // ),
       ),
+
       series: <ChartSeries>[
         ColumnSeries<TimeIntValue, String>(
           animationDuration: 300,
@@ -35,7 +40,37 @@ class RedGreenBarChart extends StatelessWidget {
           xValueMapper: (datum, index) => _dateFormat.format(datum.time),
           yValueMapper: (datum, index) => datum.value.asDollarDouble(),
         ),
+        LineSeries(
+          name: "y = 0",
+          xAxisName: '2nd xAxis',
+          dataSource: data,
+          xValueMapper: (datum, index) => _dateFormat.format(datum.time),
+          yValueMapper: (datum, index) => 0,
+          enableTooltip: false,
+          color: Colors.black,
+          width: 2,
+        ),
       ],
+
+      /// Create a second axis so that the y=0 line starts from the edges
+      /// https://www.syncfusion.com/forums/179342/categoryaxis-with-splineseries-and-column-overlap-issue
+      axes: [
+        CategoryAxis(
+          name: '2nd xAxis',
+          labelPlacement: LabelPlacement.onTicks,
+          isVisible: false,
+        ),
+      ],
+
+      /// Hide the trackball for the y=0 line
+      /// https://www.syncfusion.com/forums/154846/how-to-disable-a-trackball-for-a-specific-series
+      onTrackballPositionChanging: (TrackballArgs args) {
+        ChartSeries<dynamic, dynamic>? series = args.chartPointInfo.series;
+        if (series?.name == "y = 0") {
+          args.chartPointInfo.header = '';
+          args.chartPointInfo.label = '';
+        }
+      },
     );
   }
 }
