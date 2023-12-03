@@ -57,6 +57,7 @@ Tag _fromMap(Map<String, dynamic> map) {
 
 extension Tags on DatabaseExecutor {
   Future<int> insertTag(Tag tag) {
+    LibraDatabase.tallyBackup(1);
     return insert(
       tagsTable,
       _toMap(tag),
@@ -65,6 +66,7 @@ extension Tags on DatabaseExecutor {
   }
 
   Future<int> updateTag(Tag tag) {
+    LibraDatabase.tallyBackup(1);
     return update(
       tagsTable,
       _toMap(tag),
@@ -73,10 +75,20 @@ extension Tags on DatabaseExecutor {
     );
   }
 
-  Future<int> deleteTag(Tag tag) {
-    return delete(
+  Future<void> deleteTag(Tag tag) async {
+    if (this is Database) {
+      (this as Database).transaction((txn) => txn.deleteTag(tag));
+      return;
+    }
+    LibraDatabase.backup();
+    await delete(
       tagsTable,
       where: '$_key = ?',
+      whereArgs: [tag.key],
+    );
+    await delete(
+      tagJoinTable,
+      where: "tag_id = ?",
       whereArgs: [tag.key],
     );
   }
@@ -93,6 +105,7 @@ extension Tags on DatabaseExecutor {
   }
 
   Future<int> insertTagJoin(lt.Transaction trans, Tag tag) {
+    LibraDatabase.tallyBackup(1);
     return insert(
       tagJoinTable,
       {
@@ -103,6 +116,7 @@ extension Tags on DatabaseExecutor {
   }
 
   Future<int> deleteTagJoin(lt.Transaction trans, Tag tag) {
+    LibraDatabase.tallyBackup(1);
     return delete(
       tagJoinTable,
       where: "transaction_id = ? AND tag_id = ?",
@@ -110,7 +124,8 @@ extension Tags on DatabaseExecutor {
     );
   }
 
-  Future<int> deleteAllTags(lt.Transaction trans) {
+  Future<int> removeAllTagsFrom(lt.Transaction trans) {
+    LibraDatabase.tallyBackup(3);
     return delete(
       tagJoinTable,
       where: "transaction_id = ?",

@@ -76,13 +76,13 @@ class LibraDatabase {
     String origPath = db.path;
     String newPath;
     if (origPath.endsWith('.db')) {
-      newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp";
+      newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp.db";
     } else {
       newPath = "${origPath}_$timestamp";
     }
+    _scoreSinceLastBackup = 0;
     await File(origPath).copy(newPath);
     debugPrint("LibraDatabase::backup() Backed up to $newPath");
-    _scoreSinceLastBackup = 0;
   }
 
   /// Adds to [_scoreSinceLastBackup], and triggers a backup if it exceeds [_maxScore].

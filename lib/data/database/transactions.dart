@@ -144,7 +144,7 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
       await deleteAllocation(parent: t, index: i, txn: txn);
     }
   }
-  await txn.deleteAllTags(t);
+  await txn.removeAllTagsFrom(t);
 
   if (t.account != null) {
     // TODO this can happen if the account is deleted, should delete all corresponding transactions
