@@ -184,25 +184,24 @@ Future<List<Reimbursement>> loadReimbursements({
     """
     SELECT 
       t.*,
-      GROUP_CONCAT(tag.$tagKey) as tags,
+      GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
       COUNT(a.$allocationsKey) as nAllocs,
-      COUNT(r1.$reimbExpense) + COUNT(r2.$reimbExpense) as nReimbs,
+      COUNT(r.$reimbExpense) as nReimbs,
       reimbs.$_value as reimb_value
     FROM (
         SELECT $targetColumn, $_value FROM $reimbursementsTable WHERE $parentColumn = ?
       ) reimbs
     JOIN
       $transactionsTable t on t.$transactionKey = reimbs.$targetColumn
-    LEFT OUTER JOIN 
+    LEFT OUTER JOIN
       $tagJoinTable tag_join on tag_join.$tagJoinTrans = t.$transactionKey
     LEFT OUTER JOIN
       $tagsTable tag on tag.$tagKey = tag_join.$tagJoinTag
-    LEFT OUTER JOIN 
+    LEFT OUTER JOIN
       $allocationsTable a on a.$allocationsTransaction = t.$transactionKey
     LEFT OUTER JOIN
-      $reimbursementsTable r1 ON r1.$reimbExpense = t.$transactionKey
-    LEFT OUTER JOIN
-      $reimbursementsTable r2 ON r2.$reimbIncome = t.$transactionKey
+      $reimbursementsTable r ON t.$transactionKey = r.$targetColumn
+    GROUP BY t.$transactionKey
     """,
     [parent.key],
   );

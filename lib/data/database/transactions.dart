@@ -260,11 +260,8 @@ Future<void> loadTransactionRelations(
     LEFT OUTER JOIN 
       $allocationsTable a ON a.$allocationsTransaction = t.$_key
     LEFT OUTER JOIN
-      $reimbursementsTable r ON t.$_key = r.$reimbIncome
+      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
   ''';
-
-  // COUNT(r.$reimbExpense)
-  // (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
 
   List args = [];
 
