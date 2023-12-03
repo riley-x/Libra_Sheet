@@ -199,7 +199,7 @@ class TransactionDetailsState extends ChangeNotifier {
         name: name!,
         date: date!,
         value: value!,
-        category: category,
+        category: category ?? Category.empty,
         account: account,
         note: note!,
         allocations: List.from(allocations),

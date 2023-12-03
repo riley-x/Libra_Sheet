@@ -18,7 +18,7 @@ class Transaction {
     required this.name,
     required this.date,
     required this.value,
-    this.category,
+    required Category category,
     this.account,
     this.note = "",
     this.allocations,
@@ -26,7 +26,12 @@ class Transaction {
     this.tags,
     int nAllocations = 0,
     int nReimbursements = 0,
-  })  : _nAllocations = nAllocations,
+  })  : category = (category != Category.empty)
+            ? category
+            : (value > 0)
+                ? Category.income
+                : Category.expense,
+        _nAllocations = nAllocations,
         _nReimbursements = nReimbursements;
 
   int key;
@@ -78,4 +83,5 @@ class Transaction {
   }
 }
 
-final dummyTransaction = Transaction(name: '___TEST___', date: DateTime(1987), value: 10000);
+final dummyTransaction =
+    Transaction(name: '___TEST___', date: DateTime(1987), value: 10000, category: Category.income);

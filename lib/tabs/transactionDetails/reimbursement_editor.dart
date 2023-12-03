@@ -55,6 +55,7 @@ class ReimbursementEditor extends StatelessWidget {
                   maintainState: true,
                   child: TransactionCard(
                     trans: state.reimburseTarget ?? dummyTransaction,
+                    // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
                     margin: const EdgeInsets.all(0),
                     showTags: false,
                   ),
