@@ -107,12 +107,3 @@ Future<List<Account>> getAccounts() async {
   );
   return List.generate(maps.length, (i) => _fromMap(maps[i]));
 }
-
-Future<int> updateBalance(int account, int delta, {DatabaseExecutor? db}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.rawUpdate(
-    "UPDATE $accountsTable SET $_balance = $_balance + ? WHERE $_key = ?",
-    [delta, account],
-  );
-}

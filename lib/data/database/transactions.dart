@@ -103,7 +103,6 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
     _toMap(t),
     conflictAlgorithm: db.ConflictAlgorithm.replace,
   );
-  await updateBalance(t.account!.key, t.value, db: txn);
   await updateCategoryHistory(
     account: t.account!.key,
     category: t.category!.key,
@@ -146,10 +145,6 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
   }
   await txn.removeAllTagsFrom(t);
 
-  if (t.account != null) {
-    // TODO this can happen if the account is deleted, should delete all corresponding transactions
-    await updateBalance(t.account!.key, -t.value, db: txn);
-  }
   if (t.account != null && t.category != null) {
     // TODO this can happen if the category is deleted, should switch all affected transactions/allocs
     // to default category (in database? or soft?). And delete all rules.
