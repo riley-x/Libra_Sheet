@@ -22,7 +22,7 @@ class RedGreenBarChart extends StatelessWidget {
       trackballBehavior: TrackballBehavior(
         enable: true,
         activationMode: ActivationMode.singleTap,
-        tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
+        // tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
         // tooltipSettings: const InteractiveTooltip(
         //   format: 'series.name: \$point.y', // This totally messes up the tooltip for some reason
         // ),
@@ -31,7 +31,7 @@ class RedGreenBarChart extends StatelessWidget {
         ColumnSeries<TimeIntValue, String>(
           animationDuration: 300,
           dataSource: data,
-          pointColorMapper: (datum, index) => (datum.value > 0) ? Colors.green : Colors.red,
+          pointColorMapper: (datum, index) => (datum.value >= 0) ? Colors.green : Colors.red,
           xValueMapper: (datum, index) => _dateFormat.format(datum.time),
           yValueMapper: (datum, index) => datum.value.asDollarDouble(),
         ),

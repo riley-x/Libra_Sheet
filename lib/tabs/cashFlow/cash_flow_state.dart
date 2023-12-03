@@ -32,7 +32,7 @@ class CashFlowState extends fnd.ChangeNotifier {
   ) {
     final parentVals = categoryHistory[parent.key];
     if (parentVals != null) {
-      list.add(CategoryHistory(parent, parentVals));
+      list.add(CategoryHistory(parent, parentVals.fixedForCharts(absValues: true)));
     }
 
     for (final cat in parent.subCats) {
@@ -45,7 +45,7 @@ class CashFlowState extends fnd.ChangeNotifier {
         vals = (vals == null) ? subVals : addParallel(vals, subVals);
       }
       if (vals != null) {
-        list.add(CategoryHistory(cat, vals));
+        list.add(CategoryHistory(cat, vals.fixedForCharts(absValues: true)));
       }
     }
   }
@@ -53,8 +53,7 @@ class CashFlowState extends fnd.ChangeNotifier {
   Future<void> load() async {
     final categoryHistory = await getCategoryHistory(
       accounts: accounts.map((e) => e.key),
-      callback: (_, vals) =>
-          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
+      callback: (_, vals) => vals.withAlignedTimes(appState.monthList),
     );
     var _netIncome = await getMonthlyNetIncome(
       accounts: accounts.map((e) => e.key),
@@ -68,7 +67,7 @@ class CashFlowState extends fnd.ChangeNotifier {
 
     netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
-    netReturns = categoryHistory[Category.investment.key] ??
+    netReturns = categoryHistory[Category.investment.key]?.fixedForCharts() ??
         appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList();
 
     notifyListeners();
