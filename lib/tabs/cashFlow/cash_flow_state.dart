@@ -1,15 +1,24 @@
 import 'package:flutter/foundation.dart' as fnd;
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
+enum CashFlowType { categories, net }
+
+enum CashFlowTimeFrame { oneYear, lastYear, all }
+
 class CashFlowState extends fnd.ChangeNotifier {
   CashFlowState(this.appState) {
-    _init();
+    load();
   }
 
   final LibraAppState appState;
+
+  CashFlowType type = CashFlowType.categories;
+  CashFlowTimeFrame timeFrame = CashFlowTimeFrame.all;
+  final Set<Account> accounts = {};
 
   List<CategoryHistory> incomeData = [];
   List<CategoryHistory> expenseData = [];
@@ -39,7 +48,7 @@ class CashFlowState extends fnd.ChangeNotifier {
     }
   }
 
-  Future<void> _init() async {
+  Future<void> load() async {
     final categoryHistory = await getCategoryHistory(
       callback: (_, vals) =>
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
@@ -51,6 +60,19 @@ class CashFlowState extends fnd.ChangeNotifier {
     expenseData.clear();
     _loadList(expenseData, categoryHistory, appState.categories.expense);
 
+    notifyListeners();
+  }
+
+  //------------------------------------------------------------------------------
+  // Field callbacks
+  //------------------------------------------------------------------------------
+  void setType(CashFlowType t) {
+    type = t;
+    notifyListeners();
+  }
+
+  void setTimeFrame(CashFlowTimeFrame t) {
+    timeFrame = t;
     notifyListeners();
   }
 }
