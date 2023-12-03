@@ -28,10 +28,10 @@ class CategoryStackChart extends StatelessWidget {
       trackballBehavior: TrackballBehavior(
         enable: true,
         activationMode: ActivationMode.singleTap,
-        // tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
-        tooltipSettings: const InteractiveTooltip(
-          format: 'series.name: \$point.y',
-        ),
+        tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
+        // tooltipSettings: const InteractiveTooltip(
+        //   format: 'series.name: \$point.y', // This totally messes up the tooltip for some reason
+        // ),
       ),
       series: <ChartSeries>[
         for (final categoryHistory in data)

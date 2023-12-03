@@ -20,12 +20,15 @@ class CategoryFocusScreen extends StatelessWidget {
     final category = state.categoriesFocused.lastOrNull;
     if (category == null) return const Placeholder();
 
+    var title = category.name;
+    if (category == Category.income) title += " Income"; // "Uncategorized Income"
+    if (category == Category.expense) title += " Expense";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),
         CommonBackBar(
-          leftText: category.name,
+          leftText: title,
           rightText: state.aggregateValues[category.key]?.abs().dollarString() ?? '',
           onBack: () {
             context.read<CategoryTabState>().clearFocus();
