@@ -46,7 +46,7 @@ Map<String, dynamic> _toMap(Transaction t) {
     _value: t.value,
     _note: t.note,
     _account: t.account?.key ?? 0,
-    _category: t.category?.key ?? 0,
+    _category: t.category.key,
   };
   if (t.key != 0) {
     map[_key] = t.key;
@@ -104,16 +104,14 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
   );
   await updateCategoryHistory(
     account: t.account!.key,
-    category: t.category!.key,
+    category: t.category.key,
     date: t.date,
     delta: t.value,
     txn: txn,
   );
 
-  if (t.tags != null) {
-    for (final tag in t.tags!) {
-      await txn.insertTagJoin(t, tag);
-    }
+  for (final tag in t.tags) {
+    await txn.insertTagJoin(t, tag);
   }
   if (t.allocations != null) {
     for (int i = 0; i < t.allocations!.length; i++) {
@@ -144,12 +142,10 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
   }
   await txn.removeAllTagsFrom(t);
 
-  if (t.account != null && t.category != null) {
-    // TODO this can happen if the category is deleted, should switch all affected transactions/allocs
-    // to default category (in database? or soft?). And delete all rules.
+  if (t.account != null) {
     await updateCategoryHistory(
       account: t.account!.key,
-      category: t.category!.key,
+      category: t.category.key,
       date: t.date,
       delta: -t.value,
       txn: txn,

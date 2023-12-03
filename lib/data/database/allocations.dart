@@ -81,7 +81,6 @@ FutureOr<void> addAllocation({
   required Transaction txn,
 }) async {
   if (parent.account == null) return;
-  if (parent.category == null) return;
   if (parent.allocations == null) return;
   if (index >= parent.allocations!.length) return;
   final alloc = parent.allocations![index];
@@ -92,7 +91,7 @@ FutureOr<void> addAllocation({
   final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
   await updateCategoryHistory(
     account: parent.account!.key,
-    category: parent.category!.key,
+    category: parent.category.key,
     date: parent.date,
     delta: -signedValue,
     txn: txn,
@@ -112,7 +111,6 @@ FutureOr<void> deleteAllocation({
   required Transaction txn,
 }) async {
   if (parent.account == null) return;
-  if (parent.category == null) return;
   if (parent.allocations == null) return;
   if (index >= parent.allocations!.length) return;
   final alloc = parent.allocations![index];
@@ -131,7 +129,7 @@ FutureOr<void> deleteAllocation({
   final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
   await updateCategoryHistory(
     account: parent.account!.key,
-    category: parent.category!.key,
+    category: parent.category.key,
     date: parent.date,
     delta: signedValue,
     txn: txn,

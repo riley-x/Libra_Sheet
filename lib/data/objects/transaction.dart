@@ -71,7 +71,7 @@ class Transaction {
     if (note.isNotEmpty) {
       out += "\n\t$note";
     }
-    out += "\n\ttags=${tags?.length}"
+    out += "\n\ttags=${tags.length}"
         " alloc=${allocations?.length}"
         " reimb=${reimbursements?.length}";
     return out;

@@ -72,9 +72,7 @@ Future<void> addReimbursement(
   assert(r.target.key != 0);
   assert(r.value >= 0);
   if (parent.account == null) throw StateError("addReimbursement() parent account is null");
-  if (parent.category == null) throw StateError("addReimbursement() parent category is null");
   if (r.target.account == null) throw StateError("addReimbursement() target account is null");
-  if (r.target.category == null) throw StateError("addReimbursement() target category is null");
   if (parent.value * r.target.value > 0)
     throw StateError("addReimbursement() transactions have same sign");
 
@@ -85,14 +83,14 @@ Future<void> addReimbursement(
   /// Remove value from both transactions' original category
   await updateCategoryHistory(
     account: income.account!.key,
-    category: income.category!.key,
+    category: income.category.key,
     date: income.date,
     delta: -r.value,
     txn: txn,
   );
   await updateCategoryHistory(
     account: expense.account!.key,
-    category: expense.category!.key,
+    category: expense.category.key,
     date: expense.date,
     delta: r.value,
     txn: txn,
@@ -123,12 +121,10 @@ Future<void> deleteReimbursement(
   assert(parent.key != 0);
   assert(r.target.key != 0);
   assert(r.value >= 0);
-  if (parent.account == null) throw Exception("deleteReimbursement() parent account is null");
-  if (parent.category == null) throw Exception("deleteReimbursement() parent category is null");
-  if (r.target.account == null) throw Exception("deleteReimbursement() target account is null");
-  if (r.target.category == null) throw Exception("deleteReimbursement() target category is null");
+  if (parent.account == null) throw StateError("deleteReimbursement() parent account is null");
+  if (r.target.account == null) throw StateError("deleteReimbursement() target account is null");
   if (parent.value * r.target.value > 0)
-    throw Exception("deleteReimbursement() transactions have same sign");
+    throw StateError("deleteReimbursement() transactions have same sign");
 
   await _delete(r, parent: parent, txn: txn);
   final income = (parent.value > 0) ? parent : r.target;
@@ -137,14 +133,14 @@ Future<void> deleteReimbursement(
   /// Add value back to both transactions' original category
   await updateCategoryHistory(
     account: income.account!.key,
-    category: income.category!.key,
+    category: income.category.key,
     date: income.date,
     delta: r.value,
     txn: txn,
   );
   await updateCategoryHistory(
     account: expense.account!.key,
-    category: expense.category!.key,
+    category: expense.category.key,
     date: expense.date,
     delta: -r.value,
     txn: txn,

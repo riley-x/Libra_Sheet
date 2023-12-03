@@ -39,16 +39,15 @@ class ReimbursementCard extends StatelessWidget {
       );
     } else {
       var accCatStr = '';
-      final dtFormat = DateFormat("M/d/yy");
       if (reimbursement!.target.account != null) {
         accCatStr = reimbursement!.target.account!.name;
       }
-      if (reimbursement!.target.category != null) {
-        if (accCatStr.isNotEmpty) {
-          accCatStr += ', ';
-        }
-        accCatStr += reimbursement!.target.category!.name;
+      if (accCatStr.isNotEmpty) {
+        accCatStr += ', ';
       }
+      accCatStr += reimbursement!.target.category.name;
+
+      final dtFormat = DateFormat("M/d/yy");
       content = LimitedBox(
         maxWidth: 300,
         child: Row(
