@@ -22,6 +22,13 @@ enum CsvField {
   const CsvField(this.title);
 
   final String title;
+
+  static CsvField? fromName(String name) {
+    for (final field in CsvField.values) {
+      if (field.name == name) return field;
+    }
+    return null;
+  }
 }
 
 final List<DateFormat> _dateFormats = [
@@ -102,8 +109,29 @@ class AddCsvState extends ChangeNotifier {
   //---------------------------------------------------------------------------
   // Setter Callbacks
   //---------------------------------------------------------------------------
+  void _setHeadersFromCsvFormat(String format) {
+    final fields = format.split(',');
+    if (fields.length != nCols) return;
+
+    final types = <CsvField>[];
+    for (final name in fields) {
+      final type = CsvField.fromName(name);
+      if (type == null) return;
+      types.add(type);
+    }
+
+    for (int column = 0; column < nCols; column++) {
+      if (columnTypes[column] == CsvField.none) {
+        columnTypes[column] = types[column];
+      }
+    }
+  }
+
   void setAccount(Account? acc) {
     account = acc;
+    if (account?.csvFormat.isNotEmpty == true) {
+      _setHeadersFromCsvFormat(account!.csvFormat);
+    }
     notifyListeners();
     _validate();
   }

@@ -20,7 +20,7 @@ const createAccountsTableSql = "CREATE TABLE IF NOT EXISTS `accounts` ("
     "`screenReaderAlias` TEXT NOT NULL DEFAULT '', "
     "`colorLong` INTEGER NOT NULL, "
     "`listIndex` INTEGER NOT NULL, "
-    "$_balance INTEGER NOT NULL)";
+    "$_balance INTEGER NOT NULL DEFAULT 0)";
 
 const createTestAccountsSql = '''
 INSERT INTO $accountsTable ($_key, "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex", $_balance) VALUES
@@ -35,8 +35,8 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
     'description': acc.description,
     'type': acc.type.label,
     'csvPattern': acc.csvFormat,
-    'colorLong': acc.color?.value ?? 0,
-    'balance': acc.balance,
+    'colorLong': acc.color.value,
+    'balance': acc.balance, // TODO don't save this here, but only added DEFAULT 0 line late
   };
 
   /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
