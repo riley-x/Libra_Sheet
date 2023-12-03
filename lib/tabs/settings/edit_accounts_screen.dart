@@ -20,16 +20,23 @@ class EditAccountState extends ChangeNotifier {
   bool isFocused = false;
   Account? focused;
 
-  /// We use the color in the class as the state of the color box though!
-  MutableAccount saveSink = MutableAccount();
+  /// Save sinks for the FormFields
+  AccountType type = AccountType.bank;
+  String name = "";
+  String description = "";
+
+  /// UI states (and save values)
+  Color color = Colors.blue;
 
   void _init() {
     if (focused == null) {
-      saveSink = MutableAccount(
-        color: Colors.blue,
-      );
+      color = Colors.blue;
     } else {
-      saveSink = MutableAccount.copy(focused!);
+      /// Only color needs to be set here I think? But just in case the original values get overriden
+      type = focused!.type;
+      name = focused!.name;
+      description = focused!.description;
+      color = focused!.color;
     }
   }
 
@@ -60,11 +67,15 @@ class EditAccountState extends ChangeNotifier {
   void save() async {
     if (formKey.currentState?.validate() ?? false) {
       formKey.currentState?.save();
-      final acc = saveSink.freeze();
       if (focused == null) {
+        final acc = Account(type: type, name: name, description: description, color: color);
         appState.addAccount(acc);
       } else {
-        appState.updateAccount(acc);
+        focused!.type = type;
+        focused!.name = name;
+        focused!.description = description;
+        focused!.color = color;
+        appState.notifyUpdateAccount(focused!);
       }
       clearFocus();
     }
@@ -137,7 +148,7 @@ class _EditAccount extends StatelessWidget {
                 LibraTextFormField(
                   initial: state.focused?.name,
                   validator: (it) => null,
-                  onSave: (it) => state.saveSink.name = it ?? '',
+                  onSave: (it) => state.name = it ?? '',
                 ),
               ),
               rowSpacing,
@@ -150,7 +161,7 @@ class _EditAccount extends StatelessWidget {
                   builder: (it) =>
                       Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
                   height: 35,
-                  onSave: (it) => state.saveSink.type = it!,
+                  onSave: (it) => state.type = it!,
                 ),
                 tooltip: "This is used mostly for organizing similar accounts together."
                     "\nLiability accounts should only have negative values though.",
@@ -162,33 +173,33 @@ class _EditAccount extends StatelessWidget {
                 LibraTextFormField(
                   initial: state.focused?.description,
                   validator: (it) => null,
-                  onSave: (it) => state.saveSink.description = it ?? '',
+                  onSave: (it) => state.description = it ?? '',
                 ),
               ),
-              rowSpacing,
-              labelRow(
-                context,
-                'CSV Format',
-                LibraTextFormField(
-                  initial: state.focused?.csvFormat,
-                  validator: (it) => null,
-                  onSave: (it) => state.saveSink.csvFormat = it ?? '',
-                ),
-                tooltip: "Instructions on how to parse the CSV.\n"
-                    "You can leave this blank for new accounts.",
-              ),
+              // rowSpacing,
+              // labelRow(
+              //   context,
+              //   'CSV Format',
+              //   LibraTextFormField(
+              //     initial: state.focused?.csvFormat,
+              //     validator: (it) => null,
+              //     onSave: (it) => state.saveSink.csvFormat = it ?? '',
+              //   ),
+              //   tooltip: "Instructions on how to parse the CSV.\n"
+              //       "You can leave this blank for new accounts.",
+              // ),
               rowSpacing,
               labelRow(
                 context,
                 'Color',
                 Container(
                   height: 30,
-                  color: state.saveSink.color,
+                  color: state.color,
                   child: InkWell(
                     onTap: () => showColorPicker(
                       context: context,
-                      initialColor: state.saveSink.color,
-                      onColorChanged: (it) => state.saveSink.color = it,
+                      initialColor: state.color,
+                      onColorChanged: (it) => state.color = it,
                       // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
                       onClose: state.notifyListeners,
                     ),

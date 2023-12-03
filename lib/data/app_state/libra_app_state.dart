@@ -76,15 +76,13 @@ class LibraAppState extends ChangeNotifier {
 
   Future<void> addAccount(Account acc) async {
     debugPrint("LibraAppState::addAccount() $acc");
-    int key = await db.insertAccount(acc, listIndex: accounts.length);
-    accounts.add(acc.copyWith(key: key));
+    acc.key = await db.insertAccount(acc, listIndex: accounts.length);
+    accounts.add(acc);
     notifyListeners();
   }
 
-  Future<void> updateAccount(Account acc) async {
-    debugPrint("LibraAppState::updateAccount() $acc");
-    final i = accounts.indexWhere((it) => it.key == acc.key);
-    accounts[i] = acc;
+  Future<void> notifyUpdateAccount(Account acc) async {
+    debugPrint("LibraAppState::notifyUpdateAccount() $acc");
     notifyListeners();
     db.updateAccount(acc);
   }
