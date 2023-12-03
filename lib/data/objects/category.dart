@@ -50,8 +50,8 @@ class Category {
   /// I.e. it stands in for [income] or [expense] when the value is not known. This is also shown in
   /// the UI in preference of [income] and [expense], since those two can be a bit confusing.
   ///
-  /// WARNING categories should never have [empty] as a parent. On contrast, transactions and rules
-  /// should never have [income] or [expense] as targets.
+  /// WARNING objects like [Transaction] and [Category.parent] should not reference [empty], it
+  /// should only be used in filter menus.
   static final empty = Category._manual(
     key: 0,
     name: 'Uncategorized',
@@ -63,9 +63,6 @@ class Category {
   /// The main super-category corresponding to income transactions. This category includes all
   /// un-categorized transactions with positive value. Note that all income categories must refer
   /// to this as parent, and must be added to its subCats list.
-  ///
-  /// WARNING categories should never have [empty] as a parent. On contrast, transactions and rules
-  /// should never have [income] or [expense] as targets.
   static final income = Category._manual(
     key: -1,
     name: 'Income',
@@ -77,9 +74,6 @@ class Category {
   /// The main super-category corresponding to expense transactions. This category includes all
   /// un-categorized transactions with negative value. Note that all expense categories must refer
   /// to this as parent, and must be added to its subCats list.
-  ///
-  /// WARNING categories should never have [empty] as a parent. On contrast, transactions and rules
-  /// should never have [income] or [expense] as targets.
   static final expense = Category._manual(
     key: -2,
     name: 'Expense',

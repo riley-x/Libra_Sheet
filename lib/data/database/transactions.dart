@@ -75,7 +75,7 @@ Transaction transactionFromMap(
   final value = map[_value];
 
   /// This can happen if the category has been deleted.
-  final defaultCategory = (value > 0) ? Category.income : Category.expense;
+  final defaultCategory = Category.empty;
 
   return Transaction(
     key: map[_key],
@@ -299,10 +299,13 @@ Future<void> loadTransactionRelations(
   /// Tags and Categories ///
   // Here rows with the correct tag/alloc are assigned 1, and then we max over each transaction to
   // see if there was at least one 1.
-  final categories = filters.categories.activeKeys();
+  var categories = filters.categories.activeKeys();
   bool firstHaving = true;
   if (categories.isNotEmpty) {
     firstHaving = false;
+    if (categories.contains(Category.empty.key)) {
+      categories = List.of(categories) + [Category.income.key, Category.expense.key];
+    }
 
     /// When transaction category is in the list
     q += " HAVING (t.$_category in (${List.filled(categories.length, '?').join(',')})";
