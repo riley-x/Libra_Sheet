@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
+import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +28,7 @@ class _CashFlowTab extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Expanded(child: _CashFlowCharts()),
               SizedBox(height: 10),
             ],
@@ -54,20 +55,26 @@ class _CashFlowCharts extends StatelessWidget {
       CashFlowTimeFrame.lastYear => (max(0, nDates - 24), (max(0, nDates - 12))),
       CashFlowTimeFrame.all => (0, nDates),
     };
-    return Column(
-      children: [
-        Text(
-          "Income",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        Expanded(child: CategoryStackChart(state.incomeData, range)),
-        Text(
-          "Expenses",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        Expanded(child: CategoryStackChart(state.expenseData, range)),
-        const SizedBox(height: 10),
-      ],
-    );
+
+    final textStyle = Theme.of(context).textTheme.headlineMedium;
+    if (state.type == CashFlowType.categories) {
+      return Column(
+        children: [
+          Text("Income", style: textStyle),
+          Expanded(child: CategoryStackChart(state.incomeData, range)),
+          Text("Expenses", style: textStyle),
+          Expanded(child: CategoryStackChart(state.expenseData, range)),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          Text("Net Income", style: textStyle),
+          Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
+          Text("Investment Returns", style: textStyle),
+          // Expanded(child: RedGreenBarChart(state.netReturns.sublist(range.$1, range.$2))),
+        ],
+      );
+    }
   }
 }

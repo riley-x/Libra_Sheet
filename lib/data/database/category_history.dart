@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -95,6 +96,35 @@ Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
     columns: [_date, "SUM($_value) as $_value"],
     where: "$_value != 0${(accountId != null) ? " AND $_account = ?" : ""}",
     whereArgs: (accountId != null) ? [accountId] : null,
+    groupBy: _date,
+    orderBy: _date,
+  );
+
+  return List.generate(maps.length, (i) {
+    return TimeIntValue(
+      time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
+      value: maps[i][_value],
+    );
+  });
+}
+
+/// Gets the monthly net income, which ignores the Ignore and Investment categories.
+Future<List<TimeIntValue>> getMonthlyNetIncome({
+  Iterable<int> accounts = const [],
+}) async {
+  // the value != 0 helps filter away deleted months i.e.
+  var where = "$_value != 0 AND $_category != ? AND $_category != ?";
+  List whereArgs = [Category.ignore.key, Category.investment.key];
+  if (accounts.isNotEmpty) {
+    where += " AND $_account in (${List.filled(accounts.length, '?').join(',')})";
+    whereArgs.addAll(accounts);
+  }
+
+  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
+    categoryHistoryTable,
+    columns: [_date, "SUM($_value) as $_value"],
+    where: where,
+    whereArgs: whereArgs,
     groupBy: _date,
     orderBy: _date,
   );

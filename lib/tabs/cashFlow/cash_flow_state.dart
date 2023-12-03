@@ -22,6 +22,8 @@ class CashFlowState extends fnd.ChangeNotifier {
 
   List<CategoryHistory> incomeData = [];
   List<CategoryHistory> expenseData = [];
+  List<TimeIntValue> netIncome = [];
+  List<TimeIntValue> netReturns = [];
 
   void _loadList(
     List<CategoryHistory> list,
@@ -54,12 +56,17 @@ class CashFlowState extends fnd.ChangeNotifier {
       callback: (_, vals) =>
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
     );
+    var _netIncome = await getMonthlyNetIncome(
+      accounts: accounts.map((e) => e.key),
+    );
 
     incomeData.clear();
     _loadList(incomeData, categoryHistory, appState.categories.income);
 
     expenseData.clear();
     _loadList(expenseData, categoryHistory, appState.categories.expense);
+
+    netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
     notifyListeners();
   }
