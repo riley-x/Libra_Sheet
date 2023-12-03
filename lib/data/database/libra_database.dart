@@ -68,8 +68,6 @@ class LibraDatabase {
       version: 14,
     );
     libraDatabase = _database;
-
-    backup();
   }
 
   static Future<void> backup() async {

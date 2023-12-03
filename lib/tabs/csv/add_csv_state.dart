@@ -50,6 +50,23 @@ class AddCsvState extends ChangeNotifier {
   List<Transaction> transactions = [];
   int focusedTransIndex = -1;
 
+  // TODO may want to elevate the CSV state so that it doesn't get lost when switching tabs. But
+  // need to be really careful, since if you i.e. delete a category, the links in the csv state
+  // won't be invalidated...
+  void reset() {
+    account = null;
+    dateFormat = null;
+    errorMsg = '';
+    file = null;
+    rawLines = [];
+    nCols = 0;
+    columnTypes = [];
+    rowOk = [];
+    nRowsOk = 0;
+    transactions = [];
+    focusedTransIndex = -1;
+  }
+
   //---------------------------------------------------------------------------
   // File Processing
   //---------------------------------------------------------------------------
