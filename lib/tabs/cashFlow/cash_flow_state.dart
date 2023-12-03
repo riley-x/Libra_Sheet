@@ -11,6 +11,7 @@ enum CashFlowTimeFrame { oneYear, lastYear, all }
 
 class CashFlowState extends fnd.ChangeNotifier {
   CashFlowState(this.appState) {
+    appState.transactions.addListener(load);
     load();
   }
 

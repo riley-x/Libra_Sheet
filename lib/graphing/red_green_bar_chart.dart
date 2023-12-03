@@ -49,6 +49,7 @@ class RedGreenBarChart extends StatelessWidget {
           enableTooltip: false,
           color: Colors.black,
           width: 2,
+          animationDuration: 0,
         ),
       ],
 
