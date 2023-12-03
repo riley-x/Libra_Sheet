@@ -74,14 +74,9 @@ String _addCategoriesFilter(Iterable<int> categories, String where, List whereAr
 }
 
 //----------------------------------------------------------------------------------
-// Main functions
+// Setters
 //----------------------------------------------------------------------------------
-
-extension CategoryHistoryExtension on DatabaseExecutor {
-  //----------------------------------------------------------------------------------
-  // Setters
-  //----------------------------------------------------------------------------------
-
+extension CategoryHistoryExtensionT on Transaction {
   /// Inserts a category history entry with value = 0. Will ignore conflicts, so useful to make sure
   /// an entry exists already.
   Future<int> _insertCategoryHistory(_CategoryHistory data) async {
@@ -113,7 +108,7 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     required DateTime date,
     required int delta,
   }) async {
-    assert(this is Transaction);
+    LibraDatabase.tallyBackup(1);
     final data = _CategoryHistory(
       account: account,
       category: category,
@@ -123,11 +118,12 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     await _insertCategoryHistory(data);
     return await _updateCategoryHistory(data);
   }
+}
 
-  //----------------------------------------------------------------------------------
-  // Getters
-  //----------------------------------------------------------------------------------
-
+//----------------------------------------------------------------------------------
+// Getters
+//----------------------------------------------------------------------------------
+extension CategoryHistoryExtension on DatabaseExecutor {
   /// Returns the earliest month in the database with data
   FutureOr<DateTime?> getEarliestMonth() async {
     final out = await query(
