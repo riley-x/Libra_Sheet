@@ -102,12 +102,11 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
     _toMap(t),
     conflictAlgorithm: db.ConflictAlgorithm.replace,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: t.account!.key,
     category: t.category.key,
     date: t.date,
     delta: t.value,
-    txn: txn,
   );
 
   for (final tag in t.tags) {
@@ -143,12 +142,11 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
   await txn.removeAllTagsFrom(t);
 
   if (t.account != null) {
-    await updateCategoryHistory(
+    await txn.updateCategoryHistory(
       account: t.account!.key,
       category: t.category.key,
       date: t.date,
       delta: -t.value,
-      txn: txn,
     );
   }
   await txn.delete(

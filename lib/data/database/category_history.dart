@@ -23,6 +23,10 @@ const String createCategoryHistoryTableSql = "CREATE TABLE IF NOT EXISTS $catego
     "$_value INTEGER NOT NULL, "
     "PRIMARY KEY($_account, $_category, $_date))";
 
+//----------------------------------------------------------------------------------
+// Helper utils
+//----------------------------------------------------------------------------------
+
 class _CategoryHistory {
   final int account;
   final int category;
@@ -36,52 +40,6 @@ class _CategoryHistory {
     required this.delta,
   });
 }
-
-/// Inserts a category history entry with value = 0. Will ignore conflicts, so useful to make sure
-/// an entry exists already.
-Future<int> _insertCategoryHistory(_CategoryHistory data, DatabaseExecutor db) async {
-  return db.insert(
-    categoryHistoryTable,
-    {
-      _account: data.account,
-      _category: data.category,
-      _date: data.date.millisecondsSinceEpoch,
-      _value: 0,
-    },
-    conflictAlgorithm: ConflictAlgorithm.ignore,
-  );
-}
-
-/// Updates the category history using the month from [date].
-Future<int> _updateCategoryHistory(_CategoryHistory data, DatabaseExecutor db) async {
-  return db.rawUpdate(
-    "UPDATE $categoryHistoryTable SET $_value = $_value + ?"
-    " WHERE $_account = ? AND $_category = ? AND $_date = ?",
-    [data.delta, data.account, data.category, data.date.millisecondsSinceEpoch],
-  );
-}
-
-/// Creates and updates the category history using the month from [date].
-FutureOr<int> updateCategoryHistory({
-  required int account,
-  required int category,
-  required DateTime date,
-  required int delta,
-  required Transaction txn,
-}) async {
-  final data = _CategoryHistory(
-    account: account,
-    category: category,
-    date: startOfMonth(date),
-    delta: delta,
-  );
-  await _insertCategoryHistory(data, txn);
-  return await _updateCategoryHistory(data, txn);
-}
-
-//----------------------------------------------------------------------------------
-// Helper utils
-//----------------------------------------------------------------------------------
 
 List<TimeIntValue> _makeList(List<Map<String, dynamic>> maps) {
   return List.generate(
@@ -123,6 +81,48 @@ extension CategoryHistoryExtension on DatabaseExecutor {
   //----------------------------------------------------------------------------------
   // Setters
   //----------------------------------------------------------------------------------
+
+  /// Inserts a category history entry with value = 0. Will ignore conflicts, so useful to make sure
+  /// an entry exists already.
+  Future<int> _insertCategoryHistory(_CategoryHistory data) async {
+    return insert(
+      categoryHistoryTable,
+      {
+        _account: data.account,
+        _category: data.category,
+        _date: data.date.millisecondsSinceEpoch,
+        _value: 0,
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  /// Updates the category history using the month from [date].
+  Future<int> _updateCategoryHistory(_CategoryHistory data) async {
+    return rawUpdate(
+      "UPDATE $categoryHistoryTable SET $_value = $_value + ?"
+      " WHERE $_account = ? AND $_category = ? AND $_date = ?",
+      [data.delta, data.account, data.category, data.date.millisecondsSinceEpoch],
+    );
+  }
+
+  /// Creates and updates the category history using the month from [date].
+  FutureOr<int> updateCategoryHistory({
+    required int account,
+    required int category,
+    required DateTime date,
+    required int delta,
+  }) async {
+    assert(this is Transaction);
+    final data = _CategoryHistory(
+      account: account,
+      category: category,
+      date: startOfMonth(date),
+      delta: delta,
+    );
+    await _insertCategoryHistory(data);
+    return await _updateCategoryHistory(data);
+  }
 
   //----------------------------------------------------------------------------------
   // Getters

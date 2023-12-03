@@ -89,19 +89,17 @@ FutureOr<void> addAllocation({
   await _insertAllocation(parent: parent, allocation: alloc, listIndex: index, db: txn);
 
   final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: parent.account!.key,
     category: parent.category.key,
     date: parent.date,
     delta: -signedValue,
-    txn: txn,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: parent.account!.key,
     category: alloc.category!.key,
     date: parent.date,
     delta: signedValue,
-    txn: txn,
   );
 }
 
@@ -127,19 +125,17 @@ FutureOr<void> deleteAllocation({
   );
 
   final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: parent.account!.key,
     category: parent.category.key,
     date: parent.date,
     delta: signedValue,
-    txn: txn,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: parent.account!.key,
     category: alloc.category!.key,
     date: parent.date,
     delta: -signedValue,
-    txn: txn,
   );
 }
 

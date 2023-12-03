@@ -81,35 +81,31 @@ Future<void> addReimbursement(
   final expense = (parent.value > 0) ? r.target : parent;
 
   /// Remove value from both transactions' original category
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: income.account!.key,
     category: income.category.key,
     date: income.date,
     delta: -r.value,
-    txn: txn,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: expense.account!.key,
     category: expense.category.key,
     date: expense.date,
     delta: r.value,
-    txn: txn,
   );
 
   /// Add value to "Ignore" category
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: income.account!.key,
     category: Category.ignore.key,
     date: income.date,
     delta: r.value,
-    txn: txn,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: expense.account!.key,
     category: Category.ignore.key,
     date: expense.date,
     delta: -r.value,
-    txn: txn,
   );
 }
 
@@ -131,35 +127,31 @@ Future<void> deleteReimbursement(
   final expense = (parent.value > 0) ? r.target : parent;
 
   /// Add value back to both transactions' original category
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: income.account!.key,
     category: income.category.key,
     date: income.date,
     delta: r.value,
-    txn: txn,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: expense.account!.key,
     category: expense.category.key,
     date: expense.date,
     delta: -r.value,
-    txn: txn,
   );
 
   /// Remove value from "Ignore" category
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: income.account!.key,
     category: Category.ignore.key,
     date: income.date,
     delta: -r.value,
-    txn: txn,
   );
-  await updateCategoryHistory(
+  await txn.updateCategoryHistory(
     account: expense.account!.key,
     category: Category.ignore.key,
     date: expense.date,
     delta: r.value,
-    txn: txn,
   );
 }
 
