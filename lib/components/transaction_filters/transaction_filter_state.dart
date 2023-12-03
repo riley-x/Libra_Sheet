@@ -136,7 +136,7 @@ class TransactionFilterState extends ChangeNotifier {
     } else {
       try {
         final format = DateFormat('MM/dd/yy');
-        time = format.parse(text);
+        time = format.parse(text, true);
       } on FormatException {
         error = true;
       }
