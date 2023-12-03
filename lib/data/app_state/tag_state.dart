@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 
@@ -18,12 +19,12 @@ class TagState {
   // Modification Functions
   //----------------------------------------------------------------------------
   Future<void> load() async {
-    list.addAll(await getTags());
+    list.addAll(await LibraDatabase.db.getAllTags());
     appState.notifyListeners();
   }
 
   Future<void> add(Tag tag) async {
-    int key = await insertTag(tag);
+    int key = await LibraDatabase.db.insertTag(tag);
     tag = tag.copyWith(key: key);
     list.insert(0, tag);
     appState.notifyListeners();
@@ -32,14 +33,14 @@ class TagState {
   Future<void> delete(Tag tag) async {
     list.removeWhere((it) => it.key == tag.key);
     appState.notifyListeners();
-    await deleteTag(tag);
+    await LibraDatabase.db.deleteTag(tag);
   }
 
   /// Tags are modified in place already. This function serves to notify listeners, and also update
   /// the database.
   Future<void> notifyUpdate(Tag tag) async {
     appState.notifyListeners();
-    await updateTag(tag);
+    await LibraDatabase.db.updateTag(tag);
   }
 
   //----------------------------------------------------------------------------

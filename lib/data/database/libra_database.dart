@@ -33,10 +33,18 @@ class LibraDatabase {
   // Members
   //-------------------------------------------------------------------------------------
   static Database? _database;
+
   static Database get db {
     if (_database == null) throw StateError("Database not initialized");
     return _database!;
   }
+
+  /// This measures the amount of "data" processed since the last backup happened. It is roughly
+  /// equivalent to the number of rows affected. A new backup will be registered when this reaches
+  /// [_maxScore].
+  static int _scoreSinceLastBackup = 0;
+
+  static const int _maxScore = 10;
 
   //-------------------------------------------------------------------------------------
   // Database setup
@@ -55,10 +63,12 @@ class LibraDatabase {
 
     _database = await openDatabase(
       path,
-      onCreate: _createDatabse,
+      onCreate: _createDatabase,
       version: 14,
     );
     libraDatabase = _database;
+
+    backup();
   }
 
   static Future<void> backup() async {
@@ -71,30 +81,25 @@ class LibraDatabase {
       newPath = "${origPath}_$timestamp";
     }
     await File(origPath).copy(newPath);
+    debugPrint("LibraDatabase::backup() Backed up to $newPath");
+    _scoreSinceLastBackup = 0;
   }
 
-  //-------------------------------------------------------------------------------------
-  // Database operations
-  //-------------------------------------------------------------------------------------
-
-  // Don't try to set a state member like `executor = txn` because that might mess up async methods.
-  Future<T> transaction<T>(Future<T> Function(Transaction) action) async {
-    return db.transaction((txn) async {
-      // TODO backup or something
-      final result = await action(txn);
-      return result;
-    });
+  /// Adds to [_scoreSinceLastBackup], and triggers a backup if it exceeds [_maxScore].
+  static void tallyBackup(int score) {
+    _scoreSinceLastBackup += score;
+    if (_scoreSinceLastBackup > _maxScore) backup();
   }
 }
 
-FutureOr<void> _createDatabse(Database db, int version) {
+FutureOr<void> _createDatabase(Database db, int version) {
   return switch (version) {
-    14 => _createDatabse14(db),
+    14 => _createDatabase14(db),
     _ => null,
   };
 }
 
-FutureOr<void> _createDatabse14(Database db) async {
+FutureOr<void> _createDatabase14(Database db) async {
   await db.execute(createAccountsTableSql);
   await db.execute("CREATE TABLE IF NOT EXISTS $categoryTable ("
       "`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "

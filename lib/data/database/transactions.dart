@@ -114,7 +114,7 @@ FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
 
   if (t.tags != null) {
     for (final tag in t.tags!) {
-      await insertTagJoin(t, tag, db: txn);
+      await txn.insertTagJoin(t, tag);
     }
   }
   if (t.allocations != null) {
@@ -144,7 +144,7 @@ Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
       await deleteAllocation(parent: t, index: i, txn: txn);
     }
   }
-  await deleteAllTags(t, db: txn);
+  await txn.deleteAllTags(t);
 
   if (t.account != null) {
     // TODO this can happen if the account is deleted, should delete all corresponding transactions

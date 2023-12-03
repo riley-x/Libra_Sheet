@@ -55,71 +55,66 @@ Tag _fromMap(Map<String, dynamic> map) {
   );
 }
 
-Future<int> insertTag(Tag tag) async {
-  if (libraDatabase == null) return 0;
-  return libraDatabase!.insert(
-    tagsTable,
-    _toMap(tag),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-}
+extension Tags on DatabaseExecutor {
+  Future<int> insertTag(Tag tag) {
+    return insert(
+      tagsTable,
+      _toMap(tag),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
-Future<void> updateTag(Tag tag) async {
-  await libraDatabase?.update(
-    tagsTable,
-    _toMap(tag),
-    where: '$_key = ?',
-    whereArgs: [tag.key],
-  );
-}
+  Future<int> updateTag(Tag tag) {
+    return update(
+      tagsTable,
+      _toMap(tag),
+      where: '$_key = ?',
+      whereArgs: [tag.key],
+    );
+  }
 
-Future<void> deleteTag(Tag tag) async {
-  await libraDatabase?.delete(
-    tagsTable,
-    where: '$_key = ?',
-    whereArgs: [tag.key],
-  );
-}
+  Future<int> deleteTag(Tag tag) {
+    return delete(
+      tagsTable,
+      where: '$_key = ?',
+      whereArgs: [tag.key],
+    );
+  }
 
-Future<List<Tag>> getTags() async {
-  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    tagsTable,
-    orderBy: "$_key DESC",
-  );
-  return List.generate(
-    maps.length,
-    (i) => _fromMap(maps[i]),
-  );
-}
+  Future<List<Tag>> getAllTags() async {
+    final List<Map<String, dynamic>> maps = await query(
+      tagsTable,
+      orderBy: "$_key DESC",
+    );
+    return List.generate(
+      maps.length,
+      (i) => _fromMap(maps[i]),
+    );
+  }
 
-Future<int> insertTagJoin(lt.Transaction trans, Tag tag, {DatabaseExecutor? db}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.insert(
-    tagJoinTable,
-    {
-      "transaction_id": trans.key,
-      "tag_id": tag.key,
-    },
-  );
-}
+  Future<int> insertTagJoin(lt.Transaction trans, Tag tag) {
+    return insert(
+      tagJoinTable,
+      {
+        "transaction_id": trans.key,
+        "tag_id": tag.key,
+      },
+    );
+  }
 
-Future<int> deleteTagJoin(lt.Transaction trans, Tag tag, {DatabaseExecutor? db}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.delete(
-    tagJoinTable,
-    where: "transaction_id = ? AND tag_id = ?",
-    whereArgs: [trans.key, tag.key],
-  );
-}
+  Future<int> deleteTagJoin(lt.Transaction trans, Tag tag) {
+    return delete(
+      tagJoinTable,
+      where: "transaction_id = ? AND tag_id = ?",
+      whereArgs: [trans.key, tag.key],
+    );
+  }
 
-Future<int> deleteAllTags(lt.Transaction trans, {DatabaseExecutor? db}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.delete(
-    tagJoinTable,
-    where: "transaction_id = ?",
-    whereArgs: [trans.key],
-  );
+  Future<int> deleteAllTags(lt.Transaction trans) {
+    return delete(
+      tagJoinTable,
+      where: "transaction_id = ?",
+      whereArgs: [trans.key],
+    );
+  }
 }
