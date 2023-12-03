@@ -94,8 +94,7 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({super.key});
 
   void save(BuildContext context, AddCsvState state) {
-    context.read<LibraAppState>().popBackStack();
-    context.read<TransactionService>().addAll(state.transactions);
+    state.saveAll();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Center(child: Text('Saved ${state.transactions.length} transactions.')),

@@ -289,4 +289,17 @@ class AddCsvState extends ChangeNotifier {
     focusedTransIndex = -1;
     notifyListeners();
   }
+
+  //---------------------------------------------------------------------------
+  // Saving
+  //---------------------------------------------------------------------------
+  void saveAll() {
+    appState.popBackStack();
+    appState.transactions.addAll(transactions);
+    var csvFormat = columnTypes.map((e) => e.name).join(',');
+    if (csvFormat != account!.csvFormat) {
+      account!.csvFormat = csvFormat;
+      appState.notifyUpdateAccount(account!);
+    }
+  }
 }
