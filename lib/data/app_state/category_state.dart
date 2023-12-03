@@ -25,8 +25,8 @@ class CategoryState {
   //----------------------------------------------------------------------------
   Future<void> load() async {
     await libraDatabase?.transaction((txn) async {
-      await loadChildCategories(txn, Category.income);
-      await loadChildCategories(txn, Category.expense);
+      await loadChildCategories(txn, income);
+      await loadChildCategories(txn, expense);
     });
   }
 
@@ -35,13 +35,12 @@ class CategoryState {
   //----------------------------------------------------------------------------
   void add(Category cat) async {
     debugPrint("CategoryState::add() $cat");
-    int key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
-    cat = cat.copyWith(key: key);
+    cat.key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
     cat.parent!.subCats.add(cat);
     appState.notifyListeners();
   }
 
-  void delete(Category cat, [bool deleteFromDatabase = true]) async {
+  void delete(Category cat, {Category? oldParent, bool deleteFromDatabase = true}) async {
     debugPrint("CategoryState::delete() $cat");
     final parentList = cat.parent!.subCats;
     final ind = parentList.indexWhere((it) => it.key == cat.key);
@@ -56,16 +55,16 @@ class CategoryState {
     });
   }
 
-  Future<void> update(Category old, Category cat) async {
-    if (old.parent != cat.parent) {
-      delete(old, false);
-      add(cat);
-    } else {
-      debugPrint("CategoryState::update() $cat");
-      old.copySoftFieldsFrom(cat);
-      appState.notifyListeners();
-      updateCategory(cat);
+  Future<void> update(Category cat, Category? oldParent) async {
+    debugPrint("CategoryState::update() $cat");
+    int? listIndex;
+    if (cat.parent != oldParent) {
+      delete(cat, oldParent: oldParent, deleteFromDatabase: false);
+      listIndex = cat.parent!.subCats.length;
+      cat.parent!.subCats.add(cat);
     }
+    appState.notifyListeners();
+    updateCategory(cat, listIndex: listIndex);
   }
 
   void reorder(Category parent, int oldIndex, int newIndex) async {
@@ -98,11 +97,11 @@ class CategoryState {
     List<Category> nested;
     switch (type) {
       case ExpenseFilterType.all:
-        nested = Category.income.subCats + Category.expense.subCats;
+        nested = income.subCats + expense.subCats;
       case ExpenseFilterType.income:
-        nested = Category.income.subCats;
+        nested = income.subCats;
       case ExpenseFilterType.expense:
-        nested = Category.expense.subCats;
+        nested = expense.subCats;
     }
 
     final out = <Category>[];
@@ -120,13 +119,13 @@ class CategoryState {
   List<Category> getPotentialParents(Category current) {
     List<Category> out = [];
     if (current.type case ExpenseFilterType.expense) {
-      out.add(Category.expense);
-      for (final cat in Category.expense.subCats) {
+      out.add(expense);
+      for (final cat in expense.subCats) {
         if (cat != current) out.add(cat);
       }
     } else if (current.type case ExpenseFilterType.income) {
-      out.add(Category.income);
-      for (final cat in Category.income.subCats) {
+      out.add(income);
+      for (final cat in income.subCats) {
         if (cat != current) out.add(cat);
       }
     }

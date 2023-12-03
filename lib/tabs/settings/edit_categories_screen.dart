@@ -77,16 +77,20 @@ class EditCategoriesState extends ChangeNotifier {
   void save() async {
     if (formKey.currentState?.validate() ?? false) {
       formKey.currentState?.save();
-      final cat = focused.copyWith(
-        name: saveName,
-        color: color,
-        level: parent!.level + 1,
-        parent: parent,
-      );
       if (focused.key == 0) {
+        final cat = Category(
+          name: saveName,
+          color: color,
+          parent: parent!,
+        );
         appState.categories.add(cat);
       } else {
-        appState.categories.update(focused, cat);
+        final oldParent = focused.parent;
+        focused.name = saveName;
+        focused.color = color;
+        focused.level = parent!.level + 1;
+        focused.parent = parent;
+        appState.categories.update(focused, oldParent);
       }
       clearFocus();
     }

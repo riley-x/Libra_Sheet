@@ -5,13 +5,12 @@ import 'package:libra_sheet/data/time_value.dart';
 class CategoryBase {}
 
 class Category {
-  final int key;
+  int key;
   String name;
   Color color;
 
   /// Parent category for nested categories. All level > 0 categories must have a valid parent.
-  /// DO NOT replace the parent category without updating this field! Consider using [copyFrom] to
-  /// in-place update the parent instead;
+  /// DO NOT replace the parent category!
   Category? parent;
   final List<Category> subCats = [];
 
@@ -23,7 +22,7 @@ class Category {
   ///   1: top-level user categories
   ///   2: user subCategories
   ///   3+: not implemented
-  final int level;
+  int level;
 
   Category({
     this.key = 0,
@@ -33,6 +32,7 @@ class Category {
     List<Category>? subCats,
   })  : type = parent.type,
         level = parent.level + 1 {
+    assert(parent != Category.empty);
     if (subCats != null) {
       this.subCats.addAll(subCats);
     }
@@ -46,45 +46,12 @@ class Category {
     required this.level,
   });
 
-  // Category.copy(Category other)
-  //     : key = other.key,
-  //       name = other.name,
-  //       color = other.color,
-  //       level = other.level,
-  //       parent = other.parent,
-  //       type = other.type {
-  //   subCats.addAll(other.subCats);
-  // }
-
-  /// Update current fields from [other].
-  void copySoftFieldsFrom(Category other) {
-    assert(other.parent == parent);
-    name = other.name;
-    color = other.color;
-  }
-
-  /// Don't use with super (level==0) categories, because of the null check on this.parent :(
-  Category copyWith({
-    int? key,
-    String? name,
-    Color? color,
-    int? level,
-    Category? parent,
-    ExpenseType? type,
-    List<Category>? subCats,
-  }) {
-    assert(this.level != 0);
-    return Category(
-        key: key ?? this.key,
-        name: name ?? this.name,
-        color: color ?? this.color,
-        parent: parent ?? this.parent!,
-        subCats: subCats ?? this.subCats);
-  }
-
   /// Placeholder for initializing non-null fields, and also to indicate an uncategorized entity.
   /// I.e. it stands in for [income] or [expense] when the value is not known. This is also shown in
   /// the UI in preference of [income] and [expense], since those two can be a bit confusing.
+  ///
+  /// WARNING categories should never have [empty] as a parent. On contrast, transactions and rules
+  /// should never have [income] or [expense] as targets.
   static final empty = Category._manual(
     key: 0,
     name: 'Uncategorized',
@@ -93,14 +60,12 @@ class Category {
     level: 0,
   );
 
-  // TODO repeal the need for separate income vs expense categories. Just use empty for all. This
-  // may mess up places that expect categories to be either positive or negative though. And things
-  // like category history may want to filter on one or the other. Maybe just on UI side, but makes
-  // filtering/selecting a bit more annoying?
-
   /// The main super-category corresponding to income transactions. This category includes all
   /// un-categorized transactions with positive value. Note that all income categories must refer
   /// to this as parent, and must be added to its subCats list.
+  ///
+  /// WARNING categories should never have [empty] as a parent. On contrast, transactions and rules
+  /// should never have [income] or [expense] as targets.
   static final income = Category._manual(
     key: -1,
     name: 'Income',
@@ -112,6 +77,9 @@ class Category {
   /// The main super-category corresponding to expense transactions. This category includes all
   /// un-categorized transactions with negative value. Note that all expense categories must refer
   /// to this as parent, and must be added to its subCats list.
+  ///
+  /// WARNING categories should never have [empty] as a parent. On contrast, transactions and rules
+  /// should never have [income] or [expense] as targets.
   static final expense = Category._manual(
     key: -2,
     name: 'Expense',
