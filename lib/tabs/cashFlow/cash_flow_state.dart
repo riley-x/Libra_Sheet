@@ -68,6 +68,9 @@ class CashFlowState extends fnd.ChangeNotifier {
 
     netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
+    netReturns = categoryHistory[Category.investment.key] ??
+        appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList();
+
     notifyListeners();
   }
 

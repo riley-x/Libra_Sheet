@@ -72,7 +72,7 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Net Income", style: textStyle),
           Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
           Text("Investment Returns", style: textStyle),
-          // Expanded(child: RedGreenBarChart(state.netReturns.sublist(range.$1, range.$2))),
+          Expanded(child: RedGreenBarChart(state.netReturns.sublist(range.$1, range.$2))),
         ],
       );
     }
