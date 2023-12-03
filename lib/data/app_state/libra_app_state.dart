@@ -105,7 +105,7 @@ class LibraAppState extends ChangeNotifier {
 
   Future<void> _loadMonths() async {
     final now = DateTime.now();
-    final earliestMonth = await getEarliestMonth();
+    final earliestMonth = await LibraDatabase.db.getEarliestMonth();
     if (earliestMonth == null) return;
 
     // no easy way to do this in dart, so do manually
@@ -129,7 +129,7 @@ class LibraAppState extends ChangeNotifier {
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
-    final newData = await getMonthlyNet();
+    final newData = await LibraDatabase.db.getMonthlyNet();
     netWorthData = newData.withAlignedTimes(monthList, cumulate: true).fixedForCharts();
     notifyListeners();
   }

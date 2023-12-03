@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
@@ -70,7 +71,7 @@ class CategoryTabState extends ChangeNotifier {
       CategoryTabTimeFrame.current => appState.monthList.lastOrNull,
       CategoryTabTimeFrame.oneYear => appState.monthList[max(0, appState.monthList.length - 12)]
     };
-    individualValues = await getCategoryTotals(
+    individualValues = await LibraDatabase.db.getCategoryTotals(
       start: startTime,
       accounts: accounts.map((e) => e.key),
     );
@@ -122,7 +123,7 @@ class CategoryTabState extends ChangeNotifier {
   }
 
   void _loadCategoryDetails(Category category) async {
-    final map = await getCategoryHistory(
+    final map = await LibraDatabase.db.getCategoryHistory(
       callback: (_, vals) =>
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
     );

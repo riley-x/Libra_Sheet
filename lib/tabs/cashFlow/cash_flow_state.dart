@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' as fnd;
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -52,11 +53,11 @@ class CashFlowState extends fnd.ChangeNotifier {
   }
 
   Future<void> load() async {
-    final categoryHistory = await getCategoryHistory(
+    final categoryHistory = await LibraDatabase.db.getCategoryHistory(
       accounts: accounts.map((e) => e.key),
       callback: (_, vals) => vals.withAlignedTimes(appState.monthList),
     );
-    var _netIncome = await getMonthlyNetIncome(
+    var _netIncome = await LibraDatabase.db.getMonthlyNetIncome(
       accounts: accounts.map((e) => e.key),
     );
 

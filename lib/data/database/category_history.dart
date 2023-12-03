@@ -37,16 +37,6 @@ class _CategoryHistory {
   });
 }
 
-FutureOr<DateTime?> getEarliestMonth() async {
-  final out = await libraDatabase!.query(
-    categoryHistoryTable,
-    columns: ["MIN($_date) as $_date"],
-    where: "$_value != 0",
-  );
-  if (out.first[_date] == null) return null; // This happens when the database is empty
-  return DateTime.fromMillisecondsSinceEpoch(out.first[_date] as int, isUtc: true);
-}
-
 /// Inserts a category history entry with value = 0. Will ignore conflicts, so useful to make sure
 /// an entry exists already.
 Future<int> _insertCategoryHistory(_CategoryHistory data, DatabaseExecutor db) async {
@@ -89,164 +79,203 @@ FutureOr<int> updateCategoryHistory({
   return await _updateCategoryHistory(data, txn);
 }
 
-/// Returns the monthly net change across all acounts or [accoundId].
-Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
-  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    categoryHistoryTable,
-    columns: [_date, "SUM($_value) as $_value"],
-    where: "$_value != 0${(accountId != null) ? " AND $_account = ?" : ""}",
-    whereArgs: (accountId != null) ? [accountId] : null,
-    groupBy: _date,
-    orderBy: _date,
-  );
+//----------------------------------------------------------------------------------
+// Helper utils
+//----------------------------------------------------------------------------------
 
-  return List.generate(maps.length, (i) {
-    return TimeIntValue(
+List<TimeIntValue> _makeList(List<Map<String, dynamic>> maps) {
+  return List.generate(
+    maps.length,
+    (i) => TimeIntValue(
       time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
       value: maps[i][_value],
-    );
-  });
+    ),
+  );
 }
 
-/// Gets the monthly net income, which ignores the Ignore and Investment categories.
-Future<List<TimeIntValue>> getMonthlyNetIncome({
-  Iterable<int> accounts = const [],
-}) async {
-  // the value != 0 helps filter away deleted months i.e.
-  var where = "$_value != 0 AND $_category != ? AND $_category != ?";
-  List whereArgs = [Category.ignore.key, Category.investment.key];
-  if (accounts.isNotEmpty) {
-    where += " AND $_account in (${List.filled(accounts.length, '?').join(',')})";
-    whereArgs.addAll(accounts);
+/// Adds a check for account in [accounts] to [where] and [whereArgs], returning the new where clause.
+String _addAccountsFilter(Iterable<int> accounts, String where, List whereArgs) {
+  if (accounts.isEmpty) return where;
+  if (where.isNotEmpty) {
+    where += " AND ";
   }
-
-  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    categoryHistoryTable,
-    columns: [_date, "SUM($_value) as $_value"],
-    where: where,
-    whereArgs: whereArgs,
-    groupBy: _date,
-    orderBy: _date,
-  );
-
-  return List.generate(maps.length, (i) {
-    return TimeIntValue(
-      time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
-      value: maps[i][_value],
-    );
-  });
+  where += "$_account in (${List.filled(accounts.length, '?').join(',')})";
+  whereArgs.addAll(accounts);
+  return where;
 }
 
-/// Returns the monthly net change for the sum of certain categories
-Future<List<TimeIntValue>> getCategoryHistorySum(List<int> categories) async {
-  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    categoryHistoryTable,
-    columns: [_date, "SUM($_value) as $_value"],
-    where: "$_value != 0 AND $_category in (${List.filled(categories.length, '?').join(',')})",
-    whereArgs: categories,
-    groupBy: _date,
-    orderBy: _date,
-  );
-
-  return List.generate(maps.length, (i) {
-    return TimeIntValue(
-      time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
-      value: maps[i][_value],
-    );
-  });
+/// Adds a check for category in [categories] to [where] and [whereArgs], returning the new where clause.
+String _addCategoriesFilter(Iterable<int> categories, String where, List whereArgs) {
+  if (categories.isEmpty) return where;
+  if (where.isNotEmpty) {
+    where += " AND ";
+  }
+  where += "$_category in (${List.filled(categories.length, '?').join(',')})";
+  whereArgs.addAll(categories);
+  return where;
 }
 
-/// Returns a map: category -> list of the value history in that month. This function does not pad
-/// the lists to equal length or accumulate them. You can specify [callback] to handle some common
-/// processing options easily though.
-///
-/// Returns the categories in [categories], or all categories if the list is empty.
-Future<Map<int, List<TimeIntValue>>> getCategoryHistory({
-  List<int> categories = const [],
-  Iterable<int> accounts = const [],
-  List<TimeIntValue> Function(int category, List<TimeIntValue> history)? callback,
-}) async {
-  if (libraDatabase == null) return {};
+//----------------------------------------------------------------------------------
+// Main functions
+//----------------------------------------------------------------------------------
 
-  var where = "$_value != 0";
-  List whereArgs = [];
-  if (categories.isNotEmpty) {
-    where += " AND $_category in (${List.filled(categories.length, '?').join(',')})";
-    whereArgs = categories;
+extension CategoryHistoryExtension on DatabaseExecutor {
+  //----------------------------------------------------------------------------------
+  // Setters
+  //----------------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------------
+  // Getters
+  //----------------------------------------------------------------------------------
+
+  /// Returns the earliest month in the database with data
+  FutureOr<DateTime?> getEarliestMonth() async {
+    final out = await query(
+      categoryHistoryTable,
+      columns: ["MIN($_date) as $_date"],
+      where: "$_value != 0",
+    );
+    if (out.first[_date] == null) return null; // This happens when the database is empty
+    return DateTime.fromMillisecondsSinceEpoch(out.first[_date] as int, isUtc: true);
   }
-  if (accounts.isNotEmpty) {
-    where += " AND $_account in (${List.filled(accounts.length, '?').join(',')})";
-    whereArgs.addAll(accounts);
+
+  /// Returns the monthly net change across all acounts or [accoundId]. Useful for getting an
+  /// account's balance history.
+  Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
+    final List<Map<String, dynamic>> maps = await query(
+      categoryHistoryTable,
+      columns: [_date, "SUM($_value) as $_value"],
+      where: "$_value != 0${(accountId != null) ? " AND $_account = ?" : ""}",
+      whereArgs: (accountId != null) ? [accountId] : null,
+      groupBy: _date,
+      orderBy: _date,
+    );
+
+    return _makeList(maps);
   }
 
-  final rows = await libraDatabase!.query(
-    categoryHistoryTable,
-    columns: [_date, _category, "SUM($_value) as $_value"],
-    where: where,
-    whereArgs: whereArgs,
-    groupBy: "$_date, $_category",
-    orderBy: "$_category, $_date",
-  );
+  /// Gets the monthly net income, which ignores the Ignore and Investment categories.
+  Future<List<TimeIntValue>> getMonthlyNetIncome({
+    Iterable<int> accounts = const [],
+  }) async {
+    // the value != 0 helps filter away deleted months i.e.
+    var where = "$_value != 0 AND $_category != ? AND $_category != ?";
+    List whereArgs = [Category.ignore.key, Category.investment.key];
+    where = _addAccountsFilter(accounts, where, whereArgs);
 
-  Map<int, List<TimeIntValue>> out = {};
-  if (rows.isEmpty) return out;
+    final List<Map<String, dynamic>> maps = await query(
+      categoryHistoryTable,
+      columns: [_date, "SUM($_value) as $_value"],
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: _date,
+      orderBy: _date,
+    );
 
-  /// Per-entry accumulators ///
-  int currentCategory = rows[0][_category] as int;
-  var currentValues = <TimeIntValue>[];
-  void _addEntry() {
-    if (callback != null) {
-      currentValues = callback(currentCategory, currentValues);
+    return _makeList(maps);
+  }
+
+  /// Returns the monthly net change for the sum of certain categories
+  Future<List<TimeIntValue>> getCategoryHistorySum(Iterable<int> categories) async {
+    var where = "$_value != 0";
+    var whereArgs = [];
+    where = _addCategoriesFilter(categories, where, whereArgs);
+
+    final List<Map<String, dynamic>> maps = await query(
+      categoryHistoryTable,
+      columns: [_date, "SUM($_value) as $_value"],
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: _date,
+      orderBy: _date,
+    );
+
+    return _makeList(maps);
+  }
+
+  /// Returns a map: category -> list of the value history in that month. This function does not pad
+  /// the lists to equal length or accumulate them. You can specify [callback] to handle some common
+  /// processing options easily though.
+  ///
+  /// Returns the categories in [categories], or all categories if the list is empty.
+  Future<Map<int, List<TimeIntValue>>> getCategoryHistory({
+    Iterable<int> categories = const [],
+    Iterable<int> accounts = const [],
+    List<TimeIntValue> Function(int category, List<TimeIntValue> history)? callback,
+  }) async {
+    if (libraDatabase == null) return {};
+
+    var where = "$_value != 0";
+    List whereArgs = [];
+    where = _addAccountsFilter(accounts, where, whereArgs);
+    where = _addCategoriesFilter(categories, where, whereArgs);
+
+    /// Get all categories sorted by their key and date. Then below, we iterate consecutively and
+    /// manually group the category dates.
+    final rows = await query(
+      categoryHistoryTable,
+      columns: [_date, _category, "SUM($_value) as $_value"],
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: "$_date, $_category",
+      orderBy: "$_category, $_date",
+    );
+
+    Map<int, List<TimeIntValue>> out = {};
+    if (rows.isEmpty) return out;
+
+    /// Per-entry accumulators ///
+    int currentCategory = rows[0][_category] as int;
+    var currentValues = <TimeIntValue>[];
+    void addEntry() {
+      if (callback != null) {
+        currentValues = callback(currentCategory, currentValues);
+      }
+      out[currentCategory] = currentValues;
     }
-    out[currentCategory] = currentValues;
-  }
 
-  /// Loop per category ///
-  for (final row in rows) {
-    final cat = row[_category] as int;
-    if (cat != currentCategory) {
-      _addEntry();
-      currentValues = [];
-      currentCategory = cat;
+    /// Loop per category ///
+    for (final row in rows) {
+      final cat = row[_category] as int;
+      if (cat != currentCategory) {
+        addEntry();
+        currentValues = [];
+        currentCategory = cat;
+      }
+      currentValues.add(TimeIntValue(
+        time: DateTime.fromMillisecondsSinceEpoch(row[_date] as int, isUtc: true),
+        value: row[_value] as int,
+      ));
     }
-    currentValues.add(TimeIntValue(
-      time: DateTime.fromMillisecondsSinceEpoch(row[_date] as int, isUtc: true),
-      value: row[_value] as int,
-    ));
-  }
-  _addEntry(); // last category is dangling, so add here
-  return out;
-}
-
-/// Returns a map categoryId -> total, from the given [start] time (inclusive) and [accounts].
-Future<Map<int, int>> getCategoryTotals({
-  DateTime? start,
-  Iterable<int>? accounts,
-  Iterable<int>? tags, // TODO not sorted by tag...manually add transactions?
-}) async {
-  String where = "";
-  List args = <dynamic>[];
-  if (start != null) {
-    where = "$_date >= ?";
-    args.add(start.millisecondsSinceEpoch);
-  }
-  if (accounts != null && accounts.isNotEmpty) {
-    if (where.isNotEmpty) where += " AND ";
-    where += "$_account in (${List.filled(accounts.length, '?').join(',')})";
-    args.addAll(accounts);
+    addEntry(); // last category is dangling, so add here
+    return out;
   }
 
-  final maps = await libraDatabase!.query(
-    categoryHistoryTable,
-    columns: [_category, "SUM($_value) as $_value"],
-    where: (where.isNotEmpty) ? where : null,
-    whereArgs: args,
-    groupBy: _category,
-  );
+  /// Returns a map categoryId -> total, from the given [start] time (inclusive) and [accounts].
+  Future<Map<int, int>> getCategoryTotals({
+    DateTime? start,
+    Iterable<int> accounts = const [],
+  }) async {
+    String where = "";
+    List args = <dynamic>[];
+    if (start != null) {
+      where = "$_date >= ?";
+      args.add(start.millisecondsSinceEpoch);
+    }
+    where = _addAccountsFilter(accounts, where, args);
 
-  final out = <int, int>{};
-  for (final map in maps) {
-    out[map[_category] as int] = map[_value] as int;
+    final maps = await query(
+      categoryHistoryTable,
+      columns: [_category, "SUM($_value) as $_value"],
+      where: (where.isNotEmpty) ? where : null,
+      whereArgs: args,
+      groupBy: _category,
+    );
+
+    final out = <int, int>{};
+    for (final map in maps) {
+      out[map[_category] as int] = map[_value] as int;
+    }
+    return out;
   }
-  return out;
 }
