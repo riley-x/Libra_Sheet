@@ -44,6 +44,7 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> addAll(List<Transaction> transactions) async {
+    LibraDatabase.backup();
     await libraDatabase?.transaction((txn) async {
       for (final t in transactions) {
         await insertTransaction(t, txn: txn);

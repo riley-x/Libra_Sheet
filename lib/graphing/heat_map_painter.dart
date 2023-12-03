@@ -206,7 +206,7 @@ class HeatMapPainter<T> extends CustomPainter {
     double paddingX = 0,
     double paddingY = 0,
     (double, double) Function(int depth)? paddingMapper,
-    this.minSameAxisRatio = 0.9,
+    this.minSameAxisRatio = 0.8,
     this.textStyle,
   }) {
     if (paddingMapper != null) {

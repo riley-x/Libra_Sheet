@@ -61,7 +61,7 @@ class _TransactionList extends StatelessWidget {
         children: [
           SpeedDialChild(
             child: const Icon(Icons.upload_file),
-            backgroundColor: Colors.deepOrange,
+            backgroundColor: Colors.green.shade600,
             foregroundColor: Colors.white,
             label: 'Add CSV',
             onTap: () => context.read<LibraAppState>().navigateToAddCsvScreen(),
