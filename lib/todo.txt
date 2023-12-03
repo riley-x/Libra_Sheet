@@ -11,3 +11,4 @@
 - Replace all database calls with extension (see tags.dart).
 - Replace income/expense categories in filters with a single "uncategorized"
 - Get rid of DropdownButton and replace with newer MenuAnchor?
+- Investment history bar chart; can just sum over investment account histories, no need for new category

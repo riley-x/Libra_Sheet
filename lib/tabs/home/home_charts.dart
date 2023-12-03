@@ -166,7 +166,7 @@ class _LiabilitiesPie extends StatelessWidget {
     return ChartWithTitle(
       height: height,
       textLeft: 'Liabilities',
-      textRight: total.dollarString(),
+      textRight: (-total).dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
       child: AccountPieChart(accounts),

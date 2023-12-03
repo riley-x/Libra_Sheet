@@ -33,7 +33,7 @@ class AccountPieChart extends StatelessWidget {
         animationDuration: 300,
         dataSource: accounts,
         xValueMapper: (Account data, _) => data.name,
-        yValueMapper: (Account data, _) => data.balance / 10000,
+        yValueMapper: (Account data, _) => data.balance.abs() / 10000,
         pointColorMapper: (Account account, _) => account.color,
         dataLabelMapper: (Account account, _) => account.name,
         // account.balance.dollarString(),
