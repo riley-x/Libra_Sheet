@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/tabs/settings/database_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_accounts_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_categories_screen.dart';
 import 'package:libra_sheet/tabs/settings/edit_rules_screen.dart';
@@ -63,6 +64,7 @@ class _SettingsTabState extends State<SettingsTab> {
       SettingsScreen.rules => RulesSettingsScreen(onSelect),
       SettingsScreen.incomeRules => const EditRulesScreen(ExpenseType.income),
       SettingsScreen.expenseRules => const EditRulesScreen(ExpenseType.expense),
+      SettingsScreen.database => const DatabaseScreen(),
       _ => const SizedBox(),
     };
 

@@ -43,6 +43,7 @@ class LibraDatabase {
   /// equivalent to the number of rows affected. A new backup will be registered when this reaches
   /// [_maxScore].
   static int _scoreSinceLastBackup = 0;
+  static DateTime _lastBackupTime = DateTime.now();
 
   static const int _maxScore = 10;
 
@@ -72,7 +73,10 @@ class LibraDatabase {
   }
 
   static Future<void> backup() async {
-    final timestamp = _backupDateFormat.format(DateTime.now());
+    _lastBackupTime = DateTime.now();
+    _scoreSinceLastBackup = 0;
+    final timestamp = _backupDateFormat.format(_lastBackupTime);
+
     String origPath = db.path;
     String newPath;
     if (origPath.endsWith('.db')) {
@@ -80,15 +84,17 @@ class LibraDatabase {
     } else {
       newPath = "${origPath}_$timestamp";
     }
-    _scoreSinceLastBackup = 0;
     await File(origPath).copy(newPath);
     debugPrint("LibraDatabase::backup() Backed up to $newPath");
   }
 
-  /// Adds to [_scoreSinceLastBackup], and triggers a backup if it exceeds [_maxScore].
+  /// Adds to [_scoreSinceLastBackup], and triggers a backup if it exceeds [_maxScore] and hasn't
+  /// been backed-up in the past 10 seconds (this helps prevent multiple backups in a single big
+  /// transaction).
   static void tallyBackup(int score) {
     _scoreSinceLastBackup += score;
-    if (_scoreSinceLastBackup > _maxScore) backup();
+    if (_scoreSinceLastBackup > _maxScore &&
+        DateTime.now().difference(_lastBackupTime).inSeconds > 10) backup();
   }
 }
 

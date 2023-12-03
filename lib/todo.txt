@@ -5,5 +5,6 @@
 - Hover on heatmap
 - Double sided stack column chart
 - Dark theme
+- Replace all database calls with extension (see tags.dart).
 - Replace income/expense categories in filters with a single "uncategorized"
 - Get rid of DropdownButton and replace with newer MenuAnchor?
