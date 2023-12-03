@@ -12,6 +12,9 @@ const String _category = "category_id";
 const String _date = "date";
 const String _value = "value";
 
+const String historyAccount = _account;
+const String historyValue = _value;
+
 const String createCategoryHistoryTableSql = "CREATE TABLE IF NOT EXISTS $categoryHistoryTable ("
     "$_account INTEGER NOT NULL, "
     "$_category INTEGER NOT NULL, "

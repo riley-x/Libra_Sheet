@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
@@ -9,7 +10,8 @@ import 'package:sqflite/sqlite_api.dart';
 const accountsTable = 'accounts';
 
 const _key = "id";
-const _balance = "balance";
+const _balance = "current_balance";
+const _index = "listIndex";
 
 const createAccountsTableSql = "CREATE TABLE IF NOT EXISTS `accounts` ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
@@ -19,14 +21,13 @@ const createAccountsTableSql = "CREATE TABLE IF NOT EXISTS `accounts` ("
     "`csvPattern` TEXT NOT NULL DEFAULT '', "
     "`screenReaderAlias` TEXT NOT NULL DEFAULT '', "
     "`colorLong` INTEGER NOT NULL, "
-    "`listIndex` INTEGER NOT NULL, "
-    "$_balance INTEGER NOT NULL DEFAULT 0)";
+    "$_index INTEGER NOT NULL)";
 
 const createTestAccountsSql = '''
-INSERT INTO $accountsTable ($_key, "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex", $_balance) VALUES
-(1, 'Cash', '', 'Cash', '', '', 4279542308, 0, 0),
-(2, 'Checkings', '', 'Bank', '', '', 4280391411, 1, 0),
-(3, 'Savings', '', 'Bank', '', '', 4290126323, 2, 0);
+INSERT INTO $accountsTable ($_key, "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex") VALUES
+(1, 'Cash', '', 'Cash', '', '', 4279542308, 0),
+(2, 'Checkings', '', 'Bank', '', '', 4280391411, 1),
+(3, 'Savings', '', 'Bank', '', '', 4290126323, 2);
 ''';
 
 Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
@@ -36,7 +37,6 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
     'type': acc.type.label,
     'csvPattern': acc.csvFormat,
     'colorLong': acc.color.value,
-    'balance': acc.balance, // TODO don't save this here, but only added DEFAULT 0 line late
   };
 
   /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
@@ -55,7 +55,7 @@ Account _fromMap(Map<String, dynamic> map) {
     type: AccountType.fromString(map['type']),
     key: map[_key],
     name: map['name'],
-    balance: map['balance'],
+    balance: map[_balance] ?? 0,
     description: map['description'],
     color: Color(map['colorLong']),
     csvFormat: map['csvPattern'],
@@ -84,11 +84,26 @@ Future<void> updateAccount(Account acc, {int? listIndex}) async {
 }
 
 Future<List<Account>> getAccounts() async {
-  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    "$accountsTable a LEFT OUTER JOIN $transactionsTable t ON t.$transactionAccount = a.$_key",
-    columns: ["a.*, MAX(t.$transactionDate) as last_updated"],
-    orderBy: "listIndex",
-    groupBy: "a.$_key",
+  final List<Map<String, dynamic>> maps = await libraDatabase!.rawQuery(
+    """
+    SELECT
+      a.*,
+      t.last_updated,
+      h.$_balance
+    FROM
+      $accountsTable a
+    LEFT OUTER JOIN
+      (SELECT $transactionAccount, MAX($transactionDate) as last_updated
+        FROM $transactionsTable
+        GROUP BY $transactionAccount) t
+      ON t.$transactionAccount = a.$_key
+    LEFT OUTER JOIN
+      (SELECT $historyAccount, SUM($historyValue) as $_balance
+        FROM $categoryHistoryTable
+        GROUP BY $historyAccount) h
+      ON h.$historyAccount = a.$_key
+    ORDER BY a.$_index
+    """,
   );
   return List.generate(maps.length, (i) => _fromMap(maps[i]));
 }
