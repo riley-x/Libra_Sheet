@@ -133,15 +133,20 @@ Future<List<TimeIntValue>> getCategoryHistorySum(List<int> categories) async {
 /// Returns the categories in [categories], or all categories if the list is empty.
 Future<Map<int, List<TimeIntValue>>> getCategoryHistory({
   List<int> categories = const [],
+  Iterable<int> accounts = const [],
   List<TimeIntValue> Function(int category, List<TimeIntValue> history)? callback,
 }) async {
   if (libraDatabase == null) return {};
 
   var where = "$_value != 0";
-  List? whereArgs;
+  List whereArgs = [];
   if (categories.isNotEmpty) {
     where += " AND $_category in (${List.filled(categories.length, '?').join(',')})";
     whereArgs = categories;
+  }
+  if (accounts.isNotEmpty) {
+    where += " AND $_account in (${List.filled(accounts.length, '?').join(',')})";
+    whereArgs.addAll(accounts);
   }
 
   final rows = await libraDatabase!.query(

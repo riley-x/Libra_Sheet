@@ -50,6 +50,7 @@ class CashFlowState extends fnd.ChangeNotifier {
 
   Future<void> load() async {
     final categoryHistory = await getCategoryHistory(
+      accounts: accounts.map((e) => e.key),
       callback: (_, vals) =>
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
     );
