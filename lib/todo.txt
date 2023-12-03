@@ -1,4 +1,5 @@
 - Save account CSV format, CSV column layout/scroll
+- Account card color bar
 - Tabbing on forms
 - Transaction screen filter values get deleted on tab switch and return, weird in filter grids too
 - Filters for cash flow tab?

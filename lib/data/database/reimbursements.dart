@@ -71,12 +71,12 @@ Future<void> addReimbursement(
   assert(parent.key != 0);
   assert(r.target.key != 0);
   assert(r.value >= 0);
-  if (parent.account == null) throw Exception("addReimbursement() parent account is null");
-  if (parent.category == null) throw Exception("addReimbursement() parent category is null");
-  if (r.target.account == null) throw Exception("addReimbursement() target account is null");
-  if (r.target.category == null) throw Exception("addReimbursement() target category is null");
+  if (parent.account == null) throw StateError("addReimbursement() parent account is null");
+  if (parent.category == null) throw StateError("addReimbursement() parent category is null");
+  if (r.target.account == null) throw StateError("addReimbursement() target account is null");
+  if (r.target.category == null) throw StateError("addReimbursement() target category is null");
   if (parent.value * r.target.value > 0)
-    throw Exception("addReimbursement() transactions have same sign");
+    throw StateError("addReimbursement() transactions have same sign");
 
   await _insert(r, parent: parent, txn: txn);
   final income = (parent.value > 0) ? parent : r.target;
@@ -99,22 +99,20 @@ Future<void> addReimbursement(
   );
 
   /// Add value to "Ignore" category
-  if (income.account!.key != expense.account!.key) {
-    await updateCategoryHistory(
-      account: income.account!.key,
-      category: Category.ignore.key,
-      date: income.date,
-      delta: r.value,
-      txn: txn,
-    );
-    await updateCategoryHistory(
-      account: expense.account!.key,
-      category: Category.ignore.key,
-      date: expense.date,
-      delta: -r.value,
-      txn: txn,
-    );
-  }
+  await updateCategoryHistory(
+    account: income.account!.key,
+    category: Category.ignore.key,
+    date: income.date,
+    delta: r.value,
+    txn: txn,
+  );
+  await updateCategoryHistory(
+    account: expense.account!.key,
+    category: Category.ignore.key,
+    date: expense.date,
+    delta: -r.value,
+    txn: txn,
+  );
 }
 
 Future<void> deleteReimbursement(
@@ -153,22 +151,20 @@ Future<void> deleteReimbursement(
   );
 
   /// Remove value from "Ignore" category
-  if (income.account!.key != expense.account!.key) {
-    await updateCategoryHistory(
-      account: income.account!.key,
-      category: Category.ignore.key,
-      date: income.date,
-      delta: -r.value,
-      txn: txn,
-    );
-    await updateCategoryHistory(
-      account: expense.account!.key,
-      category: Category.ignore.key,
-      date: expense.date,
-      delta: r.value,
-      txn: txn,
-    );
-  }
+  await updateCategoryHistory(
+    account: income.account!.key,
+    category: Category.ignore.key,
+    date: income.date,
+    delta: -r.value,
+    txn: txn,
+  );
+  await updateCategoryHistory(
+    account: expense.account!.key,
+    category: Category.ignore.key,
+    date: expense.date,
+    delta: r.value,
+    txn: txn,
+  );
 }
 
 Future<List<Reimbursement>> loadReimbursements({
