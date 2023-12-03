@@ -5,6 +5,7 @@ import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
@@ -223,6 +224,9 @@ class _EditRule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<EditRulesState>();
+    var categories =
+        context.watch<LibraAppState>().categories.flattenedCategories(type.toFilterType());
+    categories = [Category.ignore] + categories;
     return Column(
       children: [
         const SizedBox(height: 10),
@@ -251,8 +255,7 @@ class _EditRule extends StatelessWidget {
                 'Category',
                 CategorySelectionFormField(
                   initial: state.focused.category,
-                  type: type.toFilterType(),
-                  showUncategorized: false,
+                  categories: categories,
                   onSave: (it) => state.focused.category = it,
                   validator: (it) {
                     if (it == null) {

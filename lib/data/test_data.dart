@@ -97,12 +97,14 @@ final List<Transaction> testTransactions = [
     name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
     date: DateTime(2023, 11, 15),
     value: 1502300,
+    category: Category.income,
   ),
   Transaction(
     key: 3,
     name: "test test",
     date: DateTime(2023, 11, 12),
     value: 12322300,
+    category: Category.income,
   ),
 ];
 

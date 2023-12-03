@@ -9,6 +9,7 @@ import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
@@ -26,6 +27,9 @@ class TransactionDetailsEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
+    var categories =
+        context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
+    categories = [Category.ignore] + categories;
 
     /// WARNING!
     /// Form rebuilds every FormField descendant on every change of one of the fields (i.e. it calls
@@ -93,11 +97,13 @@ class TransactionDetailsEditor extends StatelessWidget {
                       CategorySelectionFormField(
                         height: 35,
                         initial: state.seed?.category,
+                        categories: categories,
                         onSave: (it) => state.category = it,
-                        type: state.expenseType,
                       ),
                       tooltip: "Choose the 'Ignore' category to not count this\n"
-                          "transaction in your income or expenses."),
+                          "transaction in your income or expenses. The\n"
+                          "'Investment Returns' category is similar, but\n"
+                          "has its own dedicated cash flow graph."),
                   rowSpacing,
                   labelRow(
                     context,
