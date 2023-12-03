@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +13,10 @@ class TransactionFilterGrid extends StatelessWidget {
     this.initialFilters,
     this.title,
     this.maxRowsForName = 1,
-    this.fixedColumns,
+    this.fixedColumns = 1,
     this.onSelect,
     this.padding,
+    this.showSpeedDial = false,
   });
 
   final Widget? title;
@@ -23,6 +25,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
+  final bool showSpeedDial;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,7 @@ class TransactionFilterGrid extends StatelessWidget {
         maxRowsForName: maxRowsForName,
         fixedColumns: fixedColumns,
         onSelect: onSelect,
+        showSpeedDial: showSpeedDial,
       ),
     );
   }
@@ -48,6 +52,7 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.fixedColumns,
     this.onSelect,
     this.padding,
+    this.showSpeedDial = false,
   });
 
   final Widget? title;
@@ -55,6 +60,7 @@ class _TransactionFilterGrid extends StatelessWidget {
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
+  final bool showSpeedDial;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +69,7 @@ class _TransactionFilterGrid extends StatelessWidget {
       children: [
         Row(
           children: [
+            const SizedBox(width: 10),
             (title != null)
                 ? title!
                 : Text(
@@ -85,12 +92,16 @@ class _TransactionFilterGrid extends StatelessWidget {
           ],
         ),
         Expanded(
-          child: TransactionGrid(
-            state.transactions,
-            padding: padding,
-            maxRowsForName: maxRowsForName,
-            fixedColumns: fixedColumns,
-            onSelect: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
+          child: Scaffold(
+            body: TransactionGrid(
+              state.transactions,
+              padding: padding ??
+                  EdgeInsets.only(top: 10, left: 10, bottom: showSpeedDial ? 80 : 10, right: 10),
+              maxRowsForName: maxRowsForName,
+              fixedColumns: fixedColumns,
+              onSelect: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
+            ),
+            floatingActionButton: showSpeedDial ? const TransactionSpeedDial() : null,
           ),
         ),
       ],

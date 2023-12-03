@@ -4,7 +4,8 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+
+import '../../components/transaction_filters/transaction_speed_dial.dart';
 
 class TransactionTab extends StatelessWidget {
   const TransactionTab({super.key});
@@ -51,30 +52,7 @@ class _TransactionList extends StatelessWidget {
         fixedColumns: 1,
         onSelect: (t, i) => context.read<LibraAppState>().focusTransaction(t),
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.add,
-        activeIcon: Icons.close,
-        useRotationAnimation: true,
-        spacing: 3,
-        // renderOverlay: false,
-        overlayOpacity: 0.4,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.upload_file),
-            backgroundColor: Colors.green.shade600,
-            foregroundColor: Colors.white,
-            label: 'Add CSV',
-            onTap: () => context.read<LibraAppState>().navigateToAddCsvScreen(),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.edit_note),
-            backgroundColor: Colors.indigo,
-            foregroundColor: Colors.white,
-            label: 'Add manual',
-            onTap: () => context.read<LibraAppState>().focusTransaction(null),
-          ),
-        ],
-      ),
+      floatingActionButton: const TransactionSpeedDial(),
     );
   }
 }

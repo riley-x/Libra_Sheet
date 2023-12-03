@@ -164,10 +164,12 @@ Future<void> updateTransaction(Transaction old, Transaction nu, {db.Transaction?
   await insertTransaction(nu, txn: txn);
 }
 
-/// Note that this leaves the following null:
-///     account, if not present in [accounts]
-///     category, if not present in [categories]
-///     tags[i], for each tag not present in [tags]
+/// When the relevant linking objects are not present in the maps:
+///     account => null
+///     category => Category.income or Category.expense
+///     tag => null
+///
+/// Also, the following are always null
 ///     allocations (but sets nAllocs)
 ///     reimbursements (but sets nReimbs)
 ///
@@ -179,9 +181,9 @@ Future<void> updateTransaction(Transaction old, Transaction nu, {db.Transaction?
 /// https://github.com/flutter/flutter/issues/13937
 Future<List<Transaction>> loadTransactions(
   TransactionFilters filters, {
-  Map<int, Account>? accounts,
-  Map<int, Category>? categories,
-  Map<int, Tag>? tags,
+  required Map<int, Account> accounts,
+  required Map<int, Category> categories,
+  required Map<int, Tag> tags,
 }) async {
   List<Transaction> out = [];
   if (libraDatabase == null) return out;
