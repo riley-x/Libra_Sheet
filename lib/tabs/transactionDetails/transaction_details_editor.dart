@@ -29,7 +29,7 @@ class TransactionDetailsEditor extends StatelessWidget {
     final state = context.watch<TransactionDetailsState>();
     var categories =
         context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
-    categories = [Category.ignore] + categories + [Category.empty];
+    categories = [Category.ignore, Category.investment] + categories + [Category.empty];
     // the transaction constructor will convert Category.empty into the correct super category
     // however we must manually convert the initial category to [Category.empty] so that there isn't
     // a duplicate.

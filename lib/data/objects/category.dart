@@ -82,9 +82,21 @@ class Category {
     level: 0,
   );
 
+  /// This is a special category used to ignore the transaction value. It is also used for reimbursements
+  /// to store the reimbursed amounts.
   static final ignore = Category._manual(
     key: -3,
     name: 'Ignore',
+    color: Colors.transparent,
+    type: ExpenseFilterType.all,
+    level: 0,
+  );
+
+  /// This is a special category like [ignore] but the values here are separated in the category
+  /// history table for plotting.
+  static final investment = Category._manual(
+    key: -4,
+    name: 'Investment Returns',
     color: Colors.transparent,
     type: ExpenseFilterType.all,
     level: 0,
