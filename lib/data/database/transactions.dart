@@ -72,7 +72,6 @@ Transaction transactionFromMap(
       tagList.add(tag);
     }
   }
-
   final value = map[_value];
 
   /// This can happen if the category has been deleted.
@@ -244,12 +243,14 @@ Future<void> loadTransactionRelations(
 }
 
 (String, List) _createQuery(TransactionFilters filters) {
+  /// The GROUP_CONCAT(DISTINCT) is necessary since if you have multiple allocations or reimbursements,
+  /// the tags will be duplicated accordingly.
   var q = '''
     SELECT 
       t.*,
-      GROUP_CONCAT(tag.$tagKey) as tags,
+      GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
       COUNT(a.$allocationsKey) as nAllocs,
-      COUNT(r1.$reimbExpense) + COUNT(r2.$reimbExpense) as nReimbs
+      COUNT(r.$reimbExpense) as nReimbs
     FROM 
       $transactionsTable t
     LEFT OUTER JOIN 
@@ -259,10 +260,11 @@ Future<void> loadTransactionRelations(
     LEFT OUTER JOIN 
       $allocationsTable a ON a.$allocationsTransaction = t.$_key
     LEFT OUTER JOIN
-      $reimbursementsTable r1 ON r1.$reimbExpense = t.$_key
-    LEFT OUTER JOIN
-      $reimbursementsTable r2 ON r2.$reimbIncome = t.$_key
+      $reimbursementsTable r ON t.$_key = r.$reimbIncome
   ''';
+
+  // COUNT(r.$reimbExpense)
+  // (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
 
   List args = [];
 
