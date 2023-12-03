@@ -69,20 +69,22 @@ class LibraAppState extends ChangeNotifier {
     accounts.addAll(await db.getAccounts());
     if (!kReleaseMode) {
       for (final acc in accounts) {
-        debugPrint("LibraAppState::_loadAccounts() $acc");
+        debugPrint("LibraAppState::_loadAccounts() ${acc.dump()}");
       }
     }
   }
 
   Future<void> addAccount(Account acc) async {
-    debugPrint("LibraAppState::addAccount() $acc");
+    debugPrint("LibraAppState::addAccount() ${acc.dump()}");
     acc.key = await db.insertAccount(acc, listIndex: accounts.length);
     accounts.add(acc);
     notifyListeners();
   }
 
+  /// The account is modified in-place (because accounts must have single instances so that pointers
+  /// don't become stale). This just propogates to listerners and database.
   Future<void> notifyUpdateAccount(Account acc) async {
-    debugPrint("LibraAppState::notifyUpdateAccount() $acc");
+    debugPrint("LibraAppState::notifyUpdateAccount() ${acc.dump()}");
     notifyListeners();
     db.updateAccount(acc);
   }

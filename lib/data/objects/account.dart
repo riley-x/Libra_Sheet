@@ -24,15 +24,16 @@ enum AccountType {
 }
 
 class Account {
+  int key;
   AccountType type;
   String name;
-  int balance;
   String description;
-  DateTime? lastUpdated;
   Color color;
-
-  int key;
   String csvFormat;
+
+  /// Calculated fields
+  final DateTime? lastUpdated;
+  final int balance;
 
   Account({
     this.type = AccountType.bank,
@@ -45,31 +46,14 @@ class Account {
     this.csvFormat = '',
   });
 
-  // Avoid copying! For each account there should only ever be a single instance.
-  // Account copyWith(
-  //     {AccountType? type,
-  //     String? name,
-  //     int? balance,
-  //     String? description,
-  //     DateTime? lastUpdated,
-  //     Color? color,
-  //     int? key,
-  //     int? listIndex,
-  //     String? csvFormat}) {
-  //   return Account(
-  //     type: type ?? this.type,
-  //     name: name ?? this.name,
-  //     balance: balance ?? this.balance,
-  //     description: description ?? this.description,
-  //     lastUpdated: lastUpdated ?? this.lastUpdated,
-  //     color: color ?? this.color,
-  //     key: key ?? this.key,
-  //     csvFormat: csvFormat ?? this.csvFormat,
-  //   );
-  // }
-
   @override
   String toString() {
-    return "Account($key: $name $type $color)";
+    return "Account($key: $name)";
+  }
+
+  String dump() {
+    return "Account($key: $name $description $type\n"
+        "\t$color $csvFormat\n"
+        "\t$lastUpdated $balance)";
   }
 }
