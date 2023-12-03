@@ -206,7 +206,7 @@ class HeatMapPainter<T> extends CustomPainter {
     double paddingX = 0,
     double paddingY = 0,
     (double, double) Function(int depth)? paddingMapper,
-    this.minSameAxisRatio = 0.6,
+    this.minSameAxisRatio = 0.9,
     this.textStyle,
   }) {
     if (paddingMapper != null) {
@@ -243,7 +243,7 @@ class HeatMapPainter<T> extends CustomPainter {
     positions.add((rect, entry));
 
     /// Draw label
-    if (labelMapper != null) {
+    if (labelMapper != null && rect.width > 50) {
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: labelMapper!.call(entry, seriesDepth),

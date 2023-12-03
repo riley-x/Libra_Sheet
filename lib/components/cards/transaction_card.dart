@@ -107,6 +107,12 @@ class _TextElements extends StatelessWidget {
       }
       subText += trans.category!.name;
     }
+    if (trans.note.isNotEmpty) {
+      if (subText.isNotEmpty) {
+        subText += ' - ';
+      }
+      subText += trans.note;
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -47,7 +47,7 @@ class _TransactionList extends StatelessWidget {
         state.transactions,
         padding: const EdgeInsets.only(top: 10, left: 10, bottom: 80, right: 10),
         // extra padding on bottom to not overlap the floating action button
-        maxRowsForName: 3,
+        maxRowsForName: 1,
         fixedColumns: 1,
         onSelect: (t, i) => context.read<LibraAppState>().focusTransaction(t),
       ),
