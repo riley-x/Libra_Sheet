@@ -65,7 +65,7 @@ class Category {
   /// to this as parent, and must be added to its subCats list.
   static final income = Category._manual(
     key: -1,
-    name: 'Income',
+    name: 'Uncategorized',
     color: const Color(0xFF004940),
     type: ExpenseFilterType.income,
     level: 0,
@@ -76,7 +76,7 @@ class Category {
   /// to this as parent, and must be added to its subCats list.
   static final expense = Category._manual(
     key: -2,
-    name: 'Expense',
+    name: 'Uncategorized',
     color: const Color(0xFF5C1604),
     type: ExpenseFilterType.expense,
     level: 0,

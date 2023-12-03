@@ -25,12 +25,13 @@ class TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = (trans.category.level == 0) ? Colors.transparent : trans.category.color;
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       // color: Color.alphaBlend(
       //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
       //     Theme.of(context).colorScheme.surface),
-      surfaceTintColor: trans.category?.color,
+      surfaceTintColor: color,
       // shadowColor: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
@@ -44,7 +45,7 @@ class TransactionCard extends StatelessWidget {
                 width: colorIndicatorWidth,
                 top: 0,
                 bottom: 0,
-                child: Container(color: trans.category?.color ?? Colors.transparent),
+                child: Container(color: color),
               ),
               Padding(
                 padding: const EdgeInsets.only(left: colorIndicatorWidth + colorIndicatorOffset),
@@ -56,13 +57,13 @@ class TransactionCard extends StatelessWidget {
                       trans: trans,
                       maxRowsForName: maxRowsForName,
                     ),
-                    if (showTags && trans.tags?.isNotEmpty == true) ...[
+                    if (showTags && trans.tags.isNotEmpty) ...[
                       const SizedBox(height: 3),
                       Wrap(
                         spacing: 8,
                         runSpacing: 4,
                         children: [
-                          for (final tag in trans.tags!)
+                          for (final tag in trans.tags)
                             LibraChip(
                               tag.name,
                               color: tag.color,
@@ -101,12 +102,10 @@ class _TextElements extends StatelessWidget {
     if (trans.account != null) {
       subText += trans.account!.name;
     }
-    if (trans.category != null) {
-      if (subText.isNotEmpty) {
-        subText += ', ';
-      }
-      subText += trans.category!.name;
+    if (subText.isNotEmpty) {
+      subText += ', ';
     }
+    subText += trans.category.name;
     if (trans.note.isNotEmpty) {
       if (subText.isNotEmpty) {
         subText += ' - ';

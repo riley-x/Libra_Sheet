@@ -23,7 +23,7 @@ class Transaction {
     this.note = "",
     this.allocations,
     this.reimbursements,
-    this.tags,
+    List<Tag>? tags,
     int nAllocations = 0,
     int nReimbursements = 0,
   })  : category = (category != Category.empty)
@@ -31,6 +31,7 @@ class Transaction {
             : (value > 0)
                 ? Category.income
                 : Category.expense,
+        tags = (tags == null) ? [] : tags,
         _nAllocations = nAllocations,
         _nReimbursements = nReimbursements;
 
@@ -41,9 +42,9 @@ class Transaction {
   final String note;
 
   final Account? account;
-  final Category? category;
+  final Category category;
 
-  final List<Tag>? tags;
+  final List<Tag> tags;
   List<Allocation>? allocations;
   List<Reimbursement>? reimbursements;
 
