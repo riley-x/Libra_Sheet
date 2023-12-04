@@ -128,6 +128,7 @@ class TransactionDetailsState extends ChangeNotifier {
   void resetReimbursement() {
     reimbursementFormKey.currentState?.reset();
     reimburseTarget = focusedReimbursement?.target;
+    reimbursementError = null;
     notifyListeners();
   }
 

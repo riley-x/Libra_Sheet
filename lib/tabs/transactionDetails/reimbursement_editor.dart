@@ -34,11 +34,16 @@ class ReimbursementEditor extends StatelessWidget {
           onSave: state.saveReimbursement,
           onCancel: state.clearFocus,
         ),
+        if (state.reimbursementError != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 5),
+            child: Text(
+              state.reimbursementError!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
         const SizedBox(height: 10),
-        Container(
-          height: 1,
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        const Divider(height: 1, thickness: 1),
         // const SizedBox(height: 5),
         const Expanded(
           child: Padding(
