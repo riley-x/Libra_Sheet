@@ -49,6 +49,7 @@ class TransactionDetailsScreen extends StatelessWidget {
             leftText: "Transaction Editor",
             rightText: "Database key: ${transaction?.key}",
             rightStyle: Theme.of(context).textTheme.labelMedium,
+            onBack: Navigator.of(context).pop,
           ),
           const Expanded(child: _TransactionDetailsScreen()),
         ],

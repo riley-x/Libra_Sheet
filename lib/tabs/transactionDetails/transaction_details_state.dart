@@ -85,6 +85,9 @@ class TransactionDetailsState extends ChangeNotifier {
   //---------------------------------------------------------------------------------------------
   void _init() async {
     if (seed != null) {
+      if (!seed!.relationsAreLoaded()) {
+        await appState.transactions.loadRelations(seed!);
+      }
       expenseType = _valToFilterType(seed?.value);
       tags.insertAll(0, seed?.tags ?? const []);
       allocations.insertAll(0, seed?.allocations ?? const []);

@@ -161,10 +161,10 @@ class LibraAppState extends ChangeNotifier {
     }
   }
 
-  void focusAccount(Account x) {
-    backStack.add((DetailScreen.account, x));
-    notifyListeners();
-  }
+  // void focusAccount(Account x) {
+  //   backStack.add((DetailScreen.account, x));
+  //   notifyListeners();
+  // }
 
   void focusTransaction(Transaction? t) async {
     if (t != null && !t.relationsAreLoaded()) {

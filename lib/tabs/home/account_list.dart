@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 class AccountRow extends StatelessWidget {
@@ -32,7 +33,7 @@ class AccountRow extends StatelessWidget {
           if (onTap != null) {
             onTap?.call(account);
           } else {
-            context.read<LibraAppState>().focusAccount(account);
+            toAccountScreen(context, account);
           }
         },
         child: Padding(

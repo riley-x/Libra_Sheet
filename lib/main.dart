@@ -14,7 +14,7 @@ import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/category/category_tab.dart';
 import 'package:libra_sheet/tabs/home/account_screen.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
-import 'package:libra_sheet/tabs/libra_nav.dart';
+import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:libra_sheet/theme/text_theme.dart';
@@ -100,16 +100,24 @@ class LibraHomePage extends StatelessWidget {
                 onDestinationSelected: context.read<LibraAppState>().setTab,
               ),
             ),
-            Expanded(
-              child: IndexedStack(
-                index: (focusPage == null) ? 0 : 1,
-                sizing: StackFit.expand,
-                children: [
-                  mainTab,
-                  focusPageWidget,
-                ],
-              ),
-            ),
+            Expanded(child: Navigator(
+              onGenerateRoute: (settings) {
+                return MaterialPageRoute(
+                  builder: (context) {
+                    return mainTab;
+                  },
+                );
+              },
+            )
+                // child: IndexedStack(
+                //   index: (focusPage == null) ? 0 : 1,
+                //   sizing: StackFit.expand,
+                //   children: [
+                //     mainTab,
+                //     focusPageWidget,
+                //   ],
+                // ),
+                ),
           ],
         ),
       );

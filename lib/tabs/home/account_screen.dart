@@ -10,6 +10,7 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -50,6 +51,7 @@ class _AccountScreenState extends State<AccountScreen> {
         CommonBackBar(
           leftText: widget.account.name,
           rightText: data.lastOrNull?.value.dollarString() ?? '',
+          onBack: Navigator.of(context).pop,
           // Don't use account.balance because that can be stale after adding a transaction
         ),
         Expanded(
@@ -59,7 +61,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: TransactionFilterGrid(
                   initialFilters: TransactionFilters(accounts: {widget.account}),
                   showSpeedDial: true,
-                  onSelect: context.read<LibraAppState>().focusTransaction,
+                  // onSelect: context.read<LibraAppState>().focusTransaction,
+                  onSelect: (t) => toTransactionDetails(context, t),
                 ),
               ),
               Container(
