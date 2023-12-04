@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -18,7 +19,7 @@ enum TransactionDetailActiveFocus { none, allocation, reimbursement }
 class TransactionDetailsState extends ChangeNotifier {
   TransactionDetailsState(
     this.seed, {
-    required this.service,
+    required this.appState,
     this.onSave,
     this.onDelete,
   }) {
@@ -28,7 +29,7 @@ class TransactionDetailsState extends ChangeNotifier {
   //---------------------------------------------------------------------------------------------
   // Config
   //---------------------------------------------------------------------------------------------
-  final TransactionService service;
+  final LibraAppState appState;
   final Function(Transaction?, Transaction)? onSave;
   final Function(Transaction)? onDelete;
 
@@ -72,6 +73,7 @@ class TransactionDetailsState extends ChangeNotifier {
   ExpenseFilterType expenseType = ExpenseFilterType.all;
   TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
   String? errorMessage;
+  bool saveAsRule = false;
 
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
@@ -206,6 +208,12 @@ class TransactionDetailsState extends ChangeNotifier {
         reimbursements: List.from(reimbursements),
         tags: List.from(tags),
       );
+      if (saveAsRule) {
+        final type = category?.type.toBinaryType();
+        if (type != null) {
+          appState.rules.add(CategoryRule(pattern: t.name, category: category, type: type));
+        }
+      }
       onSave?.call(seed, t);
     }
   }
@@ -325,6 +333,11 @@ class TransactionDetailsState extends ChangeNotifier {
 
   void setReimbursementTarget(Transaction? it) {
     reimburseTarget = it;
+    notifyListeners();
+  }
+
+  void toggleSaveRule() {
+    saveAsRule = !saveAsRule;
     notifyListeners();
   }
 }

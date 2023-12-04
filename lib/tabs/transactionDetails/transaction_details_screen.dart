@@ -26,7 +26,7 @@ class TransactionDetailsScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => TransactionDetailsState(
         transaction,
-        service: context.read<TransactionService>(),
+        appState: context.read<LibraAppState>(),
         onSave: (old, nu) {
           context.read<TransactionService>().save(old, nu);
           context.read<LibraAppState>().popBackStack();

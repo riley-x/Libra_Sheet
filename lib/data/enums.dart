@@ -33,6 +33,12 @@ enum ExpenseFilterType {
     if (other == ExpenseFilterType.all || this == ExpenseFilterType.all) return true;
     return other != this;
   }
+
+  ExpenseType? toBinaryType() {
+    if (this == ExpenseFilterType.income) return ExpenseType.income;
+    if (this == ExpenseFilterType.expense) return ExpenseType.expense;
+    return null;
+  }
 }
 
 ExpenseFilterType toFilterType(ExpenseType? e) {

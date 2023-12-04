@@ -1,4 +1,3 @@
-- CSV column layout/scroll
 - Load total reimb value with transaction, and check this when adding a reimbursement for the target too
 - Account card color bar
 - Tabbing on forms

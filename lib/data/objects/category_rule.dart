@@ -37,4 +37,9 @@ class CategoryRule {
       account: account,
     );
   }
+
+  @override
+  String toString() {
+    return "Rule($key: $pattern => ${category?.name})";
+  }
 }

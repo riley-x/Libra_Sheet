@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/allocation_editor.dart';
@@ -65,7 +66,7 @@ class _TransactionDetails extends StatelessWidget {
         key: ObjectKey(trans),
         create: (context) => TransactionDetailsState(
           trans,
-          service: context.read<TransactionService>(),
+          appState: context.read<LibraAppState>(),
           onSave: state.saveTransaction,
           onDelete: (t) => state.deleteTransaction(),
         ),

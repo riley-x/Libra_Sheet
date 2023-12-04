@@ -102,18 +102,16 @@ class TransactionDetailsEditor extends StatelessWidget {
                   ),
                   rowSpacing,
                   labelRow(
-                      context,
-                      'Category',
-                      CategorySelectionFormField(
-                        height: 35,
-                        initial: initialCategory(),
-                        categories: categories,
-                        onSave: (it) => state.category = it,
-                      ),
-                      tooltip: "Choose the 'Ignore' category to not count this\n"
-                          "transaction in your income or expenses. The\n"
-                          "'Investment Returns' category is similar, but\n"
-                          "has its own dedicated cash flow graph."),
+                    context,
+                    '',
+                    CategorySelectionFormField(
+                      height: 35,
+                      initial: initialCategory(),
+                      categories: categories,
+                      onSave: (it) => state.category = it,
+                    ),
+                    labelCustom: const _CategoryLabel(),
+                  ),
                   rowSpacing,
                   labelRow(
                     context,
@@ -208,6 +206,47 @@ class TransactionDetailsEditor extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CategoryLabel extends StatelessWidget {
+  const _CategoryLabel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionDetailsState>();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: "Create a rule matching this transaction.",
+          textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onInverseSurface,
+                fontSize: 14,
+              ),
+          child: IconButton(
+            onPressed: state.toggleSaveRule,
+            icon: (state.saveAsRule)
+                ? const Icon(Icons.bookmark_add, color: Colors.green)
+                : const Icon(Icons.bookmark_outline),
+          ),
+        ),
+        Tooltip(
+          message: "Choose the 'Ignore' category to not count this\n"
+              "transaction in your income or expenses. The\n"
+              "'Investment Returns' category is similar, but\n"
+              "has its own dedicated cash flow graph.",
+          textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onInverseSurface,
+                fontSize: 14,
+              ),
+          child: Text(
+            'Category',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+      ],
     );
   }
 }
