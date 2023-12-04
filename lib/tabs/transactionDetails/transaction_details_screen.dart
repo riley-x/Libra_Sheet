@@ -29,7 +29,7 @@ class TransactionDetailsScreen extends StatelessWidget {
         appState: context.read<LibraAppState>(),
         onSave: (old, nu) {
           context.read<TransactionService>().save(old, nu);
-          context.read<LibraAppState>().popBackStack();
+          Navigator.of(context).pop();
         },
         onDelete: (t) {
           showConfirmationDialog(
@@ -38,7 +38,7 @@ class TransactionDetailsScreen extends StatelessWidget {
             msg: "Are you sure you want to delete this transaction? This cannot be undone!",
             onConfirmed: () {
               context.read<TransactionService>().delete(t);
-              context.read<LibraAppState>().popBackStack();
+              Navigator.of(context).pop();
             },
           );
         },

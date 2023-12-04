@@ -94,6 +94,7 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({super.key});
 
   void save(BuildContext context, AddCsvState state) {
+    Navigator.of(context).pop();
     state.saveAll();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

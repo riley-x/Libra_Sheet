@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_gr
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/transaction_filters/transaction_speed_dial.dart';
@@ -50,7 +51,7 @@ class _TransactionList extends StatelessWidget {
         // extra padding on bottom to not overlap the floating action button
         maxRowsForName: 1,
         fixedColumns: 1,
-        onSelect: (t, i) => context.read<LibraAppState>().focusTransaction(t),
+        onSelect: (t, i) => toTransactionDetails(context, t),
       ),
       floatingActionButton: const TransactionSpeedDial(),
     );

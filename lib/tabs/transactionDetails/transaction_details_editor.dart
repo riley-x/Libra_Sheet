@@ -186,8 +186,7 @@ class TransactionDetailsEditor extends StatelessWidget {
               const SizedBox(height: 20),
               FormButtons(
                 showDelete: (state.seed != null),
-                onCancel:
-                    (onCancel != null) ? onCancel : context.read<LibraAppState>().popBackStack,
+                onCancel: (onCancel != null) ? onCancel : Navigator.of(context).pop,
                 onDelete: state.delete,
                 onReset: state.reset,
                 // disable save when the allocation/reimb editor is open

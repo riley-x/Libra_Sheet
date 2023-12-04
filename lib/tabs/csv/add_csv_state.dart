@@ -326,7 +326,6 @@ class AddCsvState extends ChangeNotifier {
   // Saving
   //---------------------------------------------------------------------------
   void saveAll() {
-    appState.popBackStack();
     appState.transactions.addAll(transactions);
     var csvFormat = columnTypes.map((e) => e.name).join(',');
     if (csvFormat != account!.csvFormat) {

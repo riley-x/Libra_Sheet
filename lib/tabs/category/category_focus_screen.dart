@@ -9,6 +9,7 @@ import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 class CategoryFocusScreen extends StatelessWidget {
@@ -64,7 +65,7 @@ class _Body extends StatelessWidget {
               ),
               fixedColumns: 1,
               maxRowsForName: 3,
-              onSelect: context.read<LibraAppState>().focusTransaction,
+              onSelect: (t) => toTransactionDetails(context, t),
             ),
           ),
         ),
