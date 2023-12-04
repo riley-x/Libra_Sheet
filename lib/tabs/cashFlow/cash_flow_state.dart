@@ -57,7 +57,7 @@ class CashFlowState extends fnd.ChangeNotifier {
       accounts: accounts.map((e) => e.key),
       callback: (_, vals) => vals.withAlignedTimes(appState.monthList),
     );
-    var _netIncome = await LibraDatabase.db.getMonthlyNetIncome(
+    final _netIncome = await LibraDatabase.db.getMonthlyNetIncome(
       accounts: accounts.map((e) => e.key),
     );
 
@@ -70,7 +70,7 @@ class CashFlowState extends fnd.ChangeNotifier {
     netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
     netReturns = categoryHistory[Category.investment.key]?.fixedForCharts() ??
-        appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList();
+        appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList().fixedForCharts();
 
     notifyListeners();
   }

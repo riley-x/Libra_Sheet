@@ -49,7 +49,8 @@ class _AccountScreenState extends State<AccountScreen> {
       children: [
         CommonBackBar(
           leftText: widget.account.name,
-          rightText: widget.account.balance.dollarString(),
+          rightText: data.lastOrNull?.value.dollarString() ?? '',
+          // Don't use account.balance because that can be stale after adding a transaction
         ),
         Expanded(
           child: Row(
