@@ -112,6 +112,7 @@ final List<Reimbursement> testReimbursements = [
   Reimbursement(
     target: testTransactions[1],
     value: 2300,
+    commitedValue: 2300,
   ),
 ];
 

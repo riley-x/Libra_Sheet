@@ -52,20 +52,24 @@ class TransactionDetailsState extends ChangeNotifier {
   // the various FormFields' onSave methods. They don't contain any UI state, so don't need to
   // notifyListeners.
   //---------------------------------------------------------------------------------------------
+  /// Transaction editor
   Account? account;
   String? name;
   DateTime? date;
   int? value;
   Category? category;
   String? note;
+
+  /// Reimbursement editor
   int reimbursementValue = 0;
 
+  /// Allocation editor
   final MutableAllocation updatedAllocation =
       MutableAllocation(); // TODO replace these with the now non-const version of the class
 
   //---------------------------------------------------------------------------------------------
   // These variables are the UI state for the relevant fields. They are used to finalize the output
-  // transaction too.
+  // transaction too. Must notifyListeners() on update.
   //---------------------------------------------------------------------------------------------
 
   /// This is used to determine which categories to show in the dropdown lists, and the intial
@@ -73,11 +77,14 @@ class TransactionDetailsState extends ChangeNotifier {
   ExpenseFilterType expenseType = ExpenseFilterType.all;
   TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
   String? errorMessage;
+  String? reimbursementError;
   bool saveAsRule = false;
 
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
   final List<Reimbursement> reimbursements = [];
+
+  /// Current reimbursement target selected in the reimbursement editor.
   Transaction? reimburseTarget;
 
   //---------------------------------------------------------------------------------------------
@@ -239,20 +246,51 @@ class TransactionDetailsState extends ChangeNotifier {
     }
   }
 
-  bool validateReimbursement() {
-    if (reimbursementFormKey.currentState?.validate() != true) return false;
-    // Need to save the form first to get the values. This doesn't do anything other than set the
-    // save sink members above.
+  /// Validates the form for the reimbursement editor only. Returns an error message, or null on
+  /// success.
+  String? validateReimbursement() {
+    if (reimbursementFormKey.currentState?.validate() != true) return '';
+
+    /// Need to save the form first to get the values. This doesn't do anything other than set the
+    /// save sink members above.
     reimbursementFormKey.currentState?.save();
-    if (reimburseTarget == null) return false;
-    if (_valToFilterType(reimburseTarget!.value) == expenseType) return false;
-    return true;
+
+    if (reimburseTarget == null) {
+      return "Please select a target transaction.";
+    }
+    if (_valToFilterType(reimburseTarget!.value) == expenseType) {
+      return "Selected transaction must have the opposite sign.";
+    }
+    if (reimbursementValue > reimburseTarget!.value.abs()) {
+      return "Value is greater than the selected transaction's value.";
+    }
+    // p.s. We check the current transaction's value on the global validate().
+
+    /// Check to make sure the reimbursement value doesn't cause the other transaction to become
+    /// negative
+    if (reimburseTarget!.totalReimbusrements > 0) {
+      final valueRemaining = reimburseTarget!.value.abs() - reimburseTarget!.totalReimbusrements;
+      if (focusedReimbursement?.target == reimburseTarget) {
+        // We're updating an existing reimbursement, so add back original value
+        valueRemaining + focusedReimbursement!.commitedValue;
+      }
+      if (reimbursementValue > valueRemaining) {
+        return "Total reimbursements on the selected transaction exceeds its value.";
+      }
+    }
+
+    return null;
   }
 
   /// Save a single reimbursement from the allocation editor in [reimbursements]
   void saveReimbursement() {
-    if (validateReimbursement()) {
-      final reimb = Reimbursement(target: reimburseTarget!, value: reimbursementValue);
+    reimbursementError = validateReimbursement();
+    if (reimbursementError == null) {
+      final reimb = Reimbursement(
+        target: reimburseTarget!,
+        value: reimbursementValue,
+        commitedValue: 0,
+      );
 
       if (focusedReimbursement == null) {
         reimbursements.add(reimb);
@@ -266,6 +304,7 @@ class TransactionDetailsState extends ChangeNotifier {
       }
       clearFocus();
     }
+    notifyListeners();
   }
 
   //---------------------------------------------------------------------------------------------

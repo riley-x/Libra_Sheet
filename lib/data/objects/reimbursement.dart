@@ -6,8 +6,18 @@ class Reimbursement {
   final Transaction target;
   final int value;
 
-  const Reimbursement({
+  /// Helper field to test if this reimbursement was newly added or has been commited to the
+  /// database already. So reimbursements loaded from the database will have [commitedValue] = [value],
+  /// while those in memory will have this at 0. Generally [Reimbursement] should not be kept alive
+  /// in memory for that long though; this is only really used when editing a transaction.
+  ///
+  /// All transactions should be reloaded when any other transaction is changed too to reload the
+  /// reimbursements.
+  int commitedValue;
+
+  Reimbursement({
     required this.target,
     required this.value,
+    required this.commitedValue,
   });
 }

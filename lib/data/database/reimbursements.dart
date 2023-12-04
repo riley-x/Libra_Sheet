@@ -63,6 +63,7 @@ Future<int> _delete(
   );
 }
 
+/// This updates [r.commitedValue]!
 Future<void> addReimbursement(
   Reimbursement r, {
   required lt.Transaction parent,
@@ -77,6 +78,7 @@ Future<void> addReimbursement(
     throw StateError("addReimbursement() transactions have same sign");
 
   await _insert(r, parent: parent, txn: txn);
+  r.commitedValue = r.value;
   final income = (parent.value > 0) ? parent : r.target;
   final expense = (parent.value > 0) ? r.target : parent;
 
@@ -199,6 +201,7 @@ Future<List<Reimbursement>> loadReimbursements({
           tags: tags,
         ),
         value: map["reimb_value"] as int,
+        commitedValue: map["reimb_value"] as int,
       ),
   ];
 }
