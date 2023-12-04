@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:provider/provider.dart';
 
 enum LibraNavDestination {
   home(icon: Icons.home, label: 'Home'),
@@ -27,17 +29,16 @@ final libraNavDestinations = [
 class LibraNav extends StatelessWidget {
   const LibraNav({
     super.key,
-    required this.selectedIndex,
     required this.extended,
     this.onDestinationSelected,
   });
 
-  final int selectedIndex;
   final bool extended;
   final Function(int)? onDestinationSelected;
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = context.select<LibraAppState, int>((it) => it.currentTab);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return NavigationRail(

@@ -62,15 +62,12 @@ class LibraHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentTab = context.select<LibraAppState, int>((it) => it.currentTab);
-
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         body: Row(
           children: [
             SafeArea(
               child: LibraNav(
-                selectedIndex: currentTab,
                 extended: constraints.maxWidth >= 900,
                 onDestinationSelected: context.read<LibraAppState>().setTab,
               ),

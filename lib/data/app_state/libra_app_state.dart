@@ -11,13 +11,6 @@ import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/time_value.dart';
-import 'package:libra_sheet/data/objects/transaction.dart';
-
-enum DetailScreen {
-  account,
-  transaction,
-  addCsv,
-}
 
 class LibraAppState extends ChangeNotifier {
   late final CategoryState categories;
