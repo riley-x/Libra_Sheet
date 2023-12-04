@@ -113,6 +113,12 @@ class _TextElements extends StatelessWidget {
       subText += trans.note;
     }
 
+    String afterReimbValue() {
+      final signedReimb =
+          (trans.value > 0) ? -trans.totalReimbusrements : trans.totalReimbusrements;
+      return "(${(trans.value + signedReimb).dollarString()})";
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -144,8 +150,14 @@ class _TextElements extends StatelessWidget {
                   _NumberIndicator(trans.nAllocations, true),
                   const SizedBox(width: 10),
                 ],
-                if (trans.nReimbursements > 0) ...[
-                  _NumberIndicator(trans.nReimbursements, false),
+                if (trans.totalReimbusrements > 0) ...[
+                  Text(
+                    afterReimbValue(),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: (trans.value < 0) ? Colors.red : Colors.green,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
                   const SizedBox(width: 10),
                 ],
                 Text(

@@ -25,7 +25,7 @@ class Transaction {
     this.reimbursements,
     List<Tag>? tags,
     int nAllocations = 0,
-    int nReimbursements = 0,
+    int totalReimbusrements = 0,
   })  : category = (category != Category.empty)
             ? category
             : (value > 0)
@@ -33,7 +33,7 @@ class Transaction {
                 : Category.expense,
         tags = (tags == null) ? [] : tags,
         _nAllocations = nAllocations,
-        _nReimbursements = nReimbursements;
+        _reimbTotal = totalReimbusrements;
 
   int key;
   final String name;
@@ -49,17 +49,19 @@ class Transaction {
   List<Reimbursement>? reimbursements;
 
   /// We don't load all the allocations with the transaction in list view, but we do count how many
-  /// there are. This field is not used when [allocations] is not null. Similarly for reimbursements.
+  /// there are. This field is not used when [allocations] is not null.
   final int _nAllocations;
   int get nAllocations {
     if (allocations == null) return _nAllocations;
     return allocations!.length;
   }
 
-  final int _nReimbursements;
-  int get nReimbursements {
-    if (reimbursements == null) return _nReimbursements;
-    return reimbursements!.length;
+  /// Similarly, we don't load all the reimbursements with the transaction in the list view, but
+  /// we do get the total value. This field is not used when [reimbursements] is not null.
+  final int _reimbTotal;
+  int get totalReimbusrements {
+    if (reimbursements == null) return _reimbTotal;
+    return reimbursements!.fold(0, (cum, e) => cum + e.value);
   }
 
   @override

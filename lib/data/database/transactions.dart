@@ -22,6 +22,8 @@ const _note = "note";
 const _account = "account_id";
 const _category = "category_id";
 
+const _reimb_total = "reimb_total";
+
 const transactionKey = _key;
 const transactionName = _name;
 const transactionDate = _date;
@@ -86,7 +88,7 @@ Transaction transactionFromMap(
     category: categories?[map[_category]] ?? defaultCategory,
     tags: tagList,
     nAllocations: map["nAllocs"],
-    nReimbursements: map["nReimbs"],
+    totalReimbusrements: map[_reimb_total] ?? 0,
   );
 }
 
@@ -218,7 +220,7 @@ Future<void> loadTransactionRelations(
     } else {
       t.allocations = [];
     }
-    if (t.nReimbursements > 0) {
+    if (t.totalReimbusrements > 0) {
       t.reimbursements = await loadReimbursements(
         parent: t,
         accounts: accounts,
@@ -240,7 +242,7 @@ Future<void> loadTransactionRelations(
       t.*,
       GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
       COUNT(a.$allocationsKey) as nAllocs,
-      COUNT(r.$reimbExpense) as nReimbs
+      SUM(r.$reimbValue) as $_reimb_total
     FROM 
       $transactionsTable t
     LEFT OUTER JOIN 

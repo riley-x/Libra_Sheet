@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
