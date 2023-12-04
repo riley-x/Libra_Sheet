@@ -94,7 +94,7 @@ class _MainScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         const Divider(height: 1, thickness: 1),
-        const Expanded(child: _CsvGrid()),
+        Expanded(child: _CsvGrid()),
         const _BottomBar(),
       ],
     );
@@ -195,25 +195,91 @@ class _CsvGrid extends StatelessWidget {
     final state = context.watch<AddCsvState>();
     if (state.file == null || state.rawLines.isEmpty) return const SizedBox();
 
-    return SingleChildScrollView(
-      child: Table(
-        border: TableBorder.all(width: 0.3),
-        // border: TableBorder.all(width: 1, color: Theme.of(context).colorScheme.outlineVariant),
-        children: [
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 100 * state.nCols) {
+          return _ScrollingTable();
+        } else {
+          return const _FlexTable();
+        }
+      },
+    );
+  }
+}
+
+/// Scroll in both vertical and horizontal directions
+class _ScrollingTable extends StatelessWidget {
+  _ScrollingTable({super.key});
+
+  final _vertical = ScrollController();
+  final _horizontal = ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      controller: _vertical,
+      thumbVisibility: true,
+      child: Scrollbar(
+        controller: _horizontal,
+        thumbVisibility: true,
+        notificationPredicate: (notif) => notif.depth == 1,
+        child: SingleChildScrollView(
+          controller: _vertical,
+          child: SingleChildScrollView(
+            controller: _horizontal,
+            scrollDirection: Axis.horizontal,
+            child: const _Table(
+              defaultColumnWidth: FixedColumnWidth(100),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Each column will expand to the same width
+class _FlexTable extends StatelessWidget {
+  const _FlexTable({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      child: _Table(defaultColumnWidth: FlexColumnWidth()),
+    );
+  }
+}
+
+/// The underlying data table
+class _Table extends StatelessWidget {
+  const _Table({super.key, required this.defaultColumnWidth});
+
+  final TableColumnWidth defaultColumnWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AddCsvState>();
+    return Table(
+      border: TableBorder.all(width: 0.3),
+      defaultColumnWidth: defaultColumnWidth,
+      children: [
+        TableRow(
+          children: [
+            for (int i = 0; i < state.nCols; i++) _ColumnHeader(i),
+          ],
+        ),
+        for (int row = 0; row < state.rawLines.length; row++)
           TableRow(
+            decoration:
+                (state.rowOk[row]) ? BoxDecoration(color: Colors.green.withAlpha(40)) : null,
             children: [
-              for (int i = 0; i < state.nCols; i++) _ColumnHeader(i),
+              for (int i = 0; i < state.nCols; i++)
+                (i < state.rawLines[row].length)
+                    ? _Cell(state.rawLines[row][i], i)
+                    : const SizedBox(),
             ],
           ),
-          for (final row in state.rawLines)
-            TableRow(
-              children: [
-                for (int i = 0; i < state.nCols; i++)
-                  (i < row.length) ? _Cell(row[i], i) : const SizedBox(),
-              ],
-            ),
-        ],
-      ),
+      ],
     );
   }
 }

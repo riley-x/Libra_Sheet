@@ -33,6 +33,8 @@ enum CsvField {
 
 final List<DateFormat> _dateFormats = [
   DateFormat('MM/dd/yyyy'),
+  DateFormat("yyyy-MM-ddTHH:mm:ss"),
+  DateFormat(),
 ];
 
 class AddCsvState extends ChangeNotifier {
@@ -223,6 +225,7 @@ class AddCsvState extends ChangeNotifier {
       case CsvField.date:
         return _parseDate(text) != null;
       case CsvField.value:
+        text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
         return text.toIntDollar() != null;
       default:
         return null;
@@ -256,11 +259,12 @@ class AddCsvState extends ChangeNotifier {
 
       for (int col = 0; col < columnTypes.length; col++) {
         if (col >= rawLines[row].length) continue;
-        final text = rawLines[row][col];
+        var text = rawLines[row][col];
         switch (columnTypes[col]) {
           case CsvField.date:
             date = _parseDate(text);
           case CsvField.value:
+            text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
             value = text.toIntDollar();
           case CsvField.name:
             if (name.isNotEmpty) {
