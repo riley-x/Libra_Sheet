@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
-import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
-import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
-import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/objects/transaction.dart' as transaction;
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab.dart';
 import 'package:libra_sheet/tabs/category/category_tab.dart';
-import 'package:libra_sheet/tabs/home/account_screen.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab.dart';
@@ -69,26 +64,6 @@ class LibraHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentTab = context.select<LibraAppState, int>((it) => it.currentTab);
 
-    /// DO NOT select the List itself, as that is a pointer only and updates won't be registered.
-    final focusPage =
-        context.select<LibraAppState, (DetailScreen, Object?)?>((it) => it.backStack.lastOrNull);
-
-    Widget focusPageWidget = switch (focusPage?.$1) {
-      null => const Placeholder(),
-      DetailScreen.account => AccountScreen(account: focusPage!.$2 as Account),
-      DetailScreen.transaction =>
-        TransactionDetailsScreen(focusPage!.$2 as transaction.Transaction?),
-      DetailScreen.addCsv => const AddCsvScreen()
-    };
-
-    Widget mainTab = switch (LibraNavDestination.values[currentTab]) {
-      LibraNavDestination.home => const HomeTab(),
-      LibraNavDestination.cashFlows => const CashFlowTab(),
-      LibraNavDestination.categories => const CategoryTab(),
-      LibraNavDestination.transactions => const TransactionTab(),
-      LibraNavDestination.settings => const SettingsTab(),
-    };
-
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         body: Row(
@@ -100,24 +75,25 @@ class LibraHomePage extends StatelessWidget {
                 onDestinationSelected: context.read<LibraAppState>().setTab,
               ),
             ),
-            Expanded(child: Navigator(
-              onGenerateRoute: (settings) {
-                return MaterialPageRoute(
-                  builder: (context) {
-                    return mainTab;
-                  },
-                );
-              },
-            )
-                // child: IndexedStack(
-                //   index: (focusPage == null) ? 0 : 1,
-                //   sizing: StackFit.expand,
-                //   children: [
-                //     mainTab,
-                //     focusPageWidget,
-                //   ],
-                // ),
-                ),
+            Expanded(
+              child: Navigator(
+                key: context.read<LibraAppState>().navigatorKey,
+                onGenerateRoute: (settings) {
+                  return MaterialPageRoute(
+                    builder: (context) {
+                      final currentTab = context.select<LibraAppState, int>((it) => it.currentTab);
+                      return switch (LibraNavDestination.values[currentTab]) {
+                        LibraNavDestination.home => const HomeTab(),
+                        LibraNavDestination.cashFlows => const CashFlowTab(),
+                        LibraNavDestination.categories => const CategoryTab(),
+                        LibraNavDestination.transactions => const TransactionTab(),
+                        LibraNavDestination.settings => const SettingsTab(),
+                      };
+                    },
+                  );
+                },
+              ),
+            ),
           ],
         ),
       );

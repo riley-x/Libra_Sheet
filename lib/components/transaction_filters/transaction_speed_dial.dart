@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:provider/provider.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 
 class TransactionSpeedDial extends StatelessWidget {
   const TransactionSpeedDial({
@@ -15,7 +14,9 @@ class TransactionSpeedDial extends StatelessWidget {
       activeIcon: Icons.close,
       useRotationAnimation: true,
       spacing: 3,
-      // renderOverlay: false,
+      // Can't use overlay because of this bug:
+      // https://github.com/darioielardi/flutter_speed_dial/issues/290
+      renderOverlay: false,
       overlayOpacity: 0.4,
       children: [
         SpeedDialChild(
@@ -23,14 +24,14 @@ class TransactionSpeedDial extends StatelessWidget {
           backgroundColor: Colors.green.shade600,
           foregroundColor: Colors.white,
           label: 'Add CSV',
-          onTap: () => context.read<LibraAppState>().navigateToAddCsvScreen(),
+          onTap: () => toCsvScreen(context),
         ),
         SpeedDialChild(
           child: const Icon(Icons.edit_note),
           backgroundColor: Colors.indigo,
           foregroundColor: Colors.white,
           label: 'Add manual',
-          onTap: () => context.read<LibraAppState>().focusTransaction(null),
+          onTap: () => toTransactionDetails(context, null),
         ),
       ],
     );

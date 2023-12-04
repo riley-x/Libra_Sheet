@@ -51,7 +51,6 @@ class _AccountScreenState extends State<AccountScreen> {
         CommonBackBar(
           leftText: widget.account.name,
           rightText: data.lastOrNull?.value.dollarString() ?? '',
-          onBack: Navigator.of(context).pop,
           // Don't use account.balance because that can be stale after adding a transaction
         ),
         Expanded(

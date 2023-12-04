@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/objects/account.dart';
@@ -137,6 +138,7 @@ class LibraAppState extends ChangeNotifier {
   //--------------------------------------------------------------------------------
   // Screen handling
   //--------------------------------------------------------------------------------
+  final navigatorKey = GlobalKey<NavigatorState>();
 
   /// Current tab as an index into [LibraNavDestination.values].
   int currentTab = 0;
