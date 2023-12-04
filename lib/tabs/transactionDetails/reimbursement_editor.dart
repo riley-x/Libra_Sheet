@@ -25,45 +25,7 @@ class ReimbursementEditor extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 10),
-        Form(
-          key: state.reimbursementFormKey,
-          child: Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FixedColumnWidth(250),
-            },
-            children: [
-              labelRow(
-                context,
-                'Value',
-                ValueField(
-                  initial: state.focusedReimbursement?.value,
-                  onSave: (it) => state.reimbursementValue = it,
-                  positiveOnly: true,
-                ),
-                tooltip: "Value should always be positive.",
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Transaction',
-                Visibility(
-                  visible: state.reimburseTarget != null,
-                  maintainSize: true,
-                  maintainAnimation: true,
-                  maintainState: true,
-                  child: TransactionCard(
-                    trans: state.reimburseTarget ?? dummyTransaction,
-                    // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
-                    margin: const EdgeInsets.all(0),
-                    showTags: false,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        const _Form(),
         const SizedBox(height: 20),
         FormButtons(
           showDelete: state.focusedReimbursement != null,
@@ -78,24 +40,83 @@ class ReimbursementEditor extends StatelessWidget {
           color: Theme.of(context).colorScheme.outlineVariant,
         ),
         // const SizedBox(height: 5),
-        Expanded(
+        const Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: TransactionFilterGrid(
-              initialFilters: switch (state.expenseType) {
-                ExpenseFilterType.expense => TransactionFilters(minValue: 0),
-                ExpenseFilterType.income => TransactionFilters(maxValue: 0),
-                ExpenseFilterType.all => null
-              },
-              title: Text(
-                'Select target transaction',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              onSelect: state.setReimbursementTarget,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 6),
+            child: _TransactionsList(),
           ),
         )
       ],
+    );
+  }
+}
+
+class _Form extends StatelessWidget {
+  const _Form({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionDetailsState>();
+    return Form(
+      key: state.reimbursementFormKey,
+      child: Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        columnWidths: const {
+          0: IntrinsicColumnWidth(),
+          1: FixedColumnWidth(250),
+        },
+        children: [
+          labelRow(
+            context,
+            'Value',
+            ValueField(
+              initial: state.focusedReimbursement?.value,
+              onSave: (it) => state.reimbursementValue = it,
+              positiveOnly: true,
+            ),
+            tooltip: "Value should always be positive.",
+          ),
+          rowSpacing,
+          labelRow(
+            context,
+            'Transaction',
+            Visibility(
+              visible: state.reimburseTarget != null,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: TransactionCard(
+                trans: state.reimburseTarget ?? dummyTransaction,
+                // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
+                margin: const EdgeInsets.all(0),
+                showTags: false,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransactionsList extends StatelessWidget {
+  const _TransactionsList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final expenseType =
+        context.select<TransactionDetailsState, ExpenseFilterType>((value) => value.expenseType);
+    return TransactionFilterGrid(
+      initialFilters: switch (expenseType) {
+        ExpenseFilterType.expense => TransactionFilters(minValue: 0),
+        ExpenseFilterType.income => TransactionFilters(maxValue: 0),
+        ExpenseFilterType.all => null
+      },
+      title: Text(
+        'Select target transaction',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      onSelect: context.read<TransactionDetailsState>().setReimbursementTarget,
     );
   }
 }
