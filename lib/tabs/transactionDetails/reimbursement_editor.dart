@@ -75,7 +75,7 @@ class _Form extends StatelessWidget {
             context,
             'Value',
             ValueField(
-              initial: state.focusedReimbursement?.value,
+              controller: state.reimbursementValueController,
               onSave: (it) => state.reimbursementValue = it,
               positiveOnly: true,
             ),

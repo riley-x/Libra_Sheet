@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -39,6 +41,7 @@ class TransactionDetailsState extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> allocationFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> reimbursementFormKey = GlobalKey<FormState>();
+  final TextEditingController reimbursementValueController = TextEditingController();
 
   //---------------------------------------------------------------------------------------------
   // Initial values for the respective editors. Don't edit these; they're used to reset.
@@ -128,6 +131,8 @@ class TransactionDetailsState extends ChangeNotifier {
   void resetReimbursement() {
     reimbursementFormKey.currentState?.reset();
     reimburseTarget = focusedReimbursement?.target;
+    reimbursementValueController.text =
+        focusedReimbursement?.value.dollarString(dollarSign: false) ?? '';
     reimbursementError = null;
     notifyListeners();
   }
@@ -379,6 +384,10 @@ class TransactionDetailsState extends ChangeNotifier {
 
   void setReimbursementTarget(Transaction? it) {
     reimburseTarget = it;
+    if (reimburseTarget != null && seed != null && reimbursementValueController.text.isEmpty) {
+      final val = min(it!.value.abs(), seed!.value.abs());
+      reimbursementValueController.text = val.dollarString(dollarSign: false);
+    }
     notifyListeners();
   }
 

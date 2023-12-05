@@ -11,6 +11,7 @@ class ValueField extends StatelessWidget {
     this.onSave,
     this.onChanged,
     this.positiveOnly = false,
+    this.controller,
   });
 
   final int? initial;
@@ -18,11 +19,13 @@ class ValueField extends StatelessWidget {
   final Function(int?)? onChanged;
   final Key? formFieldKey;
   final bool positiveOnly;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
     return LibraTextFormField(
       formFieldKey: formFieldKey,
+      controller: controller,
       initial: initial?.dollarString(dollarSign: false),
       validator: (String? text) {
         if (text == null || text.isEmpty) return ''; // No message to not take up space

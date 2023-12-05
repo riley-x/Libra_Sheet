@@ -91,6 +91,7 @@ class LibraTextFormField extends StatelessWidget {
     this.minLines,
     this.maxLines = 1,
     this.formFieldKey,
+    this.controller,
   });
 
   final int? minLines;
@@ -101,12 +102,14 @@ class LibraTextFormField extends StatelessWidget {
   final Function(String? text)? onSave;
   final Function(String? text)? onChanged;
   final Key? formFieldKey;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       /// This forces the form field to rebuild if the initial value changes
       key: formFieldKey ?? Key(initial ?? '__^^^__null'),
+      controller: controller,
       autovalidateMode: AutovalidateMode.disabled,
       initialValue: initial,
       style: Theme.of(context).textTheme.bodyMedium,
