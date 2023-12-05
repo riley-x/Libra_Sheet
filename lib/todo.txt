@@ -1,8 +1,6 @@
-- Load total reimb value with transaction, and check this when adding a reimbursement for the target too
 - Account card color bar
 - Tabbing on forms
 - Transaction screen filter values get deleted on tab switch and return, weird in filter grids too
-- Filters for cash flow tab
 - Category focus screen, show only category history respecting filters
 - Hover on heatmap
 - Double sided stack column chart

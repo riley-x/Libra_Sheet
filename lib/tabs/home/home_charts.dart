@@ -115,6 +115,17 @@ class _NetWorthGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gradientColors = LinearGradient(
+      colors: [
+        Colors.blue.withAlpha(10),
+        Colors.blue.withAlpha(80),
+        Colors.blue.withAlpha(170),
+      ],
+      stops: const [0.0, 0.6, 1],
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+    );
+
     List<TimeIntValue> data = context.watch<LibraAppState>().netWorthData;
     return ChartWithTitle(
       height: height,
@@ -123,11 +134,15 @@ class _NetWorthGraph extends StatelessWidget {
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
       child: DateTimeGraph([
-        LineSeries<TimeIntValue, DateTime>(
+        AreaSeries<TimeIntValue, DateTime>(
           animationDuration: 300,
           dataSource: data,
           xValueMapper: (TimeIntValue sales, _) => sales.time,
           yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
+          gradient: gradientColors,
+          borderColor: Colors.blue,
+          borderWidth: 3,
+          borderDrawMode: BorderDrawMode.top,
         ),
       ]),
     );
