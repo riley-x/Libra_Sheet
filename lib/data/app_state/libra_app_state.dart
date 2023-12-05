@@ -23,14 +23,9 @@ class LibraAppState extends ChangeNotifier {
     tags = TagState(this);
     rules = RuleState(this);
     transactions = TransactionService(this);
-
-    _init();
   }
 
-  void _init() async {
-    /// Setup database
-    await LibraDatabase.init();
-
+  Future<void> init() async {
     /// Load account, categories
     var futures = <Future>[];
     futures.add(_loadAccounts());

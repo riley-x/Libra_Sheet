@@ -28,6 +28,8 @@ class CategoryState {
       await loadChildCategories(txn, income);
       await loadChildCategories(txn, expense);
     });
+    debugPrint(
+        "CategoryState::load() Loaded ${income.subCats.length}+${expense.subCats.length} categories");
   }
 
   //----------------------------------------------------------------------------

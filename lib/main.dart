@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
@@ -23,8 +24,12 @@ Future<void> main() async {
     initializeTestData();
   }
 
+  /// Setup database
+  await LibraDatabase.init();
+
   /// Top level state
   final state = LibraAppState();
+  await state.init();
   runApp(LibraApp(state));
 }
 
@@ -78,14 +83,8 @@ class LibraHomePage extends StatelessWidget {
                 onGenerateRoute: (settings) {
                   return MaterialPageRoute(
                     builder: (context) {
-                      final currentTab = context.select<LibraAppState, int>((it) => it.currentTab);
-                      return switch (LibraNavDestination.values[currentTab]) {
-                        LibraNavDestination.home => const HomeTab(),
-                        LibraNavDestination.cashFlows => const CashFlowTab(),
-                        LibraNavDestination.categories => const CategoryTab(),
-                        LibraNavDestination.transactions => const TransactionTab(),
-                        LibraNavDestination.settings => const SettingsTab(),
-                      };
+                      // return widgets[currentTab];
+                      return const _Home();
                     },
                   );
                 },
@@ -95,5 +94,33 @@ class LibraHomePage extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class _Home extends StatelessWidget {
+  const _Home({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final currentTab = context.select<LibraAppState, int>((it) => it.currentTab);
+
+    var widgets = [
+      const HomeTab(),
+      const CashFlowTab(),
+      const CategoryTab(),
+      const TransactionTab(),
+      const SettingsTab(),
+    ];
+
+    return IndexedStack(
+      index: currentTab,
+      // sizing: StackFit.expand,
+      children: [
+        for (final w in widgets)
+          Material(
+            child: w,
+          )
+      ],
+    );
   }
 }
