@@ -1,6 +1,5 @@
 - Account card color bar
 - Tabbing on forms
-- Transaction screen filter values get deleted on tab switch and return, weird in filter grids too
 - Category focus screen, show only category history respecting filters
 - Hover on heatmap
 - Double sided stack column chart

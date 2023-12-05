@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class FocusTextField extends StatefulWidget {
   final String? label;
   final String? hint;
+  final String? intial;
   final bool error;
   final bool active;
   final int? minLines;
@@ -15,6 +16,7 @@ class FocusTextField extends StatefulWidget {
     super.key,
     this.label,
     this.hint,
+    this.intial,
     this.error = false,
     this.active = false,
     this.minLines,
@@ -54,7 +56,8 @@ class _FocusTextFieldState extends State<FocusTextField> {
   Widget build(BuildContext context) {
     return LimitedBox(
       maxWidth: 100,
-      child: TextField(
+      child: TextFormField(
+        initialValue: widget.intial,
         decoration: InputDecoration(
           filled: widget.active && !widget.error,
           fillColor: Theme.of(context).colorScheme.secondaryContainer,

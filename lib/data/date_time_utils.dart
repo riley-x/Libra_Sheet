@@ -11,9 +11,16 @@ extension DateTimeUtils on DateFormat {
   }
 }
 
+final _dateFormat = DateFormat.yMd();
+
 extension DateTimeUtils2 on DateTime {
   DateTime asLocalDate() {
     return DateTime(year, month, day);
+  }
+
+  // ignore: non_constant_identifier_names
+  String MMddyy() {
+    return _dateFormat.format(this);
   }
 }
 

@@ -35,10 +35,10 @@ class TransactionFilters {
 /// It handles the loading of the transactions and the UI state of the filter fields.
 class TransactionFilterState extends ChangeNotifier {
   TransactionFilterState(
-    this.service, [
+    this.service, {
     TransactionFilters? initialFilters,
     this.doLoads = true,
-  ]) {
+  }) {
     if (initialFilters != null) filters = initialFilters;
     service.addListener(loadTransactions);
     loadTransactions();

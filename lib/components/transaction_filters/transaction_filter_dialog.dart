@@ -15,8 +15,14 @@ class TransactionFilterDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Here we create a temporary TransactionFilterState to store the in-progress edits, but it
+    // doesn't read any transactions
     return ChangeNotifierProvider(
-      create: (context) => TransactionFilterState(context.read(), initialFilters),
+      create: (context) => TransactionFilterState(
+        context.read(),
+        initialFilters: initialFilters,
+        doLoads: false,
+      ),
       builder: (context, child) => Dialog(
         child: SizedBox(
           width: 300,

@@ -7,6 +7,8 @@ import 'package:libra_sheet/components/menus/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/tag_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -159,6 +161,7 @@ class _ValueRange extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
+          intial: state.filters.minValue?.dollarString(dollarSign: false),
           label: 'Min',
           active: state.filters.minValue != null,
           error: state.minValueError,
@@ -172,6 +175,7 @@ class _ValueRange extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         FocusTextField(
+          intial: state.filters.maxValue?.dollarString(dollarSign: false),
           label: 'Max',
           active: state.filters.maxValue != null,
           error: state.maxValueError,
@@ -192,6 +196,7 @@ class _DateFilter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
+          intial: state.filters.startTime?.MMddyy(),
           label: 'Start',
           active: state.filters.startTime != null,
           error: state.startTimeError,
@@ -206,6 +211,7 @@ class _DateFilter extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         FocusTextField(
+          intial: state.filters.endTime?.MMddyy(),
           label: 'End',
           active: state.filters.endTime != null,
           error: state.endTimeError,

@@ -81,12 +81,8 @@ class LibraHomePage extends StatelessWidget {
               child: Navigator(
                 key: context.read<LibraAppState>().navigatorKey,
                 onGenerateRoute: (settings) {
-                  return MaterialPageRoute(
-                    builder: (context) {
-                      // return widgets[currentTab];
-                      return const _Home();
-                    },
-                  );
+                  // This just generates a single default route, since we have no named routes
+                  return MaterialPageRoute(builder: (context) => const _Home());
                 },
               ),
             ),
