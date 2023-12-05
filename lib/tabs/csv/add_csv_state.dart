@@ -17,6 +17,7 @@ enum CsvField {
   name('Name'),
   value('Value'),
   note('Note'),
+  venmo('Venmo'),
   none('None');
 
   const CsvField(this.title);
@@ -227,6 +228,8 @@ class AddCsvState extends ChangeNotifier {
       case CsvField.value:
         text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
         return text.toIntDollar() != null;
+      case CsvField.venmo:
+        return text.isEmpty || text == "Venmo balance";
       default:
         return null;
     }
@@ -279,6 +282,7 @@ class AddCsvState extends ChangeNotifier {
               note = text;
             }
           case CsvField.none:
+          case CsvField.venmo:
         }
       }
 

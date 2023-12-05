@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
+import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
@@ -29,6 +30,7 @@ class _AccountScreenState extends State<AccountScreen> {
   List<TimeIntValue> data = [];
 
   Future<void> loadData() async {
+    if (!mounted) return;
     final appState = context.read<LibraAppState>();
     var newData = await LibraDatabase.db.getMonthlyNet(accountId: widget.account.key);
     newData = newData.withAlignedTimes(appState.monthList, cumulate: true).fixedForCharts();
@@ -40,6 +42,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<TransactionService>().addListener(loadData);
     loadData();
   }
 

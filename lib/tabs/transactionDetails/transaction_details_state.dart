@@ -220,10 +220,13 @@ class TransactionDetailsState extends ChangeNotifier {
         tags: List.from(tags),
       );
       if (saveAsRule) {
-        final type = category?.type.toBinaryType();
-        if (type != null) {
-          appState.rules.add(CategoryRule(pattern: t.name, category: category, type: type));
-        }
+        appState.rules.add(
+          CategoryRule(
+            pattern: t.name,
+            category: category,
+            type: ExpenseType.from(value!),
+          ),
+        );
       }
       onSave?.call(seed, t);
     }

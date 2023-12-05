@@ -39,10 +39,18 @@ class _MainScreen extends StatelessWidget {
         const CommonBackBar(
           leftText: 'Add CSV',
           rightChild: Tooltip(
-            message: "After uploading a CSV file, set the column types using\n"
-                "the column headers at the top of the table. Fields that\n"
-                "can't be parsed will be highlighted in red. Once you're\n"
-                "ready, click the preview button at the bottom right.",
+            message: """After uploading a CSV file, set the column types using
+the headers at the top of the table. 
+
+    Name: You can have multiple "Name" columns and 
+              they will be joined together.
+    Venmo: For Venmo CSVs, set this header on the
+              "Funding Source" column to filter out  
+              payments originating from your bank.
+
+Fields that can't be parsed will be highlighted in red. 
+Once you're ready, click the preview button at the 
+bottom right.""",
             child: Icon(Icons.question_mark),
           ),
         ),
