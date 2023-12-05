@@ -26,8 +26,10 @@ class FormButtons extends StatelessWidget {
           ElevatedButton(
             onPressed: onDelete,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+              // backgroundColor: Theme.of(context).colorScheme.error,
+              // foregroundColor: Theme.of(context).colorScheme.onError,
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
             ),
             child: const Text('Delete'),
           ),

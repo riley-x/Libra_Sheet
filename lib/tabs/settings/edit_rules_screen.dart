@@ -136,7 +136,7 @@ class EditRulesScreen extends StatelessWidget {
         ),
         Scaffold(
           body: ReorderableListView(
-            padding: const EdgeInsets.symmetric(vertical: 15),
+            padding: const EdgeInsets.only(top: 15, bottom: 80), // to account for FAB
             onReorder: (oldIndex, newIndex) => appState.rules.reorder(type, oldIndex, newIndex),
             children: [
               for (int i = 0; i < rules.length; i++)
@@ -273,7 +273,7 @@ class _EditRule extends StatelessWidget {
         FormButtons(
           showDelete: state.focused.key != 0,
           onCancel: state.clearFocus,
-          onReset: state.reset,
+          // onReset: state.reset,
           onSave: state.save,
           onDelete: () => showConfirmationDialog(
             context: context,

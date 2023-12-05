@@ -188,7 +188,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                 showDelete: (state.seed != null),
                 onCancel: (onCancel != null) ? onCancel : Navigator.of(context).pop,
                 onDelete: state.delete,
-                onReset: state.reset,
+                // onReset: state.reset,
                 // disable save when the allocation/reimb editor is open
                 onSave: (state.focus == TransactionDetailActiveFocus.none) ? state.save : null,
               ),
