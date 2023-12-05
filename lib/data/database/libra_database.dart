@@ -45,7 +45,7 @@ class LibraDatabase {
   static int _scoreSinceLastBackup = 0;
   static DateTime _lastBackupTime = DateTime.now();
 
-  static const int _maxScore = 40;
+  static const int _maxScore = 100;
 
   //-------------------------------------------------------------------------------------
   // Database setup

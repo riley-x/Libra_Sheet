@@ -11,7 +11,7 @@ extension DateTimeUtils on DateFormat {
   }
 }
 
-final _dateFormat = DateFormat.yMd();
+final _dateFormat = DateFormat('M/d/yy');
 
 extension DateTimeUtils2 on DateTime {
   DateTime asLocalDate() {

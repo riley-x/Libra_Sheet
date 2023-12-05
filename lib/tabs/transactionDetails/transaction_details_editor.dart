@@ -29,14 +29,14 @@ class TransactionDetailsEditor extends StatelessWidget {
     final state = context.watch<TransactionDetailsState>();
     var categories =
         context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
-    categories = [Category.ignore, Category.investment] + categories + [Category.empty];
+    categories = [Category.empty, Category.ignore, Category.investment] + categories + [];
     // the transaction constructor will convert Category.empty into the correct super category
     // however we must manually convert the initial category to [Category.empty] so that there isn't
-    // a duplicate. But this puts it at the bottom of the list so just use null.
+    // a duplicate.
     Category? initialCategory() {
       if (state.seed == null) return null;
       if (state.seed!.category == Category.income || state.seed!.category == Category.expense) {
-        return null;
+        return Category.empty;
       }
       return state.seed!.category;
     }
