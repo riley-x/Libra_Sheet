@@ -75,11 +75,24 @@ class _AccountScreenState extends State<AccountScreen> {
                   textLeft: 'Balance History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
                   child: DateTimeGraph([
-                    LineSeries<TimeIntValue, DateTime>(
+                    AreaSeries<TimeIntValue, DateTime>(
                       animationDuration: 300,
                       dataSource: data,
                       xValueMapper: (TimeIntValue sales, _) => sales.time,
-                      yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
+                      yValueMapper: (TimeIntValue sales, _) => sales.value.abs().asDollarDouble(),
+                      borderColor: widget.account.color,
+                      borderWidth: 3,
+                      borderDrawMode: BorderDrawMode.top,
+                      gradient: LinearGradient(
+                        colors: [
+                          widget.account.color.withAlpha(10),
+                          widget.account.color.withAlpha(80),
+                          widget.account.color.withAlpha(170),
+                        ],
+                        stops: const [0.0, 0.6, 1],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
                     ),
                   ]),
                 ),
