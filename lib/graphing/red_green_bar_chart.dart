@@ -47,7 +47,7 @@ class RedGreenBarChart extends StatelessWidget {
           xValueMapper: (datum, index) => _dateFormat.format(datum.time),
           yValueMapper: (datum, index) => 0,
           enableTooltip: false,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onBackground,
           width: 2,
           animationDuration: 0,
         ),
