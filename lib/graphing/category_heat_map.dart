@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/heat_map_painter.dart';
+import 'package:provider/provider.dart';
 
 /// Paints a list of [categories] as a heatmap based on their values. This is a StatefulWidget
 /// that wraps [HeatMapPainter] to paint either the top-level categories or the nested categories.
@@ -78,10 +80,11 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
       return "$name\n${getValue(cat, depth).dollarString()}";
     }
 
+    final isDarkMode = context.select<LibraAppState, bool>((value) => value.isDarkMode);
     final painter = HeatMapPainter<Category>(
       widget.categories,
       valueMapper: (it, depth) => getValue(it, depth).asDollarDouble(),
-      colorMapper: (it, depth) => it.color,
+      colorMapper: (it, depth) => (isDarkMode) ? it.color.withAlpha(210) : it.color,
       labelMapper: labelMapper,
       nestedData: (widget.showSubCategories) ? getNested : null,
       textStyle: Theme.of(context).textTheme.labelLarge,

@@ -57,6 +57,7 @@ class LibraApp extends StatelessWidget {
             colorScheme: context.select<LibraAppState, ColorScheme>((it) => it.colorScheme),
             textTheme: (isDarkMode) ? libraDarkTextTheme : libraTextTheme,
           ),
+          themeAnimationDuration: Duration.zero,
           home: child,
         );
       },
