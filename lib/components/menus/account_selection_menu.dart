@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/menus/account_menu_builder.dart';
 import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:provider/provider.dart';
-
-Widget _builder(BuildContext context, Account? acc) {
-  return Text(
-    acc?.name ?? 'None',
-    style: Theme.of(context).textTheme.labelLarge,
-  );
-}
 
 /// Dropdown button for filtering by an account
 class AccountSelectionMenu extends StatelessWidget {
@@ -34,7 +28,7 @@ class AccountSelectionMenu extends StatelessWidget {
     return LibraDropdownMenu<Account?>(
       selected: selected,
       items: items,
-      builder: (cat) => _builder(context, cat),
+      builder: (cat) => accountMenuBuilder(context, cat),
       onChanged: onChanged,
       borderRadius: borderRadius,
       height: height,
@@ -66,7 +60,7 @@ class AccountSelectionFormField extends StatelessWidget {
     return LibraDropdownFormField<Account?>(
       initial: initial,
       items: items,
-      builder: (cat) => _builder(context, cat),
+      builder: (cat) => accountMenuBuilder(context, cat),
       borderRadius: borderRadius,
       height: height,
       onSave: onSave,

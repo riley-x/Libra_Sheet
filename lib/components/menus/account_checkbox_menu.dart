@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
+import 'package:libra_sheet/components/menus/account_menu_builder.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -97,12 +98,7 @@ class AccountCheckboxMenu extends StatelessWidget {
     return DropdownCheckboxMenu<Account>(
       icon: Icons.add,
       items: accounts,
-      builder: (context, acc) => Text(
-        acc.name,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.labelLarge,
-      ),
+      builder: accountMenuBuilder,
       isChecked: isChecked,
       onChanged: onChanged,
     );
