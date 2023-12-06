@@ -30,7 +30,7 @@ class ReimbursementEditor extends StatelessWidget {
         FormButtons(
           showDelete: state.focusedReimbursement != null,
           onDelete: state.deleteReimbursement,
-          onReset: state.resetReimbursement,
+          // onReset: state.resetReimbursement,
           onSave: state.saveReimbursement,
           onCancel: state.clearFocus,
         ),

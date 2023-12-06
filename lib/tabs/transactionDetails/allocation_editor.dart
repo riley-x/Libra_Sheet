@@ -76,7 +76,7 @@ class AllocationEditor extends StatelessWidget {
           showDelete: state.focusedAllocation != null,
           // showCancel: state.focusedAllocation == null,
           onDelete: state.deleteAllocation,
-          onReset: state.resetAllocation,
+          // onReset: state.resetAllocation,
           onSave: state.saveAllocation,
           onCancel: state.clearFocus,
         )

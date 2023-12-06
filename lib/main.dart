@@ -58,6 +58,8 @@ class LibraApp extends StatelessWidget {
             textTheme: (isDarkMode) ? libraDarkTextTheme : libraTextTheme,
           ),
           themeAnimationDuration: Duration.zero,
+          // the animation gets really janky when you have case statements on [isDarkMode] because
+          // those don't animate with the rest of the theme.
           home: child,
         );
       },
