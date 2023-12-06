@@ -58,6 +58,7 @@ class LibraDatabase {
     }
 
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
+    /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Mac: /Users/riley/Library/Containers/com.example.libraSheet/Data/Documents/libra_sheet.db
     final path = join(await getDatabasesPath(), 'libra_sheet.db');
     debugPrint('LibraDatabase::init() path=$path');
