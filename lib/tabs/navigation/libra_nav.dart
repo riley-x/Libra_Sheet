@@ -38,15 +38,20 @@ class LibraNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
     final selectedIndex = context.select<LibraAppState, int>((it) => it.currentTab);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    final bkgColor = (isDarkMode) ? colorScheme.background : colorScheme.secondary;
+    final textColor = (isDarkMode) ? colorScheme.onBackground : colorScheme.onSecondary;
+
     return NavigationRail(
-      backgroundColor: colorScheme.secondary,
+      backgroundColor: bkgColor,
       indicatorColor: colorScheme.surfaceVariant,
-      unselectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
-      selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSecondary),
-      unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: colorScheme.onSecondary),
+      unselectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
+      selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
+      unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: textColor),
       extended: extended,
       minExtendedWidth: 220,
       destinations: libraNavDestinations,
@@ -59,12 +64,15 @@ class LibraNav extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
               children: [
-                const Icon(Icons.dark_mode),
+                Icon(Icons.dark_mode_outlined, color: textColor),
+                const SizedBox(width: 5),
                 Switch(
-                  value: context.select<LibraAppState, bool>((it) => !it.isDarkMode),
+                  value: !isDarkMode,
                   onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
+                  activeColor: colorScheme.surfaceVariant,
                 ),
-                const Icon(Icons.light_mode),
+                const SizedBox(width: 5),
+                Icon(Icons.light_mode, color: textColor),
               ],
             ),
           ),

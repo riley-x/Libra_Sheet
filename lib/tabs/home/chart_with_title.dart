@@ -32,7 +32,7 @@ class ChartWithTitle extends StatelessWidget {
                     textLeft!,
                     style: textStyle,
                   ),
-                Spacer(),
+                const Spacer(),
                 if (textRight != null)
                   Text(
                     textRight!,
@@ -44,12 +44,12 @@ class ChartWithTitle extends StatelessWidget {
         ],
       ),
     );
-    if (height != null)
+    if (height != null) {
       return SizedBox(
         height: height,
         child: main,
       );
-    else {
+    } else {
       return main;
     }
   }

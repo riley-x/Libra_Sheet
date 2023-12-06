@@ -12,7 +12,6 @@ import 'package:libra_sheet/tabs/category/category_tab.dart';
 import 'package:libra_sheet/tabs/home/home_tab.dart';
 import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab.dart';
-import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:libra_sheet/theme/text_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -50,12 +49,13 @@ class LibraApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TransactionFilterState(state.transactions)),
       ],
       builder: (context, child) {
+        final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
         return MaterialApp(
           title: 'Libra Sheet',
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: context.select<LibraAppState, ColorScheme>((it) => it.colorScheme),
-            textTheme: libraTextTheme,
+            textTheme: (isDarkMode) ? libraDarkTextTheme : libraTextTheme,
           ),
           home: child,
         );

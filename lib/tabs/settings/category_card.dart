@@ -18,7 +18,7 @@ class BaseCategoryCard extends StatelessWidget {
   }) : isSubCat = parentColor != null;
 
   static const double height = 45;
-  static const double colorBoxWidth = 6;
+  static const double colorBoxWidth = 5;
   static const double colorBoxHeight = height - 10;
   static const double subCatIndicatorWidth = 16;
   static const double subCatDividerOffset = 20 + colorBoxWidth; // this aligns with start of text
