@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-final libraDarkColorScheme = ColorScheme.fromSeed(seedColor: Colors.lightBlue);
+final libraDarkColorScheme =
+    ColorScheme.fromSeed(seedColor: Colors.lightBlue, brightness: Brightness.dark);
+final libraLightColorScheme = ColorScheme.fromSeed(seedColor: Colors.lightBlue);
 
 /// Chooses the label text color based on the background color
 /// https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color

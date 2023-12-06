@@ -49,15 +49,18 @@ class LibraApp extends StatelessWidget {
         // used by the transaction tab
         ChangeNotifierProvider(create: (_) => TransactionFilterState(state.transactions)),
       ],
-      child: MaterialApp(
-        title: 'Libra Sheet',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: libraDarkColorScheme,
-          textTheme: libraTextTheme,
-        ),
-        home: const LibraHomePage(),
-      ),
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Libra Sheet',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: context.select<LibraAppState, ColorScheme>((it) => it.colorScheme),
+            textTheme: libraTextTheme,
+          ),
+          home: child,
+        );
+      },
+      child: const LibraHomePage(),
     );
   }
 }

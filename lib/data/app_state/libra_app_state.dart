@@ -11,6 +11,7 @@ import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/theme/colorscheme.dart';
 
 class LibraAppState extends ChangeNotifier {
   late final CategoryState categories;
@@ -25,6 +26,9 @@ class LibraAppState extends ChangeNotifier {
     transactions = TransactionService(this);
   }
 
+  //--------------------------------------------------------------------------------
+  // Init
+  //--------------------------------------------------------------------------------
   Future<void> init() async {
     /// Load account, categories
     var futures = <Future>[];
@@ -45,6 +49,23 @@ class LibraAppState extends ChangeNotifier {
     futures.add(_loadAccounts());
     await Future.wait(futures);
     _loadNetWorth(); // not needed downstream, no need to await
+    notifyListeners();
+  }
+
+  //--------------------------------------------------------------------------------
+  // Config
+  //--------------------------------------------------------------------------------
+  ColorScheme colorScheme = libraDarkColorScheme;
+  bool isDarkMode = true;
+
+  void toggleDarkMode() {
+    if (isDarkMode) {
+      isDarkMode = false;
+      colorScheme = libraLightColorScheme;
+    } else {
+      isDarkMode = true;
+      colorScheme = libraDarkColorScheme;
+    }
     notifyListeners();
   }
 
