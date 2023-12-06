@@ -100,11 +100,24 @@ class TagCheckboxMenu extends StatelessWidget {
     return DropdownCheckboxMenu<Tag>(
       icon: Icons.add,
       items: tags,
-      builder: (context, tag) => Text(
-        tag.name,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.labelLarge,
+      builder: (context, tag) => Row(
+        children: [
+          Container(
+            width: 4,
+            height: 26,
+            color: tag.color,
+          ),
+          const SizedBox(width: 7),
+          // This is necessary to make sure the text clips properly
+          Flexible(
+            child: Text(
+              tag.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
+        ],
       ),
       isChecked: isChecked,
       onChanged: onChanged,

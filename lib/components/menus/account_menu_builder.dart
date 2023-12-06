@@ -16,11 +16,14 @@ Widget accountMenuBuilder(BuildContext context, Account? account) {
           color: account?.color,
         ),
         const SizedBox(width: 7),
-        Text(
-          account?.name ?? 'None',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelLarge,
+        // This is necessary to make sure the text clips properly
+        Flexible(
+          child: Text(
+            account?.name ?? 'None',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
         )
       ],
     ),

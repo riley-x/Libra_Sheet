@@ -72,6 +72,7 @@ class AccountChips extends StatelessWidget {
               for (final acc in selected)
                 LibraChip(
                   acc.name,
+                  color: acc.color,
                   onTap: () => defaultOnChanged(acc, false),
                 ),
             ],
