@@ -45,7 +45,7 @@ class AccountPieChart extends StatelessWidget {
         dataLabelSettings: DataLabelSettings(
           isVisible: true,
           textStyle: Theme.of(context).textTheme.labelLarge,
-          labelIntersectAction: LabelIntersectAction.shift, // Avoid labels intersection
+          labelIntersectAction: LabelIntersectAction.hide, // Avoid labels intersection
           labelPosition: ChartDataLabelPosition.outside,
           // connectorLineSettings:
           // ConnectorLineSettings(type: ConnectorType.curve, length: '25%'),

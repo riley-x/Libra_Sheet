@@ -5,9 +5,10 @@ import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/components/dialogs/show_color_picker.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/tabs/home/account_list.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
+
+import '../../components/cards/account_card.dart';
 
 /// State for the accounts submenu in the settings tab
 class EditAccountState extends ChangeNotifier {
@@ -105,7 +106,7 @@ class EditAccountsScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             children: [
               for (final acc in appState.accounts)
-                AccountRow(
+                AccountCard(
                   account: acc,
                   onTap: (it) => state.setFocus(it),
                 ),
