@@ -26,13 +26,22 @@ class SettingsScreenHeader extends StatelessWidget {
             leftText: "Settings  |  ${screen.title}",
             onBack: onBack,
           ),
-        if (!isFullScreen) ...[
-          const SizedBox(height: 10),
-          Text(
-            screen.title,
-            style: Theme.of(context).textTheme.headlineMedium,
+        if (!isFullScreen && screen != SettingsScreen.none) ...[
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: onBack,
+              ),
+              const Spacer(),
+              Text(
+                screen.title,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const Spacer(),
+              const SizedBox(width: 48),
+            ],
           ),
-          const SizedBox(height: 10),
         ],
         Expanded(
           child: child,
