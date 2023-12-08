@@ -24,7 +24,7 @@ final List<Account> testAccounts = [
     description: '',
     balance: 200000,
     lastUpdated: now.subtract(const Duration(days: 5)),
-    color: Colors.green,
+    color: Color(0xffb2d9c4),
   ),
   Account(
     key: 4,
@@ -33,7 +33,7 @@ final List<Account> testAccounts = [
     description: '',
     balance: 232600,
     lastUpdated: now.subtract(const Duration(days: 5)),
-    color: Colors.lightBlue,
+    color: Color(0xff80b9c8),
   ),
   Account(
     key: 1,
@@ -42,25 +42,25 @@ final List<Account> testAccounts = [
     description: 'xxx-1234',
     balance: 4341200,
     lastUpdated: now.subtract(const Duration(days: 15)),
-    color: Colors.teal,
+    color: Color(0xffc29470),
   ),
   Account(
     key: 2,
     type: AccountType.bank,
     name: 'Savings',
     description: 'xxx-1234',
-    balance: 24221100,
+    balance: 14221100,
     lastUpdated: now.subtract(const Duration(days: 15)),
-    color: Color.fromARGB(255, 6, 132, 14),
+    color: const Color(0xff247d7f),
   ),
   Account(
     key: 5,
     type: AccountType.investment,
     name: 'IRA',
     description: 'xxxx-1234',
-    balance: 34238900,
+    balance: 18238900,
     lastUpdated: now.subtract(const Duration(days: 32)),
-    color: Colors.blue.shade800,
+    color: Color(0xff44916f),
   ),
   Account(
     key: 6,
@@ -225,28 +225,67 @@ final testAllocations = [
 
 final List<Transaction> testTransactions = [
   Transaction(
-    key: 1,
-    name: "TARGET abbey is awesome",
-    date: DateTime(2023, 11, 16),
+    key: 0,
+    name: "This is a transaction!",
+    date: DateTime(2023, 11, 23),
     value: -502300,
-    account: testAccounts[0],
+    account: testAccounts[2],
+    category: testCategories[5],
+  ),
+  Transaction(
+    key: 0,
+    name: "Each transaction is assigned a category",
+    date: DateTime(2023, 11, 22),
+    value: -122300,
+    account: testAccounts[2],
+    category: testCategories[8],
+  ),
+  Transaction(
+    key: 0,
+    name: "But you can add allocations to split a transaction into multiple categories",
+    date: DateTime(2023, 11, 21),
+    value: -1050000,
+    account: testAccounts[2],
+    category: testCategories[6],
+    allocations: [],
+  ),
+  Transaction(
+    key: 0,
+    name: "You can also add tags to transactions",
+    date: DateTime(2023, 11, 20),
+    value: 20428900,
+    account: testAccounts[3],
     category: testCategories[0],
+    tags: testTags.sublist(0, 1),
+  ),
+  Transaction(
+    key: 0,
+    name: "A transaction can have multiple tags",
+    date: DateTime(2023, 11, 19),
+    value: -326800,
+    account: testAccounts[2],
+    category: testCategories[7],
+    tags: testTags.sublist(1),
+  ),
+  Transaction(
+    key: 0,
+    name: "And be reimbursed! Imagine you paid for dinner",
+    note: "This only adds -\$32 to the restaurant category",
+    date: DateTime(2023, 11, 18),
+    value: -640000,
+    account: testAccounts[2],
+    category: testCategories[5],
     reimbursements: [],
-    tags: testTags,
   ),
   Transaction(
-    key: 2,
-    name: "awefljawkelfjlkasdjflkajsdkljf klasdjfkljasl kdjfkla jsdlkfj",
-    date: DateTime(2023, 11, 15),
-    value: 1502300,
+    key: 0,
+    name: "And your friend Venmo'd you back 🍔",
+    note: "This adds \$0 to your income",
+    date: DateTime(2023, 11, 17),
+    value: 320000,
+    account: testAccounts[1],
     category: Category.income,
-  ),
-  Transaction(
-    key: 3,
-    name: "test test",
-    date: DateTime(2023, 11, 12),
-    value: 12322300,
-    category: Category.income,
+    reimbursements: [],
   ),
 ];
 
@@ -261,5 +300,17 @@ final List<Reimbursement> testReimbursements = [
 void initializeTestData() {
   _initTestCategories();
 
-  testTransactions[0].reimbursements!.add(testReimbursements[0]);
+  testTransactions[2]
+      .allocations!
+      .add(Allocation(name: '', category: testCategories[5].subCats[4], value: 100000));
+  testTransactions[5].reimbursements!.add(Reimbursement(
+        target: testTransactions[6],
+        value: 320000,
+        commitedValue: 320000,
+      ));
+  testTransactions[6].reimbursements!.add(Reimbursement(
+        target: testTransactions[5],
+        value: 320000,
+        commitedValue: 320000,
+      ));
 }
