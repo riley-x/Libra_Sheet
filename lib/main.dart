@@ -80,12 +80,33 @@ class LibraHomePage extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Navigator(
-                key: context.read<LibraAppState>().navigatorKey,
-                onGenerateRoute: (settings) {
-                  // This just generates a single default route, since we have no named routes
-                  return MaterialPageRoute(builder: (context) => const _Home());
-                },
+              child: Stack(
+                children: [
+                  Navigator(
+                    key: context.read<LibraAppState>().navigatorKey,
+                    onGenerateRoute: (settings) {
+                      // This just generates a single default route, since we have no named routes
+                      return MaterialPageRoute(builder: (context) => const _Home());
+                    },
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        color: Theme.of(context).colorScheme.surface.withAlpha(128),
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        child: Text(
+                          'This is a sample only. Expect some things to not work!',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
           ],
