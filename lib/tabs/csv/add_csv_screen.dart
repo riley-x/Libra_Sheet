@@ -102,7 +102,7 @@ bottom right.""",
         ),
         const SizedBox(height: 10),
         const Divider(height: 1, thickness: 1),
-        Expanded(child: _CsvGrid()),
+        const Expanded(child: _CsvGrid()),
         const _BottomBar(),
       ],
     );
@@ -268,7 +268,7 @@ class _Table extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
     return Table(
-      border: TableBorder.all(width: 0.3),
+      border: TableBorder.all(width: 0.3, color: Theme.of(context).colorScheme.outline),
       defaultColumnWidth: defaultColumnWidth,
       children: [
         TableRow(
@@ -323,9 +323,9 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
     final color = switch (state.tryParse(text, column)) {
-      null => null,
-      true => null,
-      false => Colors.red.shade800,
+      null => Theme.of(context).colorScheme.onBackground,
+      true => Theme.of(context).colorScheme.onBackground,
+      false => Theme.of(context).colorScheme.error,
     };
     // Highlighting the background of a cell is really annoying actually, because if every cell is
     // TableCellVerticalAlignment.fill, then the row will have 0 height.
