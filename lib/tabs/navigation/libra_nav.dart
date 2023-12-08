@@ -57,27 +57,29 @@ class LibraNav extends StatelessWidget {
       destinations: libraNavDestinations,
       selectedIndex: selectedIndex,
       onDestinationSelected: onDestinationSelected,
-      trailing: Expanded(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              children: [
-                Icon(Icons.dark_mode_outlined, color: textColor),
-                const SizedBox(width: 5),
-                Switch(
-                  value: !isDarkMode,
-                  onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
-                  activeColor: colorScheme.surfaceVariant,
+      trailing: (!extended)
+          ? null
+          : Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.dark_mode_outlined, color: textColor),
+                      const SizedBox(width: 5),
+                      Switch(
+                        value: !isDarkMode,
+                        onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
+                        activeColor: colorScheme.surfaceVariant,
+                      ),
+                      const SizedBox(width: 5),
+                      Icon(Icons.light_mode, color: textColor),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 5),
-                Icon(Icons.light_mode, color: textColor),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }
