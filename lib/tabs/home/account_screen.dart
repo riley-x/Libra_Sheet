@@ -33,7 +33,6 @@ class _AccountScreenState extends State<AccountScreen> {
     if (!mounted) return;
     final appState = context.read<LibraAppState>();
     var newData = appState.netWorthData;
-    newData = newData.withAlignedTimes(appState.monthList).fixedForCharts();
     setState(() {
       data = newData;
     });
