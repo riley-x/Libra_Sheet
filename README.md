@@ -1,16 +1,10 @@
 # Libra Sheet
 
-A new Flutter project.
+This is the branch for the Github pages demo. It removes most of the database interactions and replaces it with dummy data.
 
-## Getting Started
+## Build
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+flutter build web --base-href /Libra_Sheet/
+cp -r build/web/* docs/
+```
