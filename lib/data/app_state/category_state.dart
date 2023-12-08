@@ -23,21 +23,13 @@ class CategoryState {
   //----------------------------------------------------------------------------
   // Loading
   //----------------------------------------------------------------------------
-  Future<void> load() async {
-    await libraDatabase?.transaction((txn) async {
-      await loadChildCategories(txn, income);
-      await loadChildCategories(txn, expense);
-    });
-    debugPrint(
-        "CategoryState::load() Loaded ${income.subCats.length}+${expense.subCats.length} categories");
-  }
+  Future<void> load() async {}
 
   //----------------------------------------------------------------------------
   // Editing and updating categories
   //----------------------------------------------------------------------------
   void add(Category cat) async {
     debugPrint("CategoryState::add() $cat");
-    cat.key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
     cat.parent!.subCats.add(cat);
     appState.notifyListeners();
   }
@@ -48,25 +40,15 @@ class CategoryState {
     final ind = parentList.indexWhere((it) => it.key == cat.key);
     parentList.removeAt(ind);
     appState.notifyListeners();
-
-    libraDatabase!.transaction((txn) async {
-      if (deleteFromDatabase) {
-        await deleteCategory(cat, db: txn);
-      }
-      await shiftCategoryListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1, db: txn);
-    });
   }
 
   Future<void> update(Category cat, Category? oldParent) async {
     debugPrint("CategoryState::update() $cat");
-    int? listIndex;
     if (cat.parent != oldParent) {
       delete(cat, oldParent: oldParent, deleteFromDatabase: false);
-      listIndex = cat.parent!.subCats.length;
       cat.parent!.subCats.add(cat);
     }
     appState.notifyListeners();
-    updateCategory(cat, listIndex: listIndex);
   }
 
   void reorder(Category parent, int oldIndex, int newIndex) async {
@@ -77,16 +59,6 @@ class CategoryState {
       parent.subCats.insert(newIndex, cat);
     }
     appState.notifyListeners();
-
-    await libraDatabase?.transaction((txn) async {
-      if (newIndex > oldIndex) {
-        await shiftCategoryListIndicies(parent.key, oldIndex, newIndex, -1, db: txn);
-        await updateCategory(cat, listIndex: newIndex - 1, db: txn);
-      } else {
-        await shiftCategoryListIndicies(parent.key, newIndex, oldIndex, 1, db: txn);
-        await updateCategory(cat, listIndex: newIndex, db: txn);
-      }
-    });
   }
 
   //----------------------------------------------------------------------------

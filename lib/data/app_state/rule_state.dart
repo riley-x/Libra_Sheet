@@ -6,6 +6,7 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
+import 'package:libra_sheet/data/test_data.dart';
 
 /// Helper module for handling the category rules
 class RuleState {
@@ -22,9 +23,8 @@ class RuleState {
   // Modification Functions
   //----------------------------------------------------------------------------
   Future<void> load() async {
-    final map = appState.categories.createKeyMap();
-    income.addAll(await getRules(ExpenseType.income, map));
-    expense.addAll(await getRules(ExpenseType.expense, map));
+    income.add(testRules[0]);
+    expense.add(testRules[1]);
     appState.notifyListeners();
   }
 
@@ -32,8 +32,6 @@ class RuleState {
     debugPrint("RuleState::add() $rule");
     if (rule.category == null) return;
     final list = (rule.type == ExpenseType.income) ? income : expense;
-    int key = await insertRule(rule, listIndex: list.length);
-    rule = rule.copyWith(key: key);
     list.add(rule);
     appState.notifyListeners();
   }
@@ -44,18 +42,12 @@ class RuleState {
     final ind = list.indexWhere((it) => it.key == rule.key);
     list.removeAt(ind);
     appState.notifyListeners();
-
-    await libraDatabase?.transaction((txn) async {
-      await deleteRule(rule, db: txn);
-      await shiftRuleIndicies(rule.type, ind + 1, list.length + 1, -1, db: txn);
-    });
   }
 
   /// Rules are modified in place already. This function serves to notify listeners, and also update
   /// the database.
   Future<void> notifyUpdate(CategoryRule rule) async {
     appState.notifyListeners();
-    await updateRule(rule);
   }
 
   void reorder(ExpenseType type, int oldIndex, int newIndex) async {
@@ -67,16 +59,6 @@ class RuleState {
       list.insert(newIndex, rule);
     }
     appState.notifyListeners();
-
-    await libraDatabase?.transaction((txn) async {
-      if (newIndex > oldIndex) {
-        await shiftRuleIndicies(type, oldIndex, newIndex, -1, db: txn);
-        await updateRule(rule, listIndex: newIndex - 1, db: txn);
-      } else {
-        await shiftRuleIndicies(type, newIndex, oldIndex, 1, db: txn);
-        await updateRule(rule, listIndex: newIndex, db: txn);
-      }
-    });
   }
 
   //----------------------------------------------------------------------------

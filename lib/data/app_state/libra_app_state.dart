@@ -4,12 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
@@ -44,11 +46,6 @@ class LibraAppState extends ChangeNotifier {
   }
 
   Future<void> reloadAfterTransactions() async {
-    var futures = <Future>[];
-    futures.add(_loadMonths());
-    futures.add(_loadAccounts());
-    await Future.wait(futures);
-    _loadNetWorth(); // not needed downstream, no need to await
     notifyListeners();
   }
 
@@ -76,17 +73,11 @@ class LibraAppState extends ChangeNotifier {
 
   Future<void> _loadAccounts() async {
     accounts.clear();
-    accounts.addAll(await db.getAccounts());
-    if (!kReleaseMode) {
-      for (final acc in accounts) {
-        debugPrint("LibraAppState::_loadAccounts() ${acc.dump()}");
-      }
-    }
+    accounts.addAll(testAccounts);
   }
 
   Future<void> addAccount(Account acc) async {
     debugPrint("LibraAppState::addAccount() ${acc.dump()}");
-    acc.key = await db.insertAccount(acc, listIndex: accounts.length);
     accounts.add(acc);
     notifyListeners();
   }
@@ -96,7 +87,6 @@ class LibraAppState extends ChangeNotifier {
   Future<void> notifyUpdateAccount(Account acc) async {
     debugPrint("LibraAppState::notifyUpdateAccount() ${acc.dump()}");
     notifyListeners();
-    db.updateAccount(acc);
   }
 
   // TODO cache this?
@@ -115,8 +105,7 @@ class LibraAppState extends ChangeNotifier {
 
   Future<void> _loadMonths() async {
     final now = DateTime.now();
-    final earliestMonth = await LibraDatabase.db.getEarliestMonth();
-    if (earliestMonth == null) return;
+    final earliestMonth = startOfMonth(now.subtract(const Duration(days: 360)));
 
     // no easy way to do this in dart, so do manually
     final current = (now.year, now.month);
@@ -139,8 +128,27 @@ class LibraAppState extends ChangeNotifier {
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
-    final newData = await LibraDatabase.db.getMonthlyNet();
-    netWorthData = newData.withAlignedTimes(monthList, cumulate: true).fixedForCharts();
+    const vals = [
+      163246100,
+      165128600,
+      169421500,
+      174295300,
+      179102000,
+      176138000,
+      180194200,
+      182143900,
+      184094300,
+      183497500,
+      187915400,
+      189134200,
+      190438100,
+      191968900,
+      191968900,
+    ];
+    final newData = [
+      for (int i = 0; i < monthList.length; i++) TimeIntValue(time: monthList[i], value: vals[i])
+    ];
+    netWorthData = newData.fixedForCharts();
     notifyListeners();
   }
 

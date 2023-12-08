@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/data/test_data.dart';
 
 /// Helper class for managing transactions. Every widget that monitors transactions should probably
 /// watch this service, so that they can be notified when transactions are added or edited (which
@@ -23,48 +24,14 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<List<Transaction>> load(TransactionFilters filters) async {
-    final ts = await loadTransactions(
-      filters,
-      accounts: appState.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
-    );
-    return ts;
+    return testTransactions;
   }
 
-  Future<void> save(Transaction? old, Transaction nu) async {
-    debugPrint("TransactionService::save() $nu");
-    if (old == null) {
-      assert(nu.key == 0);
-      await insertTransaction(nu);
-    } else {
-      await updateTransaction(old, nu);
-    }
-    _onUpdate();
-  }
+  Future<void> save(Transaction? old, Transaction nu) async {}
 
-  Future<void> addAll(List<Transaction> transactions) async {
-    await libraDatabase?.transaction((txn) async {
-      for (final t in transactions) {
-        await insertTransaction(t, txn: txn);
-      }
-    });
-    _onUpdate();
-    LibraDatabase.backup();
-  }
+  Future<void> addAll(List<Transaction> transactions) async {}
 
-  Future<void> delete(Transaction t) async {
-    debugPrint("TransactionService::delete() $t");
-    await deleteTransaction(t);
-    _onUpdate();
-  }
+  Future<void> delete(Transaction t) async {}
 
-  Future<void> loadRelations(Transaction t) {
-    return loadTransactionRelations(
-      t,
-      accounts: appState.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
-    );
-  }
+  Future<void> loadRelations(Transaction t) async {}
 }

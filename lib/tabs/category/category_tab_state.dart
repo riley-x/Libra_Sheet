@@ -7,6 +7,7 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
 enum CategoryTabTimeFrame { current, oneYear, all }
@@ -71,10 +72,7 @@ class CategoryTabState extends ChangeNotifier {
       CategoryTabTimeFrame.current => appState.monthList.lastOrNull,
       CategoryTabTimeFrame.oneYear => appState.monthList[max(0, appState.monthList.length - 12)]
     };
-    individualValues = await LibraDatabase.db.getCategoryTotals(
-      start: startTime,
-      accounts: accounts.map((e) => e.key),
-    );
+    individualValues = testCategoryHistory.map((key, value) => MapEntry(key, value.last));
 
     /// Aggregate
     aggregateValues = Map.of(individualValues);
@@ -123,15 +121,15 @@ class CategoryTabState extends ChangeNotifier {
   }
 
   void _loadCategoryDetails(Category category) async {
-    final map = await LibraDatabase.db.getCategoryHistory(
-      callback: (_, vals) =>
-          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
-    );
+    final categoryHistory = testCategoryHistory.map((key, value) => MapEntry(key, [
+          for (int i = 0; i < appState.monthList.length; i++)
+            TimeIntValue(time: appState.monthList[i], value: value[i])
+        ]));
     categoryFocusedHistory.clear();
-    _addCategoryHistory(category, map);
+    _addCategoryHistory(category, categoryHistory);
     if (category.level == 1) {
       for (final subCat in category.subCats) {
-        _addCategoryHistory(subCat, map);
+        _addCategoryHistory(subCat, categoryHistory);
       }
     }
     notifyListeners();

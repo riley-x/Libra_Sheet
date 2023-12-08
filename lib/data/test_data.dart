@@ -1,4 +1,9 @@
+// ignore_for_file: use_full_hex_values_for_flutter_colors
+
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
@@ -8,71 +13,208 @@ import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
+final DateTime now = DateTime.now();
+final rng = Random(0);
+
 final List<Account> testAccounts = [
   Account(
-    key: 1,
-    name: 'Robinhood',
-    description: 'xxx-1234',
-    balance: 13451200,
-    lastUpdated: DateTime(2023, 11, 15),
+    key: 3,
+    type: AccountType.cash,
+    name: 'Cash',
+    description: '',
+    balance: 200000,
+    lastUpdated: now.subtract(const Duration(days: 5)),
     color: Colors.green,
   ),
   Account(
-    key: 2,
-    name: 'Virgo',
-    description: 'xxx-1234',
-    balance: 4221100,
-    lastUpdated: DateTime(2023, 10, 15),
-    color: Colors.red,
-  ),
-  Account(
-    key: 3,
-    name: 'TD',
-    description: 'xxx-1234',
-    balance: 124221100,
-    lastUpdated: DateTime(2023, 10, 15),
+    key: 4,
+    type: AccountType.cash,
+    name: 'Venmo',
+    description: '',
+    balance: 232600,
+    lastUpdated: now.subtract(const Duration(days: 5)),
     color: Colors.lightBlue,
   ),
+  Account(
+    key: 1,
+    type: AccountType.bank,
+    name: 'Checkings',
+    description: 'xxx-1234',
+    balance: 4341200,
+    lastUpdated: now.subtract(const Duration(days: 15)),
+    color: Colors.teal,
+  ),
+  Account(
+    key: 2,
+    type: AccountType.bank,
+    name: 'Savings',
+    description: 'xxx-1234',
+    balance: 24221100,
+    lastUpdated: now.subtract(const Duration(days: 15)),
+    color: Color.fromARGB(255, 6, 132, 14),
+  ),
+  Account(
+    key: 5,
+    type: AccountType.investment,
+    name: 'IRA',
+    description: 'xxxx-1234',
+    balance: 34238900,
+    lastUpdated: now.subtract(const Duration(days: 32)),
+    color: Colors.blue.shade800,
+  ),
+  Account(
+    key: 6,
+    type: AccountType.liability,
+    name: 'Credit Card',
+    description: 'xxxx-1234',
+    balance: -1264900,
+    lastUpdated: now.subtract(const Duration(days: 15)),
+    color: Colors.pink.shade800,
+  )
 ];
 
 final testCategories = [
-  Category(key: 1, name: 'cat 1', color: Colors.amber, parent: Category.expense),
-  Category(key: 2, name: 'cat 2', color: Colors.blue, parent: Category.expense),
-  Category(key: 3, name: 'cat 3', color: Colors.green, parent: Category.expense),
-  Category(key: 9, name: 'cat 4', color: Colors.red, parent: Category.expense),
-  Category(key: 10, name: 'cat 5', color: Colors.purple, parent: Category.expense),
+  Category(key: 1, color: const Color(4279939415), parent: Category.income, name: 'Paycheck'),
+  Category(key: 2, color: const Color(4278607389), parent: Category.income, name: 'Cash Back'),
+  Category(key: 3, color: const Color(4293828260), parent: Category.income, name: 'Gifts'),
+  Category(key: 4, color: const Color(4285770954), parent: Category.income, name: 'Interest'),
+  Category(key: 5, color: const Color(4284238947), parent: Category.income, name: 'Tax Refund'),
+
+  ///
+  Category(key: 10, color: const Color(4283611708), parent: Category.expense, name: 'Food'),
+  Category(key: 16, color: const Color(4278434036), parent: Category.expense, name: 'Shopping'),
+  Category(key: 6, color: const Color(4286531083), parent: Category.expense, name: 'Household'),
+  Category(
+      key: 21, color: const Color(4293960260), parent: Category.expense, name: 'Entertainment'),
+  Category(key: 25, color: const Color(4291904339), parent: Category.expense, name: 'Health'),
+  Category(
+      key: 30, color: const Color(4281353876), parent: Category.expense, name: 'Transportation'),
+  Category(key: 35, color: const Color(4287993237), parent: Category.expense, name: 'Other'),
 ];
 
-const testCategoryValues = {
-  1: 357000,
-  2: 23000,
-  3: 1000000,
-  4: 200000,
-  5: 200000,
-  6: 200000,
-  7: 200000,
-  8: 200000,
-  9: 223000,
-  10: 43000
+void _initTestCategories() {
+  Category.income.subCats.addAll(testCategories.sublist(0, 5));
+  Category.expense.subCats.addAll(testCategories.sublist(5));
+
+  final household = testCategories[7];
+  household.subCats.addAll([
+    Category(key: 7, color: const Color(4293303345), parent: household, name: 'Utilities'),
+    Category(key: 8, color: const Color(4287500554), parent: household, name: 'Rent/Mortgage'),
+    Category(key: 9, color: const Color(4290017826), parent: household, name: 'Supplies'),
+  ]);
+
+  final food = testCategories[5];
+  food.subCats.addAll([
+    Category(key: 11, color: const Color(4285851992), parent: food, name: 'Groceries'),
+    Category(key: 12, color: const Color(4291882280), parent: food, name: 'Takeout'),
+    Category(key: 13, color: const Color(4278422059), parent: food, name: 'Restaurants'),
+    Category(key: 14, color: const Color(4285369631), parent: food, name: 'Snacks'),
+    Category(key: 15, color: const Color(4287806109), parent: food, name: 'Alcohol'),
+  ]);
+
+  final shopping = testCategories[6];
+  shopping.subCats.addAll([
+    Category(key: 17, color: const Color(4283008198), parent: shopping, name: 'Clothes'),
+    Category(key: 18, color: const Color(4282903786), parent: shopping, name: 'Electronics'),
+    Category(key: 19, color: const Color(4283925399), parent: shopping, name: 'Furniture'),
+    Category(key: 20, color: const Color(4278937202), parent: shopping, name: 'Gifts'),
+  ]);
+
+  final entertainment = testCategories[8];
+  entertainment.subCats.addAll([
+    Category(key: 22, color: const Color(4289683232), parent: entertainment, name: 'Subscriptions'),
+    Category(key: 23, color: const Color(4293907217), parent: entertainment, name: 'Games'),
+    Category(
+        key: 24, color: const Color(4292836714), parent: entertainment, name: 'Movies & Events'),
+  ]);
+
+  final health = testCategories[9];
+  health.subCats.addAll([
+    Category(key: 26, color: const Color(4291053104), parent: health, name: 'Pharmacy'),
+    Category(key: 27, color: const Color(4294923164), parent: health, name: 'Beauty'),
+    Category(key: 28, color: const Color(4290810794), parent: health, name: 'Copays'),
+    Category(key: 29, color: const Color(4288020487), parent: health, name: 'Insurance'),
+  ]);
+
+  final transportation = testCategories[10];
+  transportation.subCats.addAll([
+    Category(key: 31, color: const Color(4284443815), parent: transportation, name: 'Car'),
+    Category(key: 32, color: const Color(4283382146), parent: transportation, name: 'Gas'),
+    Category(key: 33, color: const Color(4282349036), parent: transportation, name: 'Taxis'),
+    Category(key: 34, color: const Color(4289710333), parent: transportation, name: 'Fares'),
+  ]);
+
+  final other = testCategories[11];
+  other.subCats.addAll([
+    Category(key: 37, color: const Color(4289687417), parent: other, name: 'Taxes'),
+    Category(key: 38, color: const Color(4287460443), parent: other, name: 'Services'),
+  ]);
+}
+
+Map<int, List<int>> testCategoryHistory = {
+  1: List.generate(13, (index) => 40000000),
+  2: [1000000, 0, 0, 0, 1000000, 0, 0, 0, 1220000, 0, 0, 0, 1000000],
+  3: [0, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 420000, 200000],
+  4: List.generate(13, (index) => 0),
+  5: List.generate(13, (index) => 0),
+
+  /// Household
+  6: List.generate(13, (index) => 0),
+  7: List.generate(13, (index) => 200000 + rng.nextInt(1000000)),
+  8: List.generate(13, (index) => 12000000),
+  9: List.generate(14, (index) => rng.nextInt(1000000)),
+
+  /// Food
+  10: List.generate(13, (index) => 0),
+  11: List.generate(13, (index) => 4000000 + rng.nextInt(1000000)),
+  12: List.generate(13, (index) => 2000000 + rng.nextInt(1000000)),
+  13: List.generate(13, (index) => 3000000 + rng.nextInt(1000000)),
+  14: List.generate(14, (index) => 200000 + rng.nextInt(300000)),
+
+  /// Shopping
+  16: List.generate(14, (index) => rng.nextInt(1000000)),
+  17: List.generate(14, (index) => rng.nextInt(1000000)),
+  18: List.generate(14, (index) => rng.nextInt(1000000)),
+  20: List.generate(14, (index) => rng.nextInt(1000000)),
+
+  /// Entertainment
+  22: List.generate(14, (index) => 600000),
+  24: List.generate(14, (index) => rng.nextInt(1000000)),
+
+  /// Health
+  26: List.generate(14, (index) => 300000 + rng.nextInt(10000) * 100),
+  27: List.generate(14, (index) => rng.nextInt(2000) * 100),
+
+  /// Transportation
+  33: List.generate(14, (index) => rng.nextInt(2000) * 100),
+  34: List.generate(14, (index) => rng.nextInt(6000) * 100),
 };
 
 final testTags = [
-  Tag(key: 0, name: 'Tag 1', color: Colors.amber),
-  Tag(key: 1, name: 'Tag 2', color: Colors.green),
-  Tag(key: 2, name: 'Tag 3', color: Colors.blue),
+  Tag(key: 0, name: 'Needs Reimbursement', color: Colors.red),
+  Tag(key: 1, name: 'You', color: Colors.orange),
+  Tag(key: 2, name: 'can', color: Colors.amber),
+  Tag(key: 3, name: 'have', color: Colors.yellow),
+  Tag(key: 4, name: 'multiple', color: Colors.lime),
+  Tag(key: 5, name: 'tags', color: Colors.green),
+  Tag(key: 6, name: 'per', color: Colors.teal),
+  Tag(key: 7, name: 'transaction', color: Colors.blue),
+  Tag(key: 8, name: '😎', color: Colors.indigo),
 ];
 
 final testRules = [
   CategoryRule(
-      key: 1,
-      pattern: "THIASDF ASDF LKASDJF ASDFKLJ",
-      category: testCategories[0],
-      type: ExpenseType.expense),
+    key: 1,
+    pattern: "DIRECT DEPOSIT",
+    category: testCategories[0],
+    type: ExpenseType.income,
+  ),
   CategoryRule(
-      key: 2,
-      pattern: "4320558230495890358",
-      category: testCategories[1],
-      type: ExpenseType.expense),
+    key: 2,
+    pattern: "AMAZON",
+    category: testCategories[5],
+    type: ExpenseType.expense,
+  ),
 ];
 
 final testAllocations = [
@@ -117,16 +259,7 @@ final List<Reimbursement> testReimbursements = [
 ];
 
 void initializeTestData() {
+  _initTestCategories();
+
   testTransactions[0].reimbursements!.add(testReimbursements[0]);
-
-  // Category.expense.subCats.addAll(testCategories);
-
-  final parent = testCategories[2];
-  parent.subCats.addAll([
-    Category(key: 4, name: 'subcat 1', color: Colors.grey, parent: parent),
-    Category(key: 5, name: 'subcat 2', color: Colors.greenAccent, parent: parent),
-    Category(key: 6, name: 'subcat 3', color: Colors.lightGreen, parent: parent),
-    Category(key: 7, name: 'subcat 4', color: Colors.lightGreenAccent, parent: parent),
-    Category(key: 8, name: 'subcat 5', color: Colors.green, parent: parent),
-  ]);
 }

@@ -16,7 +16,7 @@ class DatabaseScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: SelectableText(
-                LibraDatabase.db.path,
+                "	⊂(◉‿◉)つ",
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

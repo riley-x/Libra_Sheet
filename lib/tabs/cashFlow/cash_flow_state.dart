@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart' as fnd;
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
 enum CashFlowType { categories, net }
@@ -53,24 +56,28 @@ class CashFlowState extends fnd.ChangeNotifier {
   }
 
   Future<void> load() async {
-    final categoryHistory = await LibraDatabase.db.getCategoryHistory(
-      accounts: accounts.map((e) => e.key),
-      callback: (_, vals) => vals.withAlignedTimes(appState.monthList),
-    );
-    final _netIncome = await LibraDatabase.db.getMonthlyNetIncome(
-      accounts: accounts.map((e) => e.key),
-    );
-
+    Map<int, List<TimeIntValue>> categoryHistory =
+        testCategoryHistory.map((key, value) => MapEntry(key, [
+              for (int i = 0; i < appState.monthList.length; i++)
+                TimeIntValue(time: appState.monthList[i], value: value[i])
+            ]));
     incomeData.clear();
     _loadList(incomeData, categoryHistory, appState.categories.income);
 
     expenseData.clear();
     _loadList(expenseData, categoryHistory, appState.categories.expense);
 
-    netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
-
-    netReturns = categoryHistory[Category.investment.key]?.fixedForCharts() ??
-        appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList().fixedForCharts();
+    final incomeVals = [
+      for (int i = 0; i < appState.netWorthData.length; i++)
+        TimeIntValue(
+            time: appState.netWorthData[i].time,
+            value: (i == appState.netWorthData.length - 1)
+                ? 0
+                : appState.netWorthData[i + 1].value - appState.netWorthData[i].value)
+    ];
+    netIncome = incomeVals.fixedForCharts();
+    netReturns = netIncome;
+    print(netIncome);
 
     notifyListeners();
   }

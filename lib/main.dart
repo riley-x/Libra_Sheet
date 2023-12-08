@@ -19,12 +19,8 @@ Future<void> main() async {
   /// Disable debugPrint() in release mode
   if (kReleaseMode) {
     debugPrint = (String? message, {int? wrapWidth}) {};
-  } else {
-    initializeTestData();
   }
-
-  /// Setup database
-  await LibraDatabase.init();
+  initializeTestData();
 
   /// Top level state
   final state = LibraAppState();
