@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
-import 'package:libra_sheet/data/test_data.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
@@ -20,7 +19,7 @@ Future<void> main() async {
   if (kReleaseMode) {
     debugPrint = (String? message, {int? wrapWidth}) {};
   } else {
-    initializeTestData();
+    // initializeTestData();
   }
 
   /// Setup database
