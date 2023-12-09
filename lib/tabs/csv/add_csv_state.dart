@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:csv/csv_settings_autodetection.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
@@ -98,6 +99,7 @@ class AddCsvState extends ChangeNotifier {
     final input = await file!.readAsString();
     const converter = CsvToListConverter(
       shouldParseNumbers: false,
+      csvSettingsDetector: FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']),
     );
     rawLines = converter.convert(input);
     nCols = rawLines.fold(0, (m, it) => max(m, it.length));
