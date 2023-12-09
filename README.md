@@ -1,16 +1,36 @@
 # Libra Sheet
 
-A new Flutter project.
+This is a Flutter app for tracking and categorizing your expenses. 
 
-## Getting Started
+## Preview
 
-This project is a starting point for a Flutter application.
+You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/).
 
-A few resources to get you started if this is your first Flutter project:
+### Your accounts and net worth at a glance
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+![Home screen](docs/screen_home.png)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### See where you spend your money
+
+![Categories screen](docs/screen_categories.png)
+
+### And how it changes over time
+
+![Cashflow screen](docs/screen_cashflow.png)
+
+### Or view details for a specific category
+
+![Category focus screen](docs/screen_categoryfocus.png)
+
+
+## Features
+
+* Fully customizable categories and sub-categories
+* Fully customizable transaction tags
+* **Input transactions via CSV**
+  * Automatic categorizing, but you have to define your own rules
+* Reimburse transactions
+  * Imagine you paid $60 for dinner with a friend and they Venmo you back $30
+  * Your real expense is only $30, and the Venmo transaction shouldn't count as income
+* Dark/light theme
+* Fully offline; no internet connection used
