@@ -38,7 +38,40 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> {
   SettingsScreen tab = SettingsScreen.none;
 
-  void onBack() {
+  bool clearFocus(BuildContext context) {
+    switch (tab) {
+      case SettingsScreen.accounts:
+        final state = context.read<EditAccountState>();
+        if (state.isFocused) {
+          state.clearFocus();
+          return true;
+        }
+      case SettingsScreen.categories:
+        final state = context.read<EditCategoriesState>();
+        if (state.isFocused) {
+          state.clearFocus();
+          return true;
+        }
+      case SettingsScreen.tags:
+        final state = context.read<EditTagsState>();
+        if (state.isFocused) {
+          state.clearFocus();
+          return true;
+        }
+      case SettingsScreen.incomeRules:
+      case SettingsScreen.expenseRules:
+        final state = context.read<EditRulesState>();
+        if (state.isFocused) {
+          state.clearFocus();
+          return true;
+        }
+      default:
+    }
+    return false;
+  }
+
+  void onBack(BuildContext context) {
+    if (clearFocus(context)) return;
     setState(() {
       if (tab.parent != null) {
         tab = tab.parent!;
@@ -48,7 +81,8 @@ class _SettingsTabState extends State<SettingsTab> {
     });
   }
 
-  void onSelect(SettingsScreen it) {
+  void onSelect(BuildContext context, SettingsScreen it) {
+    clearFocus(context);
     setState(() {
       tab = it;
     });
@@ -56,18 +90,6 @@ class _SettingsTabState extends State<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    Widget mainScreen = _SettingsTab(onSelect: onSelect);
-    Widget auxContent = switch (tab) {
-      SettingsScreen.accounts => const EditAccountsScreen(),
-      SettingsScreen.categories => const EditCategoriesScreen(),
-      SettingsScreen.tags => const EditTagsScreen(),
-      SettingsScreen.rules => RulesSettingsScreen(onSelect),
-      SettingsScreen.incomeRules => const EditRulesScreen(ExpenseType.income),
-      SettingsScreen.expenseRules => const EditRulesScreen(ExpenseType.expense),
-      SettingsScreen.database => const DatabaseScreen(),
-      _ => const SizedBox(),
-    };
-
     return MultiProvider(
       /// The providers need to be above the LayoutBuilder to survive a screen switch
       providers: [
@@ -82,11 +104,23 @@ class _SettingsTabState extends State<SettingsTab> {
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
+          Widget mainScreen = _SettingsTab(onSelect: (it) => onSelect(context, it));
+          Widget auxContent = switch (tab) {
+            SettingsScreen.accounts => const EditAccountsScreen(),
+            SettingsScreen.categories => const EditCategoriesScreen(),
+            SettingsScreen.tags => const EditTagsScreen(),
+            SettingsScreen.rules => RulesSettingsScreen((it) => onSelect(context, it)),
+            SettingsScreen.incomeRules => const EditRulesScreen(ExpenseType.income),
+            SettingsScreen.expenseRules => const EditRulesScreen(ExpenseType.expense),
+            SettingsScreen.database => const DatabaseScreen(),
+            _ => const SizedBox(),
+          };
+
           bool isFullScreen = constraints.maxWidth < 850;
           Widget auxScreen = SettingsScreenHeader(
             screen: tab,
             isFullScreen: isFullScreen,
-            onBack: onBack,
+            onBack: () => onBack(context),
             child: auxContent,
           );
 
