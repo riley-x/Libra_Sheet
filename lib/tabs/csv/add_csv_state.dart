@@ -34,7 +34,7 @@ enum CsvField {
 }
 
 final List<DateFormat> _dateFormats = [
-  DateFormat('MM/dd/yyyy'),
+  DateFormat('MM/dd/yy'),
   DateFormat("yyyy-MM-ddTHH:mm:ss"),
   DateFormat(),
 ];
