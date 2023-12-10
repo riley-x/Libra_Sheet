@@ -13,6 +13,7 @@ import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// TODO deprecated
 Database? libraDatabase;
@@ -60,7 +61,10 @@ class LibraDatabase {
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Mac: /Users/riley/Library/Containers/com.example.libraSheet/Data/Documents/libra_sheet.db
-    final path = join(await getDatabasesPath(), 'libra_sheet.db');
+    // final path = join(await getDatabasesPath(), 'libra_sheet.db');
+
+    final appDocumentsDir = await getApplicationDocumentsDirectory();
+    final path = join(appDocumentsDir.path, "libra_sheet.db");
     debugPrint('LibraDatabase::init() path=$path');
 
     _database = await openDatabase(
@@ -120,10 +124,10 @@ FutureOr<void> _createDatabase14(Database db) async {
   await db.execute(createReimbursementsTableSql);
   await db.execute(createTagJoinTableSql);
   await db.execute(createDefaultCategories);
-  if (kDebugMode) {
-    await db.execute(createTestAccountsSql);
-    await db.execute(createTestTagsSql);
-  }
+  // if (kDebugMode) {
+  //   await db.execute(createTestAccountsSql);
+  //   await db.execute(createTestTagsSql);
+  // }
 }
 
 const createDefaultCategories = '''
