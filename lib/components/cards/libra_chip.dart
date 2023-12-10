@@ -25,12 +25,16 @@ class LibraChip extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: color ?? Theme.of(context).colorScheme.secondaryContainer,
-          border: (color == Colors.transparent) ? Border.all() : null,
+          border: (color == Colors.transparent)
+              ? Border.all(color: Theme.of(context).colorScheme.onBackground)
+              : null,
         ),
         child: Text(
           text,
-          style: (style ?? Theme.of(context).textTheme.labelLarge)
-              ?.copyWith(color: (color == null) ? null : adaptiveTextColor(color!)),
+          style: (style ?? Theme.of(context).textTheme.labelLarge)?.copyWith(
+              color: (color == null || color == Colors.transparent)
+                  ? null
+                  : adaptiveTextColor(color!)),
         ),
       ),
     );

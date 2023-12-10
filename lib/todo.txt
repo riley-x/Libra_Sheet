@@ -1,6 +1,4 @@
-- Back button on settings screen
-- Filter gets reset on save transaction
-- Libra chip transparent background dark mode
+- Filter gets reset on save transaction, account and category screen
 - Account chip large name pushes numbers out
 - Add click on bar charts
 - Tabbing on forms
