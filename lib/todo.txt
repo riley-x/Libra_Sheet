@@ -1,4 +1,8 @@
-- CSV in dark mode doesn't work
+- Back button on settings screen
+- Filter gets reset on save transaction
+- Libra chip transparent background dark mode
+- Account chip large name pushes numbers out
+- Add click on bar charts
 - Tabbing on forms
 - Category focus screen, show only category history respecting filters
 - Categories screen, change this mo. to custom range
