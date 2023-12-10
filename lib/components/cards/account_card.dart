@@ -46,20 +46,25 @@ class AccountCard extends StatelessWidget {
                 color: account.color,
               ),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    account.name,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  Text(
-                    account.description,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      account.name,
+                      style: theme.textTheme.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      account.description,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              const Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
