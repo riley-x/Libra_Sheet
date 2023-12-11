@@ -65,7 +65,9 @@ class _FocusTextFieldState extends State<FocusTextField> {
           errorStyle: const TextStyle(height: 0),
           border: const OutlineInputBorder(), // this sets the shape, but the color is not used
           hintText: widget.hint,
-          hintStyle: Theme.of(context).textTheme.bodySmall,
+          hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
           labelText: widget.label,
           contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           isDense: true,

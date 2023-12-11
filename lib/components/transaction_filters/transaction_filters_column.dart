@@ -47,61 +47,63 @@ class TransactionFiltersColumn extends StatelessWidget {
         physics: const ClampingScrollPhysics(),
         child: Padding(
           padding: interiorPadding ?? EdgeInsets.zero,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              /// Title
-              const SizedBox(height: 10),
-              Text(
-                "Filter",
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+          child: FocusScope(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// Title
+                const SizedBox(height: 10),
+                Text(
+                  "Filter",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
 
-              /// Not needed? Since already have a value filter
-              // const SizedBox(height: 10),
-              // Text("Type", style: textStyle),
-              // const SizedBox(height: 5),
-              // ExpenseTypeFilter(
-              //   state.expenseFilterSelected,
-              //   onSelect: state.setExpenseFilter,
-              // ),
+                /// Not needed? Since already have a value filter
+                // const SizedBox(height: 10),
+                // Text("Type", style: textStyle),
+                // const SizedBox(height: 5),
+                // ExpenseTypeFilter(
+                //   state.expenseFilterSelected,
+                //   onSelect: state.setExpenseFilter,
+                // ),
 
-              /// Date
-              const SizedBox(height: 15),
-              Text("Date", style: textStyle),
-              const SizedBox(height: 5),
-              const _DateFilter(),
+                /// Date
+                const SizedBox(height: 15),
+                Text("Date", style: textStyle),
+                const SizedBox(height: 5),
+                const _DateFilter(),
 
-              /// Value
-              const SizedBox(height: 15),
-              Text("Value", style: textStyle),
-              const SizedBox(height: 5),
-              const _ValueRange(),
+                /// Value
+                const SizedBox(height: 15),
+                Text("Value", style: textStyle),
+                const SizedBox(height: 5),
+                const _ValueRange(),
 
-              /// Account
-              const SizedBox(height: 15),
-              const _AccountChips(),
+                /// Account
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _AccountChips()),
 
-              /// Category
-              const SizedBox(height: 15),
-              const _CategoryChips(),
+                /// Category
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _CategoryChips()),
 
-              /// Tags
-              const SizedBox(height: 15),
-              const _TagSelector(),
-              const SizedBox(height: 10),
+                /// Tags
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _TagSelector()),
+                const SizedBox(height: 10),
 
-              /// Confirmation Buttons
-              if (showConfirmationButtons) ...[
-                const SizedBox(height: 30),
-                FormButtons(
-                  showDelete: false,
-                  onCancel: onCancel,
-                  onReset: onReset,
-                  onSave: onSave,
-                )
-              ]
-            ],
+                /// Confirmation Buttons
+                if (showConfirmationButtons) ...[
+                  const SizedBox(height: 30),
+                  FormButtons(
+                    showDelete: false,
+                    onCancel: onCancel,
+                    onReset: onReset,
+                    onSave: onSave,
+                  )
+                ]
+              ],
+            ),
           ),
         ),
       ),

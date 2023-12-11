@@ -49,8 +49,7 @@ class TransactionDetailsEditor extends StatelessWidget {
       physics: const ClampingScrollPhysics(),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        child: FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
+        child: FocusScope(
           child: Form(
             key: state.formKey,
             child: Column(
