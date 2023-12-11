@@ -69,7 +69,7 @@ class LibraDropdownMenu<T> extends StatelessWidget {
             selectedItemBuilder: (selectedBuilder == null) ? null : selectedItemBuilder,
 
             /// this is the color of the button when it has keyboard focus
-            focusColor: Theme.of(context).colorScheme.background,
+            // focusColor: Theme.of(context).colorScheme.primaryContainer,
             value: selected,
             items: menuItems,
             onChanged: onChanged,
