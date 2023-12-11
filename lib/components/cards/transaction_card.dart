@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -26,13 +27,28 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = (trans.category.level == 0) ? Colors.transparent : trans.category.color;
+
+    bool isUncategorized = trans.category == Category.income || trans.category == Category.expense;
+    bool isInvestment = trans.category == Category.investment;
+
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      shape: (isUncategorized)
+          ? RoundedRectangleBorder(
+              side: BorderSide(color: Theme.of(context).colorScheme.error),
+              borderRadius: BorderRadius.circular(8),
+            )
+          : (isInvestment)
+              ? RoundedRectangleBorder(
+                  side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                  borderRadius: BorderRadius.circular(8),
+                )
+              : null,
       // color: Color.alphaBlend(
       //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
       //     Theme.of(context).colorScheme.surface),
       surfaceTintColor: color,
-      // shadowColor: Colors.transparent,
+      // shadowColor: (isUncategorized) ? Colors.amber : null,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => onSelect?.call(trans),

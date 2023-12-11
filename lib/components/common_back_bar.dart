@@ -30,11 +30,14 @@ class CommonBackBar extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            Text(
-              leftText ?? '',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Expanded(
+              child: Text(
+                leftText ?? '',
+                style: Theme.of(context).textTheme.headlineMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            const Spacer(),
             if (rightChild != null) rightChild!,
             if (rightChild == null)
               Text(
