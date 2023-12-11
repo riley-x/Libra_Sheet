@@ -1,4 +1,3 @@
-- Fix account reload!!!
 - Add click on bar charts
 - Tabbing on forms
 - Category focus screen, show only category history respecting filters

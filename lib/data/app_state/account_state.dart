@@ -23,7 +23,7 @@ class AccountState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Refetches the balances from the database, i.e. after transaction change.
+  /// Refetches the calculated fields from the database, i.e. after transaction change.
   ///
   /// DO NOT replace the original objects! Accounts are kept as pointers by other objects.
   Future<void> _updateAfterTransactions() async {
