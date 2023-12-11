@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/menus/account_menu_builder.dart';
 import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:provider/provider.dart';
@@ -23,8 +24,8 @@ class AccountSelectionMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Account?> items = context.watch<LibraAppState>().accounts;
-    if (includeNone) items = <Account?>[null] + items;
+    List<Account?> items = context.watch<AccountState>().list;
+    if (includeNone) items = [null, ...items];
     return LibraDropdownMenu<Account?>(
       selected: selected,
       items: items,
@@ -55,8 +56,8 @@ class AccountSelectionFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Account?> items = context.watch<LibraAppState>().accounts;
-    if (includeNone) items = <Account?>[null] + items;
+    List<Account?> items = context.watch<AccountState>().list;
+    if (includeNone) items = [null, ...items];
     return LibraDropdownFormField<Account?>(
       initial: initial,
       items: items,

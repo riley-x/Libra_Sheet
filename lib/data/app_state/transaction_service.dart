@@ -25,7 +25,7 @@ class TransactionService extends ChangeNotifier {
   Future<List<Transaction>> load(TransactionFilters filters) async {
     final ts = await loadTransactions(
       filters,
-      accounts: appState.createAccountMap(),
+      accounts: appState.accounts.createAccountMap(),
       categories: appState.categories.createKeyMap(),
       tags: appState.tags.createKeyMap(),
     );
@@ -62,7 +62,7 @@ class TransactionService extends ChangeNotifier {
   Future<void> loadRelations(Transaction t) {
     return loadTransactionRelations(
       t,
-      accounts: appState.createAccountMap(),
+      accounts: appState.accounts.createAccountMap(),
       categories: appState.categories.createKeyMap(),
       tags: appState.tags.createKeyMap(),
     );

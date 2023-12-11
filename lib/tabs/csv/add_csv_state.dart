@@ -336,7 +336,7 @@ class AddCsvState extends ChangeNotifier {
     var csvFormat = columnTypes.map((e) => e.name).join(',');
     if (csvFormat != account!.csvFormat) {
       account!.csvFormat = csvFormat;
-      appState.notifyUpdateAccount(account!);
+      appState.accounts.notifyUpdate(account!);
     }
   }
 }

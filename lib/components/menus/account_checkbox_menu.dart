@@ -3,7 +3,7 @@ import 'package:libra_sheet/components/cards/libra_chip.dart';
 import 'package:libra_sheet/components/menus/account_menu_builder.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:provider/provider.dart';
 
@@ -41,7 +41,7 @@ class AccountChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(onChanged == null || whenChanged == null);
-    final accounts = context.watch<LibraAppState>().accounts;
+    final accounts = context.watch<AccountState>().list;
     return Column(
       children: [
         TitleRow(

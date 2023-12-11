@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/account_card.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:provider/provider.dart';
 
+/// The account list view used in the sidebar of the home tab.
 class AccountList extends StatelessWidget {
   final EdgeInsets padding;
 
@@ -14,7 +15,7 @@ class AccountList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<LibraAppState>();
+    final accounts = context.watch<AccountState>().list;
 
     return ListView(
       padding: padding,
@@ -23,7 +24,7 @@ class AccountList extends StatelessWidget {
           "Cash Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) ...[
+        for (final account in accounts) ...[
           if (account.type == AccountType.cash) AccountCard(account: account),
         ],
         const SizedBox(height: 20),
@@ -31,7 +32,7 @@ class AccountList extends StatelessWidget {
           "Bank Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) ...[
+        for (final account in accounts) ...[
           if (account.type == AccountType.bank) AccountCard(account: account),
         ],
         const SizedBox(height: 20),
@@ -39,7 +40,7 @@ class AccountList extends StatelessWidget {
           "Investment Accounts",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) ...[
+        for (final account in accounts) ...[
           if (account.type == AccountType.investment) AccountCard(account: account),
         ],
         const SizedBox(height: 20),
@@ -47,7 +48,7 @@ class AccountList extends StatelessWidget {
           "Liabilities",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        for (final account in appState.accounts) ...[
+        for (final account in accounts) ...[
           if (account.type == AccountType.liability) AccountCard(account: account),
         ],
       ],

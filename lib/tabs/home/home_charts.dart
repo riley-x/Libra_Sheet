@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
@@ -155,8 +156,8 @@ class _AssetsPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<LibraAppState>();
-    final accounts = appState.accounts.where((it) => it.type != AccountType.liability).toList();
+    final accounts =
+        context.watch<AccountState>().list.where((it) => it.type != AccountType.liability).toList();
     final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
@@ -175,8 +176,8 @@ class _LiabilitiesPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<LibraAppState>();
-    final accounts = appState.accounts.where((it) => it.type == AccountType.liability).toList();
+    final accounts =
+        context.watch<AccountState>().list.where((it) => it.type == AccountType.liability).toList();
     final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,

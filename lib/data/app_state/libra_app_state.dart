@@ -1,13 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
-import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
-import 'package:libra_sheet/data/database/accounts.dart' as db;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -18,12 +16,14 @@ class LibraAppState extends ChangeNotifier {
   late final TagState tags;
   late final RuleState rules;
   late final TransactionService transactions;
+  late final AccountState accounts;
 
   LibraAppState() {
     categories = CategoryState(this);
     tags = TagState(this);
     rules = RuleState(this);
     transactions = TransactionService(this);
+    accounts = AccountState(transactions);
   }
 
   //--------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ class LibraAppState extends ChangeNotifier {
   Future<void> init() async {
     /// Load account, categories
     var futures = <Future>[];
-    futures.add(_loadAccounts());
+    futures.add(accounts.load());
     futures.add(categories.load());
     futures.add(tags.load());
     futures.add(_loadMonths());
@@ -43,11 +43,11 @@ class LibraAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Make sure to NOT subscribe this to [transactions] as the month list MUST be awaited before
+  /// anything else is updated. I'm not sure if the ChangeNotifier updates in order, but it
+  /// probably doesn't await anything.
   Future<void> reloadAfterTransactions() async {
-    var futures = <Future>[];
-    futures.add(_loadMonths());
-    futures.add(_loadAccounts());
-    await Future.wait(futures);
+    await _loadMonths();
     _loadNetWorth(); // not needed downstream, no need to await
     notifyListeners();
   }
@@ -67,46 +67,6 @@ class LibraAppState extends ChangeNotifier {
       colorScheme = libraDarkColorScheme;
     }
     notifyListeners();
-  }
-
-  //--------------------------------------------------------------------------------
-  // Accounts
-  //--------------------------------------------------------------------------------
-  final List<Account> accounts = [];
-
-  Future<void> _loadAccounts() async {
-    // TODO update from old! DO NOT replace objects!
-    accounts.clear();
-    accounts.addAll(await db.getAccounts());
-    if (!kReleaseMode) {
-      for (final acc in accounts) {
-        debugPrint("LibraAppState::_loadAccounts() ${acc.dump()}");
-      }
-    }
-  }
-
-  Future<void> addAccount(Account acc) async {
-    debugPrint("LibraAppState::addAccount() ${acc.dump()}");
-    acc.key = await db.insertAccount(acc, listIndex: accounts.length);
-    accounts.add(acc);
-    notifyListeners();
-  }
-
-  /// The account is modified in-place (because accounts must have single instances so that pointers
-  /// don't become stale). This just propogates to listerners and database.
-  Future<void> notifyUpdateAccount(Account acc) async {
-    debugPrint("LibraAppState::notifyUpdateAccount() ${acc.dump()}");
-    notifyListeners();
-    db.updateAccount(acc);
-  }
-
-  // TODO cache this?
-  Map<int, Account> createAccountMap() {
-    final out = <int, Account>{};
-    for (final acc in accounts) {
-      out[acc.key] = acc;
-    }
-    return out;
   }
 
   //--------------------------------------------------------------------------------

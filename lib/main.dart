@@ -42,6 +42,7 @@ class LibraApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: state),
         ChangeNotifierProvider.value(value: state.transactions),
+        ChangeNotifierProvider.value(value: state.accounts),
         ChangeNotifierProvider(create: (_) => CategoryTabState(state)),
         ChangeNotifierProvider(create: (_) => CashFlowState(state)),
         // used by the transaction tab

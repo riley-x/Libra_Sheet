@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/components/dialogs/show_color_picker.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
@@ -70,13 +71,13 @@ class EditAccountState extends ChangeNotifier {
       formKey.currentState?.save();
       if (focused == null) {
         final acc = Account(type: type, name: name, description: description, color: color);
-        appState.addAccount(acc);
+        appState.accounts.add(acc);
       } else {
         focused!.type = type;
         focused!.name = name;
         focused!.description = description;
         focused!.color = color;
-        appState.notifyUpdateAccount(focused!);
+        appState.accounts.notifyUpdate(focused!);
       }
       clearFocus();
     }
@@ -90,7 +91,7 @@ class EditAccountsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<LibraAppState>();
+    final accounts = context.watch<AccountState>().list;
     final state = context.watch<EditAccountState>();
 
     /// The IndexedStack preserves the scroll state of the ListView I think...
@@ -105,7 +106,7 @@ class EditAccountsScreen extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             children: [
-              for (final acc in appState.accounts)
+              for (final acc in accounts)
                 AccountCard(
                   account: acc,
                   onTap: (it) => state.setFocus(it),
