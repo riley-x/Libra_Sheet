@@ -6,7 +6,7 @@ import 'package:libra_sheet/data/objects/account.dart';
 class AccountState extends ChangeNotifier {
   final TransactionService txnService;
   AccountState(this.txnService) {
-    txnService.addListener(updateBalances);
+    txnService.addListener(_updateAfterTransactions);
   }
 
   final List<Account> list = [];
@@ -23,9 +23,18 @@ class AccountState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Refetches the balances from the database, i.e. after transaction change. DO NOT replace objects!
-  Future<void> updateBalances() async {
-    // TODO
+  /// Refetches the balances from the database, i.e. after transaction change.
+  ///
+  /// DO NOT replace the original objects! Accounts are kept as pointers by other objects.
+  Future<void> _updateAfterTransactions() async {
+    final map = createAccountMap();
+    final tempList = await db.getAccounts();
+    for (final newAcc in tempList) {
+      final oldAcc = map[newAcc.key];
+      oldAcc?.balance = newAcc.balance;
+      oldAcc?.lastUpdated = newAcc.lastUpdated;
+    }
+    notifyListeners();
   }
 
   Future<void> add(Account acc) async {

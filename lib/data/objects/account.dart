@@ -32,8 +32,8 @@ class Account {
   String csvFormat;
 
   /// Calculated fields
-  final DateTime? lastUpdated;
-  final int balance;
+  DateTime? lastUpdated;
+  int balance;
 
   Account({
     this.type = AccountType.bank,
