@@ -278,7 +278,7 @@ class _EditCategory extends StatelessWidget {
         FormButtons(
           showDelete: state.focused.key > 0,
           onCancel: state.clearFocus,
-          onReset: state.reset,
+          // onReset: state.reset,
           onSave: state.save,
           onDelete: () => showConfirmationDialog(
             context: context,

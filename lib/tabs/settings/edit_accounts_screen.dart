@@ -216,7 +216,7 @@ class _EditAccount extends StatelessWidget {
           showDelete: state.focused != null,
           onDelete: null, // TODO
           onCancel: state.clearFocus,
-          onReset: state.reset,
+          // onReset: state.reset,
           onSave: state.save,
         ),
       ],

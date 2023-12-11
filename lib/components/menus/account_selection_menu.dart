@@ -3,7 +3,6 @@ import 'package:libra_sheet/components/menus/account_menu_builder.dart';
 import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:provider/provider.dart';
 
 /// Dropdown button for filtering by an account

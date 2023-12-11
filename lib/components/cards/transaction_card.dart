@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:provider/provider.dart';
 
 class TransactionCard extends StatelessWidget {
   const TransactionCard({
@@ -113,6 +115,10 @@ class _TextElements extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// TODO think of a cleaner way to not have to remember to watch AccountState every time you
+    /// use an account.
+
+    context.watch<AccountState>();
     final theme = Theme.of(context);
     var subText = '';
     if (trans.account != null) {
