@@ -50,7 +50,7 @@ class TransactionCard extends StatelessWidget {
       //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
       //     Theme.of(context).colorScheme.surface),
       surfaceTintColor: color,
-      // shadowColor: (isUncategorized) ? Colors.amber : null,
+      shadowColor: (isUncategorized || isInvestment) ? Colors.transparent : null,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => onSelect?.call(trans),

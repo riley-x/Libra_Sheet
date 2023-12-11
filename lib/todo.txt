@@ -1,9 +1,7 @@
 - Add click on bar charts
-- Tabbing on forms
 - Category focus screen, show only category history respecting filters
 - Categories screen, change this mo. to custom range
 - Hover on heatmap
 - Double sided stack column chart
-- Dark theme
 - Replace all database calls with extension (see tags.dart).
 - Get rid of DropdownButton and replace with newer MenuAnchor?
