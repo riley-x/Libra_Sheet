@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 
 import 'transaction_filter_dialog.dart';
 
+/// [initialFilters] is used as an object key, so make sure you keep a persistent object instead
+/// of recreating it in a build function. Otherwise random rebuilds will constantly reload the
+/// transactions and reset the filter.
 class TransactionFilterGrid extends StatelessWidget {
   const TransactionFilterGrid({
     super.key,

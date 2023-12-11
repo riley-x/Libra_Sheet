@@ -75,6 +75,7 @@ class LibraAppState extends ChangeNotifier {
   final List<Account> accounts = [];
 
   Future<void> _loadAccounts() async {
+    // TODO update from old! DO NOT replace objects!
     accounts.clear();
     accounts.addAll(await db.getAccounts());
     if (!kReleaseMode) {

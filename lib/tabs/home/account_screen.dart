@@ -28,6 +28,7 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   List<TimeIntValue> data = [];
+  TransactionFilters? initialFilters;
 
   Future<void> loadData() async {
     if (!mounted) return;
@@ -42,6 +43,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void initState() {
     super.initState();
+    initialFilters = TransactionFilters(accounts: {widget.account});
     context.read<TransactionService>().addListener(loadData);
     loadData();
   }
@@ -61,7 +63,7 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               Expanded(
                 child: TransactionFilterGrid(
-                  initialFilters: TransactionFilters(accounts: {widget.account}),
+                  initialFilters: initialFilters,
                   showSpeedDial: true,
                   // onSelect: context.read<LibraAppState>().focusTransaction,
                   onSelect: (t) => toTransactionDetails(context, t),
