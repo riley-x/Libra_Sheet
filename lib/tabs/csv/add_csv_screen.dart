@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
-import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/account_selection_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
@@ -136,7 +135,9 @@ class _InstructionsDialog extends StatelessWidget {
               _BulletRow(
                   "Amount: The value of the transaction. Make sure this has the correct sign (negative for expenses)."),
               _BulletRow(
-                  "Note: You can have multiple note columns and the contents will be saved as a note in the transaction")
+                  "Note: You can have multiple note columns and the contents will be saved as a note in the transaction"),
+              _BulletRow(
+                  "Match: Filter for rows where the column matches a specific string, or is empty."),
             ],
           ),
         ),

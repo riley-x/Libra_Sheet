@@ -4,6 +4,8 @@ import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:provider/provider.dart';
 
+import 'csv_field.dart';
+
 class CsvTable extends StatelessWidget {
   const CsvTable({super.key});
 
