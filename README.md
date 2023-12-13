@@ -1,10 +1,10 @@
 # Libra Sheet
 
-This is a Flutter app for tracking and categorizing your expenses. 
+This is a Flutter app for tracking and categorizing your expenses. It is designed for desktop environments.
 
 ## Preview
 
-You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/).
+You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/). This naturally doesn't link to any database, but is a nice way to preview the UI.
 
 ### Your accounts and net worth at a glance
 
@@ -33,4 +33,4 @@ You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://ri
   * Imagine you paid $60 for dinner with a friend and they Venmo you back $30
   * Your real expense is only $30, and the Venmo transaction shouldn't count as income
 * Dark/light theme
-* Fully offline; no internet connection used
+* Fully offline; no internet connection used. Everything is saved to a local SQLite file.
