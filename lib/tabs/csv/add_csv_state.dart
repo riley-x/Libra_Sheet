@@ -13,24 +13,101 @@ import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
-enum CsvField {
-  date('Date'),
-  name('Name'),
-  value('Value'),
-  note('Note'),
-  venmo('Venmo'),
-  none('None');
+sealed class CsvField {
+  abstract final String title;
+  abstract final String saveName;
 
-  const CsvField(this.title);
+  const CsvField();
 
-  final String title;
-
-  static CsvField? fromName(String name) {
-    for (final field in CsvField.values) {
-      if (field.name == name) return field;
+  factory CsvField.fromName(String name) {
+    switch (name) {
+      case CsvDate.name:
+        return CsvDate();
+      case CsvName.name:
+        return CsvName();
+      case CsvAmount.name:
+        return CsvAmount();
+      case CsvNote.name:
+        return CsvNote();
+      case CsvNone.name:
+        return CsvNone();
+      case CsvDebit.name:
+        return CsvDebit();
     }
-    return null;
+    if (name.startsWith(CsvMatch.name)) {
+      return CsvMatch(name.substring(CsvMatch.name.length));
+    }
+    return CsvNone();
   }
+
+  static final List<CsvField> fields = [
+    CsvDate(),
+    CsvAmount(),
+    CsvName(),
+    CsvNote(),
+    const CsvMatch(''),
+    CsvDebit(),
+    CsvNone(),
+  ];
+}
+
+class CsvDate extends CsvField {
+  static const String name = "date";
+  @override
+  String get saveName => name;
+  @override
+  String get title => "Date";
+}
+
+class CsvName extends CsvField {
+  static const String name = "name";
+  @override
+  String get saveName => name;
+  @override
+  String get title => "Name";
+}
+
+class CsvAmount extends CsvField {
+  static const String name = "value";
+  @override
+  String get saveName => name;
+  @override
+  String get title => "Amount";
+}
+
+class CsvNote extends CsvField {
+  static const String name = "note";
+  @override
+  String get saveName => name;
+  @override
+  String get title => "Note";
+}
+
+class CsvNone extends CsvField {
+  static const String name = "none";
+  @override
+  String get saveName => name;
+  @override
+  String get title => "None";
+}
+
+class CsvDebit extends CsvField {
+  static const String name = "debit";
+  @override
+  String get saveName => name;
+  @override
+  String get title => "Debit/Credit";
+}
+
+class CsvMatch extends CsvField {
+  static const String name = "match";
+  @override
+  String get saveName => "$name$match";
+  @override
+  String get title => "Match";
+
+  final String match;
+  const CsvMatch(this.match);
 }
 
 final List<DateFormat> _dateFormats = [
@@ -106,9 +183,13 @@ class AddCsvState extends ChangeNotifier {
 
     rowOk = List.filled(rawLines.length, false);
     nRowsOk = 0;
-    columnTypes = List.filled(nCols, CsvField.none);
+    columnTypes = List.filled(nCols, CsvNone());
     errorMsg = '';
     notifyListeners();
+
+    if (account?.csvFormat.isNotEmpty == true) {
+      _setHeadersFromCsvFormat(account!.csvFormat);
+    }
   }
 
   //---------------------------------------------------------------------------
@@ -121,15 +202,15 @@ class AddCsvState extends ChangeNotifier {
     final types = <CsvField>[];
     for (final name in fields) {
       final type = CsvField.fromName(name);
-      if (type == null) return;
       types.add(type);
     }
 
     for (int column = 0; column < nCols; column++) {
-      if (columnTypes[column] == CsvField.none) {
+      if (columnTypes[column] is CsvNone) {
         columnTypes[column] = types[column];
       }
     }
+    notifyListeners();
   }
 
   void setAccount(Account? acc) {
@@ -181,11 +262,11 @@ class AddCsvState extends ChangeNotifier {
     int nName = 0;
     for (final type in columnTypes) {
       switch (type) {
-        case CsvField.date:
+        case CsvDate():
           nDate++;
-        case CsvField.value:
+        case CsvAmount():
           nValue++;
-        case CsvField.name:
+        case CsvName():
           nName++;
         default:
       }
@@ -223,15 +304,20 @@ class AddCsvState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Returns true if this cell is parseable, false if there is an error, or null if there is
+  /// nothing to parse.
   bool? tryParse(String text, int column) {
-    switch (columnTypes[column]) {
-      case CsvField.date:
+    final type = columnTypes[column];
+    switch (type) {
+      case CsvDate():
         return _parseDate(text) != null;
-      case CsvField.value:
+      case CsvAmount():
         text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
         return text.toIntDollar() != null;
-      case CsvField.venmo:
-        return text.isEmpty || text == "Venmo balance";
+      case CsvMatch():
+        return text.isEmpty || text == type.match;
+      case CsvDebit():
+        return _parseDebit(text) != null;
       default:
         return null;
     }
@@ -249,6 +335,13 @@ class AddCsvState extends ChangeNotifier {
     }
   }
 
+  /// Returns true if this is a debit (need to negate), false if this is a credit, and null on error.
+  bool? _parseDebit(String text) {
+    if (text.toLowerCase() == "debit") return true;
+    if (text.toLowerCase() == "credit") return false;
+    return null;
+  }
+
   //---------------------------------------------------------------------------
   // Transactions
   //---------------------------------------------------------------------------
@@ -261,34 +354,38 @@ class AddCsvState extends ChangeNotifier {
       String note = '';
       DateTime? date;
       int? value;
+      bool negateValue = false;
 
       for (int col = 0; col < columnTypes.length; col++) {
         if (col >= rawLines[row].length) continue;
         var text = rawLines[row][col];
         switch (columnTypes[col]) {
-          case CsvField.date:
+          case CsvDate():
             date = _parseDate(text);
-          case CsvField.value:
+          case CsvAmount():
             text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
             value = text.toIntDollar();
-          case CsvField.name:
+          case CsvName():
             if (name.isNotEmpty) {
               name += ' $text';
             } else {
               name = text;
             }
-          case CsvField.note:
+          case CsvNote():
             if (note.isNotEmpty) {
               note += ' $text';
             } else {
               note = text;
             }
-          case CsvField.none:
-          case CsvField.venmo:
+          case CsvDebit():
+            if (_parseDebit(text) == true) negateValue = true;
+          case CsvNone():
+          case CsvMatch():
         }
       }
 
       if (date == null || value == null) continue;
+      if (negateValue) value = -value;
       final rule = appState.rules.match(
         name,
         (value < 0) ? ExpenseType.expense : ExpenseType.income,
@@ -333,7 +430,7 @@ class AddCsvState extends ChangeNotifier {
   //---------------------------------------------------------------------------
   void saveAll() {
     appState.transactions.addAll(transactions);
-    var csvFormat = columnTypes.map((e) => e.name).join(',');
+    var csvFormat = columnTypes.map((e) => e.saveName).join(',');
     if (csvFormat != account!.csvFormat) {
       account!.csvFormat = csvFormat;
       appState.accounts.notifyUpdate(account!);

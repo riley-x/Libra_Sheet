@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
 class ConfirmationDialog extends StatelessWidget {
-  const ConfirmationDialog({super.key, this.title, this.msg});
+  const ConfirmationDialog({
+    super.key,
+    this.title,
+    this.msg,
+    this.showCancel = true,
+  });
 
   final String? title;
   final String? msg;
+  final bool showCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +23,11 @@ class ConfirmationDialog extends StatelessWidget {
               child: Text(msg!),
             ),
       actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.pop(context, 'Cancel'),
-          child: const Text('Cancel'),
-        ),
+        if (showCancel)
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancel'),
+          ),
         TextButton(
           onPressed: () => Navigator.pop(context, 'Ok'),
           child: const Text('Ok'),
@@ -36,11 +43,12 @@ void showConfirmationDialog({
   String? msg,
   Function(bool confirmed)? onClose,
   Function()? onConfirmed,
+  bool showCancel = true,
 }) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return ConfirmationDialog(title: title, msg: msg);
+      return ConfirmationDialog(title: title, msg: msg, showCancel: showCancel);
     },
   ).then((msg) {
     final confirmed = msg == 'Ok';

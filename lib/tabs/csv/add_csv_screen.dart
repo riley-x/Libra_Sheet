@@ -36,22 +36,16 @@ class _MainScreen extends StatelessWidget {
     final state = context.watch<AddCsvState>();
     return Column(
       children: [
-        const CommonBackBar(
+        CommonBackBar(
           leftText: 'Add CSV',
-          rightChild: Tooltip(
-            message: """After uploading a CSV file, set the column types using
-the headers at the top of the table. 
-
-    Name: You can have multiple "Name" columns and 
-              they will be joined together.
-    Venmo: For Venmo CSVs, set this header on the
-              "Funding Source" column to filter out  
-              payments originating from your bank.
-
-Fields that can't be parsed will be highlighted in red. 
-Once you're ready, click the preview button at the 
-bottom right.""",
-            child: Icon(Icons.question_mark),
+          rightChild: TextButton(
+            onPressed: () => showDialog(
+              context: context,
+              builder: (BuildContext context) => const _InstructionsDialog(),
+            ),
+            child: const Text(
+              "Click Here for Instructions",
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -104,6 +98,80 @@ bottom right.""",
         const Divider(height: 1, thickness: 1),
         const Expanded(child: _CsvGrid()),
         const _BottomBar(),
+      ],
+    );
+  }
+}
+
+class _InstructionsDialog extends StatelessWidget {
+  const _InstructionsDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      // insetPadding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 40.0),
+      title: const Text('CSV Instuctions'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.pop(context, 'Ok'),
+          child: const Text('Ok'),
+        ),
+      ],
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "After uploading a CSV file, if the app is unable to parse your CSV, you will need to"
+                " manually set the column types. Use the drop-down menus at the top of the table."
+                " The possible types are:",
+              ),
+              SizedBox(height: 15),
+              _BulletRow(
+                  "Name: The name of the transaction. You can have multiple name columns and they will be joined together."),
+              _BulletRow(
+                  "Date: The transaction date. If this isn't working, please change the format of the dates to MM/dd/yyyy in Excel."),
+              _BulletRow(
+                  "Amount: The value of the transaction. Make sure this has the correct sign (negative for expenses)."),
+              _BulletRow(
+                  "Note: You can have multiple note columns and the contents will be saved as a note in the transaction")
+            ],
+          ),
+        ),
+      ),
+    );
+//     Venmo: For Venmo CSVs, set this header on the
+//               "Funding Source" column to filter out
+//               payments originating from your bank.
+
+// Fields that can't be parsed will be highlighted in red.
+// Once you're ready, click the preview button at the
+// bottom right.""",
+//             child: Icon(Icons.question_mark),
+//           ),
+  }
+}
+
+class _BulletRow extends StatelessWidget {
+  const _BulletRow(this.msg, {super.key});
+
+  final String msg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(width: 40),
+        const Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: Icon(Icons.circle, size: 6),
+        ),
+        const SizedBox(width: 15),
+        Expanded(child: Text(msg))
       ],
     );
   }
@@ -300,14 +368,16 @@ class _ColumnHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
-    return LibraDropdownMenu(
-      selected: state.columnTypes[column],
-      items: CsvField.values,
-      isDense: true,
-      onChanged: (it) => state.setColumn(column, it),
-      builder: (it) => Text(
-        (it != CsvField.none) ? it?.title ?? '' : '',
-        style: Theme.of(context).textTheme.labelMedium,
+    return ExcludeFocus(
+      child: LibraDropdownMenu(
+        selected: state.columnTypes[column],
+        items: CsvField.fields,
+        isDense: true,
+        onChanged: (it) => state.setColumn(column, it),
+        builder: (it) => Text(
+          (it is CsvNone) ? '' : it?.title ?? '',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
       ),
     );
   }
