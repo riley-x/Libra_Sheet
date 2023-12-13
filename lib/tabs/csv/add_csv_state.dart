@@ -93,9 +93,7 @@ class AddCsvState extends ChangeNotifier {
     errorMsg = '';
     notifyListeners();
 
-    if (account?.csvFormat.isNotEmpty == true) {
-      _setHeadersFromCsvFormat(account!.csvFormat);
-    } else {
+    if (!_setHeadersFromCsvFormat()) {
       _autoIdentifyCsv();
     }
   }
@@ -112,9 +110,10 @@ class AddCsvState extends ChangeNotifier {
   //---------------------------------------------------------------------------
   // Setter Callbacks
   //---------------------------------------------------------------------------
-  void _setHeadersFromCsvFormat(String format) {
-    final fields = format.split(',');
-    if (fields.length != nCols) return;
+  bool _setHeadersFromCsvFormat() {
+    if (account?.csvFormat.isNotEmpty != true) return false;
+    final fields = account!.csvFormat.split(',');
+    if (fields.length != nCols) return false;
 
     final types = <CsvField>[];
     for (final name in fields) {
@@ -129,13 +128,12 @@ class AddCsvState extends ChangeNotifier {
     }
     notifyListeners();
     _validate();
+    return true;
   }
 
   void setAccount(Account? acc) {
     account = acc;
-    if (account?.csvFormat.isNotEmpty == true) {
-      _setHeadersFromCsvFormat(account!.csvFormat);
-    }
+    _setHeadersFromCsvFormat();
     notifyListeners();
     _validate();
   }
