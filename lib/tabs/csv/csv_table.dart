@@ -16,7 +16,7 @@ class CsvTable extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 100 * state.nCols) {
+        if (constraints.maxWidth < _ScrollingTable.columnWidth * state.nCols) {
           return _ScrollingTable();
         } else {
           return const _FlexTable();
@@ -29,6 +29,8 @@ class CsvTable extends StatelessWidget {
 /// Scroll in both vertical and horizontal directions
 class _ScrollingTable extends StatelessWidget {
   _ScrollingTable({super.key});
+
+  static const columnWidth = 125.0;
 
   final _vertical = ScrollController();
   final _horizontal = ScrollController();
@@ -48,7 +50,7 @@ class _ScrollingTable extends StatelessWidget {
             controller: _horizontal,
             scrollDirection: Axis.horizontal,
             child: const _Table(
-              defaultColumnWidth: FixedColumnWidth(100),
+              defaultColumnWidth: FixedColumnWidth(columnWidth),
             ),
           ),
         ),
@@ -112,34 +114,43 @@ class _ColumnHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
     return ExcludeFocus(
-      child: LibraDropdownMenu(
-        selected: state.columnTypes[column].baseName,
-        items: CsvField.fieldBaseNames,
-        isDense: true,
-        onChanged: (it) {
-          if (it == CsvMatch.name) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) => const _MatchDialog(),
-            ).then((value) => (value != null) ? state.setColumn(column, CsvMatch(value)) : null);
-          } else {
-            state.setColumn(column, CsvField.fromName(it));
-          }
-        },
-        builder: (it) {
-          final field = CsvField.fromName(it);
-          return Text(
-            (field is CsvNone) ? '' : field.title,
-            style: Theme.of(context).textTheme.labelMedium,
-          );
-        },
-        selectedBuilder: (context, _) {
-          final field = state.columnTypes[column];
-          return Text(
-            (field is CsvNone) ? '' : field.title,
-            style: Theme.of(context).textTheme.labelMedium,
-          );
-        },
+      child: LayoutBuilder(
+        builder: (context, constraints) => LibraDropdownMenu(
+          selected: state.columnTypes[column].baseName,
+          items: CsvField.fieldBaseNames,
+          isDense: true,
+          onChanged: (it) {
+            if (it == CsvMatch.name) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => const _MatchDialog(),
+              ).then((value) => (value != null) ? state.setColumn(column, CsvMatch(value)) : null);
+            } else {
+              state.setColumn(column, CsvField.fromName(it));
+            }
+          },
+          builder: (it) {
+            final field = CsvField.fromName(it);
+            return Text(
+              (field is CsvNone) ? '' : field.title,
+              style: Theme.of(context).textTheme.labelMedium,
+            );
+          },
+          selectedBuilder: (context, _) {
+            final field = state.columnTypes[column];
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth - 48, // minus space for icon button
+              ),
+              child: Text(
+                (field is CsvNone) ? '' : field.title,
+                style: Theme.of(context).textTheme.labelMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          },
+        ),
       ),
     );
   }

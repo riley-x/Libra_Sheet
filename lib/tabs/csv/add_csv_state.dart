@@ -107,9 +107,6 @@ class AddCsvState extends ChangeNotifier {
       columnTypes = fields;
       _validate();
     }
-    for (final x in rawLines.sublist(0, min(10, rawLines.length))) {
-      print("${x.length} $x");
-    }
   }
 
   //---------------------------------------------------------------------------
@@ -323,7 +320,6 @@ class AddCsvState extends ChangeNotifier {
     }
     notifyListeners();
     var csvFormat = columnTypes.map((e) => e.saveName).join(',');
-    print(csvFormat);
     if (csvFormat != account!.csvFormat) {
       account!.csvFormat = csvFormat;
       appState.accounts.notifyUpdate(account!);
