@@ -33,9 +33,12 @@ class TransactionCard extends StatelessWidget {
     bool isUncategorized = trans.category == Category.income || trans.category == Category.expense;
     bool isInvestment = trans.category == Category.investment;
 
+    final signedReimb = (trans.value > 0) ? -trans.totalReimbusrements : trans.totalReimbusrements;
+    final valueAfterReimb = trans.value + signedReimb;
+
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      shape: (isUncategorized)
+      shape: (isUncategorized && valueAfterReimb != 0)
           ? RoundedRectangleBorder(
               side: BorderSide(color: Theme.of(context).colorScheme.error),
               borderRadius: BorderRadius.circular(8),

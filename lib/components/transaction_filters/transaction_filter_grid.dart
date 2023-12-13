@@ -139,10 +139,22 @@ class TransactionGrid extends StatelessWidget {
         const minWidth = 300;
         final numCols = fixedColumns ?? (constraints.maxWidth / minWidth).floor();
         final numRows = (transactions.length + numCols - 1) ~/ numCols;
+        final includeLimitText = transactions.length == 300;
         return ListView.builder(
-          itemCount: numRows,
-          padding: padding,
+          itemCount: numRows + (includeLimitText ? 1 : 0),
+          padding: includeLimitText ? padding?.copyWith(bottom: 0) : padding,
           itemBuilder: (context, index) {
+            if (index == numRows) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 4, top: (padding?.bottom ?? 28) - 20),
+                  child: Text(
+                    "Results are limited to the first 300 transactions",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              );
+            }
             final startIndex = index * numCols;
             if (startIndex >= transactions.length) return null;
             return Row(

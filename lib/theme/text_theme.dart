@@ -24,7 +24,7 @@ final libraTextTheme = Typography.blackMountainView.copyWith(
     fontWeight: FontWeight.w500,
   ),
   bodySmall: TextStyle(
-    color: libraDarkColorScheme.onBackground,
+    color: libraLightColorScheme.onBackground,
   ),
 );
 
@@ -51,7 +51,7 @@ final libraDarkTextTheme = Typography.whiteMountainView.copyWith(
     fontWeight: FontWeight.w500,
   ),
   bodySmall: TextStyle(
-    color: libraLightColorScheme.onBackground,
+    color: libraDarkColorScheme.onBackground,
   ),
 );
 

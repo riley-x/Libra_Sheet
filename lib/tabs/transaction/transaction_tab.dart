@@ -12,24 +12,14 @@ class TransactionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
-        const Expanded(child: _TransactionList()),
-        const VerticalDivider(width: 1, thickness: 1),
+        Expanded(child: _TransactionList()),
+        VerticalDivider(width: 1, thickness: 1),
         SizedBox(
           width: 300,
-          child: Column(
-            children: [
-              const Expanded(
-                child: TransactionFiltersColumn(
-                  interiorPadding: EdgeInsets.symmetric(horizontal: 10),
-                ),
-              ),
-              Text(
-                "Results are limited to the first 300 transactions",
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+          child: TransactionFiltersColumn(
+            interiorPadding: EdgeInsets.symmetric(horizontal: 10),
           ),
         ),
       ],

@@ -87,7 +87,7 @@ class RulesSettingsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Text("Each rule matches a pattern to a category. If a transaction's name "
                 "contains the pattern, the rule is triggered, and the transaction "
-                "is assigned the corresponding category. Rules are not case sensitive, "
+                "is assigned the corresponding category. Rules are case sensitive, "
                 "and are matched first-come first-serve."),
           ),
           const SizedBox(height: 8),
