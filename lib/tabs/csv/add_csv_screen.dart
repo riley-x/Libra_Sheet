@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/account_selection_menu.dart';
-import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
+import 'package:libra_sheet/tabs/csv/csv_table.dart';
 import 'package:libra_sheet/tabs/csv/preview_transactions_screen.dart';
 import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
 import 'package:provider/provider.dart';
@@ -73,30 +73,30 @@ class _MainScreen extends StatelessWidget {
               tooltip: "You can only input for one account at a time. If your CSV has\n"
                   "multiple accounts, try filtering your CSV first in Excel.",
             ),
-            rowSpacing,
-            labelRow(
-              context,
-              'Date Format',
-              SizedBox(
-                height: 30,
-                child: FocusTextField(
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  hint: "Default",
-                  onChanged: state.setDateFormat,
-                ),
-              ),
-              tooltip: "If the default date parsing doesn't work, you can input\n"
-                  "a manual date format here. The format code follows the\n"
-                  "Java SimpleDateFormat patterns.",
-              // TODO try to link to https://docs.unidata.ucar.edu/tds/4.6/adminguide/reference/collections/SimpleDateFormat.html
-              // but richTooltip is possibly bugged?
-            ),
+            // rowSpacing,
+            // labelRow(
+            //   context,
+            //   'Date Format',
+            //   SizedBox(
+            //     height: 30,
+            //     child: FocusTextField(
+            //       style: Theme.of(context).textTheme.bodyMedium,
+            //       hint: "Default",
+            //       onChanged: state.setDateFormat,
+            //     ),
+            //   ),
+            //   tooltip: "If the default date parsing doesn't work, you can input\n"
+            //       "a manual date format here. The format code follows the\n"
+            //       "Java SimpleDateFormat patterns.",
+            //   // TODO try to link to https://docs.unidata.ucar.edu/tds/4.6/adminguide/reference/collections/SimpleDateFormat.html
+            //   // but richTooltip is possibly bugged?
+            // ),
             // Invert values
           ],
         ),
         const SizedBox(height: 10),
         const Divider(height: 1, thickness: 1),
-        const Expanded(child: _CsvGrid()),
+        const Expanded(child: CsvTable()),
         const _BottomBar(),
       ],
     );
@@ -257,158 +257,6 @@ class _FileCard extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 10),
                   child: Text(state.file!.name),
                 ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CsvGrid extends StatelessWidget {
-  const _CsvGrid({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AddCsvState>();
-    if (state.file == null || state.rawLines.isEmpty) return const SizedBox();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 100 * state.nCols) {
-          return _ScrollingTable();
-        } else {
-          return const _FlexTable();
-        }
-      },
-    );
-  }
-}
-
-/// Scroll in both vertical and horizontal directions
-class _ScrollingTable extends StatelessWidget {
-  _ScrollingTable({super.key});
-
-  final _vertical = ScrollController();
-  final _horizontal = ScrollController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-      controller: _vertical,
-      thumbVisibility: true,
-      child: Scrollbar(
-        controller: _horizontal,
-        thumbVisibility: true,
-        notificationPredicate: (notif) => notif.depth == 1,
-        child: SingleChildScrollView(
-          controller: _vertical,
-          child: SingleChildScrollView(
-            controller: _horizontal,
-            scrollDirection: Axis.horizontal,
-            child: const _Table(
-              defaultColumnWidth: FixedColumnWidth(100),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Each column will expand to the same width
-class _FlexTable extends StatelessWidget {
-  const _FlexTable({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      child: _Table(defaultColumnWidth: FlexColumnWidth()),
-    );
-  }
-}
-
-/// The underlying data table
-class _Table extends StatelessWidget {
-  const _Table({super.key, required this.defaultColumnWidth});
-
-  final TableColumnWidth defaultColumnWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AddCsvState>();
-    return Table(
-      border: TableBorder.all(width: 0.3, color: Theme.of(context).colorScheme.outline),
-      defaultColumnWidth: defaultColumnWidth,
-      children: [
-        TableRow(
-          children: [
-            for (int i = 0; i < state.nCols; i++) _ColumnHeader(i),
-          ],
-        ),
-        for (int row = 0; row < state.rawLines.length; row++)
-          TableRow(
-            decoration:
-                (state.rowOk[row]) ? BoxDecoration(color: Colors.green.withAlpha(40)) : null,
-            children: [
-              for (int i = 0; i < state.nCols; i++)
-                (i < state.rawLines[row].length)
-                    ? _Cell(state.rawLines[row][i], i)
-                    : const SizedBox(),
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-class _ColumnHeader extends StatelessWidget {
-  final int column;
-
-  const _ColumnHeader(this.column, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AddCsvState>();
-    return ExcludeFocus(
-      child: LibraDropdownMenu(
-        selected: state.columnTypes[column],
-        items: CsvField.fields,
-        isDense: true,
-        onChanged: (it) => state.setColumn(column, it),
-        builder: (it) => Text(
-          (it is CsvNone) ? '' : it?.title ?? '',
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-      ),
-    );
-  }
-}
-
-class _Cell extends StatelessWidget {
-  const _Cell(this.text, this.column, {super.key});
-
-  final String text;
-  final int column;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AddCsvState>();
-    final color = switch (state.tryParse(text, column)) {
-      null => Theme.of(context).colorScheme.onBackground,
-      true => Theme.of(context).colorScheme.onBackground,
-      false => Theme.of(context).colorScheme.error,
-    };
-    // Highlighting the background of a cell is really annoying actually, because if every cell is
-    // TableCellVerticalAlignment.fill, then the row will have 0 height.
-    return TableCell(
-      // verticalAlignment: (column > 0) ? TableCellVerticalAlignment.fill : null,
-      child: Container(
-        padding: const EdgeInsets.all(1),
-        // color: color,
-        child: Text(
-          text,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
         ),
       ),
     );

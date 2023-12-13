@@ -16,10 +16,12 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 sealed class CsvField {
   abstract final String title;
   abstract final String saveName;
+  abstract final String baseName;
 
   const CsvField();
 
-  factory CsvField.fromName(String name) {
+  factory CsvField.fromName(String? name) {
+    if (name == null) return CsvNone();
     switch (name) {
       case CsvDate.name:
         return CsvDate();
@@ -40,19 +42,21 @@ sealed class CsvField {
     return CsvNone();
   }
 
-  static final List<CsvField> fields = [
-    CsvDate(),
-    CsvAmount(),
-    CsvName(),
-    CsvNote(),
-    const CsvMatch(''),
-    CsvDebit(),
-    CsvNone(),
+  static final List<String> fieldBaseNames = [
+    CsvDate.name,
+    CsvAmount.name,
+    CsvName.name,
+    CsvNote.name,
+    CsvMatch.name,
+    CsvDebit.name,
+    CsvNone.name,
   ];
 }
 
 class CsvDate extends CsvField {
   static const String name = "date";
+  @override
+  String get baseName => name;
   @override
   String get saveName => name;
   @override
@@ -62,6 +66,8 @@ class CsvDate extends CsvField {
 class CsvName extends CsvField {
   static const String name = "name";
   @override
+  String get baseName => name;
+  @override
   String get saveName => name;
   @override
   String get title => "Name";
@@ -69,6 +75,8 @@ class CsvName extends CsvField {
 
 class CsvAmount extends CsvField {
   static const String name = "value";
+  @override
+  String get baseName => name;
   @override
   String get saveName => name;
   @override
@@ -78,6 +86,8 @@ class CsvAmount extends CsvField {
 class CsvNote extends CsvField {
   static const String name = "note";
   @override
+  String get baseName => name;
+  @override
   String get saveName => name;
   @override
   String get title => "Note";
@@ -85,6 +95,8 @@ class CsvNote extends CsvField {
 
 class CsvNone extends CsvField {
   static const String name = "none";
+  @override
+  String get baseName => name;
   @override
   String get saveName => name;
   @override
@@ -94,6 +106,8 @@ class CsvNone extends CsvField {
 class CsvDebit extends CsvField {
   static const String name = "debit";
   @override
+  String get baseName => name;
+  @override
   String get saveName => name;
   @override
   String get title => "Debit/Credit";
@@ -102,9 +116,14 @@ class CsvDebit extends CsvField {
 class CsvMatch extends CsvField {
   static const String name = "match";
   @override
+  String get baseName => name;
+  @override
   String get saveName => "$name$match";
   @override
-  String get title => "Match";
+  String get title {
+    if (match.isEmpty) return "Match";
+    return "Match: $match";
+  }
 
   final String match;
   const CsvMatch(this.match);
@@ -222,8 +241,8 @@ class AddCsvState extends ChangeNotifier {
     _validate();
   }
 
-  void setColumn(int column, CsvField? type) {
-    if (type == null || column >= columnTypes.length) return;
+  void setColumn(int column, CsvField type) {
+    if (column >= columnTypes.length) return;
     columnTypes[column] = type;
     notifyListeners();
     _validate();
