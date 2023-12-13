@@ -64,7 +64,7 @@ class LibraDatabase {
     // final path = join(await getDatabasesPath(), 'libra_sheet.db');
 
     final appDocumentsDir = await getApplicationDocumentsDirectory();
-    final path = join(appDocumentsDir.path, "libra_sheet.db");
+    final path = join(appDocumentsDir.path, "Libra Sheet", "libra_sheet.db");
     debugPrint('LibraDatabase::init() path=$path');
 
     _database = await openDatabase(
@@ -124,10 +124,10 @@ FutureOr<void> _createDatabase14(Database db) async {
   await db.execute(createReimbursementsTableSql);
   await db.execute(createTagJoinTableSql);
   await db.execute(createDefaultCategories);
-  // if (kDebugMode) {
-  //   await db.execute(createTestAccountsSql);
-  //   await db.execute(createTestTagsSql);
-  // }
+  if (kDebugMode) {
+    await db.execute(createTestAccountsSql);
+    await db.execute(createTestTagsSql);
+  }
 }
 
 const createDefaultCategories = '''

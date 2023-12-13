@@ -51,6 +51,7 @@ class LibraApp extends StatelessWidget {
       builder: (context, child) {
         final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
         return MaterialApp(
+          navigatorKey: context.read<LibraAppState>().navigatorKey,
           title: 'Libra Sheet',
           theme: ThemeData(
             useMaterial3: true,
@@ -83,15 +84,7 @@ class LibraHomePage extends StatelessWidget {
                 onDestinationSelected: context.read<LibraAppState>().setTab,
               ),
             ),
-            Expanded(
-              child: Navigator(
-                key: context.read<LibraAppState>().navigatorKey,
-                onGenerateRoute: (settings) {
-                  // This just generates a single default route, since we have no named routes
-                  return MaterialPageRoute(builder: (context) => const _Home());
-                },
-              ),
-            ),
+            const Expanded(child: _Home()),
           ],
         ),
       );
@@ -119,8 +112,11 @@ class _Home extends StatelessWidget {
       // sizing: StackFit.expand,
       children: [
         for (final w in widgets)
-          Material(
-            child: w,
+          Navigator(
+            onGenerateRoute: (settings) {
+              // This just generates a single default route, since we have no named routes
+              return MaterialPageRoute(builder: (context) => w);
+            },
           )
       ],
     );
