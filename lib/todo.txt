@@ -1,4 +1,3 @@
-- Allow nav away from tabs, csv input
 - Auto populate categories on CSV screen when save new rule?
 - Add click on bar charts
 - Category focus screen, show only category history respecting filters

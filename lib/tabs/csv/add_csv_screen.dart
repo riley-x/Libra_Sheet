@@ -123,21 +123,28 @@ class _InstructionsDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "After uploading a CSV file, if the app is unable to parse your CSV, you will need to"
-                " manually set the column types. Use the drop-down menus at the top of the table."
+                'Click the "Select File" button to upload a CSV! The app will try to automatically parse it.'
+                "\n\nIf it is unable to, you will need to manually set the column types. Use the drop-down menus at the top of the table."
                 " The possible types are:",
               ),
-              SizedBox(height: 15),
+              SizedBox(height: 20),
+              Text("Mandatory columns:"),
+              SizedBox(height: 8),
               _BulletRow(
                   "Name: The name of the transaction. You can have multiple name columns and they will be joined together."),
               _BulletRow(
                   "Date: The transaction date. If this isn't working, please change the format of the dates to MM/dd/yyyy in Excel."),
               _BulletRow(
                   "Amount: The value of the transaction. Make sure this has the correct sign (negative for expenses)."),
+              SizedBox(height: 20),
+              Text("Utility columns:"),
+              SizedBox(height: 8),
               _BulletRow(
-                  "Note: You can have multiple note columns and the contents will be saved as a note in the transaction"),
+                  "Note: You can have multiple note columns and the contents will be saved as a note in the transaction."),
               _BulletRow(
                   "Match: Filter for rows where the column matches a specific string, or is empty."),
+              _BulletRow(
+                  'Debit/Credit: If your CSV only has positive values and uses a column with "Debit" or "Credit" to distinguish transactions, use this column type on that latter column.')
             ],
           ),
         ),
