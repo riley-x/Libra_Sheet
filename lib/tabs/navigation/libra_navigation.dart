@@ -33,9 +33,9 @@ void toTransactionDetails(BuildContext context, Transaction? t, {Account? initia
   );
 }
 
-void toCsvScreen(BuildContext context) {
+void toCsvScreen(BuildContext context, {Account? initialAccount}) {
   Navigator.push(
     context,
-    NoAnimationRoute((context) => const AddCsvScreen()),
+    NoAnimationRoute((context) => AddCsvScreen(initialAccount: initialAccount)),
   );
 }

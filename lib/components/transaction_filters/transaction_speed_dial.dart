@@ -28,7 +28,7 @@ class TransactionSpeedDial extends StatelessWidget {
           backgroundColor: Colors.green.shade600,
           foregroundColor: Colors.white,
           label: 'Add CSV',
-          onTap: () => toCsvScreen(context),
+          onTap: () => toCsvScreen(context, initialAccount: initialAccount),
         ),
         SpeedDialChild(
           child: const Icon(Icons.edit_note),

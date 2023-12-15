@@ -24,7 +24,7 @@ final List<DateFormat> _dateFormats = [
 
 class AddCsvState extends ChangeNotifier {
   final LibraAppState appState;
-  AddCsvState(this.appState);
+  AddCsvState({required this.appState, this.account});
 
   //---------------------------------------------------------------------------
   // Fields
@@ -93,7 +93,7 @@ class AddCsvState extends ChangeNotifier {
     errorMsg = '';
     notifyListeners();
 
-    if (!_setHeadersFromCsvFormat()) {
+    if (!_setHeadersFromAccountCsvFormat()) {
       _autoIdentifyCsv();
     }
   }
@@ -110,7 +110,7 @@ class AddCsvState extends ChangeNotifier {
   //---------------------------------------------------------------------------
   // Setter Callbacks
   //---------------------------------------------------------------------------
-  bool _setHeadersFromCsvFormat() {
+  bool _setHeadersFromAccountCsvFormat() {
     if (account?.csvFormat.isNotEmpty != true) return false;
     final fields = account!.csvFormat.split(',');
     if (fields.length != nCols) return false;
@@ -133,7 +133,7 @@ class AddCsvState extends ChangeNotifier {
 
   void setAccount(Account? acc) {
     account = acc;
-    _setHeadersFromCsvFormat();
+    _setHeadersFromAccountCsvFormat();
     notifyListeners();
     _validate();
   }
