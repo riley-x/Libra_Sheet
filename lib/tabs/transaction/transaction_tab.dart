@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
-
-import '../../components/transaction_filters/transaction_speed_dial.dart';
 
 class TransactionTab extends StatelessWidget {
   const TransactionTab({super.key});
@@ -13,6 +12,7 @@ class TransactionTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: _TransactionList()),
         VerticalDivider(width: 1, thickness: 1),
