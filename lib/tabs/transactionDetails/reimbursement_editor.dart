@@ -5,7 +5,7 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_gr
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
-import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
+import 'package:libra_sheet/components/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';

@@ -9,7 +9,7 @@ import 'package:libra_sheet/components/dialogs/show_color_picker.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/settings/category_card.dart';
-import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
+import 'package:libra_sheet/components/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
 /// State for the EditCategoriesScreen in the settings tab

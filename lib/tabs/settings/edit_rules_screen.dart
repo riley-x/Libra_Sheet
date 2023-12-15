@@ -9,7 +9,7 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
-import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
+import 'package:libra_sheet/components/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
 /// State for the tag submenu in the settings tab

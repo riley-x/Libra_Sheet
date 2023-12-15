@@ -6,7 +6,7 @@ import 'package:libra_sheet/components/dialogs/show_color_picker.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
+import 'package:libra_sheet/components/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/cards/account_card.dart';

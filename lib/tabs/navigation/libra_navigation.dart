@@ -17,7 +17,7 @@ void toAccountScreen(BuildContext context, Account account) {
   );
 }
 
-void toTransactionDetails(BuildContext context, Transaction? t) async {
+void toTransactionDetails(BuildContext context, Transaction? t, {Account? initialAccount}) async {
   if (t != null && !t.relationsAreLoaded()) {
     await context.read<TransactionService>().loadRelations(t);
   }
@@ -25,7 +25,10 @@ void toTransactionDetails(BuildContext context, Transaction? t) async {
   Navigator.push(
     context,
     NoAnimationRoute(
-      (context) => TransactionDetailsScreen(t),
+      (context) => TransactionDetailsScreen(
+        t,
+        initialAccount: initialAccount,
+      ),
     ),
   );
 }

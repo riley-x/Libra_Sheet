@@ -5,7 +5,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:libra_sheet/tabs/csv/csv_table.dart';
 import 'package:libra_sheet/tabs/csv/preview_transactions_screen.dart';
-import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
+import 'package:libra_sheet/components/table_form_utils.dart';
 import 'package:provider/provider.dart';
 
 class AddCsvScreen extends StatelessWidget {
