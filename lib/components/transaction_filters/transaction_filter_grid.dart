@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
-import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +18,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.fixedColumns = 1,
     this.onSelect,
     this.padding,
-    this.showSpeedDial = false,
+    this.fab,
   });
 
   final Widget? title;
@@ -28,7 +27,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
-  final bool showSpeedDial;
+  final Widget? fab;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +40,7 @@ class TransactionFilterGrid extends StatelessWidget {
         maxRowsForName: maxRowsForName,
         fixedColumns: fixedColumns,
         onSelect: onSelect,
-        showSpeedDial: showSpeedDial,
+        fab: fab,
       ),
     );
   }
@@ -55,7 +54,7 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.fixedColumns,
     this.onSelect,
     this.padding,
-    this.showSpeedDial = false,
+    this.fab,
   });
 
   final Widget? title;
@@ -63,7 +62,7 @@ class _TransactionFilterGrid extends StatelessWidget {
   final int? fixedColumns;
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
-  final bool showSpeedDial;
+  final Widget? fab;
 
   @override
   Widget build(BuildContext context) {
@@ -99,12 +98,12 @@ class _TransactionFilterGrid extends StatelessWidget {
             body: TransactionGrid(
               state.transactions,
               padding: padding ??
-                  EdgeInsets.only(top: 10, left: 10, bottom: showSpeedDial ? 80 : 10, right: 10),
+                  EdgeInsets.only(top: 10, left: 10, bottom: fab != null ? 80 : 10, right: 10),
               maxRowsForName: maxRowsForName,
               fixedColumns: fixedColumns,
               onSelect: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
             ),
-            floatingActionButton: showSpeedDial ? const TransactionSpeedDial() : null,
+            floatingActionButton: fab,
           ),
         ),
       ],

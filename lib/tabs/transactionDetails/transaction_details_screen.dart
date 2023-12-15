@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/transactionDetails/allocation_editor.dart';
 import 'package:libra_sheet/tabs/transactionDetails/reimbursement_editor.dart';
@@ -16,17 +17,25 @@ import 'package:provider/provider.dart';
 /// is converted to a second screen with a back button (but this is not added to the LibraAppState
 /// backstack).
 class TransactionDetailsScreen extends StatelessWidget {
-  const TransactionDetailsScreen(this.transaction, {super.key});
+  const TransactionDetailsScreen(
+    this.original, {
+    super.key,
+    this.initialAccount,
+  });
 
-  /// Transaction used to initialize the fields. Also, the key is used in case of "Update".
-  final Transaction? transaction;
+  /// Transaction being edited, or null if a new transaction.
+  final Transaction? original;
+
+  /// Optional initial values to set the form fields with.
+  final Account? initialAccount;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => TransactionDetailsState(
-        transaction,
+        original,
         appState: context.read<LibraAppState>(),
+        initialAccount: initialAccount,
         onSave: (old, nu) {
           context.read<TransactionService>().save(old, nu);
           Navigator.of(context).pop();
@@ -43,14 +52,14 @@ class TransactionDetailsScreen extends StatelessWidget {
           );
         },
       ),
-      child: Column(
+      child: const Column(
         children: [
           CommonBackBar(
             leftText: "Transaction Editor",
-            rightText: "Database key: ${transaction?.key}",
-            rightStyle: Theme.of(context).textTheme.labelMedium,
+            // rightText: "Database key: ${transaction?.key}",
+            // rightStyle: Theme.of(context).textTheme.labelMedium,
           ),
-          const Expanded(child: _TransactionDetailsScreen()),
+          Expanded(child: _TransactionDetailsScreen()),
         ],
       ),
     );

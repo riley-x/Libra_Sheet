@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
@@ -64,8 +65,7 @@ class _AccountScreenState extends State<AccountScreen> {
               Expanded(
                 child: TransactionFilterGrid(
                   initialFilters: initialFilters,
-                  showSpeedDial: true,
-                  // onSelect: context.read<LibraAppState>().focusTransaction,
+                  fab: TransactionSpeedDial(initialAccount: widget.account),
                   onSelect: (t) => toTransactionDetails(context, t),
                 ),
               ),

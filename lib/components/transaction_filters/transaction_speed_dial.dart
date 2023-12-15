@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 
 class TransactionSpeedDial extends StatelessWidget {
   const TransactionSpeedDial({
     super.key,
+    this.initialAccount,
   });
+
+  final Account? initialAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +35,7 @@ class TransactionSpeedDial extends StatelessWidget {
           backgroundColor: Colors.indigo,
           foregroundColor: Colors.white,
           label: 'Add manual',
-          onTap: () => toTransactionDetails(context, null),
+          onTap: () => toTransactionDetails(context, null, initialAccount: initialAccount),
         ),
       ],
     );

@@ -24,6 +24,7 @@ class TransactionDetailsState extends ChangeNotifier {
     required this.appState,
     this.onSave,
     this.onDelete,
+    this.initialAccount,
   }) {
     _init();
   }
@@ -44,11 +45,14 @@ class TransactionDetailsState extends ChangeNotifier {
   final TextEditingController reimbursementValueController = TextEditingController();
 
   //---------------------------------------------------------------------------------------------
-  // Initial values for the respective editors. Don't edit these; they're used to reset.
+  // Initial values for the respective editors. Don't modify these; they're used to reset. When
+  // [seed] is null, will use the [initial***] variables.
   //---------------------------------------------------------------------------------------------
   Transaction? seed;
   Allocation? focusedAllocation;
   Reimbursement? focusedReimbursement;
+
+  Account? initialAccount;
 
   //---------------------------------------------------------------------------------------------
   // Updated values for the respective forms. These are used to save the values retrieved from

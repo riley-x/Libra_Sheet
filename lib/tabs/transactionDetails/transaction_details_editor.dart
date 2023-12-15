@@ -11,7 +11,7 @@ import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
-import 'package:libra_sheet/tabs/transactionDetails/table_form_utils.dart';
+import 'package:libra_sheet/components/table_form_utils.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
@@ -66,7 +66,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                       'Account',
                       AccountSelectionFormField(
                         height: 35,
-                        initial: state.seed?.account,
+                        initial: state.seed?.account ?? state.initialAccount,
                         onSave: (it) => state.account = it,
                       ),
                     ),
