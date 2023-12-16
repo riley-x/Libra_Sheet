@@ -1,4 +1,6 @@
 - Auto populate categories on CSV screen when save new rule?
+- Maybe balance update? Specifically for investments?
+- Fix dropdownbutton hover bleeding through screens 
 - Add click on bar charts
 - Category focus screen, show only category history respecting filters
 - Categories screen, change this mo. to custom range
