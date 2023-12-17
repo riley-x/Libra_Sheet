@@ -16,17 +16,6 @@ import 'package:libra_sheet/tabs/csv/auto_identify_csv.dart';
 
 import 'csv_field.dart';
 
-final List<DateFormat> _dateFormats = [
-  /// Make sure the MM/ are before the yyyy/ because the latter WILL parse 12 as year 0012.
-  DateFormat('MM/dd/yy'),
-  DateFormat('MM-dd-yy'),
-  DateFormat('yyyy/MM/dd'),
-  DateFormat('yyyy-MM-dd'),
-  DateFormat('MMM dd, yy'),
-  DateFormat("yyyy-MM-ddTHH:mm:ss"),
-  DateFormat(),
-];
-
 class AddCsvState extends ChangeNotifier {
   final LibraAppState appState;
   AddCsvState({required this.appState, this.account});
@@ -244,15 +233,28 @@ class AddCsvState extends ChangeNotifier {
     }
   }
 
+  final List<DateFormat> _dateFormats = [
+    /// Make sure the MM/ are before the yyyy/ because the latter WILL parse 12 as year 0012. But
+    /// the former will fail because we use parseStrict. Also, make sure the intl package is 0.19.0
+    /// or above due to this bug https://github.com/dart-lang/i18n/issues/483 with yy parsing.
+    DateFormat('MM/dd/yy'),
+    DateFormat('MM-dd-yy'),
+    DateFormat('yyyy/MM/dd'),
+    DateFormat('yyyy-MM-dd'),
+    DateFormat("yyyy-MM-ddTHH:mm:ss"),
+    DateFormat(),
+  ];
+
   DateTime? _parseDate(String text) {
     if (dateFormat != null) {
-      return dateFormat!.tryParse(text);
+      return dateFormat!.tryParse(text, true);
     } else {
       for (final format in _dateFormats) {
-        final dt = format.tryParse(text, strict: true);
+        final dt = format.tryParseStrict(text, true);
         if (dt != null) return dt;
       }
-      return null;
+      final dt = DateFormat('MMM dd, yy').tryParseLoose(text, true);
+      return dt;
     }
   }
 
