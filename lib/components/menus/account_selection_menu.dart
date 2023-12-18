@@ -56,13 +56,15 @@ class AccountSelectionFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Account?> items = context.watch<AccountState>().list;
     if (includeNone) items = [null, ...items];
-    return LibraDropdownFormField<Account?>(
-      initial: initial,
-      items: items,
-      builder: (cat) => accountMenuBuilder(context, cat),
-      borderRadius: borderRadius,
+    return SizedBox(
       height: height,
-      onSave: onSave,
+      child: LibraDropdownFormField<Account?>(
+        initial: initial,
+        items: items,
+        builder: accountMenuBuilder,
+        borderRadius: borderRadius,
+        onSave: onSave,
+      ),
     );
   }
 }

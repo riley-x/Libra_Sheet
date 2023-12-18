@@ -157,13 +157,15 @@ class _EditAccount extends StatelessWidget {
               labelRow(
                 context,
                 'Type',
-                LibraDropdownFormField<AccountType>(
-                  initial: state.focused?.type,
-                  items: AccountType.values,
-                  builder: (it) =>
-                      Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
+                SizedBox(
                   height: 35,
-                  onSave: (it) => state.type = it!,
+                  child: LibraDropdownFormField<AccountType>(
+                    initial: state.focused?.type,
+                    items: AccountType.values,
+                    builder: (context, it) =>
+                        Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
+                    onSave: (it) => state.type = it!,
+                  ),
                 ),
                 tooltip: "This is used mostly for organizing similar accounts together."
                     "\nLiability accounts should only have negative values though.",
