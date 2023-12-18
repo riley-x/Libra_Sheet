@@ -116,6 +116,7 @@ class _ColumnHeader extends StatelessWidget {
     return ExcludeFocus(
       child: LayoutBuilder(
         builder: (context, constraints) => DropdownSelector(
+          borderRadius: BorderRadius.zero,
           selected: state.columnTypes[column].baseName,
           items: CsvField.fieldBaseNames,
           onSelected: (it) {
@@ -136,17 +137,13 @@ class _ColumnHeader extends StatelessWidget {
             );
           },
           selectedBuilder: (context, _) {
+            /// Show the full title for CsvMatch; have to fetch the non-default object from state.
             final field = state.columnTypes[column];
-            return ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: constraints.maxWidth - 48, // minus space for icon button
-              ),
-              child: Text(
-                (field is CsvNone) ? '' : field.title,
-                style: Theme.of(context).textTheme.labelMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            return Text(
+              (field is CsvNone) ? '' : field.title,
+              style: Theme.of(context).textTheme.labelMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),
