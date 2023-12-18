@@ -64,7 +64,12 @@ class LibraDatabase {
     // final path = join(await getDatabasesPath(), 'libra_sheet.db');
 
     final appDocumentsDir = await getApplicationDocumentsDirectory();
-    final path = join(appDocumentsDir.path, "Libra Sheet", "libra_sheet.db");
+    String path;
+    if (kDebugMode) {
+      path = join(appDocumentsDir.path, "Libra Sheet", "Debug", "libra_sheet.db");
+    } else {
+      path = join(appDocumentsDir.path, "Libra Sheet", "libra_sheet.db");
+    }
     debugPrint('LibraDatabase::init() path=$path');
 
     _database = await openDatabase(

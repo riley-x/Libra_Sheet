@@ -55,7 +55,6 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
               for (final (i, x) in widget.items.indexed)
                 ConstrainedBox(
                   constraints: constraints.widthConstraints(),
-                  // constraints: constraints,
                   child: MenuItemButton(
                     focusNode: (i == 0) ? _firstFocus : null,
                     onPressed: () => widget.onSelected?.call(x),
