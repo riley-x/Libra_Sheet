@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/menus/account_menu_builder.dart';
-import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
+import 'package:libra_sheet/components/menus/dropdown_selector.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +25,7 @@ class AccountSelectionMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Account?> items = context.watch<AccountState>().list;
     if (includeNone) items = [null, ...items];
-    return LibraDropdownMenu<Account?>(
+    return DropdownSelector<Account?>(
       selected: selected,
       items: items,
       builder: (cat) => accountMenuBuilder(context, cat),

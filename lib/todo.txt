@@ -1,10 +1,11 @@
 - Auto populate categories on CSV screen when save new rule?
+- Export to CSV
+- Choose category/account on CSV column?
 - Maybe balance update? Specifically for investments?
-- Fix dropdownbutton hover bleeding through screens 
+- Fix dropdownbutton hover bleeding through screens. Get rid of DropdownButton and replace with newer MenuAnchor?
 - Add click on bar charts
 - Category focus screen, show only category history respecting filters
 - Categories screen, change this mo. to custom range
 - Hover on heatmap
 - Double sided stack column chart
 - Replace all database calls with extension (see tags.dart).
-- Get rid of DropdownButton and replace with newer MenuAnchor?

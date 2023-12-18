@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
+import 'package:libra_sheet/components/menus/dropdown_selector.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:provider/provider.dart';
 
@@ -115,7 +115,7 @@ class _ColumnHeader extends StatelessWidget {
     final state = context.watch<AddCsvState>();
     return ExcludeFocus(
       child: LayoutBuilder(
-        builder: (context, constraints) => LibraDropdownMenu(
+        builder: (context, constraints) => DropdownSelector(
           selected: state.columnTypes[column].baseName,
           items: CsvField.fieldBaseNames,
           isDense: true,

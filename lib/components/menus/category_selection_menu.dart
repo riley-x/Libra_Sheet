@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/menus/category_menu_builder.dart';
-import 'package:libra_sheet/components/menus/libra_dropdown_menu.dart';
+import 'package:libra_sheet/components/menus/dropdown_selector.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 
 /// Dropdown selector for choosing a single category.
@@ -24,7 +24,7 @@ class CategorySelectionMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LibraDropdownMenu<Category?>(
+    return DropdownSelector<Category?>(
       selected: selected,
       items: categories,
       builder: (cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
