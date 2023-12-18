@@ -255,6 +255,7 @@ class _FileCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         margin: EdgeInsets.zero,
         child: InkWell(
+          borderRadius: BorderRadius.circular(8),
           onTap: state.selectFile,
           child: (state.file == null)
               ? Center(

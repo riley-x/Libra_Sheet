@@ -21,9 +21,6 @@ Widget categoryMenuBuilder(
   }
 
   return LimitedBox(
-    /// For some reason the DropdownButton doesn't pass its constraints to the builder. Hard-coded
-    /// for now to match the width of the table forms (this excludes the space added by the dropdown
-    /// button).
     maxWidth: 200,
     child: Row(
       children: [

@@ -27,12 +27,11 @@ class CategorySelectionMenu extends StatelessWidget {
     return DropdownSelector<Category?>(
       selected: selected,
       items: categories,
-      builder: (cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
+      builder: (context, cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
       selectedBuilder: (context, cat) =>
           categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true),
-      onChanged: onChanged,
+      onSelected: onChanged,
       borderRadius: borderRadius,
-      height: height,
     );
   }
 }

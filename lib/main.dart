@@ -111,12 +111,20 @@ class _Home extends StatelessWidget {
       index: currentTab,
       // sizing: StackFit.expand,
       children: [
-        for (final w in widgets)
-          Navigator(
-            onGenerateRoute: (settings) {
-              // This just generates a single default route, since we have no named routes
-              return MaterialPageRoute(builder: (context) => w);
-            },
+        for (final (i, w) in widgets.indexed)
+          ExcludeFocus(
+            // Make the other tabs not focusable, workaround noted below. This unfortunately breaks
+            // the focus when navigation between nested tabs. I.e. if the CSV screen is open, and
+            // you switch back and forth between tabs, tab and arrow keys will focus the screen
+            // behind.
+            // https://github.com/flutter/flutter/issues/114213
+            excluding: i != currentTab,
+            child: Navigator(
+              onGenerateRoute: (settings) {
+                // This just generates a single default route, since we have no named routes
+                return MaterialPageRoute(builder: (context) => w);
+              },
+            ),
           )
       ],
     );

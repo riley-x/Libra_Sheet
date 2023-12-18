@@ -118,8 +118,7 @@ class _ColumnHeader extends StatelessWidget {
         builder: (context, constraints) => DropdownSelector(
           selected: state.columnTypes[column].baseName,
           items: CsvField.fieldBaseNames,
-          isDense: true,
-          onChanged: (it) {
+          onSelected: (it) {
             if (it == CsvMatch.name) {
               showDialog(
                 context: context,
@@ -129,7 +128,7 @@ class _ColumnHeader extends StatelessWidget {
               state.setColumn(column, CsvField.fromName(it));
             }
           },
-          builder: (it) {
+          builder: (context, it) {
             final field = CsvField.fromName(it);
             return Text(
               (field is CsvNone) ? '' : field.title,

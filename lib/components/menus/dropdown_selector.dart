@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Dropdown button for selecting an object of class [T].
-class DropdownSelector<T> extends StatelessWidget {
+class DropdownMenu<T> extends StatelessWidget {
   final T? selected;
   final List<T?> items;
   final Function(T?)? onChanged;
@@ -12,7 +11,7 @@ class DropdownSelector<T> extends StatelessWidget {
 
   final bool isDense;
 
-  const DropdownSelector({
+  const DropdownMenu({
     super.key,
     required this.items,
     required this.builder,
@@ -78,6 +77,92 @@ class DropdownSelector<T> extends StatelessWidget {
   }
 }
 
+/// Dropdown button for selecting an object of class [T].
+class DropdownSelector<T> extends StatefulWidget {
+  final T selected;
+  final Iterable<T> items;
+  final Function(T)? onSelected;
+  final Widget Function(BuildContext context, T item) builder;
+  final Widget Function(BuildContext context, T item)? selectedBuilder;
+
+  final BorderRadius? borderRadius;
+  final EdgeInsets padding;
+
+  const DropdownSelector({
+    super.key,
+    required this.items,
+    required this.builder,
+    required this.selected,
+    required this.onSelected,
+    this.selectedBuilder,
+    this.borderRadius,
+    this.padding = const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+  });
+
+  @override
+  State<DropdownSelector<T>> createState() => _DropdownSelectorState<T>();
+}
+
+class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
+  final MenuController _menuController = MenuController();
+  final FocusNode _firstFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _firstFocus.dispose();
+    super.dispose();
+  }
+
+  void _open() {
+    _menuController.open();
+    _firstFocus.requestFocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedWidget =
+        (widget.selectedBuilder ?? widget.builder).call(context, widget.selected);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return LimitedBox(
+          maxWidth: 400,
+          child: MenuAnchor(
+            controller: _menuController,
+            menuChildren: [
+              for (final (i, x) in widget.items.indexed)
+                ConstrainedBox(
+                  constraints: constraints.widthConstraints(),
+                  child: MenuItemButton(
+                    focusNode: (i == 0) ? _firstFocus : null,
+                    onPressed: () => widget.onSelected?.call(x),
+                    child: widget.builder(context, x),
+                  ),
+                ),
+            ],
+            // crossAxisUnconstrained: false, // this doesn't seem to do anything?
+            child: ClipRRect(
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
+              child: InkWell(
+                borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
+                onTap: () => _menuController.isOpen ? _menuController.close() : _open(),
+                child: Padding(
+                  padding: widget.padding,
+                  child: Row(
+                    children: [
+                      Expanded(child: selectedWidget),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class LibraDropdownFormField<T> extends StatelessWidget {
   const LibraDropdownFormField({
     super.key,
@@ -114,7 +199,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
                     ? Theme.of(context).colorScheme.error
                     : Theme.of(context).colorScheme.surface),
           ),
-          child: DropdownSelector<T>(
+          child: DropdownMenu<T>(
             selected: state.value,
             items: items,
             builder: builder,

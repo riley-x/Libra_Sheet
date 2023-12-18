@@ -28,10 +28,9 @@ class AccountSelectionMenu extends StatelessWidget {
     return DropdownSelector<Account?>(
       selected: selected,
       items: items,
-      builder: (cat) => accountMenuBuilder(context, cat),
-      onChanged: onChanged,
+      builder: (context, cat) => accountMenuBuilder(context, cat),
+      onSelected: onChanged,
       borderRadius: borderRadius,
-      height: height,
     );
   }
 }

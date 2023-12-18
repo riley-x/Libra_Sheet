@@ -46,40 +46,42 @@ class LibraNav extends StatelessWidget {
     final bkgColor = (isDarkMode) ? colorScheme.background : colorScheme.secondary;
     final textColor = (isDarkMode) ? colorScheme.onBackground : colorScheme.onSecondary;
 
-    return NavigationRail(
-      backgroundColor: bkgColor,
-      indicatorColor: colorScheme.surfaceVariant,
-      unselectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
-      selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
-      unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: textColor),
-      extended: extended,
-      minExtendedWidth: 220,
-      destinations: libraNavDestinations,
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      trailing: (!extended)
-          ? null
-          : Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.dark_mode_outlined, color: textColor),
-                      const SizedBox(width: 5),
-                      Switch(
-                        value: !isDarkMode,
-                        onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
-                        activeColor: colorScheme.surfaceVariant,
-                      ),
-                      const SizedBox(width: 5),
-                      Icon(Icons.light_mode, color: textColor),
-                    ],
+    return ExcludeFocus(
+      child: NavigationRail(
+        backgroundColor: bkgColor,
+        indicatorColor: colorScheme.surfaceVariant,
+        unselectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
+        selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
+        unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: textColor),
+        extended: extended,
+        minExtendedWidth: 220,
+        destinations: libraNavDestinations,
+        selectedIndex: selectedIndex,
+        onDestinationSelected: onDestinationSelected,
+        trailing: (!extended)
+            ? null
+            : Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.dark_mode_outlined, color: textColor),
+                        const SizedBox(width: 5),
+                        Switch(
+                          value: !isDarkMode,
+                          onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
+                          activeColor: colorScheme.surfaceVariant,
+                        ),
+                        const SizedBox(width: 5),
+                        Icon(Icons.light_mode, color: textColor),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }

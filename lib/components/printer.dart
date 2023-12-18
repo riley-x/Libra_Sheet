@@ -12,14 +12,15 @@ class Printer extends StatelessWidget {
 }
 
 class ConstraintsPrinter extends StatelessWidget {
-  const ConstraintsPrinter(this.child, {super.key});
+  const ConstraintsPrinter({super.key, required this.child, this.msg});
   final Widget child;
+  final String? msg;
 
   @override
   Widget build(BuildContext context) {
     return ConstraintsTransformBox(
       constraintsTransform: (it) {
-        debugPrint("Incoming constraints: $it");
+        debugPrint("${msg ?? 'Incoming constraints:'} $it");
         return it;
       },
       child: child,
