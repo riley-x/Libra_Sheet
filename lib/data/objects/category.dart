@@ -124,6 +124,9 @@ class Category {
     }
     return out;
   }
+
+  bool get isUncategorized =>
+      this == Category.empty || this == Category.expense || this == Category.income;
 }
 
 class CategoryHistory {

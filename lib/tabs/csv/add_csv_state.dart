@@ -9,8 +9,8 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/objects/category_rule.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/csv/auto_identify_csv.dart';
 
@@ -35,12 +35,16 @@ class AddCsvState extends ChangeNotifier {
   List<bool> rowOk = [];
   int nRowsOk = 0;
 
+  /// List of transactions in the preview screen. This list is populated after
+  /// clicking save on the CSV editor screen, and is displayed in the
+  /// [PreviewTransactionsScreen] where the transactions can be further edited.
+  /// These are not committed to the database until another confirmation.
   List<Transaction> transactions = [];
+
+  /// Selected transaction index in the [PreviewTransactionsScreen]. We keep the
+  ///  index to easily delete transactions.
   int focusedTransIndex = -1;
 
-  // TODO may want to elevate the CSV state so that it doesn't get lost when switching tabs. But
-  // need to be really careful, since if you i.e. delete a category, the links in the csv state
-  // won't be invalidated...
   void reset() {
     account = null;
     dateFormat = null;
@@ -344,6 +348,19 @@ class AddCsvState extends ChangeNotifier {
   void saveTransaction(Transaction? old, Transaction t) {
     transactions[focusedTransIndex] = t;
     focusedTransIndex = -1;
+    notifyListeners();
+  }
+
+  /// Called when a preview transaction is saved with a new rule. This will set
+  /// all matching uncategorized transactions to this category.
+  void reprocessRule(CategoryRule rule) {
+    for (final (i, t) in transactions.indexed) {
+      if (t.category.isUncategorized &&
+          ExpenseType.from(t.value) == rule.type &&
+          t.name.contains(rule.pattern)) {
+        transactions[i] = t.copyWith(category: rule.category);
+      }
+    }
     notifyListeners();
   }
 

@@ -84,6 +84,25 @@ class Transaction {
     if (reimbursements == null) return false;
     return true;
   }
+
+  Transaction copyWith({
+    Category? category,
+  }) {
+    return Transaction(
+      key: key,
+      name: name,
+      date: date,
+      value: value,
+      category: category ?? this.category,
+      account: account,
+      note: note,
+      allocations: allocations,
+      reimbursements: reimbursements,
+      tags: tags,
+      nAllocations: nAllocations,
+      totalReimbusrements: totalReimbusrements,
+    );
+  }
 }
 
 final dummyTransaction =

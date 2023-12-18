@@ -23,6 +23,7 @@ class TransactionDetailsState extends ChangeNotifier {
     this.seed, {
     required this.appState,
     this.onSave,
+    this.onSaveRule,
     this.onDelete,
     this.initialAccount,
   }) {
@@ -33,7 +34,8 @@ class TransactionDetailsState extends ChangeNotifier {
   // Config
   //---------------------------------------------------------------------------------------------
   final LibraAppState appState;
-  final Function(Transaction?, Transaction)? onSave;
+  final Function(Transaction? orig, Transaction updated)? onSave;
+  final Function(CategoryRule rule)? onSaveRule;
   final Function(Transaction)? onDelete;
 
   //---------------------------------------------------------------------------------------------
@@ -228,16 +230,16 @@ class TransactionDetailsState extends ChangeNotifier {
         reimbursements: List.from(reimbursements),
         tags: List.from(tags),
       );
-      if (saveAsRule) {
-        appState.rules.add(
-          CategoryRule(
-            pattern: t.name,
-            category: category,
-            type: ExpenseType.from(value!),
-          ),
-        );
-      }
       onSave?.call(seed, t);
+      if (saveAsRule) {
+        final rule = CategoryRule(
+          pattern: t.name,
+          category: category,
+          type: ExpenseType.from(value!),
+        );
+        appState.rules.add(rule);
+        onSaveRule?.call(rule);
+      }
     }
   }
 

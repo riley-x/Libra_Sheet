@@ -68,6 +68,7 @@ class _TransactionDetails extends StatelessWidget {
           appState: context.read<LibraAppState>(),
           onSave: state.saveTransaction,
           onDelete: (t) => state.deleteTransaction(),
+          onSaveRule: state.reprocessRule,
         ),
         builder: (context, child) {
           final focus = context
