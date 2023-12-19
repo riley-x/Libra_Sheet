@@ -5,6 +5,14 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+Widget trackballTooltipBuilder(BuildContext context, TrackballDetails trackballDetails) {
+  return Container(
+    width: 70,
+    decoration: const BoxDecoration(color: Color.fromRGBO(66, 244, 164, 1)),
+    child: Text('${trackballDetails.point?.cumulativeValue}'),
+  );
+}
+
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
 ///
@@ -14,7 +22,14 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 class CategoryStackChart extends StatelessWidget {
   final List<CategoryHistory> data;
   final (int, int)? range;
-  const CategoryStackChart(this.data, this.range, {super.key});
+  final TrackballDisplayMode trackballDisplayMode;
+
+  const CategoryStackChart(
+    this.data,
+    this.range, {
+    super.key,
+    this.trackballDisplayMode = TrackballDisplayMode.groupAllPoints,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +42,12 @@ class CategoryStackChart extends StatelessWidget {
       trackballBehavior: TrackballBehavior(
         enable: true,
         activationMode: ActivationMode.singleTap,
-        tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
-        // tooltipSettings: const InteractiveTooltip(
-        //   format: 'series.name: \$point.y', // This totally messes up the tooltip for some reason
-        // ),
+        tooltipDisplayMode: trackballDisplayMode,
+        // builder: trackballDisplayMode == TrackballDisplayMode.nearestPoint ? trackballTooltipBuilder: null,
+        /// The custom tooltip format totally messes up the tooltip in the groupAllPoints for some reason
+        tooltipSettings: trackballDisplayMode == TrackballDisplayMode.groupAllPoints
+            ? const InteractiveTooltip()
+            : const InteractiveTooltip(format: 'series.name: \$point.y'),
       ),
       series: <ChartSeries>[
         for (final categoryHistory in data)

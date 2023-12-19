@@ -7,6 +7,7 @@ import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CashFlowTab extends StatelessWidget {
   const CashFlowTab({super.key});
@@ -65,6 +66,9 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range,
+              trackballDisplayMode: state.showSubCategories
+                  ? TrackballDisplayMode.nearestPoint
+                  : TrackballDisplayMode.groupAllPoints,
             ),
           ),
           Text("Expenses", style: textStyle),
@@ -72,6 +76,9 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range,
+              trackballDisplayMode: state.showSubCategories
+                  ? TrackballDisplayMode.nearestPoint
+                  : TrackballDisplayMode.groupAllPoints,
             ),
           ),
         ],
