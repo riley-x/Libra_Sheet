@@ -39,6 +39,12 @@ class CashFlowTabFilters extends StatelessWidget {
           whenChanged: (_, __) => state.load(),
         ),
 
+        /// Sub-cats switch
+        const SizedBox(height: 20),
+        const Text("Show Sub-Categories"),
+        const SizedBox(height: 5),
+        const _SubCategorySwitch(),
+
         /// Tags
         // TODO not trivial
         // const SizedBox(height: 15),
@@ -103,6 +109,21 @@ class _TimeFrameSelector extends StatelessWidget {
       selected: <CashFlowTimeFrame>{state.timeFrame},
       onSelectionChanged: (Set<CashFlowTimeFrame> newSelection) =>
           state.setTimeFrame(newSelection.first),
+    );
+  }
+}
+
+class _SubCategorySwitch extends StatelessWidget {
+  const _SubCategorySwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<CashFlowState>();
+    return Switch(
+      value: state.showSubCategories,
+      onChanged: state.shouldShowSubCategories,
+      activeColor: Theme.of(context).colorScheme.surfaceTint,
+      activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
     );
   }
 }

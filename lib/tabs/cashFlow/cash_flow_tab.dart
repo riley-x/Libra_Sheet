@@ -61,9 +61,19 @@ class _CashFlowCharts extends StatelessWidget {
       return Column(
         children: [
           Text("Income", style: textStyle),
-          Expanded(child: CategoryStackChart(state.incomeData, range)),
+          Expanded(
+            child: CategoryStackChart(
+              state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
+              range,
+            ),
+          ),
           Text("Expenses", style: textStyle),
-          Expanded(child: CategoryStackChart(state.expenseData, range)),
+          Expanded(
+            child: CategoryStackChart(
+              state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
+              range,
+            ),
+          ),
         ],
       );
     } else {

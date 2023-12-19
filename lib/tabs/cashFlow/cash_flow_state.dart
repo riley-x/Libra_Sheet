@@ -11,43 +11,59 @@ enum CashFlowType { categories, net }
 enum CashFlowTimeFrame { oneYear, lastYear, all }
 
 class CashFlowState extends fnd.ChangeNotifier {
+  final LibraAppState appState;
+
   CashFlowState(this.appState) {
     appState.transactions.addListener(load);
     load();
   }
 
-  final LibraAppState appState;
-
+  /// Filters
   CashFlowType type = CashFlowType.categories;
   CashFlowTimeFrame timeFrame = CashFlowTimeFrame.all;
   final Set<Account> accounts = {};
+  bool showSubCategories = false;
 
+  /// These aggregate subcategory data into parent categories
   List<CategoryHistory> incomeData = [];
   List<CategoryHistory> expenseData = [];
+
+  /// These separate subcategory data
+  List<CategoryHistory> incomeDataSubCats = [];
+  List<CategoryHistory> expenseDataSubCats = [];
+
   List<TimeIntValue> netIncome = [];
   List<TimeIntValue> netReturns = [];
 
   void _loadList(
-    List<CategoryHistory> list,
+    List<CategoryHistory> aggregateList,
+    List<CategoryHistory> subcatList,
     Map<int, List<TimeIntValue>> categoryHistory,
     Category parent,
   ) {
     final parentVals = categoryHistory[parent.key];
     if (parentVals != null) {
-      list.add(CategoryHistory(parent, parentVals.fixedForCharts(absValues: true)));
+      final vals = parentVals.fixedForCharts(absValues: true);
+      aggregateList.add(CategoryHistory(parent, vals));
+      subcatList.add(CategoryHistory(parent, vals));
     }
 
     for (final cat in parent.subCats) {
       var vals = categoryHistory[cat.key];
+      if (vals != null) {
+        subcatList.add(CategoryHistory(cat, vals.fixedForCharts(absValues: true)));
+      }
 
-      /// Add values from subcategories too. Only need to recurse once since max level = 2.
+      /// Accumulate values from subcategories too. Only need to recurse once since max level = 2.
       for (final subCat in cat.subCats) {
         var subVals = categoryHistory[subCat.key];
         if (subVals == null) continue;
+        subcatList.add(CategoryHistory(subCat, subVals.fixedForCharts(absValues: true)));
         vals = (vals == null) ? subVals : addParallel(vals, subVals);
       }
+
       if (vals != null) {
-        list.add(CategoryHistory(cat, vals.fixedForCharts(absValues: true)));
+        aggregateList.add(CategoryHistory(cat, vals.fixedForCharts(absValues: true)));
       }
     }
   }
@@ -62,10 +78,12 @@ class CashFlowState extends fnd.ChangeNotifier {
     );
 
     incomeData.clear();
-    _loadList(incomeData, categoryHistory, appState.categories.income);
+    incomeDataSubCats.clear();
+    _loadList(incomeData, incomeDataSubCats, categoryHistory, appState.categories.income);
 
     expenseData.clear();
-    _loadList(expenseData, categoryHistory, appState.categories.expense);
+    expenseDataSubCats.clear();
+    _loadList(expenseData, expenseDataSubCats, categoryHistory, appState.categories.expense);
 
     netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
@@ -76,7 +94,7 @@ class CashFlowState extends fnd.ChangeNotifier {
   }
 
   //------------------------------------------------------------------------------
-  // Field callbacks
+  // Filter field callbacks
   //------------------------------------------------------------------------------
   void setType(CashFlowType t) {
     type = t;
@@ -85,6 +103,11 @@ class CashFlowState extends fnd.ChangeNotifier {
 
   void setTimeFrame(CashFlowTimeFrame t) {
     timeFrame = t;
+    notifyListeners();
+  }
+
+  void shouldShowSubCategories(bool x) {
+    showSubCategories = x;
     notifyListeners();
   }
 }
