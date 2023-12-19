@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/graphing/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
+import 'package:libra_sheet/graphing/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
@@ -87,7 +89,8 @@ class _CashFlowCharts extends StatelessWidget {
       return Column(
         children: [
           Text("Net Income", style: textStyle),
-          Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
+          Expanded(child: DiscreteCartesianGraph(axes: CartesianAxes())),
+          // Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
           Text("Investment Returns", style: textStyle),
           Expanded(child: RedGreenBarChart(state.netReturns.sublist(range.$1, range.$2))),
         ],
