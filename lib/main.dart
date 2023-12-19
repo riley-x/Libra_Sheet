@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
+import 'package:libra_sheet/tabs/navigation/no_animation_route.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -122,7 +123,7 @@ class _Home extends StatelessWidget {
             child: Navigator(
               onGenerateRoute: (settings) {
                 // This just generates a single default route, since we have no named routes
-                return MaterialPageRoute(builder: (context) => w);
+                return NoAnimationRoute((context) => w);
               },
             ),
           )
