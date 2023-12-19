@@ -6,7 +6,7 @@ class NoAnimationRoute<T> extends PageRouteBuilder<T> {
   ) : super(
           /// Wrap the child with a ModalBarrier since the default PageRoute includes one, but
           /// the barrier is set to non-dismissable, which causes a beep whenever you click any
-          /// dead area.
+          /// dead area. So use a barrier with a no-op onDismiss instead.
           ///
           /// https://github.com/flutter/flutter/issues/117342.
           pageBuilder: (context, animation1, animation2) => Stack(

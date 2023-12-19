@@ -60,6 +60,17 @@ class CategoryStackChart extends StatelessWidget {
             color: categoryHistory.category.color,
             xValueMapper: (TimeIntValue data, _) => format.format(data.time),
             yValueMapper: (TimeIntValue data, _) => data.value.asDollarDouble(),
+
+            /// Problem with onPointTap: this can trigger multiple times on nearby points, seems to
+            /// have some fudge allowance on click position.
+            // onPointTap: (pointInteractionDetails) {
+            //   if (pointInteractionDetails.pointIndex != null) {
+            //     // CartesianChartPoint x =
+            //     //     pointInteractionDetails.dataPoints?[pointInteractionDetails.pointIndex!];
+            //     print(pointInteractionDetails.pointIndex);
+            //     print(pointInteractionDetails.seriesIndex);
+            //   }
+            // },
           ),
       ],
     );
