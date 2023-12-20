@@ -5,18 +5,22 @@ import 'package:libra_sheet/graphing/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/series.dart';
 
 class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
-  final CartesianAxes axes;
+  final CartesianAxis xAxis;
+  final CartesianAxis yAxis;
   final ThemeData theme;
   final List<Series<T>> data;
 
   /// Variables of a given paint
   Size currentSize = Size.zero;
-  late CartesianAxesInternal ax;
+  CartesianCoordinateSpace? coordSpace;
+  List<(double, TextPainter)>? xLabels;
+  List<(double, TextPainter)>? yLabels;
 
   _DiscreteCartesianGraphPainter({
     super.repaint,
     required this.data,
-    required this.axes,
+    required this.xAxis,
+    required this.yAxis,
     required this.theme,
   });
 
@@ -25,51 +29,71 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
     if (size == currentSize) return;
 
     currentSize = size;
-    ax = CartesianAxesInternal(axes: axes, size: size);
-    ax.xAxis.defaultAxisPainter
-      ..color = theme.colorScheme.onBackground
-      ..style = PaintingStyle.stroke
-      ..isAntiAlias = false; // this is necessary to get the hairline
-    ax.yAxis.defaultAxisPainter
-      ..color = theme.colorScheme.onBackground
-      ..style = PaintingStyle.stroke
-      ..isAntiAlias = false;
-    ax.xAxis.defaultGridLinePainter
-      ..color = theme.colorScheme.outlineVariant
-      ..style = PaintingStyle.stroke
-      ..isAntiAlias = false;
-    ax.yAxis.defaultGridLinePainter
-      ..color = theme.colorScheme.outlineVariant
-      ..style = PaintingStyle.stroke
-      ..isAntiAlias = false;
+    coordSpace = CartesianCoordinateSpace.autoRange(
+      canvasSize: size,
+      xAxis: xAxis,
+      yAxis: yAxis,
+      data: data,
+    );
 
-    ax.xAxis.defaultLabelStyle = theme.textTheme.bodySmall;
-    ax.yAxis.defaultLabelStyle = theme.textTheme.bodySmall;
+    /// Auto labels and axis padding; TODO this is hard coded for bottom and left aligned labels
+    yLabels = yAxis.autoYLabels(coordSpace!);
+    if (coordSpace!.xAxis.padStart == null) {
+      var maxLabelWidth = 0.0;
+      for (final (_, x) in yLabels) {
+        maxLabelWidth = max(maxLabelWidth, x.width);
+      }
+      coordSpace!.xAxis.padStart = maxLabelWidth + yAxis.labelOffset;
+    }
+    xLabels = xAxis.autoXLabels(coordSpace!);
+    if (coordSpace!.yAxis.padStart == null) {
+      coordSpace!.yAxis.padStart = coordSpace!.xAxis.labelLineHeight + xAxis.labelOffset;
+    }
+  }
 
-    ax.autoRange(data);
-    ax.autoLabels();
+  // TODO this is hard coded for bottom and left aligned labels
+  void paintLabels(Canvas canvas) {
+    if (coordSpace == null) return;
+
+    /// x labels
+    for (final (pos, painter) in xLabels) {
+      final loc = Offset(
+        coordSpace!.xAxis.userToPixel(pos) - painter.width / 2,
+        coordSpace!.yAxis.pixelMin + yAxis.labelOffset,
+      );
+      painter.paint(canvas, loc);
+    }
+
+    /// y labels
+    for (final (pos, painter) in yLabels) {
+      final loc = Offset(
+        coordSpace!.xAxis.pixelMin - yAxis.labelOffset - painter.width,
+        coordSpace!.yAxis.userToPixel(pos) - painter.height / 2,
+      );
+      painter.paint(canvas, loc);
+    }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     layoutAxes(size);
-    ax.paintGridLines(canvas);
-    ax.paintXAxis(canvas);
-    ax.paintYAxis(canvas);
+    paintLabels(canvas);
   }
 
   @override
   bool shouldRepaint(_DiscreteCartesianGraphPainter<T> oldDelegate) {
-    return axes != oldDelegate.axes || data != oldDelegate.data;
+    return xAxis != oldDelegate.xAxis || yAxis != oldDelegate.yAxis || data != oldDelegate.data;
   }
 }
 
 class DiscreteCartesianGraph extends StatelessWidget {
-  final CartesianAxes axes;
+  final CartesianAxis xAxis;
+  final CartesianAxis yAxis;
 
   const DiscreteCartesianGraph({
     super.key,
-    required this.axes,
+    required this.xAxis,
+    required this.yAxis,
   });
 
   @override
@@ -79,7 +103,8 @@ class DiscreteCartesianGraph extends StatelessWidget {
       child: CustomPaint(
         painter: _DiscreteCartesianGraphPainter(
           theme: Theme.of(context),
-          axes: axes,
+          xAxis: xAxis,
+          yAxis: yAxis,
           data: [testSeries],
         ),
         size: Size.infinite,

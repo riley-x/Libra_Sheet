@@ -92,15 +92,15 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Net Income", style: textStyle),
           Expanded(
             child: DiscreteCartesianGraph(
-              axes: CartesianAxes(
-                yAxis: CartesianAxis(
-                  axisLoc: null,
-                  valToString: formatOrder,
-                ),
-                xAxis: CartesianAxis(
-                  axisLoc: 0,
-                  // gridLines: [],
-                ),
+              yAxis: CartesianAxis(
+                theme: Theme.of(context),
+                axisLoc: null,
+                valToString: formatOrder,
+              ),
+              xAxis: CartesianAxis(
+                theme: Theme.of(context),
+                axisLoc: 0,
+                // gridLines: [],
               ),
             ),
           ),
