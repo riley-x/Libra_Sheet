@@ -69,7 +69,7 @@ class CartesianAxis {
   /// Style of the grid lines.
   final Paint? _gridLinePainter;
   Paint get gridLinePainter => _gridLinePainter ?? Paint()
-    ..color = theme.colorScheme.outlineVariant
+    ..color = theme.colorScheme.outlineVariant.withAlpha(128)
     ..style = PaintingStyle.stroke
     ..isAntiAlias = false;
 

@@ -1,12 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/graphing/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/series/column_series.dart';
-import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
-
-import 'cartesian_coordinate_space.dart';
 
 class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   final CartesianAxis xAxis;
@@ -146,11 +144,11 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
     layoutAxes(size);
     if (coordSpace == null) return;
     paintGridLines(canvas);
-    paintLabels(canvas);
-    paintAxisLines(canvas);
     for (final series in data) {
       series.paint(canvas, coordSpace!);
     }
+    paintLabels(canvas);
+    paintAxisLines(canvas);
   }
 
   @override

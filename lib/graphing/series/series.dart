@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/graphing/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 
 class BoundingBox {
   final double xMin;
