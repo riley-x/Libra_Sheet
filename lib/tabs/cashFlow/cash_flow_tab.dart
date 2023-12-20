@@ -98,8 +98,9 @@ class _CashFlowCharts extends StatelessWidget {
                   valToString: formatOrder,
                 ),
                 xAxis: CartesianAxis(
-                    // gridLines: [],
-                    ),
+                  axisLoc: 0,
+                  // gridLines: [],
+                ),
               ),
             ),
           ),

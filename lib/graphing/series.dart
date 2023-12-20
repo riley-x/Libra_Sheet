@@ -37,8 +37,8 @@ abstract class Series<T> {
 
 final testSeries = LineSeries(
   name: 'test',
-  data: [100, 200, 150, -80, -90, 70],
-  valueMapper: (i, it) => (i.toDouble(), it.toDouble()),
+  data: [10000.0, 20000.0, 15000.0, -8000.0, -9000.0, 7000.0],
+  valueMapper: (i, it) => (i.toDouble(), it),
 );
 
 extension SeriesExtension<T> on List<Series<T>> {

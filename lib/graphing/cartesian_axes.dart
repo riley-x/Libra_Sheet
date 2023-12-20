@@ -18,7 +18,7 @@ class CartesianAxis {
   /// Optional padding to the auto-determined [min]/[max] values when they are null above. This should
   /// be a fraction of the total width/height. I.e. a value of 0.05 will reserve 5% of the graph
   /// space on each side for empty space.
-  final double dataPadFrac;
+  final double? dataPadFrac;
 
   /// Axis crossing locations; for an x-axis this is the user y coordinate. Use double.infinity for
   /// bottom/top/left/right, or null to not draw the axis.
@@ -54,7 +54,7 @@ class CartesianAxis {
   const CartesianAxis({
     this.min,
     this.max,
-    this.dataPadFrac = 0.05,
+    this.dataPadFrac,
     this.axisLoc = double.negativeInfinity,
     this.padStart,
     this.padEnd,
@@ -208,15 +208,12 @@ class CartesianAxesInternal {
     }
 
     /// Add padding
-    final xPad = (xAxis.userMax - xAxis.userMin) * xAxis.axis.dataPadFrac;
-    final yPad = (yAxis.userMax - yAxis.userMin) * yAxis.axis.dataPadFrac;
+    final xPad = (xAxis.userMax - xAxis.userMin) * (xAxis.axis.dataPadFrac ?? 0);
+    final yPad = (yAxis.userMax - yAxis.userMin) * (yAxis.axis.dataPadFrac ?? 0.05);
     xAxis.autoMin -= xPad;
     xAxis.autoMax += xPad;
     yAxis.autoMin -= yAxis.autoMin == 0 ? 0 : yPad;
     yAxis.autoMax += yAxis.autoMax == 0 ? 0 : yPad;
-
-    debugPrint(
-        'CartesianAxesInternal::autoRange() ${xAxis.autoMin} ${xAxis.autoMax} ${yAxis.autoMin} ${yAxis.autoMax}');
   }
 
   void autoLabels() {
@@ -244,8 +241,9 @@ class CartesianAxesInternal {
     var idealNTicks = (yAxis.pixelMax - yAxis.pixelMin).abs() / (labelLineHeight + 30);
     if (idealNTicks < 2) idealNTicks = 2;
 
-    final targetStepSize = (yAxis.userMax - yAxis.userMin) / (idealNTicks - 1);
+    final targetStepSize = (yAxis.userMax - yAxis.userMin) / idealNTicks;
     final (stepSize, order) = roundToHumanReadable(targetStepSize);
+    print("$targetStepSize $stepSize $order");
 
     final out = <(double, String)>[];
 
