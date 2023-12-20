@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
@@ -177,7 +178,7 @@ class DiscreteCartesianGraph extends StatelessWidget {
           theme: Theme.of(context),
           xAxis: xAxis,
           yAxis: yAxis,
-          data: [testSeries],
+          data: [testColumnSeries],
         ),
         size: Size.infinite,
       ),

@@ -93,6 +93,20 @@ class CartesianCoordinateSpace {
     );
   }
 
+  Rect userToPixelRect(BoundingBox pixelPos) {
+    // Remember that pixelMax might be > pixelMin for inverted axes.
+    final xMin = xAxis.userToPixel(pixelPos.xMin);
+    final xMax = xAxis.userToPixel(pixelPos.xMax);
+    final yMin = yAxis.userToPixel(pixelPos.yMin);
+    final yMax = yAxis.userToPixel(pixelPos.yMax);
+    return Rect.fromLTRB(
+      math.min(xMin, xMax),
+      math.min(yMin, yMax),
+      math.max(xMin, xMax),
+      math.max(yMin, yMax),
+    );
+  }
+
   void autoRange({
     required CartesianAxis xAxis,
     required CartesianAxis yAxis,
@@ -112,11 +126,13 @@ class CartesianCoordinateSpace {
     var autoYMax = double.negativeInfinity;
     for (final series in data) {
       final ext = series.totalBoundingBox();
+      if (ext == null) continue;
       autoXMin = math.min(autoXMin, ext.xMin);
       autoXMax = math.max(autoXMax, ext.xMax);
       autoYMin = math.min(autoYMin, ext.yMin);
       autoYMax = math.max(autoYMax, ext.yMax);
     }
+    if (autoXMin == double.infinity) return;
 
     /// Override auto with user
     autoXMin = xAxis.min ?? autoXMin;
