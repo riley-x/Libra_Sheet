@@ -2,7 +2,12 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/graphing/auto_y_ticks.dart';
 import 'package:libra_sheet/graphing/series.dart';
+
+String _defaultValToString(double val, int order) {
+  return "$val";
+}
 
 class CartesianAxis {
   /// These are the user coordiantes that define the axis limits. If null, will be auto set to contain
@@ -16,8 +21,8 @@ class CartesianAxis {
   final double dataPadFrac;
 
   /// Axis crossing locations; for an x-axis this is the user y coordinate. Use double.infinity for
-  /// bottom/top/left/right.
-  final double axisLoc;
+  /// bottom/top/left/right, or null to not draw the axis.
+  final double? axisLoc;
 
   /// Padding to add around the axes in pixels. start/end are always the left/right or bottom/top.
   /// If null, default padding will be used. These should generally be used for reserving space for
@@ -34,6 +39,9 @@ class CartesianAxis {
   /// Text style for the labels.
   final TextStyle? labelStyle;
 
+  /// For hover, default axis labels, etc.
+  final String Function(double val, int order) valToString;
+
   /// Grid line positions. If null, will be where the [labels] are.
   final List<double>? gridLines;
 
@@ -46,13 +54,14 @@ class CartesianAxis {
   const CartesianAxis({
     this.min,
     this.max,
-    this.dataPadFrac = 0,
+    this.dataPadFrac = 0.05,
     this.axisLoc = double.negativeInfinity,
     this.padStart,
     this.padEnd,
     this.labels,
     this.labelOffset = 6,
     this.labelStyle,
+    this.valToString = _defaultValToString,
     this.gridLines,
     this.axisPainter,
     this.gridLinePainter,
@@ -104,8 +113,8 @@ class CartesianAxisInternal {
   double get userMax => axis.max ?? autoMax;
 
   /// Axis crossing locations; for an x-axis this is the user y coordinate. Is double.infinity for
-  /// bottom/top/left/right.
-  double get axisUserLoc => axis.axisLoc;
+  /// bottom/top/left/right, or null to not draw the axis.
+  double? get axisUserLoc => axis.axisLoc;
 
   /// Labels after being laid out. Position is still in user coordinates.
   List<(double, TextPainter)> labels = [];
@@ -121,7 +130,8 @@ class CartesianAxisInternal {
   double get padStart => axis.padStart ?? autoPadStart;
   double get padEnd => axis.padEnd ?? autoPadEnd;
 
-  /// Pixel coordinates corresponding to user min/max above
+  /// Pixel coordinates corresponding to user min/max above. Note that when [invert], [pixelMax] is
+  /// smaller than [pixelMin].
   double get pixelMin => invert ? size - padStart : padStart;
   double get pixelMax => invert ? padEnd : size - padEnd;
 
@@ -142,6 +152,7 @@ class CartesianAxisInternal {
     if (val == double.negativeInfinity) return pixelMin;
     final userWidth = userMax - userMin;
     final pixelWidth = pixelMax - pixelMin;
+    if (userWidth == 0) return pixelMin + pixelWidth / 2;
     return pixelMin + pixelWidth * (val - userMin) / userWidth;
   }
 
@@ -201,8 +212,53 @@ class CartesianAxesInternal {
     final yPad = (yAxis.userMax - yAxis.userMin) * yAxis.axis.dataPadFrac;
     xAxis.autoMin -= xPad;
     xAxis.autoMax += xPad;
-    yAxis.autoMin -= yPad;
-    yAxis.autoMax += yPad;
+    yAxis.autoMin -= yAxis.autoMin == 0 ? 0 : yPad;
+    yAxis.autoMax += yAxis.autoMax == 0 ? 0 : yPad;
+
+    debugPrint(
+        'CartesianAxesInternal::autoRange() ${xAxis.autoMin} ${xAxis.autoMax} ${yAxis.autoMin} ${yAxis.autoMax}');
+  }
+
+  void autoLabels() {
+    if (!(yAxis.axis.labels == null || xAxis.axis.labels == null)) return;
+
+    /// Do y labels first because these will affect the width available for the x labels,
+    /// whereas the x labels generally are just a single line.
+    /// TODO this only works for bottom and left aligned labels
+
+    final textPainter = TextPainter(text: TextSpan(text: '', style: xAxis.labelStyle));
+    final labelLineHeight = textPainter.preferredLineHeight;
+
+    if (yAxis.axis.labels == null) {
+      yAxis.autoPadStart = labelLineHeight + xAxis.labelOffset;
+      final labels = _autoYLabels(labelLineHeight);
+      yAxis.setLabels(labels);
+    }
+
+    if (xAxis.axis.labels == null) {
+      xAxis.autoPadStart = yAxis.maxLabelWidth + xAxis.labelOffset;
+    }
+  }
+
+  List<(double, String)> _autoYLabels(double labelLineHeight) {
+    var idealNTicks = (yAxis.pixelMax - yAxis.pixelMin).abs() / (labelLineHeight + 30);
+    if (idealNTicks < 2) idealNTicks = 2;
+
+    final targetStepSize = (yAxis.userMax - yAxis.userMin) / (idealNTicks - 1);
+    final (stepSize, order) = roundToHumanReadable(targetStepSize);
+
+    final out = <(double, String)>[];
+
+    /// Start from the nearest integer multiple
+    var currPos = (yAxis.userMin / stepSize).roundToDouble() * stepSize;
+    while (currPos <= yAxis.userMax) {
+      if (currPos >= yAxis.autoMin) {
+        out.add((currPos, yAxis.axis.valToString(currPos, order)));
+      }
+      currPos += stepSize;
+    }
+
+    return out;
   }
 
   //---------------------------------------------------------------------------
@@ -229,15 +285,12 @@ class CartesianAxesInternal {
   }
 
   void paintXAxis(Canvas canvas) {
-    double x1 = xAxis.pixelMin;
-    double x2 = xAxis.pixelMax;
-    double y = yAxis.userToPixel(xAxis.axisUserLoc);
-    canvas.drawLine(Offset(x1, y), Offset(x2, y), xAxis.axisPainter);
-
-    final Path path = Path();
-    path.moveTo(x1, y);
-    path.lineTo(x2, y);
-    canvas.drawPath(path, xAxis.axisPainter);
+    if (xAxis.axisUserLoc != null) {
+      double x1 = xAxis.pixelMin;
+      double x2 = xAxis.pixelMax;
+      double y = yAxis.userToPixel(xAxis.axisUserLoc!);
+      canvas.drawLine(Offset(x1, y), Offset(x2, y), xAxis.axisPainter);
+    }
 
     for (final (pos, painter) in xAxis.labels) {
       /// TODO this only works for bottom aligned labels
@@ -250,10 +303,12 @@ class CartesianAxesInternal {
   }
 
   void paintYAxis(Canvas canvas) {
-    double y1 = yAxis.pixelMin;
-    double y2 = yAxis.pixelMax;
-    double x = xAxis.userToPixel(yAxis.axisUserLoc);
-    canvas.drawLine(Offset(x, y1), Offset(x, y2), yAxis.axisPainter);
+    if (yAxis.axisUserLoc != null) {
+      double y1 = yAxis.pixelMin;
+      double y2 = yAxis.pixelMax;
+      double x = xAxis.userToPixel(yAxis.axisUserLoc!);
+      canvas.drawLine(Offset(x, y1), Offset(x, y2), yAxis.axisPainter);
+    }
 
     for (final (pos, painter) in yAxis.labels) {
       /// TODO this only works for left aligned labels
