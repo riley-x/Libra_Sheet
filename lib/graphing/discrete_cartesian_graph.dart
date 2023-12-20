@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/series.dart';
 
+import 'cartesian_coordinate_space.dart';
+
 class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   final CartesianAxis xAxis;
   final CartesianAxis yAxis;
