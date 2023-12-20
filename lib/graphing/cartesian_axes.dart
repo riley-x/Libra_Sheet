@@ -1,157 +1,222 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/graphing/series.dart';
 
-class CartesianAxes {
-  /// These are the user coordiantes that define the axis limits. If null, will be auto set.
-  final double? xMin;
-  final double? xMax;
-  final double? yMin;
-  final double? yMax;
+class CartesianAxis {
+  /// These are the user coordiantes that define the axis limits. If null, will be auto set to contain
+  /// all data. See also [dataPadFrac].
+  final double? min;
+  final double? max;
 
-  /// Axis crossing locations; xAxisLoc is user y coordinate. Use double.infinity for bottom/top/left/right.
-  final double xAxisLoc;
-  final double yAxisLoc;
+  /// Optional padding to the auto-determined [min]/[max] values when they are null above. This should
+  /// be a fraction of the total width/height. I.e. a value of 0.05 will reserve 5% of the graph
+  /// space on each side for empty space.
+  final double dataPadFrac;
 
-  /// Padding to add around the data in pixels. If null, default padding will be used.
-  final double? padLeft;
-  final double? padRight;
-  final double? padTop;
-  final double? padBottom;
+  /// Axis crossing locations; for an x-axis this is the user y coordinate. Use double.infinity for
+  /// bottom/top/left/right.
+  final double axisLoc;
+
+  /// Padding to add around the axes in pixels. If null, default padding will be used. These should
+  /// generally be used for reserving space for the axis labels / titles.
+  final double? padStart;
+  final double? padEnd;
 
   /// Label position and text. If null, will be auto created.
-  final Iterable<(double, String)>? xLabels;
-  final Iterable<(double, String)>? yLabels;
+  final List<(double, String)>? labels;
 
-  /// Style of the actual axis lines.
-  final Paint? xAxisPainter;
-  final Paint? yAxisPainter;
+  /// Label offset in pixels from the start of the plot area.
+  final double labelOffset;
 
-  const CartesianAxes({
-    this.xMin,
-    this.xMax,
-    this.yMin,
-    this.yMax,
-    this.xAxisLoc = double.negativeInfinity,
-    this.yAxisLoc = double.negativeInfinity,
-    this.padLeft,
-    this.padRight,
-    this.padTop,
-    this.padBottom,
-    this.xLabels,
-    this.yLabels,
-    this.xAxisPainter,
-    this.yAxisPainter,
+  /// Text style for the labels.
+  final TextStyle? labelStyle;
+
+  /// Style of the main axis line.
+  final Paint? axisPainter;
+
+  const CartesianAxis({
+    this.min,
+    this.max,
+    this.dataPadFrac = 0,
+    this.axisLoc = double.negativeInfinity,
+    this.padStart,
+    this.padEnd,
+    this.labels,
+    this.labelOffset = 6,
+    this.labelStyle,
+    this.axisPainter,
   });
 }
 
-/// Same fields as above but non-null
+class CartesianAxes {
+  final CartesianAxis xAxis;
+  final CartesianAxis yAxis;
+
+  CartesianAxes({
+    this.xAxis = const CartesianAxis(),
+    this.yAxis = const CartesianAxis(),
+  });
+}
+
+class CartesianAxisInternal {
+  /// The original axis. External methods should avoid touching this member and use the below ones
+  /// instead.
+  final CartesianAxis axis;
+
+  /// This is the total pixel size of the canvas in this axis direction
+  final double size;
+
+  /// Invert the direction of the data. For y axes, this should be true by default because y = 0
+  /// represents the top of the screen.
+  final bool invert;
+
+  CartesianAxisInternal({
+    required this.axis,
+    required this.size,
+    required this.invert,
+  }) {
+    setLabels(axis.labels ?? []);
+  }
+
+  /// Auto-determined values when the user supplied ones are null. TODO can these be privated?
+  double autoMin = 0;
+  double autoMax = 1;
+  double autoPadStart = 0;
+  double autoPadEnd = 0;
+
+  Paint defaultPainter = Paint();
+
+  /// Labels after being laid out. Position is still in user coordinates.
+  List<(double, TextPainter)> labels = [];
+  double maxLabelWidth = 0;
+
+  /// These are the user coordiantes that define the axis limits.
+  double get userMin => axis.min ?? autoMin;
+  double get userMax => axis.max ?? autoMax;
+
+  /// Axis crossing locations; for an x-axis this is the user y coordinate. Is double.infinity for
+  /// bottom/top/left/right.
+  double get axisUserLoc => axis.axisLoc;
+
+  /// Padding to add around the axis in pixels.
+  double get padStart => axis.padStart ?? autoPadStart;
+  double get padEnd => axis.padEnd ?? autoPadEnd;
+
+  /// Pixel coordinates corresponding to user min/max above
+  double get pixelMin => invert ? size - padStart : padStart;
+  double get pixelMax => invert ? padEnd : size - padEnd;
+
+  /// Label offset in pixels from the start of the plot area.
+  double get labelOffset => axis.labelOffset;
+
+  /// Text style for the labels.
+  TextStyle? get labelStyle => axis.labelStyle;
+
+  /// Style of the main axis line.
+  Paint get axisPainter => axis.axisPainter ?? defaultPainter;
+
+  double userToPixel(double val) {
+    if (val == double.infinity) return pixelMax;
+    if (val == double.negativeInfinity) return pixelMin;
+    final userWidth = userMax - userMin;
+    final pixelWidth = pixelMax - pixelMin;
+    return pixelMin + pixelWidth * (val - userMin) / userWidth;
+  }
+
+  void setLabels(List<(double, String)> labels) {
+    maxLabelWidth = 0.0;
+    this.labels = [];
+
+    for (final (pos, text) in labels) {
+      final TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: labelStyle,
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      maxLabelWidth = max(maxLabelWidth, textPainter.width);
+      this.labels.add((pos, textPainter));
+    }
+  }
+}
+
 class CartesianAxesInternal {
-  /// These are the user coordiantes that define the axis limits. If null, will be auto set.
-  final double xMin;
-  final double xMax;
-  final double yMin;
-  final double yMax;
+  CartesianAxisInternal xAxis;
+  CartesianAxisInternal yAxis;
 
-  /// Axis crossing locations; xAxisLoc is user y coordinate. Use double.infinity for bottom/top/left/right.
-  late final double xAxisLoc;
-  late final double yAxisLoc;
+  CartesianAxesInternal({
+    required CartesianAxes axes,
+    required Size size,
+  })  : xAxis = CartesianAxisInternal(axis: axes.xAxis, size: size.width, invert: false),
+        yAxis = CartesianAxisInternal(axis: axes.yAxis, size: size.height, invert: true);
 
-  /// Padding to add around the data in pixels. If null, default padding will be used.
-  final double padLeft;
-  final double padRight;
-  final double padTop;
-  final double padBottom;
+  void autoRange<T>(List<Series<T>> data) {
+    if (!data.hasData()) return;
+    if (!(xAxis.axis.min == null ||
+        xAxis.axis.max == null ||
+        yAxis.axis.min == null ||
+        yAxis.axis.max == null)) return;
 
-  /// Label position and text. If null, will be auto created.
-  final Iterable<(double, String)> xLabels;
-  final Iterable<(double, String)> yLabels;
-
-  /// Style of the actual axis lines.
-  late final Paint xAxisPainter;
-  late final Paint yAxisPainter;
-
-  /// Will copy fields from [axes] but with optional overrides.
-  CartesianAxesInternal(
-    BuildContext context,
-    CartesianAxes axes, {
-    double? xMin,
-    double? xMax,
-    double? yMin,
-    double? yMax,
-    double? xAxisLoc,
-    double? yAxisLoc,
-    double? padLeft,
-    double? padRight,
-    double? padTop,
-    double? padBottom,
-    Iterable<(double, String)>? xLabels,
-    Iterable<(double, String)>? yLabels,
-    Paint? xAxisPainter,
-    Paint? yAxisPainter,
-  })  : xMin = xMin ?? axes.xMin ?? 0,
-        xMax = xMax ?? axes.xMax ?? 1,
-        yMin = yMin ?? axes.yMin ?? 0,
-        yMax = yMax ?? axes.yMax ?? 1,
-        padLeft = padLeft ?? axes.padLeft ?? 0,
-        padRight = padRight ?? axes.padRight ?? 0,
-        padTop = padTop ?? axes.padTop ?? 0,
-        padBottom = padBottom ?? axes.padBottom ?? 0,
-        xLabels = xLabels ?? axes.xLabels ?? [],
-        yLabels = yLabels ?? axes.yLabels ?? [] {
-    final xLoc = xAxisLoc ?? axes.xAxisLoc;
-    if (xLoc == double.infinity) {
-      this.xAxisLoc = this.yMax;
-    } else if (xLoc == double.negativeInfinity) {
-      this.xAxisLoc = this.yMin;
-    } else {
-      this.xAxisLoc = xLoc;
+    xAxis.autoMin = double.infinity;
+    yAxis.autoMin = double.infinity;
+    xAxis.autoMax = double.negativeInfinity;
+    yAxis.autoMax = double.negativeInfinity;
+    for (final series in data) {
+      for (int i = 0; i < series.data.length; i++) {
+        final ext = series.extentMapper(i, series.data[i]);
+        xAxis.autoMin = min(xAxis.autoMin, ext.xMin);
+        xAxis.autoMax = max(xAxis.autoMax, ext.xMax);
+        yAxis.autoMin = min(yAxis.autoMin, ext.yMin);
+        yAxis.autoMax = max(yAxis.autoMax, ext.yMax);
+      }
     }
 
-    final yLoc = yAxisLoc ?? axes.yAxisLoc;
-    if (yLoc == double.infinity) {
-      this.yAxisLoc = this.xMax;
-    } else if (yLoc == double.negativeInfinity) {
-      this.yAxisLoc = this.xMin;
-    } else {
-      this.yAxisLoc = yLoc;
-    }
+    /// Add padding
+    final xPad = (xAxis.userMax - xAxis.userMin) * xAxis.axis.dataPadFrac;
+    final yPad = (yAxis.userMax - yAxis.userMin) * yAxis.axis.dataPadFrac;
+    xAxis.autoMin -= xPad;
+    xAxis.autoMax += xPad;
+    yAxis.autoMin -= yPad;
+    yAxis.autoMax += yPad;
+  }
 
-    final xPainter = xAxisPainter ?? axes.xAxisPainter;
-    if (xPainter != null) {
-      this.xAxisPainter = xPainter;
-    } else {
-      this.xAxisPainter = Paint()..color = Theme.of(context).colorScheme.onSurface;
-    }
+  //---------------------------------------------------------------------------
+  // Painters
+  //---------------------------------------------------------------------------
+  void paintXAxis(Canvas canvas) {
+    double x1 = xAxis.pixelMin;
+    double x2 = xAxis.pixelMax;
+    double y = yAxis.userToPixel(xAxis.axisUserLoc);
+    canvas.drawLine(Offset(x1, y), Offset(x2, y), xAxis.axisPainter);
 
-    final yPainter = yAxisPainter ?? axes.yAxisPainter;
-    if (yPainter != null) {
-      this.yAxisPainter = yPainter;
-    } else {
-      this.yAxisPainter = Paint()..color = Theme.of(context).colorScheme.onSurface;
+    for (final (pos, painter) in xAxis.labels) {
+      /// TODO this only works for bottom aligned labels
+      final loc = Offset(
+        xAxis.userToPixel(pos) - painter.width / 2,
+        yAxis.pixelMin + yAxis.labelOffset,
+      );
+      painter.paint(canvas, loc);
     }
   }
 
-  double userToPixelX(double x, Size size) {
-    final pixelStart = padLeft;
-    final pixelEnd = size.width - padRight;
-    final pixelWidth = pixelEnd - pixelStart;
+  void paintYAxis(Canvas canvas) {
+    double y1 = yAxis.pixelMin;
+    double y2 = yAxis.pixelMax;
+    double x = xAxis.userToPixel(yAxis.axisUserLoc);
+    canvas.drawLine(Offset(x, y1), Offset(x, y2), yAxis.axisPainter);
 
-    final userStart = xMin;
-    final userEnd = xMax;
-    final userWidth = userEnd - userStart;
-    return pixelStart + pixelWidth * (x - userStart) / userWidth;
-  }
-
-  double userToPixelY(double y, Size size) {
-    /// Remember pixel y = 0 is the top. So [pixelHeight] is negative.
-    final pixelStart = size.height - padBottom;
-    final pixelEnd = padTop;
-    final pixelHeight = pixelEnd - pixelStart;
-
-    final userStart = yMin;
-    final userEnd = yMax;
-    final userHeight = userEnd - userStart;
-    return pixelStart + pixelHeight * (y - userStart) / userHeight;
+    for (final (pos, painter) in yAxis.labels) {
+      /// TODO this only works for left aligned labels
+      final loc = Offset(
+        xAxis.pixelMin - yAxis.labelOffset - painter.width,
+        yAxis.userToPixel(pos) - painter.height / 2,
+      );
+      painter.paint(canvas, loc);
+    }
   }
 }
