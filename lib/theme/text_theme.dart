@@ -53,6 +53,10 @@ final libraDarkTextTheme = Typography.whiteMountainView.copyWith(
   bodySmall: TextStyle(
     color: libraDarkColorScheme.onBackground,
   ),
+  labelSmall: const TextStyle(
+    fontSize: 10,
+    fontWeight: FontWeight.normal,
+  ),
 );
 
 

@@ -14,29 +14,28 @@ class BoundingBox {
   });
 }
 
-class Series<T> {
+abstract class Series<T> {
   final String name;
   final List<T> data;
   final (double, double) Function(int, T) valueMapper;
-  final BoundingBox Function(int i, T x)? _extentMapper;
+
+  const Series({
+    required this.name,
+    required this.data,
+    required this.valueMapper,
+  });
 
   /// This returns the bounding rectangle of all drawing objects associated with data[i] = x.
   /// The returned BoundingBox is in user coordinates.
   BoundingBox extentMapper(int i, T item) {
-    if (_extentMapper != null) return _extentMapper!(i, item);
     final (x, y) = valueMapper(i, item);
     return BoundingBox(xMin: x, xMax: x, yMin: y, yMax: y);
   }
 
-  Series({
-    required this.name,
-    required this.data,
-    required this.valueMapper,
-    BoundingBox Function(int, T)? extentMapper,
-  }) : _extentMapper = extentMapper;
+  void paint(Canvas canvas);
 }
 
-final testSeries = Series(
+final testSeries = LineSeries(
   name: 'test',
   data: [100, 200, 150, -80, -90, 70],
   valueMapper: (i, it) => (i.toDouble(), it.toDouble()),
@@ -48,5 +47,18 @@ extension SeriesExtension<T> on List<Series<T>> {
       if (series.data.isNotEmpty) return true;
     }
     return false;
+  }
+}
+
+class LineSeries<T> extends Series<T> {
+  const LineSeries({
+    required super.name,
+    required super.data,
+    required super.valueMapper,
+  });
+
+  @override
+  void paint(Canvas canvas) {
+    // TODO: implement paint
   }
 }

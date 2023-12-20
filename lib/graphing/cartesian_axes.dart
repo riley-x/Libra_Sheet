@@ -19,8 +19,9 @@ class CartesianAxis {
   /// bottom/top/left/right.
   final double axisLoc;
 
-  /// Padding to add around the axes in pixels. If null, default padding will be used. These should
-  /// generally be used for reserving space for the axis labels / titles.
+  /// Padding to add around the axes in pixels. start/end are always the left/right or bottom/top.
+  /// If null, default padding will be used. These should generally be used for reserving space for
+  /// the axis labels / titles.
   final double? padStart;
   final double? padEnd;
 
@@ -33,8 +34,14 @@ class CartesianAxis {
   /// Text style for the labels.
   final TextStyle? labelStyle;
 
+  /// Grid line positions. If null, will be where the [labels] are.
+  final List<double>? gridLines;
+
   /// Style of the main axis line.
   final Paint? axisPainter;
+
+  /// Style of the grid lines.
+  final Paint? gridLinePainter;
 
   const CartesianAxis({
     this.min,
@@ -46,7 +53,9 @@ class CartesianAxis {
     this.labels,
     this.labelOffset = 6,
     this.labelStyle,
+    this.gridLines,
     this.axisPainter,
+    this.gridLinePainter,
   });
 }
 
@@ -86,11 +95,9 @@ class CartesianAxisInternal {
   double autoPadStart = 0;
   double autoPadEnd = 0;
 
-  Paint defaultPainter = Paint();
-
-  /// Labels after being laid out. Position is still in user coordinates.
-  List<(double, TextPainter)> labels = [];
-  double maxLabelWidth = 0;
+  Paint defaultAxisPainter = Paint();
+  Paint defaultGridLinePainter = Paint();
+  TextStyle? defaultLabelStyle;
 
   /// These are the user coordiantes that define the axis limits.
   double get userMin => axis.min ?? autoMin;
@@ -100,7 +107,17 @@ class CartesianAxisInternal {
   /// bottom/top/left/right.
   double get axisUserLoc => axis.axisLoc;
 
-  /// Padding to add around the axis in pixels.
+  /// Labels after being laid out. Position is still in user coordinates.
+  List<(double, TextPainter)> labels = [];
+  double maxLabelWidth = 0;
+
+  /// Gridline positions in user coordinates.
+  List<double> get gridLines {
+    if (axis.gridLines != null) return axis.gridLines!;
+    return [for (final (pos, _) in labels) pos];
+  }
+
+  /// Padding to add around the axis in pixels. start/end are always the left/right or bottom/top.
   double get padStart => axis.padStart ?? autoPadStart;
   double get padEnd => axis.padEnd ?? autoPadEnd;
 
@@ -112,10 +129,13 @@ class CartesianAxisInternal {
   double get labelOffset => axis.labelOffset;
 
   /// Text style for the labels.
-  TextStyle? get labelStyle => axis.labelStyle;
+  TextStyle? get labelStyle => axis.labelStyle ?? defaultLabelStyle;
 
   /// Style of the main axis line.
-  Paint get axisPainter => axis.axisPainter ?? defaultPainter;
+  Paint get axisPainter => axis.axisPainter ?? defaultAxisPainter;
+
+  /// Style of the grid lines.
+  Paint get gridLinePainter => axis.gridLinePainter ?? defaultGridLinePainter;
 
   double userToPixel(double val) {
     if (val == double.infinity) return pixelMax;
@@ -188,11 +208,36 @@ class CartesianAxesInternal {
   //---------------------------------------------------------------------------
   // Painters
   //---------------------------------------------------------------------------
+  void paintGridLines(Canvas canvas) {
+    /// Horizontal grid lines
+    for (final pos in yAxis.gridLines) {
+      if (pos == xAxis.axisUserLoc) continue;
+      double y = yAxis.userToPixel(pos);
+      double x1 = xAxis.pixelMin;
+      double x2 = xAxis.pixelMax;
+      canvas.drawLine(Offset(x1, y), Offset(x2, y), yAxis.gridLinePainter);
+    }
+
+    /// Vertical grid lines
+    for (final pos in xAxis.gridLines) {
+      if (pos == yAxis.axisUserLoc) continue;
+      double x = xAxis.userToPixel(pos);
+      double y1 = yAxis.pixelMin;
+      double y2 = yAxis.pixelMax;
+      canvas.drawLine(Offset(x, y1), Offset(x, y2), xAxis.gridLinePainter);
+    }
+  }
+
   void paintXAxis(Canvas canvas) {
     double x1 = xAxis.pixelMin;
     double x2 = xAxis.pixelMax;
     double y = yAxis.userToPixel(xAxis.axisUserLoc);
     canvas.drawLine(Offset(x1, y), Offset(x2, y), xAxis.axisPainter);
+
+    final Path path = Path();
+    path.moveTo(x1, y);
+    path.lineTo(x2, y);
+    canvas.drawPath(path, xAxis.axisPainter);
 
     for (final (pos, painter) in xAxis.labels) {
       /// TODO this only works for bottom aligned labels
