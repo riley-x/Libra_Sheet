@@ -51,7 +51,7 @@ class CartesianAxis {
 
   /// Text style for the labels.
   final TextStyle? _labelStyle;
-  TextStyle? get labelStyle => _labelStyle;
+  TextStyle? get labelStyle => _labelStyle ?? theme.textTheme.bodySmall;
 
   /// For hover, default axis labels, etc.
   final String Function(double val, int order) valToString;
@@ -145,8 +145,10 @@ class CartesianAxis {
         if (lastLabelRightPixel > pixelPos - layout.width / 2) {
           return _autoXLabels(coordSpace, humanReadableStep.nextLargerStep());
         }
-        out.add((currPos, layout));
         lastLabelRightPixel = pixelPos + layout.width / 2;
+        if (lastLabelRightPixel <= coordSpace.xAxis.canvasSize) {
+          out.add((currPos, layout));
+        }
       }
       currPos += stepSize;
     }
@@ -174,7 +176,7 @@ class CartesianAxis {
     }
 
     /// Get ideal step size
-    final idealTickSeparation = labelWidthEstimate + 30;
+    final idealTickSeparation = labelWidthEstimate + 40;
     var idealNTicks = coordSpace.xAxis.pixelWidth.abs() / idealTickSeparation;
     if (idealNTicks < 2) idealNTicks = 2;
     final idealStepSize = coordSpace.xAxis.userWidth / idealNTicks;
@@ -268,19 +270,16 @@ class CartesianCoordinateSpace {
     return CartesianCoordinateSpace(xAxis: coordXAxis, yAxis: coordYAxis);
   }
 
-  factory CartesianCoordinateSpace.autoRange({
-    required Size canvasSize,
+  void autoRange({
     required CartesianAxis xAxis,
     required CartesianAxis yAxis,
     required List<Series> data,
     double defaultXDataPadFrac = 0,
     double defaultYDataPadFrac = 0.05,
   }) {
-    final coordSpace =
-        CartesianCoordinateSpace.fromAxes(canvasSize: canvasSize, xAxis: xAxis, yAxis: yAxis);
-    if (!data.hasData()) return coordSpace;
+    if (!data.hasData()) return;
     if (!(xAxis.min == null || xAxis.max == null || yAxis.min == null || yAxis.max == null)) {
-      return coordSpace;
+      return;
     }
 
     /// Get min/max
@@ -313,151 +312,9 @@ class CartesianCoordinateSpace {
     autoYMax = yAxis.max ?? (autoYMax == 0 ? 0 : autoYMax + yPad);
 
     /// Set the values
-    coordSpace.xAxis.userMin = autoXMin;
-    coordSpace.xAxis.userMax = autoXMax;
-    coordSpace.yAxis.userMin = autoYMin;
-    coordSpace.yAxis.userMax = autoYMax;
-    return coordSpace;
+    this.xAxis.userMin = autoXMin;
+    this.xAxis.userMax = autoXMax;
+    this.yAxis.userMin = autoYMin;
+    this.yAxis.userMax = autoYMax;
   }
 }
-
-// class CartesianAxisInternal {
-//   /// The original axis. External methods should avoid touching this member and use the below ones
-//   /// instead.
-//   final CartesianAxis axis;
-
-//   /// This is the total pixel size of the canvas in this axis direction
-//   final double size;
-
-//   /// Invert the direction of the data. For y axes, this should be true by default because y = 0
-//   /// represents the top of the screen.
-//   final bool invert;
-
-//   CartesianAxisInternal({
-//     required this.axis,
-//     required this.size,
-//     required this.invert,
-//   }) {
-//     setLabels(axis.labels ?? []);
-//   }
-
-//   /// Auto-determined values when the user supplied ones are null. TODO can these be privated?
-//   double autoMin = 0;
-//   double autoMax = 1;
-//   double autoPadStart = 0;
-//   double autoPadEnd = 0;
-
-//   Paint defaultAxisPainter = Paint();
-//   Paint defaultGridLinePainter = Paint();
-//   TextStyle? defaultLabelStyle;
-
-//   /// These are the user coordiantes that define the axis limits.
-//   double get userMin => axis.min ?? autoMin;
-//   double get userMax => axis.max ?? autoMax;
-
-//   /// Axis crossing locations; for an x-axis this is the user y coordinate. Is double.infinity for
-//   /// bottom/top/left/right, or null to not draw the axis.
-//   double? get axisUserLoc => axis.axisLoc;
-
-//   /// Labels after being laid out. Position is still in user coordinates.
-//   List<(double, TextPainter)> labels = [];
-//   double maxLabelWidth = 0;
-
-//   /// Gridline positions in user coordinates.
-//   List<double> get gridLines {
-//     if (axis.gridLines != null) return axis.gridLines!;
-//     return [for (final (pos, _) in labels) pos];
-//   }
-
-//   /// Padding to add around the axis in pixels. start/end are always the left/right or bottom/top.
-//   double get padStart => axis.padStart ?? autoPadStart;
-//   double get padEnd => axis.padEnd ?? autoPadEnd;
-
-//   /// Pixel coordinates corresponding to user min/max above. Note that when [invert], [pixelMax] is
-//   /// smaller than [pixelMin].
-//   double get pixelMin => invert ? size - padStart : padStart;
-//   double get pixelMax => invert ? padEnd : size - padEnd;
-
-//   /// Label offset in pixels from the start of the plot area.
-//   double get labelOffset => axis.labelOffset;
-
-//   /// Text style for the labels.
-//   TextStyle? get labelStyle => axis.labelStyle ?? defaultLabelStyle;
-
-//   /// Style of the main axis line.
-//   Paint get axisPainter => axis.axisPainter ?? defaultAxisPainter;
-
-//   /// Style of the grid lines.
-//   Paint get gridLinePainter => axis.gridLinePainter ?? defaultGridLinePainter;
-
-//   double userToPixel(double val) {
-//     if (val == double.infinity) return pixelMax;
-//     if (val == double.negativeInfinity) return pixelMin;
-//     final userWidth = userMax - userMin;
-//     final pixelWidth = pixelMax - pixelMin;
-//     if (userWidth == 0) return pixelMin + pixelWidth / 2;
-//     return pixelMin + pixelWidth * (val - userMin) / userWidth;
-//   }
-
-//   void setLabels(List<(double, String)> labels) {
-//     maxLabelWidth = 0.0;
-//     this.labels = [];
-
-//     for (final (pos, text) in labels) {
-//       final TextPainter textPainter = TextPainter(
-//         text: TextSpan(
-//           text: text,
-//           style: labelStyle,
-//         ),
-//         textAlign: TextAlign.center,
-//         textDirection: TextDirection.ltr,
-//       );
-//       textPainter.layout();
-//       maxLabelWidth = math.max(maxLabelWidth, textPainter.width);
-//       this.labels.add((pos, textPainter));
-//     }
-//   }
-// }
-
-// class CartesianAxesInternal {
-//   //---------------------------------------------------------------------------
-//   // Painters
-//   //---------------------------------------------------------------------------
-//   void paintGridLines(Canvas canvas) {
-//     /// Horizontal grid lines
-//     for (final pos in yAxis.gridLines) {
-//       if (pos == xAxis.axisUserLoc) continue;
-//       double y = yAxis.userToPixel(pos);
-//       double x1 = xAxis.pixelMin;
-//       double x2 = xAxis.pixelMax;
-//       canvas.drawLine(Offset(x1, y), Offset(x2, y), yAxis.gridLinePainter);
-//     }
-
-//     /// Vertical grid lines
-//     for (final pos in xAxis.gridLines) {
-//       if (pos == yAxis.axisUserLoc) continue;
-//       double x = xAxis.userToPixel(pos);
-//       double y1 = yAxis.pixelMin;
-//       double y2 = yAxis.pixelMax;
-//       canvas.drawLine(Offset(x, y1), Offset(x, y2), xAxis.gridLinePainter);
-//     }
-//   }
-
-//   void paintXAxis(Canvas canvas) {
-//     if (xAxis.axisUserLoc != null) {
-//       double x1 = xAxis.pixelMin;
-//       double x2 = xAxis.pixelMax;
-//       double y = yAxis.userToPixel(xAxis.axisUserLoc!);
-//       canvas.drawLine(Offset(x1, y), Offset(x2, y), xAxis.axisPainter);
-//     }
-//   }
-
-//   void paintYAxis(Canvas canvas) {
-//     if (yAxis.axisUserLoc != null) {
-//       double y1 = yAxis.pixelMin;
-//       double y2 = yAxis.pixelMax;
-//       double x = xAxis.userToPixel(yAxis.axisUserLoc!);
-//       canvas.drawLine(Offset(x, y1), Offset(x, y2), yAxis.axisPainter);
-//     }
-//   }
-// }

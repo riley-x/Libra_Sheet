@@ -29,18 +29,18 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
     if (size == currentSize) return;
 
     currentSize = size;
-    coordSpace = CartesianCoordinateSpace.autoRange(
+    coordSpace = CartesianCoordinateSpace.fromAxes(
       canvasSize: size,
       xAxis: xAxis,
       yAxis: yAxis,
-      data: data,
     );
+    coordSpace!.autoRange(xAxis: xAxis, yAxis: yAxis, data: data);
 
     /// Auto labels and axis padding; TODO this is hard coded for bottom and left aligned labels
     yLabels = yAxis.autoYLabels(coordSpace!);
     if (coordSpace!.xAxis.padStart == null) {
       var maxLabelWidth = 0.0;
-      for (final (_, x) in yLabels) {
+      for (final (_, x) in yLabels!) {
         maxLabelWidth = max(maxLabelWidth, x.width);
       }
       coordSpace!.xAxis.padStart = maxLabelWidth + yAxis.labelOffset;
@@ -56,28 +56,92 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
     if (coordSpace == null) return;
 
     /// x labels
-    for (final (pos, painter) in xLabels) {
-      final loc = Offset(
-        coordSpace!.xAxis.userToPixel(pos) - painter.width / 2,
-        coordSpace!.yAxis.pixelMin + yAxis.labelOffset,
-      );
-      painter.paint(canvas, loc);
+    if (xLabels != null) {
+      for (final (pos, painter) in xLabels!) {
+        final loc = Offset(
+          coordSpace!.xAxis.userToPixel(pos) - painter.width / 2,
+          coordSpace!.yAxis.pixelMin + yAxis.labelOffset,
+        );
+        painter.paint(canvas, loc);
+      }
     }
 
     /// y labels
-    for (final (pos, painter) in yLabels) {
-      final loc = Offset(
-        coordSpace!.xAxis.pixelMin - yAxis.labelOffset - painter.width,
-        coordSpace!.yAxis.userToPixel(pos) - painter.height / 2,
-      );
-      painter.paint(canvas, loc);
+    if (yLabels != null) {
+      for (final (pos, painter) in yLabels!) {
+        final loc = Offset(
+          coordSpace!.xAxis.pixelMin - yAxis.labelOffset - painter.width,
+          coordSpace!.yAxis.userToPixel(pos) - painter.height / 2,
+        );
+        painter.paint(canvas, loc);
+      }
+    }
+  }
+
+  List<double> _defaultXGridlines() {
+    List<double> out = [];
+    if (xLabels != null) {
+      for (final (pos, _) in xLabels!) {
+        out.add(pos);
+      }
+    }
+    return out;
+  }
+
+  List<double> _defaultYGridlines() {
+    List<double> out = [];
+    if (yLabels != null) {
+      for (final (pos, _) in yLabels!) {
+        out.add(pos);
+      }
+    }
+    return out;
+  }
+
+  void paintGridLines(Canvas canvas) {
+    if (coordSpace == null) return;
+
+    /// Horizontal grid lines
+    final horizontalGridLines = yAxis.gridLines ?? _defaultYGridlines();
+    for (final pos in horizontalGridLines) {
+      double y = coordSpace!.yAxis.userToPixel(pos);
+      double x1 = coordSpace!.xAxis.pixelMin;
+      double x2 = coordSpace!.xAxis.pixelMax;
+      canvas.drawLine(Offset(x1, y), Offset(x2, y), yAxis.gridLinePainter);
+    }
+
+    /// Vertical grid lines
+    final verticalGridLines = xAxis.gridLines ?? _defaultXGridlines();
+    for (final pos in verticalGridLines) {
+      double x = coordSpace!.xAxis.userToPixel(pos);
+      double y1 = coordSpace!.yAxis.pixelMin;
+      double y2 = coordSpace!.yAxis.pixelMax;
+      canvas.drawLine(Offset(x, y1), Offset(x, y2), xAxis.gridLinePainter);
+    }
+  }
+
+  void paintAxisLines(Canvas canvas) {
+    if (xAxis.axisLoc != null) {
+      double x1 = coordSpace!.xAxis.pixelMin;
+      double x2 = coordSpace!.xAxis.pixelMax;
+      double y = coordSpace!.yAxis.userToPixel(xAxis.axisLoc!);
+      canvas.drawLine(Offset(x1, y), Offset(x2, y), xAxis.axisPainter);
+    }
+
+    if (yAxis.axisLoc != null) {
+      double y1 = coordSpace!.yAxis.pixelMin;
+      double y2 = coordSpace!.yAxis.pixelMax;
+      double x = coordSpace!.xAxis.userToPixel(yAxis.axisLoc!);
+      canvas.drawLine(Offset(x, y1), Offset(x, y2), yAxis.axisPainter);
     }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     layoutAxes(size);
+    paintGridLines(canvas);
     paintLabels(canvas);
+    paintAxisLines(canvas);
   }
 
   @override
