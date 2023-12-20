@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian_axes.dart';
-import 'package:libra_sheet/graphing/series.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
 
 class CartesianCoordinateAxis {
   /// These are the user coordiantes that define the axis limits.

@@ -2,7 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian_axes.dart';
-import 'package:libra_sheet/graphing/series.dart';
+import 'package:libra_sheet/graphing/series/line_series.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
 
 import 'cartesian_coordinate_space.dart';
 
