@@ -86,6 +86,13 @@ class CartesianCoordinateSpace {
     return CartesianCoordinateSpace(xAxis: coordXAxis, yAxis: coordYAxis);
   }
 
+  Offset userToPixel(Offset offset) {
+    return Offset(
+      xAxis.userToPixel(offset.dx),
+      yAxis.userToPixel(offset.dy),
+    );
+  }
+
   void autoRange({
     required CartesianAxis xAxis,
     required CartesianAxis yAxis,
@@ -104,13 +111,11 @@ class CartesianCoordinateSpace {
     var autoXMax = double.negativeInfinity;
     var autoYMax = double.negativeInfinity;
     for (final series in data) {
-      for (int i = 0; i < series.data.length; i++) {
-        final ext = series.extentMapper(i, series.data[i]);
-        autoXMin = math.min(autoXMin, ext.xMin);
-        autoXMax = math.max(autoXMax, ext.xMax);
-        autoYMin = math.min(autoYMin, ext.yMin);
-        autoYMax = math.max(autoYMax, ext.yMax);
-      }
+      final ext = series.totalBoundingBox();
+      autoXMin = math.min(autoXMin, ext.xMin);
+      autoXMax = math.max(autoXMax, ext.xMax);
+      autoYMin = math.min(autoYMin, ext.yMin);
+      autoYMax = math.max(autoYMax, ext.yMax);
     }
 
     /// Override auto with user

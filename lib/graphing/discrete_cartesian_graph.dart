@@ -123,6 +123,7 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   }
 
   void paintAxisLines(Canvas canvas) {
+    if (coordSpace == null) return;
     if (xAxis.axisLoc != null) {
       double x1 = coordSpace!.xAxis.pixelMin;
       double x2 = coordSpace!.xAxis.pixelMax;
@@ -141,9 +142,13 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     layoutAxes(size);
+    if (coordSpace == null) return;
     paintGridLines(canvas);
     paintLabels(canvas);
     paintAxisLines(canvas);
+    for (final series in data) {
+      series.paint(canvas, coordSpace!);
+    }
   }
 
   @override
