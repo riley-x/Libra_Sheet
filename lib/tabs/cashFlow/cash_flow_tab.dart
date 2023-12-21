@@ -93,23 +93,7 @@ class _CashFlowCharts extends StatelessWidget {
       return Column(
         children: [
           Text("Net Income", style: textStyle),
-          Expanded(
-            child: DiscreteCartesianGraph(
-              yAxis: CartesianAxis(
-                theme: Theme.of(context),
-                axisLoc: null,
-                valToString: formatOrder,
-              ),
-              xAxis: MonthAxis(
-                theme: Theme.of(context),
-                axisLoc: 0,
-                dates: [for (int i = 1; i <= 12; i++) DateTime.utc(2020, i)],
-                // gridLines: [],
-              ),
-              data: SeriesCollection(testStackColumnSeries),
-            ),
-          ),
-          // Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
+          Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
           Text("Investment Returns", style: textStyle),
           Expanded(child: RedGreenBarChart(state.netReturns.sublist(range.$1, range.$2))),
         ],

@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/time_value.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
+import 'package:libra_sheet/graphing/series/column_series.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' as syf;
 
 final _dateFormat = DateFormat("MMM ''yy"); // single quote is escaped by doubling
 
-/// This is a bar chart that plots a single series. Psotive values are shown in green and negative
+/// This is a bar chart that plots a single series. Positive values are shown in green and negative
 /// values are shown as red bars.
 class RedGreenBarChart extends StatelessWidget {
   final List<TimeIntValue> data;
@@ -14,8 +19,39 @@ class RedGreenBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SfCartesianChart(
-      primaryXAxis: CategoryAxis(
+    return DiscreteCartesianGraph(
+      yAxis: CartesianAxis(
+        theme: Theme.of(context),
+        axisLoc: null,
+        valToString: formatOrder,
+      ),
+      xAxis: MonthAxis(
+        theme: Theme.of(context),
+        axisLoc: 0,
+        dates: data.map((e) => e.time).toList(),
+      ),
+      data: SeriesCollection([
+        ColumnSeries<TimeIntValue>(
+          name: '',
+          data: data,
+          valueMapper: (i, item) => item.value.asDollarDouble(),
+          colorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
+        ),
+      ]),
+    );
+  }
+}
+
+/// This is a bar chart that plots a single series. Psotive values are shown in green and negative
+/// values are shown as red bars.
+class SyncfusionRedGreenBarChart extends StatelessWidget {
+  final List<TimeIntValue> data;
+  const SyncfusionRedGreenBarChart(this.data, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return syf.SfCartesianChart(
+      primaryXAxis: syf.CategoryAxis(
           // These options move the axis the y=0, but it looks bad because the boxes overlap it.
           // placeLabelsNearAxisLine: false,
           // crossesAt: 0,
@@ -23,24 +59,24 @@ class RedGreenBarChart extends StatelessWidget {
           // majorTickLines: const MajorTickLines(size: 0),
           // majorGridLines: const MajorGridLines(width: 0),
           ),
-      trackballBehavior: TrackballBehavior(
+      trackballBehavior: syf.TrackballBehavior(
         enable: true,
-        activationMode: ActivationMode.singleTap,
+        activationMode: syf.ActivationMode.singleTap,
         // tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
         // tooltipSettings: const InteractiveTooltip(
         //   format: 'series.name: \$point.y', // This totally messes up the tooltip for some reason
         // ),
       ),
 
-      series: <ChartSeries>[
-        ColumnSeries<TimeIntValue, String>(
+      series: <syf.ChartSeries>[
+        syf.ColumnSeries<TimeIntValue, String>(
           animationDuration: 300,
           dataSource: data,
           pointColorMapper: (datum, index) => (datum.value >= 0) ? Colors.green : Colors.red,
           xValueMapper: (datum, index) => _dateFormat.format(datum.time),
           yValueMapper: (datum, index) => datum.value.asDollarDouble(),
         ),
-        LineSeries(
+        syf.LineSeries(
           name: "y = 0",
           xAxisName: '2nd xAxis',
           dataSource: data,
@@ -56,17 +92,17 @@ class RedGreenBarChart extends StatelessWidget {
       /// Create a second axis so that the y=0 line starts from the edges
       /// https://www.syncfusion.com/forums/179342/categoryaxis-with-splineseries-and-column-overlap-issue
       axes: [
-        CategoryAxis(
+        syf.CategoryAxis(
           name: '2nd xAxis',
-          labelPlacement: LabelPlacement.onTicks,
+          labelPlacement: syf.LabelPlacement.onTicks,
           isVisible: false,
         ),
       ],
 
       /// Hide the trackball for the y=0 line
       /// https://www.syncfusion.com/forums/154846/how-to-disable-a-trackball-for-a-specific-series
-      onTrackballPositionChanging: (TrackballArgs args) {
-        ChartSeries<dynamic, dynamic>? series = args.chartPointInfo.series;
+      onTrackballPositionChanging: (syf.TrackballArgs args) {
+        syf.ChartSeries<dynamic, dynamic>? series = args.chartPointInfo.series;
         if (series?.name == "y = 0") {
           args.chartPointInfo.header = '';
           args.chartPointInfo.label = '';

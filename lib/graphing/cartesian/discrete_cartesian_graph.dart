@@ -179,14 +179,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   int? hoverLocX;
   DiscreteCartesianGraphPainter? painter;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void _initPainter() {
     painter = DiscreteCartesianGraphPainter(
       theme: Theme.of(context),
       xAxis: widget.xAxis,
@@ -196,17 +189,26 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  // Need to init here and not [initState] because we access Theme.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initPainter();
+  }
+
+  // This is necessary to update the state when the parent rebuilds.
+  // https://stackoverflow.com/questions/54759920/flutter-why-is-child-widgets-initstate-is-not-called-on-every-rebuild-of-pa
+  @override
   void didUpdateWidget(DiscreteCartesianGraph oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.xAxis != widget.xAxis ||
         oldWidget.yAxis != widget.yAxis ||
         oldWidget.data != widget.data) {
-      painter = DiscreteCartesianGraphPainter(
-        theme: Theme.of(context),
-        xAxis: widget.xAxis,
-        yAxis: widget.yAxis,
-        data: widget.data,
-      );
+      _initPainter();
     }
   }
 

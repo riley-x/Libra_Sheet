@@ -95,6 +95,13 @@ class ColumnSeries<T> extends Series<T> {
     if (i < 0 || i >= _renderedPoints.length) return null;
     final point = _renderedPoints[i];
     if (point.value == 0) return null;
+    if (name.isEmpty) {
+      return Text(
+        mainGraph.yAxis.valToString(point.value),
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
