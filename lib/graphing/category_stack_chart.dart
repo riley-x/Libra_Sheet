@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -8,7 +7,6 @@ import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
@@ -38,16 +36,14 @@ class CategoryStackChart extends StatelessWidget {
       xAxis: MonthAxis(
         theme: Theme.of(context),
         axisLoc: 0,
-        dates: data.times.looseSublist(range!.$1, range!.$2),
+        dates: data.times.looseRange(range),
       ),
       data: SeriesCollection([
         for (final categoryHistory in data.categories)
           StackColumnSeries<int>(
             name: categoryHistory.category.name,
             color: categoryHistory.category.color,
-            data: (range != null)
-                ? categoryHistory.values.looseSublist(range!.$1, range!.$2)
-                : categoryHistory.values,
+            data: categoryHistory.values.looseRange(range),
             valueMapper: (i, item) => item.asDollarDouble(),
           ),
       ]),

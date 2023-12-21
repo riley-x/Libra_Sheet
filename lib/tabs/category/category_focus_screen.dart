@@ -7,12 +7,8 @@ import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/category.dart';
-import 'package:libra_sheet/data/time_value.dart';
-import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
-import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
@@ -39,8 +35,7 @@ class CategoryFocusScreen extends StatefulWidget {
 }
 
 class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
-  List<CategoryHistory> data = [];
-  List<DateTime> months = [];
+  CategoryHistory data = CategoryHistory.empty;
   late TransactionService service;
   late TransactionFilters initialFilters;
 
@@ -49,30 +44,14 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
 
     /// Load all category histories
     final appState = context.read<LibraAppState>();
-    months = appState.monthList;
-    final map = await LibraDatabase.db.getCategoryHistory(
+    final rawHistory = await LibraDatabase.db.getCategoryHistory(
       accounts: initialFilters.accounts.map((e) => e.key),
-      callback: (_, vals) => vals.withAlignedTimes(months).fixedForCharts(absValues: true),
     );
     if (!mounted) return; // across async await
 
     /// Output list
-    final newData = <CategoryHistory>[];
-
-    /// Add this cat
-    final history = map[widget.category.key];
-    if (history != null) {
-      newData.add(CategoryHistory(widget.category, history));
-    }
-
-    /// Add subcats
-    if (widget.category.level == 1) {
-      for (final subCat in widget.category.subCats) {
-        final history = map[subCat.key];
-        if (history == null) continue;
-        newData.add(CategoryHistory(subCat, history));
-      }
-    }
+    final newData = CategoryHistory(appState.monthList);
+    newData.addIndividual(widget.category, rawHistory, recurseSubcats: widget.category.level == 1);
 
     setState(() {
       data = newData;
@@ -127,7 +106,6 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
             child: _Body(
               category: widget.category,
               initialFilters: initialFilters,
-              months: months,
               data: data,
             ),
           ),
@@ -143,13 +121,11 @@ class _Body extends StatelessWidget {
     required this.category,
     this.initialFilters,
     required this.data,
-    required this.months,
   });
 
   final Category category;
   final TransactionFilters? initialFilters;
-  final List<CategoryHistory> data;
-  final List<DateTime> months;
+  final CategoryHistory data;
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +158,6 @@ class _Body extends StatelessWidget {
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
                   child: CategoryStackChart(
-                    months: months,
                     data: data,
                     onTap: (category, month) {
                       if (category == this.category) {

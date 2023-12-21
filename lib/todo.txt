@@ -1,5 +1,4 @@
 - Export to CSV
-- Change category bar chart inputs to fixed month list (for empty data)
 - Choose category/account on CSV column?
 - Maybe balance update? Specifically for investments?
 - Categories screen, change this mo. to custom range

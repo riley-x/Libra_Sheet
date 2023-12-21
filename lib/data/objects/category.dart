@@ -129,14 +129,80 @@ class Category {
       this == Category.empty || this == Category.expense || this == Category.income;
 }
 
-class CategoryHistory {
+class CategoryHistoryEntry {
   final Category category;
-  final List<TimeIntValue> values;
+  final List<int> values;
 
-  const CategoryHistory(
-    this.category,
-    this.values,
-  );
+  CategoryHistoryEntry(this.category, this.values);
+}
+
+class CategoryHistory {
+  final bool invertExpenses;
+  final bool cumulateTimeValues;
+  final List<DateTime> times;
+  final List<CategoryHistoryEntry> categories;
+
+  CategoryHistory(
+    this.times, {
+    this.invertExpenses = true,
+    this.cumulateTimeValues = false,
+  }) : categories = [];
+
+  const CategoryHistory.fromList(
+    this.times,
+    this.categories, {
+    this.invertExpenses = true,
+    this.cumulateTimeValues = false,
+  });
+
+  static const empty = CategoryHistory.fromList([], []);
+
+  List<int>? _fixVals(Category category, List<TimeIntValue>? values) {
+    if (values == null) return null;
+    final vals = values.alignValues(times, cumulate: cumulateTimeValues);
+    if (invertExpenses && category.type == ExpenseFilterType.expense) {
+      for (int i = 0; i < vals.length; i++) {
+        vals[i] = -vals[i];
+      }
+    }
+    return vals;
+  }
+
+  void addIndividual(
+    Category category,
+    Map<int, List<TimeIntValue>> data, {
+    bool recurseSubcats = true,
+  }) {
+    /// This entry
+    final vals = _fixVals(category, data[category.key]);
+    if (vals != null) {
+      categories.add(CategoryHistoryEntry(category, vals));
+    }
+
+    /// Recurse subcats
+    if (recurseSubcats) {
+      for (final subCat in category.subCats) {
+        addIndividual(subCat, data);
+      }
+    }
+  }
+
+  void addCumulative(Category category, Map<int, List<TimeIntValue>> data) {
+    var vals = _fixVals(category, data[category.key]);
+
+    for (final subCat in category.subCats) {
+      final subCatVals = _fixVals(subCat, data[subCat.key]);
+      if (vals == null) {
+        vals = subCatVals;
+      } else if (subCatVals != null) {
+        vals.addElementwise(subCatVals);
+      }
+    }
+
+    if (vals != null) {
+      categories.add(CategoryHistoryEntry(category, vals));
+    }
+  }
 }
 
 /// A tristate map for checkboxes. Categories can have three states:

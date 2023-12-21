@@ -81,7 +81,6 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Income", style: textStyle),
           Expanded(
             child: CategoryStackChart(
-              months: monthList,
               data: state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range: range,
               onTap: (category, month) => onTap(context, category, month),
@@ -91,7 +90,6 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Expenses", style: textStyle),
           Expanded(
             child: CategoryStackChart(
-              months: monthList,
               data: state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range: range,
               onTap: (category, month) => onTap(context, category, month),

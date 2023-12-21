@@ -190,14 +190,12 @@ extension CategoryHistoryExtension on DatabaseExecutor {
   }
 
   /// Returns a map: category -> list of the value history in that month. This function does not pad
-  /// the lists to equal length or accumulate them. You can specify [callback] to handle some common
-  /// processing options easily though.
+  /// the lists to equal length or accumulate them.
   ///
   /// Returns the categories in [categories], or all categories if the list is empty.
   Future<Map<int, List<TimeIntValue>>> getCategoryHistory({
     Iterable<int> categories = const [],
     Iterable<int>? accounts,
-    List<TimeIntValue> Function(int category, List<TimeIntValue> history)? callback,
   }) async {
     if (libraDatabase == null) return {};
 
@@ -224,9 +222,6 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     int currentCategory = rows[0][_category] as int;
     var currentValues = <TimeIntValue>[];
     void addEntry() {
-      if (callback != null) {
-        currentValues = callback(currentCategory, currentValues);
-      }
       out[currentCategory] = currentValues;
     }
 

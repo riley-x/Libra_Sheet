@@ -7,7 +7,6 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/enums.dart';
-import 'package:libra_sheet/data/time_value.dart';
 
 enum CategoryTabTimeFrame { current, oneYear, all }
 
@@ -89,56 +88,6 @@ class CategoryTabState extends ChangeNotifier {
     }
     for (final cat in appState.categories.expense.subCats) {
       _aggregateSubCatVals(cat);
-    }
-    notifyListeners();
-
-    /// History
-    if (categoriesFocused.isNotEmpty) {
-      _loadCategoryDetails(categoriesFocused.last);
-    }
-  }
-
-  //--------------------------------------------------------------------------
-  // Navigation
-  //--------------------------------------------------------------------------
-
-  /// The list contains the nesting of category focuses, since you can focus a subcategory from a parent.
-  List<Category> categoriesFocused = [];
-  List<CategoryHistory> categoryFocusedHistory = [];
-
-  void clearFocus() {
-    if (categoriesFocused.isEmpty) return;
-    categoriesFocused.removeLast();
-    categoryFocusedHistory = [];
-    if (categoriesFocused.isNotEmpty) {
-      _loadCategoryDetails(categoriesFocused.last);
-    }
-    notifyListeners();
-  }
-
-  void focusCategory(Category category) {
-    categoriesFocused.add(category);
-    _loadCategoryDetails(category);
-    notifyListeners();
-  }
-
-  void _addCategoryHistory(Category category, Map<int, List<TimeIntValue>> map) {
-    final history = map[category.key];
-    if (history == null) return;
-    categoryFocusedHistory.add(CategoryHistory(category, history));
-  }
-
-  void _loadCategoryDetails(Category category) async {
-    final map = await LibraDatabase.db.getCategoryHistory(
-      callback: (_, vals) =>
-          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
-    );
-    categoryFocusedHistory.clear();
-    _addCategoryHistory(category, map);
-    if (category.level == 1) {
-      for (final subCat in category.subCats) {
-        _addCategoryHistory(subCat, map);
-      }
     }
     notifyListeners();
   }

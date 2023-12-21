@@ -31,69 +31,46 @@ class CashFlowState extends fnd.ChangeNotifier {
   bool showSubCategories = false;
 
   /// These aggregate subcategory data into parent categories
-  List<CategoryHistory> incomeData = [];
-  List<CategoryHistory> expenseData = [];
+  CategoryHistory incomeData = CategoryHistory.empty;
+  CategoryHistory expenseData = CategoryHistory.empty;
 
   /// These separate subcategory data
-  List<CategoryHistory> incomeDataSubCats = [];
-  List<CategoryHistory> expenseDataSubCats = [];
+  CategoryHistory incomeDataSubCats = CategoryHistory.empty;
+  CategoryHistory expenseDataSubCats = CategoryHistory.empty;
 
   List<TimeIntValue> netIncome = [];
   List<TimeIntValue> netReturns = [];
 
-  void _loadList(
-    List<CategoryHistory> aggregateList,
-    List<CategoryHistory> subcatList,
-    Map<int, List<TimeIntValue>> categoryHistory,
-    Category parent,
-  ) {
-    final parentVals = categoryHistory[parent.key];
-    if (parentVals != null) {
-      final vals = parentVals.fixedForCharts(absValues: true);
-      aggregateList.add(CategoryHistory(parent, vals));
-      subcatList.add(CategoryHistory(parent, vals));
-    }
-
-    for (final cat in parent.subCats) {
-      var vals = categoryHistory[cat.key];
-      if (vals != null) {
-        subcatList.add(CategoryHistory(cat, vals.fixedForCharts(absValues: true)));
-      }
-
-      /// Accumulate values from subcategories too. Only need to recurse once since max level = 2.
-      for (final subCat in cat.subCats) {
-        var subVals = categoryHistory[subCat.key];
-        if (subVals == null) continue;
-        subcatList.add(CategoryHistory(subCat, subVals.fixedForCharts(absValues: true)));
-        vals = (vals == null) ? subVals : addParallel(vals, subVals);
-      }
-
-      if (vals != null) {
-        aggregateList.add(CategoryHistory(cat, vals.fixedForCharts(absValues: true)));
-      }
-    }
-  }
-
   Future<void> load() async {
-    final categoryHistory = await LibraDatabase.db.getCategoryHistory(
+    final rawHistory = await LibraDatabase.db.getCategoryHistory(
       accounts: accounts.map((e) => e.key),
-      callback: (_, vals) => vals.withAlignedTimes(appState.monthList),
     );
     final _netIncome = await LibraDatabase.db.getMonthlyNetIncome(
       accounts: accounts.map((e) => e.key),
     );
 
-    incomeData.clear();
-    incomeDataSubCats.clear();
-    _loadList(incomeData, incomeDataSubCats, categoryHistory, appState.categories.income);
+    /// Accumulate to level = 1 categories
+    incomeData = CategoryHistory(appState.monthList);
+    incomeData.addIndividual(appState.categories.income, rawHistory, recurseSubcats: false);
+    for (final cat in appState.categories.income.subCats) {
+      incomeData.addCumulative(cat, rawHistory);
+    }
 
-    expenseData.clear();
-    expenseDataSubCats.clear();
-    _loadList(expenseData, expenseDataSubCats, categoryHistory, appState.categories.expense);
+    expenseData = CategoryHistory(appState.monthList);
+    expenseData.addIndividual(appState.categories.expense, rawHistory, recurseSubcats: false);
+    for (final cat in appState.categories.expense.subCats) {
+      expenseData.addCumulative(cat, rawHistory);
+    }
+
+    /// Separated subcat data
+    incomeDataSubCats = CategoryHistory(appState.monthList);
+    expenseDataSubCats = CategoryHistory(appState.monthList);
+    incomeDataSubCats.addIndividual(appState.categories.income, rawHistory);
+    expenseDataSubCats.addIndividual(appState.categories.expense, rawHistory);
 
     netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
-    netReturns = categoryHistory[Category.investment.key]?.fixedForCharts() ??
+    netReturns = rawHistory[Category.investment.key]?.withAlignedTimes(appState.monthList) ??
         appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList().fixedForCharts();
 
     notifyListeners();
