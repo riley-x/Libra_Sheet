@@ -88,7 +88,7 @@ class TransactionCard extends StatelessWidget {
                             LibraChip(
                               tag.name,
                               color: tag.color,
-                              style: Theme.of(context).textTheme.labelSmall,
+                              style: Theme.of(context).textTheme.labelMedium,
                             ),
                         ],
                       ),

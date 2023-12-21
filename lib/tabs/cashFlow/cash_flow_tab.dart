@@ -2,14 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
-import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
-import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
-import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
-import 'package:libra_sheet/graphing/series/series.dart';
-import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
 import 'package:provider/provider.dart';
