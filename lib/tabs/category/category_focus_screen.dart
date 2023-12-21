@@ -188,6 +188,7 @@ class _Body extends StatelessWidget {
                             startTime: month,
                             endTime: month.monthEnd(),
                             categories: CategoryTristateMap({category}),
+                            accounts: initialFilters?.accounts,
                           ),
                         );
                       }

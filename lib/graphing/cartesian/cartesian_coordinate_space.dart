@@ -80,7 +80,7 @@ class CartesianCoordinateSpace {
     final coordYAxis = CartesianCoordinateAxis(
       invert: true,
       userMin: yAxis.min ?? 0,
-      userMax: yAxis.max ?? 1,
+      userMax: yAxis.max ?? 100,
       canvasSize: canvasSize.height,
       padStart: yAxis.padStart,
       padEnd: yAxis.padEnd,

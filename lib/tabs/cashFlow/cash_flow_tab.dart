@@ -58,6 +58,7 @@ class _CashFlowCharts extends StatelessWidget {
         startTime: month,
         endTime: month.monthEnd(),
         categories: CategoryTristateMap({category}),
+        accounts: context.read<CashFlowState>().accounts,
       ),
     );
   }

@@ -1,7 +1,7 @@
 - Export to CSV
+- Change category bar chart inputs to fixed month list (for empty data)
 - Choose category/account on CSV column?
 - Maybe balance update? Specifically for investments?
-- Add click on bar charts
 - Category focus screen, show only category history respecting filters
 - Categories screen, change this mo. to custom range
 - Hover on heatmap

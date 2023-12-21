@@ -10,7 +10,15 @@ import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-final _defaultDates = [for (int i = 1; i <= 12; i++) DateTime.utc(2023, i)];
+// TODO change input format so we don't need this
+List<DateTime> _getDefaultDates() {
+  final now = DateTime.now();
+  return [
+    for (int i = 0; i < 12; i++) DateTime(now.year, now.month - i, 1),
+  ];
+}
+
+final _defaultDates = _getDefaultDates();
 
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
