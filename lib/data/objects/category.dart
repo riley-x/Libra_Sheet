@@ -136,6 +136,8 @@ class CategoryHistoryEntry {
   CategoryHistoryEntry(this.category, this.values);
 }
 
+/// Utility class for aggregating category histories for bar charts. Only add entries using
+/// [addIndividual] or [addCumulative] to ensure that the value lists are aligned with [times].
 class CategoryHistory {
   final bool invertExpenses;
   final bool cumulateTimeValues;
@@ -168,6 +170,10 @@ class CategoryHistory {
     return vals;
   }
 
+  /// Assuming [data] is raw monthly data from the database, pads the values to align with [times],
+  /// and adds it without cumulating values from sub categories.
+  ///
+  /// If [recurseSubcats], will recurse to add all subcats of [category] too (still no cumulate).
   void addIndividual(
     Category category,
     Map<int, List<TimeIntValue>> data, {
@@ -187,9 +193,12 @@ class CategoryHistory {
     }
   }
 
+  /// Adds only [category] to [categories], but iterates through the subcats to cumulate their values
+  /// togther.
   void addCumulative(Category category, Map<int, List<TimeIntValue>> data) {
     var vals = _fixVals(category, data[category.key]);
 
+    /// We only recurse once since max level = 2.
     for (final subCat in category.subCats) {
       final subCatVals = _fixVals(subCat, data[subCat.key]);
       if (vals == null) {
