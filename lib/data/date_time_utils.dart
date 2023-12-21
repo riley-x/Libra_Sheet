@@ -11,6 +11,10 @@ extension DateTimeUtils2 on DateTime {
   String MMddyy() {
     return _dateFormat.format(this);
   }
+
+  DateTime monthEnd() {
+    return DateTime.utc(year, month + 1, 0);
+  }
 }
 
 DateTime startOfMonth(DateTime x) {

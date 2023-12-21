@@ -23,10 +23,10 @@ class CategoryStackChart extends StatelessWidget {
   final (int, int)? range;
   final Function(Category, DateTime)? onTap;
 
-  const CategoryStackChart(
-    this.data,
-    this.range, {
+  const CategoryStackChart({
     super.key,
+    required this.data,
+    this.range,
     this.onTap,
   });
 

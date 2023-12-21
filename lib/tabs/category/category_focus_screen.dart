@@ -5,6 +5,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
@@ -155,7 +156,24 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: CategoryStackChart(data, null),
+                  child: CategoryStackChart(
+                    data: data,
+                    onTap: (category, month) {
+                      if (category == this.category) {
+                        print('hi!');
+                      } else {
+                        toCategoryScreen(
+                          context,
+                          category,
+                          initialFilters: TransactionFilters(
+                            startTime: month,
+                            endTime: month.monthEnd(),
+                            categories: CategoryTristateMap({category}),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ),
               ),
               // if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[

@@ -1,11 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
 import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 class CashFlowTab extends StatelessWidget {
@@ -46,6 +50,18 @@ class _CashFlowTab extends StatelessWidget {
 class _CashFlowCharts extends StatelessWidget {
   const _CashFlowCharts({super.key});
 
+  void onTap(BuildContext context, Category category, DateTime month) {
+    toCategoryScreen(
+      context,
+      category,
+      initialFilters: TransactionFilters(
+        startTime: month,
+        endTime: month.monthEnd(),
+        categories: CategoryTristateMap({category}),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<CashFlowState>();
@@ -63,16 +79,17 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Income", style: textStyle),
           Expanded(
             child: CategoryStackChart(
-              state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
-              range,
-              onTap: (p0, p1) => print("$p0 $p1"),
+              data: state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
+              range: range,
+              onTap: (category, month) => onTap(context, category, month),
             ),
           ),
           Text("Expenses", style: textStyle),
           Expanded(
             child: CategoryStackChart(
-              state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
-              range,
+              data: state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
+              range: range,
+              onTap: (category, month) => onTap(context, category, month),
             ),
           ),
         ],
