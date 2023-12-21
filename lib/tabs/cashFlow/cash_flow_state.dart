@@ -18,6 +18,12 @@ class CashFlowState extends fnd.ChangeNotifier {
     load();
   }
 
+  @override
+  void dispose() {
+    appState.transactions.removeListener(load);
+    super.dispose();
+  }
+
   /// Filters
   CashFlowType type = CashFlowType.categories;
   CashFlowTimeFrame timeFrame = CashFlowTimeFrame.all;

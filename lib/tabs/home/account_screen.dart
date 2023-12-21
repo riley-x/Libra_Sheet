@@ -30,12 +30,15 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   List<TimeIntValue> data = [];
   TransactionFilters? initialFilters;
+  TransactionService? service;
 
   Future<void> loadData() async {
     if (!mounted) return;
     final appState = context.read<LibraAppState>();
     var newData = await LibraDatabase.db.getMonthlyNet(accountId: widget.account.key);
     newData = newData.withAlignedTimes(appState.monthList, cumulate: true).fixedForCharts();
+
+    if (!mounted) return;
     setState(() {
       data = newData;
     });
@@ -45,8 +48,15 @@ class _AccountScreenState extends State<AccountScreen> {
   void initState() {
     super.initState();
     initialFilters = TransactionFilters(accounts: {widget.account});
-    context.read<TransactionService>().addListener(loadData);
+    service = context.read<TransactionService>();
+    service!.addListener(loadData);
     loadData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    service?.removeListener(loadData);
   }
 
   @override

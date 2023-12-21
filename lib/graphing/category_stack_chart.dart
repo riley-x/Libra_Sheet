@@ -17,7 +17,7 @@ final _defaultDates = [for (int i = 1; i <= 12; i++) DateTime.utc(2023, i)];
 ///
 /// [range] can be optionally specified to make filtering on [data] simple. These are the [start, end)
 /// indices in [data] to sublist. In this case each entry in [data.values] must have the same length.
-/// Settings it to null will use the full range.
+/// Setting it to null will use the full range.
 class CategoryStackChart extends StatelessWidget {
   final List<CategoryHistory> data;
   final (int, int)? range;

@@ -18,6 +18,12 @@ class CategoryTabState extends ChangeNotifier {
     loadValues();
   }
 
+  @override
+  void dispose() {
+    appState.transactions.removeListener(loadValues);
+    super.dispose();
+  }
+
   //--------------------------------------------------------------------------
   // Filters / Selections
   //--------------------------------------------------------------------------

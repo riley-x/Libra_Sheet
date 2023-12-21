@@ -56,11 +56,14 @@ class TransactionFilterState extends ChangeNotifier {
   /// This is necessary because the [TransactionFilterState] is often disposed when navigating between
   /// different screent that use a [TransactionFilterGrid], so [notifyListeners] might be called
   /// after being disposed.
+  ///
+  /// TODO this might just be because forgot to [removeListener]? Still needed?
   bool _disposed = false;
 
   @override
   void dispose() {
     _disposed = true;
+    service.removeListener(loadTransactions);
     super.dispose();
   }
 
@@ -88,6 +91,7 @@ class TransactionFilterState extends ChangeNotifier {
   List<Transaction> transactions = [];
 
   void loadTransactions() async {
+    print("is loading! ${service}");
     notifyListeners(); // for the UI form state
     if (!doLoads) return;
     transactions = await service.load(filters);

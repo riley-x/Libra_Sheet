@@ -9,6 +9,12 @@ class AccountState extends ChangeNotifier {
     txnService.addListener(_updateAfterTransactions);
   }
 
+  @override
+  void dispose() {
+    txnService.removeListener(_updateAfterTransactions);
+    super.dispose();
+  }
+
   final List<Account> list = [];
 
   /// Initial load of accounts from the database. DO NOT replace objects!
