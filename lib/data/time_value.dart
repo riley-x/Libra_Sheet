@@ -102,9 +102,11 @@ extension ListUtils<T> on List<T> {
     return looseSublist(range.$1, range.$2);
   }
 
-  List<T> looseSublist(int start, [int? end]) {
+  List<T> looseSublist(int start, int end) {
     if (start < 0) start = 0;
-    if (end != null && end > length) end = null;
+    if (start > length) start = length;
+    if (end < start) end = start;
+    if (end > length) end = length;
     return sublist(start, end);
   }
 }

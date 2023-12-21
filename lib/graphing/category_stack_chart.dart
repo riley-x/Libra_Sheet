@@ -37,6 +37,8 @@ class CategoryStackChart extends StatelessWidget {
         theme: Theme.of(context),
         axisLoc: 0,
         dates: data.times.looseRange(range),
+        // Using [looseRange] here is pretty important because if [range] is calculated in a Widget
+        // build and [data] is calculated in a notifier callback or async, they can be out of sync.
       ),
       data: SeriesCollection([
         for (final categoryHistory in data.categories)
