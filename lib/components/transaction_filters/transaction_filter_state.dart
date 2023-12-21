@@ -31,22 +31,15 @@ class TransactionFilters {
         categories = categories ?? CategoryTristateMap();
 }
 
-/// Useful as a callback to get the state
-class TransactionFiltersStateReference {
-  TransactionFilterState? it;
-}
-
 /// This class stores the common state for a TransactionFilterColumn and its corresponding transactions.
 /// It handles the loading of the transactions and the UI state of the filter fields.
 class TransactionFilterState extends ChangeNotifier {
   TransactionFilterState(
     this.service, {
-    this.reference,
     TransactionFilters? initialFilters,
     this.doLoads = true,
   }) {
     if (initialFilters != null) filters = initialFilters;
-    reference?.it = this;
     service.addListener(loadTransactions);
     loadTransactions();
   }
@@ -54,7 +47,6 @@ class TransactionFilterState extends ChangeNotifier {
   //----------------------------------------------------------------------
   // Config
   //----------------------------------------------------------------------
-  final TransactionFiltersStateReference? reference;
   final TransactionService service;
   final bool doLoads;
 
@@ -71,7 +63,6 @@ class TransactionFilterState extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    reference?.it = null;
     service.removeListener(loadTransactions);
     super.dispose();
   }

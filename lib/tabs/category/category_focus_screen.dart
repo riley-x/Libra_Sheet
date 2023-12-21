@@ -40,9 +40,8 @@ class CategoryFocusScreen extends StatefulWidget {
 
 class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   List<CategoryHistory> data = [];
-  TransactionService? service;
-  TransactionFilters? initialFilters;
-  final transactionFilterState = TransactionFiltersStateReference();
+  late TransactionService service;
+  late TransactionFilters initialFilters;
 
   Future<void> loadData() async {
     if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
@@ -50,7 +49,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     /// Load all category histories
     final appState = context.read<LibraAppState>();
     final map = await LibraDatabase.db.getCategoryHistory(
-      accounts: initialFilters?.accounts.map((e) => e.key),
+      accounts: initialFilters.accounts.map((e) => e.key),
       callback: (_, vals) =>
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
     );
@@ -83,11 +82,11 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   void initState() {
     super.initState();
     service = context.read<TransactionService>();
-    service!.addListener(loadData);
+    service.addListener(loadData);
 
     initialFilters = widget.initialFilters ?? TransactionFilters();
-    if (initialFilters!.categories.isEmpty) {
-      initialFilters!.categories = CategoryTristateMap({widget.category});
+    if (initialFilters.categories.isEmpty) {
+      initialFilters.categories = CategoryTristateMap({widget.category});
     }
 
     loadData();
@@ -96,7 +95,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   @override
   void dispose() {
     super.dispose();
-    service?.removeListener(loadData);
+    service.removeListener(loadData);
   }
 
   @override
@@ -106,32 +105,32 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     if (widget.category == Category.expense) title += " Expense";
 
     String? rightText;
-    if (initialFilters != null) {
-      if (initialFilters!.accounts.length == 1) {
-        rightText = "Account: ${initialFilters!.accounts.first.name}";
-      } else if (initialFilters!.accounts.length > 1) {
-        rightText = "Multiple accounts";
-      }
+    if (initialFilters.accounts.length == 1) {
+      rightText = "Account: ${initialFilters.accounts.first.name}";
+    } else if (initialFilters.accounts.length > 1) {
+      rightText = "Multiple accounts";
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 5),
-        CommonBackBar(
-          leftText: title,
-          rightText: rightText,
-          rightStyle: Theme.of(context).textTheme.titleMedium,
-        ),
-        Expanded(
-          child: _Body(
-            category: widget.category,
-            initialFilters: initialFilters,
-            data: data,
-            transactionFilterState: transactionFilterState,
+    return ChangeNotifierProvider(
+      create: (context) => TransactionFilterState(service, initialFilters: initialFilters),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 5),
+          CommonBackBar(
+            leftText: title,
+            rightText: rightText,
+            rightStyle: Theme.of(context).textTheme.titleMedium,
           ),
-        ),
-      ],
+          Expanded(
+            child: _Body(
+              category: widget.category,
+              initialFilters: initialFilters,
+              data: data,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -142,13 +141,11 @@ class _Body extends StatelessWidget {
     required this.category,
     this.initialFilters,
     required this.data,
-    this.transactionFilterState,
   });
 
   final Category category;
   final TransactionFilters? initialFilters;
   final List<CategoryHistory> data;
-  final TransactionFiltersStateReference? transactionFilterState;
 
   @override
   Widget build(BuildContext context) {
@@ -159,11 +156,11 @@ class _Body extends StatelessWidget {
             padding: const EdgeInsets.only(left: 10), // this offsets the title
             child: TransactionFilterGrid(
               padding: const EdgeInsets.only(right: 10),
+              createProvider: false,
               initialFilters: initialFilters,
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
-              stateReference: transactionFilterState,
             ),
           ),
         ),
@@ -184,8 +181,9 @@ class _Body extends StatelessWidget {
                     data: data,
                     onTap: (category, month) {
                       if (category == this.category) {
-                        transactionFilterState?.it?.setStartTime(month, false);
-                        transactionFilterState?.it?.setEndTime(month.monthEnd());
+                        final filterState = context.read<TransactionFilterState>();
+                        filterState.setStartTime(month, false);
+                        filterState.setEndTime(month.monthEnd());
                       } else {
                         toCategoryScreen(
                           context,

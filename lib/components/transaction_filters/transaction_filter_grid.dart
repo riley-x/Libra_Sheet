@@ -19,7 +19,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.onSelect,
     this.padding,
     this.fab,
-    this.stateReference,
+    this.createProvider = true,
   });
 
   final Widget? title;
@@ -29,25 +29,26 @@ class TransactionFilterGrid extends StatelessWidget {
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
   final Widget? fab;
-  final TransactionFiltersStateReference? stateReference;
+  final bool createProvider;
 
   @override
   Widget build(BuildContext context) {
+    final grid = _TransactionFilterGrid(
+      padding: padding,
+      title: title,
+      maxRowsForName: maxRowsForName,
+      fixedColumns: fixedColumns,
+      onSelect: onSelect,
+      fab: fab,
+    );
+    if (!createProvider) return grid;
     return ChangeNotifierProvider(
       key: ObjectKey(initialFilters),
       create: (context) => TransactionFilterState(
         context.read(),
         initialFilters: initialFilters,
-        reference: stateReference,
       ),
-      child: _TransactionFilterGrid(
-        padding: padding,
-        title: title,
-        maxRowsForName: maxRowsForName,
-        fixedColumns: fixedColumns,
-        onSelect: onSelect,
-        fab: fab,
-      ),
+      child: grid,
     );
   }
 }
