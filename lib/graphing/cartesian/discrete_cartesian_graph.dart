@@ -258,6 +258,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   @override
   Widget build(BuildContext context) {
     // print(MediaQuery.of(context).devicePixelRatio);
+    if (!widget.data.hasData()) return const SizedBox();
     return MouseRegion(
       onHover: onHover,
       onExit: onExit,

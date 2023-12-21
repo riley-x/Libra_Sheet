@@ -17,6 +17,13 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_st
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
+/// Full-screen Widget that shows the details for a single category. On the left column is a list
+/// of transactions, and on the right column is a history bar chart.
+///
+/// [initialFilters] sets what data is being loaded. If [initialFilters.categories] is null, it will
+/// be autofilled with the current category.
+///   - For the transaction list, the filters are used directly.
+///   - For the bar chart, The accounts are used and other fields are ignored.
 class CategoryFocusScreen extends StatefulWidget {
   const CategoryFocusScreen({
     super.key,
@@ -42,6 +49,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     /// Load all category histories
     final appState = context.read<LibraAppState>();
     final map = await LibraDatabase.db.getCategoryHistory(
+      accounts: initialFilters?.accounts.map((e) => e.key),
       callback: (_, vals) =>
           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
     );
@@ -76,10 +84,10 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     service = context.read<TransactionService>();
     service!.addListener(loadData);
 
-    initialFilters = widget.initialFilters ??
-        TransactionFilters(
-          categories: CategoryTristateMap({widget.category}),
-        );
+    initialFilters = widget.initialFilters ?? TransactionFilters();
+    if (initialFilters!.categories.isEmpty) {
+      initialFilters!.categories = CategoryTristateMap({widget.category});
+    }
 
     loadData();
   }
@@ -95,13 +103,24 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     var title = widget.category.name;
     if (widget.category == Category.income) title += " Income"; // "Uncategorized Income"
     if (widget.category == Category.expense) title += " Expense";
+
+    String? rightText;
+    if (initialFilters != null) {
+      if (initialFilters!.accounts.length == 1) {
+        rightText = "Account: ${initialFilters!.accounts.first.name}";
+      } else if (initialFilters!.accounts.length > 1) {
+        rightText = "Multiple accounts";
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),
         CommonBackBar(
           leftText: title,
-          // rightText: state.aggregateValues[category.key]?.abs().dollarString() ?? '',
+          rightText: rightText,
+          rightStyle: Theme.of(context).textTheme.titleMedium,
         ),
         Expanded(
           child: _Body(
@@ -160,7 +179,7 @@ class _Body extends StatelessWidget {
                     data: data,
                     onTap: (category, month) {
                       if (category == this.category) {
-                        print('hi!');
+                        // TODO load transactions but don't create new screen
                       } else {
                         toCategoryScreen(
                           context,
@@ -176,6 +195,10 @@ class _Body extends StatelessWidget {
                   ),
                 ),
               ),
+              // TODO which values to show? Should match transaction filters? But the category history
+              // is all...and it's unintuitive what is being displayed. For example, if focusing on
+              // one month, don't want to display just one month history but do want to in heatmap.
+
               // if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
               //   const SizedBox(height: 5),
               //   Container(

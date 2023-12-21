@@ -52,8 +52,8 @@ List<TimeIntValue> _makeList(List<Map<String, dynamic>> maps) {
 }
 
 /// Adds a check for account in [accounts] to [where] and [whereArgs], returning the new where clause.
-String _addAccountsFilter(Iterable<int> accounts, String where, List whereArgs) {
-  if (accounts.isEmpty) return where;
+String _addAccountsFilter(Iterable<int>? accounts, String where, List whereArgs) {
+  if (accounts == null || accounts.isEmpty) return where;
   if (where.isNotEmpty) {
     where += " AND ";
   }
@@ -196,7 +196,7 @@ extension CategoryHistoryExtension on DatabaseExecutor {
   /// Returns the categories in [categories], or all categories if the list is empty.
   Future<Map<int, List<TimeIntValue>>> getCategoryHistory({
     Iterable<int> categories = const [],
-    Iterable<int> accounts = const [],
+    Iterable<int>? accounts,
     List<TimeIntValue> Function(int category, List<TimeIntValue> history)? callback,
   }) async {
     if (libraDatabase == null) return {};

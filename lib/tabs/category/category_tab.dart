@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
@@ -51,7 +53,14 @@ class _HeatMap extends StatelessWidget {
       categories: categories,
       individualValues: state.individualValues,
       aggregateValues: state.aggregateValues,
-      onSelect: (it) => toCategoryScreen(context, it),
+      onSelect: (it) => toCategoryScreen(
+        context,
+        it,
+        initialFilters: TransactionFilters(
+          categories: CategoryTristateMap([it]),
+          accounts: state.accounts,
+        ),
+      ),
       showSubCategories: state.showSubCategories,
     );
   }

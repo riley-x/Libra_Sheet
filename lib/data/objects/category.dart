@@ -194,6 +194,8 @@ class CategoryTristateMap {
     }
   }
 
+  bool get isEmpty => _map.isEmpty;
+
   bool isActive(Category cat) {
     return _map.containsKey(cat.key);
   }

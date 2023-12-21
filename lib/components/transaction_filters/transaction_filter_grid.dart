@@ -75,7 +75,7 @@ class _TransactionFilterGrid extends StatelessWidget {
             (title != null)
                 ? title!
                 : Text(
-                    "Recent Transactions",
+                    "Transactions",
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
             const Spacer(),
