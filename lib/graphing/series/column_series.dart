@@ -85,8 +85,8 @@ class ColumnSeries<T> extends Series<T> {
   }
 
   @override
-  (double?, String?) hoverLabel(int i) {
-    return (valueMapper(i), null);
+  double? hoverValue(int i) {
+    return valueMapper(i);
   }
 }
 

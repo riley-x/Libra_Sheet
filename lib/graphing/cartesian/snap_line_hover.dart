@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
 
 class SnapLineHover extends SingleChildRenderObjectWidget {
   final DiscreteCartesianGraphPainter mainGraph;
@@ -76,6 +77,22 @@ class PooledTooltip extends StatelessWidget {
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
 
+  Widget? _getSeriesLabel(BuildContext context, Series series) {
+    if (hoverLoc == null) return null;
+    if (hoverLoc! >= series.data.length) return null;
+
+    final widget = series.hoverBuilder(hoverLoc!);
+    if (widget != null) return widget;
+
+    final val = series.hoverValue(hoverLoc!);
+    if (val == null) return null;
+
+    return Text(
+      mainGraph.yAxis.valToString(val),
+      style: Theme.of(context).textTheme.bodyMedium,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (hoverLoc == null) return const SizedBox();
@@ -91,7 +108,7 @@ class PooledTooltip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              mainGraph.xAxis.valToString(hoverLoc!.toDouble()) ?? '',
+              mainGraph.xAxis.valToString(hoverLoc!.toDouble()),
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 2),
@@ -99,7 +116,7 @@ class PooledTooltip extends StatelessWidget {
             for (final series in mainGraph.data.data)
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('whatwhat'),
+                child: _getSeriesLabel(context, series),
               ),
           ],
         ),
