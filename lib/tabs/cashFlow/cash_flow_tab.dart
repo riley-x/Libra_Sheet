@@ -85,6 +85,7 @@ class _CashFlowCharts extends StatelessWidget {
               onTap: (category, month) => onTap(context, category, month),
             ),
           ),
+          const SizedBox(height: 10),
           Text("Expenses", style: textStyle),
           Expanded(
             child: CategoryStackChart(
@@ -100,6 +101,7 @@ class _CashFlowCharts extends StatelessWidget {
         children: [
           Text("Net Income", style: textStyle),
           Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
+          const SizedBox(height: 10),
           Text("Investment Returns", style: textStyle),
           Expanded(child: RedGreenBarChart(state.netReturns.sublist(range.$1, range.$2))),
         ],

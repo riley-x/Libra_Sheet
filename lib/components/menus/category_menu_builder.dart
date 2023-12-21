@@ -12,9 +12,9 @@ Widget categoryMenuBuilder(
   bool selected = false,
 }) {
   var style = Theme.of(context).textTheme.labelLarge;
-  var text = cat?.name ?? 'None';
+  var text = cat?.name;
   var color = cat?.color;
-  if (cat == null || (superAsNone && cat.level == 0)) {
+  if (superAsNone && cat?.level == 0) {
     text = 'None';
     style = style?.copyWith(fontStyle: FontStyle.italic);
     color = null;
@@ -31,7 +31,7 @@ Widget categoryMenuBuilder(
         /// This is necessary to make sure the text clips properly
         Flexible(
           child: Text(
-            text,
+            text ?? '',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: style,

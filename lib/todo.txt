@@ -2,8 +2,6 @@
 - Change category bar chart inputs to fixed month list (for empty data)
 - Choose category/account on CSV column?
 - Maybe balance update? Specifically for investments?
-- Category focus screen, show only category history respecting filters
 - Categories screen, change this mo. to custom range
 - Hover on heatmap
-- Double sided stack column chart
 - Replace all database calls with extension (see tags.dart).

@@ -14,7 +14,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 List<DateTime> _getDefaultDates() {
   final now = DateTime.now();
   return [
-    for (int i = 0; i < 12; i++) DateTime(now.year, now.month - i, 1),
+    for (int i = 11; i >= 0; i++) DateTime(now.year, now.month - i, 1),
   ];
 }
 

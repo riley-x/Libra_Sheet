@@ -182,6 +182,7 @@ class _Body extends StatelessWidget {
                     onTap: (category, month) {
                       if (category == this.category) {
                         final filterState = context.read<TransactionFilterState>();
+                        filterState.filters.categories = CategoryTristateMap({category}, false);
                         filterState.setStartTime(month, false);
                         filterState.setEndTime(month.monthEnd());
                       } else {
