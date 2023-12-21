@@ -35,6 +35,7 @@ class SnapLineHover extends SingleChildRenderObjectWidget {
 class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   DiscreteCartesianGraphPainter? painter;
   int? hoverLoc;
+  static const _xOffset = 10.0;
 
   RenderSnapLineHover(this.painter, this.hoverLoc);
 
@@ -52,8 +53,6 @@ class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<Rend
     if (painter!.coordSpace == null) return;
     if (hoverLoc == null) return;
 
-    print("$size ${painter!.currentSize} ${child!.size}");
-
     final userLoc = hoverLoc!.toDouble();
     final pixelLoc = painter!.coordSpace!.xAxis.userToPixel(userLoc);
     context.canvas.drawLine(
@@ -64,9 +63,9 @@ class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<Rend
         ..isAntiAlias = false,
     );
 
-    var left = pixelLoc + 10.0;
+    var left = pixelLoc + _xOffset;
     if (child!.size.width + left > size.width) {
-      left = pixelLoc - 10.0 - child!.size.width;
+      left = pixelLoc - _xOffset - child!.size.width;
     }
     context.paintChild(child!, offset + Offset(left, 30));
   }
@@ -81,14 +80,14 @@ class PooledTooltip extends StatelessWidget {
     if (hoverLoc == null) return null;
     if (hoverLoc! >= series.data.length) return null;
 
-    final widget = series.hoverBuilder(hoverLoc!);
+    final widget = series.hoverBuilder(context, hoverLoc!, mainGraph);
     if (widget != null) return widget;
 
     final val = series.hoverValue(hoverLoc!);
     if (val == null) return null;
 
     return Text(
-      mainGraph.yAxis.valToString(val),
+      "${series.name}: ${mainGraph.yAxis.valToString(val)}",
       style: Theme.of(context).textTheme.bodyMedium,
     );
   }
@@ -107,12 +106,17 @@ class PooledTooltip extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            /// Title
             Text(
               mainGraph.xAxis.valToString(hoverLoc!.toDouble()),
               style: Theme.of(context).textTheme.labelLarge,
             ),
+
+            /// Divider
             const SizedBox(height: 2),
             Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.onBackground),
+
+            /// Series items
             for (final series in mainGraph.data.data)
               Align(
                 alignment: Alignment.centerLeft,

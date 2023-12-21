@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 
 class BoundingBox {
@@ -54,7 +55,8 @@ abstract class Series<T> {
   double? hoverValue(int i) => null;
 
   /// The widget to display when hovering. See also [hoverValue] for simple cases.
-  Widget? hoverBuilder(int i) => null;
+  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) =>
+      null;
 
   /// This returns the bounding rectangle of all drawing objects associated with data[i] = x.
   /// The returned BoundingBox is in user coordinates.

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
 class ColumnSeriesPoint<T> {
@@ -84,9 +85,34 @@ class ColumnSeries<T> extends Series<T> {
     return BoundingBox(xMin: x - width / 2, xMax: x + width / 2, yMin: min(0, y), yMax: max(0, y));
   }
 
+  // @override
+  // double? hoverValue(int i) {
+  //   return valueMapper(i);
+  // }
+
   @override
-  double? hoverValue(int i) {
-    return valueMapper(i);
+  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+    if (i < 0 || i >= data.length) return null;
+    final val = valueMapper(i);
+    if (val == 0) return null;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10.0,
+          height: 10.0,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          "$name: ${mainGraph.yAxis.valToString(val)}",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
   }
 }
 
