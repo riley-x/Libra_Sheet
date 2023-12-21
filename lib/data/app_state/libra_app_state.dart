@@ -75,11 +75,14 @@ class LibraAppState extends ChangeNotifier {
   List<DateTime> monthList = [];
 
   Future<void> _loadMonths() async {
-    final now = DateTime.now();
     final earliestMonth = await LibraDatabase.db.getEarliestMonth();
-    if (earliestMonth == null) return;
+    if (earliestMonth == null) {
+      monthList = _getDefaultMonths(); // So that the charts don't look too weird
+      return;
+    }
 
     // no easy way to do this in dart, so do manually
+    final now = DateTime.now();
     final current = (now.year, now.month);
     var iter = (earliestMonth.year, earliestMonth.month);
 
@@ -118,4 +121,11 @@ class LibraAppState extends ChangeNotifier {
     navigatorKey.currentState?.popUntil((route) => route.isFirst);
     notifyListeners();
   }
+}
+
+List<DateTime> _getDefaultMonths() {
+  final now = DateTime.now();
+  return [
+    for (int i = 11; i >= 0; i--) DateTime.utc(now.year, now.month - i, 1),
+  ];
 }

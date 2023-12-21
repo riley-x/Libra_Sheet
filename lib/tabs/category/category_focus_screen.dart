@@ -40,6 +40,7 @@ class CategoryFocusScreen extends StatefulWidget {
 
 class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   List<CategoryHistory> data = [];
+  List<DateTime> months = [];
   late TransactionService service;
   late TransactionFilters initialFilters;
 
@@ -48,10 +49,10 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
 
     /// Load all category histories
     final appState = context.read<LibraAppState>();
+    months = appState.monthList;
     final map = await LibraDatabase.db.getCategoryHistory(
       accounts: initialFilters.accounts.map((e) => e.key),
-      callback: (_, vals) =>
-          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
+      callback: (_, vals) => vals.withAlignedTimes(months).fixedForCharts(absValues: true),
     );
     if (!mounted) return; // across async await
 
@@ -126,6 +127,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
             child: _Body(
               category: widget.category,
               initialFilters: initialFilters,
+              months: months,
               data: data,
             ),
           ),
@@ -141,11 +143,13 @@ class _Body extends StatelessWidget {
     required this.category,
     this.initialFilters,
     required this.data,
+    required this.months,
   });
 
   final Category category;
   final TransactionFilters? initialFilters;
   final List<CategoryHistory> data;
+  final List<DateTime> months;
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +182,7 @@ class _Body extends StatelessWidget {
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
                   child: CategoryStackChart(
+                    months: months,
                     data: data,
                     onTap: (category, month) {
                       if (category == this.category) {

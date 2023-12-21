@@ -10,29 +10,23 @@ import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-// TODO change input format so we don't need this
-List<DateTime> _getDefaultDates() {
-  final now = DateTime.now();
-  return [
-    for (int i = 11; i >= 0; i++) DateTime(now.year, now.month - i, 1),
-  ];
-}
-
-final _defaultDates = _getDefaultDates();
-
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
 ///
+/// [months] is the list of dates used. Each [CategoryHistory.values] list in [data] should have the
+/// same length; the time values in [data] are ignored.
+///
 /// [range] can be optionally specified to make filtering on [data] simple. These are the [start, end)
-/// indices in [data] to sublist. In this case each entry in [data.values] must have the same length.
-/// Setting it to null will use the full range.
+/// indices in [data] to sublist. Setting it to null will use the full range.
 class CategoryStackChart extends StatelessWidget {
+  final List<DateTime> months;
   final List<CategoryHistory> data;
   final (int, int)? range;
   final Function(Category, DateTime)? onTap;
 
   const CategoryStackChart({
     super.key,
+    required this.months,
     required this.data,
     this.range,
     this.onTap,
@@ -49,8 +43,7 @@ class CategoryStackChart extends StatelessWidget {
       xAxis: MonthAxis(
         theme: Theme.of(context),
         axisLoc: 0,
-        dates: data.firstOrNull?.values.map((e) => e.time).toList() ?? _defaultDates,
-        // gridLines: [],
+        dates: months.looseSublist(range!.$1, range!.$2),
       ),
       data: SeriesCollection([
         for (final categoryHistory in data)
@@ -58,7 +51,7 @@ class CategoryStackChart extends StatelessWidget {
             name: categoryHistory.category.name,
             color: categoryHistory.category.color,
             data: (range != null)
-                ? categoryHistory.values.sublist(range!.$1, range!.$2)
+                ? categoryHistory.values.looseSublist(range!.$1, range!.$2)
                 : categoryHistory.values,
             valueMapper: (i, item) => item.value.asDollarDouble(),
           ),
@@ -67,7 +60,7 @@ class CategoryStackChart extends StatelessWidget {
           ? null
           : (iSeries, series, iData) {
               if (range != null) iData += range!.$1;
-              onTap?.call(data[iSeries].category, data[iSeries].values[iData].time);
+              onTap?.call(data[iSeries].category, months[iData]);
             },
     );
   }

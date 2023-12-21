@@ -66,7 +66,8 @@ class _CashFlowCharts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<CashFlowState>();
-    final nDates = context.watch<LibraAppState>().monthList.length;
+    final monthList = context.watch<LibraAppState>().monthList;
+    final nDates = monthList.length;
     final range = switch (state.timeFrame) {
       CashFlowTimeFrame.oneYear => (max(0, nDates - 12), nDates),
       CashFlowTimeFrame.lastYear => (max(0, nDates - 24), (max(0, nDates - 12))),
@@ -80,6 +81,7 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Income", style: textStyle),
           Expanded(
             child: CategoryStackChart(
+              months: monthList,
               data: state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range: range,
               onTap: (category, month) => onTap(context, category, month),
@@ -89,6 +91,7 @@ class _CashFlowCharts extends StatelessWidget {
           Text("Expenses", style: textStyle),
           Expanded(
             child: CategoryStackChart(
+              months: monthList,
               data: state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range: range,
               onTap: (category, month) => onTap(context, category, month),

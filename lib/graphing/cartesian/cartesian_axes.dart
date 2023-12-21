@@ -109,6 +109,7 @@ class CartesianAxis {
     var idealNTicks = coordSpace.yAxis.pixelWidth.abs() / idealTickSeparation;
     if (idealNTicks < 2) idealNTicks = 2;
     final idealStepSize = coordSpace.yAxis.userWidth / idealNTicks;
+    if (idealStepSize <= 0) return [];
 
     /// Start from the nearest integer multiple of a human readable step size.
     final humanReadableStep = roundToHumanReadable(idealStepSize);

@@ -151,6 +151,24 @@ class CartesianCoordinateSpace {
     autoYMin = yAxis.min ?? (autoYMin == 0 ? 0 : autoYMin - yPad);
     autoYMax = yAxis.max ?? (autoYMax == 0 ? 0 : autoYMax + yPad);
 
+    /// Ensure not empty
+    if (autoYMin == autoYMax) {
+      if (autoYMax == 0) {
+        autoYMax = 100;
+      } else {
+        autoYMin -= autoYMin.abs() * 0.1;
+        autoYMax += autoYMax.abs() * 0.1;
+      }
+    }
+    if (autoXMin == autoXMax) {
+      if (autoXMax == 0) {
+        autoXMax = 100;
+      } else {
+        autoXMin -= autoXMin.abs() * 0.1;
+        autoXMax += autoXMax.abs() * 0.1;
+      }
+    }
+
     /// Set the values
     this.xAxis.userMin = autoXMin;
     this.xAxis.userMax = autoXMax;

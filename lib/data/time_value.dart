@@ -91,3 +91,11 @@ extension TimeValueList on List<TimeIntValue> {
     ];
   }
 }
+
+extension ListUtils<T> on List<T> {
+  List<T> looseSublist(int start, [int? end]) {
+    if (start < 0) start = 0;
+    if (end != null && end > length) end = null;
+    return sublist(start, end);
+  }
+}
