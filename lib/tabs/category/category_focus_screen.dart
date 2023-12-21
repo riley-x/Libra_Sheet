@@ -42,6 +42,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   List<CategoryHistory> data = [];
   TransactionService? service;
   TransactionFilters? initialFilters;
+  final transactionFilterState = TransactionFiltersStateReference();
 
   Future<void> loadData() async {
     if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
@@ -127,6 +128,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
             category: widget.category,
             initialFilters: initialFilters,
             data: data,
+            transactionFilterState: transactionFilterState,
           ),
         ),
       ],
@@ -140,11 +142,13 @@ class _Body extends StatelessWidget {
     required this.category,
     this.initialFilters,
     required this.data,
+    this.transactionFilterState,
   });
 
   final Category category;
   final TransactionFilters? initialFilters;
   final List<CategoryHistory> data;
+  final TransactionFiltersStateReference? transactionFilterState;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +163,7 @@ class _Body extends StatelessWidget {
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
+              stateReference: transactionFilterState,
             ),
           ),
         ),
@@ -179,7 +184,8 @@ class _Body extends StatelessWidget {
                     data: data,
                     onTap: (category, month) {
                       if (category == this.category) {
-                        // TODO load transactions but don't create new screen
+                        transactionFilterState?.it?.setStartTime(month, false);
+                        transactionFilterState?.it?.setEndTime(month.monthEnd());
                       } else {
                         toCategoryScreen(
                           context,

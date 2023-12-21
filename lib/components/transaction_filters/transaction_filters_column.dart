@@ -200,7 +200,7 @@ class _DateFilter extends StatelessWidget {
           active: state.filters.startTime != null,
           error: state.startTimeError,
           hint: 'MM/DD/YY',
-          onChanged: state.setStartTime,
+          onChanged: state.parseStartTime,
         ),
         const SizedBox(width: 5),
         Container(
@@ -215,7 +215,7 @@ class _DateFilter extends StatelessWidget {
           active: state.filters.endTime != null,
           error: state.endTimeError,
           hint: 'MM/DD/YY',
-          onChanged: state.setEndTime,
+          onChanged: state.parseEndTime,
         ),
       ],
     );

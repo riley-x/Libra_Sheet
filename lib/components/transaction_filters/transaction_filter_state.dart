@@ -31,15 +31,22 @@ class TransactionFilters {
         categories = categories ?? CategoryTristateMap();
 }
 
+/// Useful as a callback to get the state
+class TransactionFiltersStateReference {
+  TransactionFilterState? it;
+}
+
 /// This class stores the common state for a TransactionFilterColumn and its corresponding transactions.
 /// It handles the loading of the transactions and the UI state of the filter fields.
 class TransactionFilterState extends ChangeNotifier {
   TransactionFilterState(
     this.service, {
+    this.reference,
     TransactionFilters? initialFilters,
     this.doLoads = true,
   }) {
     if (initialFilters != null) filters = initialFilters;
+    reference?.it = this;
     service.addListener(loadTransactions);
     loadTransactions();
   }
@@ -47,6 +54,7 @@ class TransactionFilterState extends ChangeNotifier {
   //----------------------------------------------------------------------
   // Config
   //----------------------------------------------------------------------
+  final TransactionFiltersStateReference? reference;
   final TransactionService service;
   final bool doLoads;
 
@@ -63,6 +71,7 @@ class TransactionFilterState extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    reference?.it = null;
     service.removeListener(loadTransactions);
     super.dispose();
   }
@@ -148,23 +157,31 @@ class TransactionFilterState extends ChangeNotifier {
     return (time, error);
   }
 
-  void setStartTime(String? text) {
+  void setStartTime(DateTime? time, [bool load = true]) {
+    filters.startTime = time;
+    if (load) loadTransactions();
+  }
+
+  void setEndTime(DateTime? time, [bool load = true]) {
+    filters.endTime = time;
+    if (load) loadTransactions();
+  }
+
+  void parseStartTime(String? text) {
     final val = _parseDate(text);
     startTimeError = val.$2;
     if (!startTimeError) {
-      filters.startTime = val.$1;
-      loadTransactions();
+      setStartTime(val.$1);
     } else {
       notifyListeners();
     }
   }
 
-  void setEndTime(String? text) {
+  void parseEndTime(String? text, [bool load = true]) {
     final val = _parseDate(text);
     endTimeError = val.$2;
     if (!endTimeError) {
-      filters.endTime = val.$1;
-      loadTransactions();
+      setEndTime(val.$1);
     } else {
       notifyListeners();
     }

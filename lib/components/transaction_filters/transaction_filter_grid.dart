@@ -19,6 +19,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.onSelect,
     this.padding,
     this.fab,
+    this.stateReference,
   });
 
   final Widget? title;
@@ -28,12 +29,17 @@ class TransactionFilterGrid extends StatelessWidget {
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
   final Widget? fab;
+  final TransactionFiltersStateReference? stateReference;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       key: ObjectKey(initialFilters),
-      create: (context) => TransactionFilterState(context.read(), initialFilters: initialFilters),
+      create: (context) => TransactionFilterState(
+        context.read(),
+        initialFilters: initialFilters,
+        reference: stateReference,
+      ),
       child: _TransactionFilterGrid(
         padding: padding,
         title: title,
