@@ -35,7 +35,7 @@ class SnapLineHover extends SingleChildRenderObjectWidget {
 class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   DiscreteCartesianGraphPainter? painter;
   int? hoverLoc;
-  static const _xOffset = 10.0;
+  static const _xOffset = 20.0;
 
   RenderSnapLineHover(this.painter, this.hoverLoc);
 
@@ -100,7 +100,7 @@ class PooledTooltip extends StatelessWidget {
         padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
         constraints: const BoxConstraints(maxWidth: 300),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.outlineVariant.withAlpha(160),
+          color: Theme.of(context).colorScheme.onInverseSurface.withAlpha(210),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Column(
