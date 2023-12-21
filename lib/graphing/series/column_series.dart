@@ -20,10 +20,13 @@ class ColumnSeriesPoint<T> {
   });
 }
 
-/// A column series maps
+/// A column series draws each point as a bar extending from y=0 to the value given by [valueMapper].
+/// This series
 class ColumnSeries<T> extends Series<T> {
   Color? color;
   final double Function(int i, T item) valueMapper;
+
+  /// Supply a custom color for each point. By default the series [color] is used.
   final Color? Function(int i, T item)? colorMapper;
 
   /// A value betwen [-0.5, 0.5] on where to center each bar. 0 indicates the center of the bin
@@ -34,7 +37,7 @@ class ColumnSeries<T> extends Series<T> {
   /// A value between [0, 1] for the width of the bar. 1 indicates taking the full bin width (no
   /// padding between bars). Generally offset +- width should be in [-0.5, 0.5].
   double? width;
-  static const _defaultWidth = 0.6;
+  static const _defaultWidth = 0.8;
 
   /// Cache the points to enable easy hit testing
   final List<ColumnSeriesPoint<T>> _renderedPoints = [];

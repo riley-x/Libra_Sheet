@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
@@ -157,8 +159,39 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   }
 }
 
-class DiscreteCartesianGraph extends StatelessWidget {
-  final CartesianAxis xAxis;
+class _DiscreteCartesianGraphHoverPainter extends CustomPainter {
+  final _DiscreteCartesianGraphPainter mainGraph;
+  final ValueNotifier<int?> hoverLoc;
+
+  _DiscreteCartesianGraphHoverPainter({
+    required this.mainGraph,
+    required this.hoverLoc,
+  }) : super(repaint: hoverLoc);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size != mainGraph.currentSize) return;
+    if (mainGraph.coordSpace == null) return;
+    if (hoverLoc.value == null) return;
+
+    final loc = mainGraph.coordSpace!.xAxis.userToPixel(hoverLoc.value!.toDouble());
+    canvas.drawLine(
+      Offset(loc, mainGraph.coordSpace!.yAxis.pixelMin),
+      Offset(loc, mainGraph.coordSpace!.yAxis.pixelMax),
+      Paint()
+        ..color = Colors.white
+        ..isAntiAlias = false,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DiscreteCartesianGraphHoverPainter oldDelegate) {
+    return mainGraph != oldDelegate.mainGraph;
+  }
+}
+
+class DiscreteCartesianGraph extends StatefulWidget {
+  final MonthAxis xAxis;
   final CartesianAxis yAxis;
 
   const DiscreteCartesianGraph({
@@ -168,17 +201,66 @@ class DiscreteCartesianGraph extends StatelessWidget {
   });
 
   @override
+  State<DiscreteCartesianGraph> createState() => _DiscreteCartesianGraphState();
+}
+
+class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
+  final hoverLocX = ValueNotifier<int?>(null);
+  _DiscreteCartesianGraphPainter? painter;
+  _DiscreteCartesianGraphHoverPainter? hoverPainter;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    painter = _DiscreteCartesianGraphPainter(
+      theme: Theme.of(context),
+      xAxis: widget.xAxis,
+      yAxis: widget.yAxis,
+      data: [testColumnSeries],
+    );
+    hoverPainter = _DiscreteCartesianGraphHoverPainter(
+      mainGraph: painter!,
+      hoverLoc: hoverLocX,
+    );
+  }
+
+  void onHover(PointerHoverEvent event) {
+    if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) return;
+    final userX = painter!.coordSpace!.xAxis.pixelToUser(event.localPosition.dx).round();
+    if (userX < 0 || userX >= widget.xAxis.dates.length) {
+      hoverLocX.value = null;
+    } else {
+      hoverLocX.value = userX;
+    }
+  }
+
+  void onExit(PointerExitEvent event) {
+    hoverLocX.value = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     // print(MediaQuery.of(context).devicePixelRatio);
-    return RepaintBoundary(
-      child: CustomPaint(
-        painter: _DiscreteCartesianGraphPainter(
-          theme: Theme.of(context),
-          xAxis: xAxis,
-          yAxis: yAxis,
-          data: [testColumnSeries],
-        ),
-        size: Size.infinite,
+    print(painter);
+    return MouseRegion(
+      onHover: onHover,
+      onExit: onExit,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          RepaintBoundary(
+            child: CustomPaint(
+              painter: painter,
+              size: Size.infinite,
+            ),
+          ),
+          RepaintBoundary(
+            child: CustomPaint(
+              foregroundPainter: hoverPainter,
+              size: Size.infinite,
+            ),
+          ),
+        ],
       ),
     );
   }

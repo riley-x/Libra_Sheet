@@ -44,10 +44,13 @@ class CartesianCoordinateAxis {
   double userToPixel(double val) {
     if (val == double.infinity) return pixelMax;
     if (val == double.negativeInfinity) return pixelMin;
-    final userWidth = userMax - userMin;
-    final pixelWidth = pixelMax - pixelMin;
     if (userWidth == 0) return pixelMin + pixelWidth / 2;
     return pixelMin + pixelWidth * ((val - userMin) / userWidth);
+  }
+
+  double pixelToUser(double val) {
+    if (pixelWidth == 0) return userMin;
+    return userMin + userWidth * ((val - pixelMin) / pixelWidth);
   }
 }
 
