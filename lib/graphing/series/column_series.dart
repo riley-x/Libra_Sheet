@@ -10,7 +10,7 @@ class ColumnSeriesPoint<T> {
   final T item;
   final double value;
   final Color color;
-  final BoundingBox pixelPos;
+  final Rect pixelPos;
 
   ColumnSeriesPoint({
     required this.index,
@@ -59,8 +59,9 @@ class ColumnSeries<T> extends Series<T> {
       item: data[i],
       value: valueMapper(i),
       color: colorMapper?.call(i, data[i]) ?? this.color ?? Colors.blue,
-      pixelPos: boundingBox(i),
+      pixelPos: coordSpace.userToPixelRect(boundingBox(i)),
     );
+    assert(_renderedPoints.length == i);
     _renderedPoints.add(out);
     return out;
   }
@@ -73,7 +74,7 @@ class ColumnSeries<T> extends Series<T> {
       final painter = Paint()
         ..color = point.color
         ..style = PaintingStyle.fill;
-      canvas.drawRect(coordSpace.userToPixelRect(point.pixelPos), painter);
+      canvas.drawRect(point.pixelPos, painter);
     }
   }
 
@@ -120,6 +121,14 @@ class ColumnSeries<T> extends Series<T> {
         ),
       ],
     );
+  }
+
+  @override
+  int? hitTest(Offset offset, CartesianCoordinateSpace coordSpace) {
+    for (int i = 0; i < _renderedPoints.length; i++) {
+      if (_renderedPoints[i].pixelPos.contains(offset)) return i;
+    }
+    return null;
   }
 }
 

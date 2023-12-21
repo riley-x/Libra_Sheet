@@ -39,6 +39,14 @@ class BoundingBox {
 }
 
 /// An abstract class representing information for a data series in a graph.
+///
+/// Mandatory overrides:
+///     [paint]
+///     [boundingBox]
+///
+/// Suggested overrides:
+///     [hoverValue] or [hoverBuilder]
+///     [hitTest]
 abstract class Series<T> {
   final String name;
   final List<T> data;
@@ -82,6 +90,10 @@ abstract class Series<T> {
     if (xMin == double.infinity) return null;
     return BoundingBox(xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax);
   }
+
+  /// Returns the index of the closest data point to a tap event. [offset] is in pixel coordinates.
+  /// Returns null if no hit.
+  int? hitTest(Offset offset, CartesianCoordinateSpace coordSpace) => null;
 }
 
 class SeriesCollection {

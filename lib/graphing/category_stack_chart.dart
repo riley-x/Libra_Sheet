@@ -21,13 +21,13 @@ final _defaultDates = [for (int i = 1; i <= 12; i++) DateTime.utc(2023, i)];
 class CategoryStackChart extends StatelessWidget {
   final List<CategoryHistory> data;
   final (int, int)? range;
-  final TrackballDisplayMode trackballDisplayMode;
+  final Function(Category, DateTime)? onTap;
 
   const CategoryStackChart(
     this.data,
     this.range, {
     super.key,
-    this.trackballDisplayMode = TrackballDisplayMode.groupAllPoints,
+    this.onTap,
   });
 
   @override
@@ -55,6 +55,12 @@ class CategoryStackChart extends StatelessWidget {
             valueMapper: (i, item) => item.value.asDollarDouble(),
           ),
       ]),
+      onTap: (onTap == null)
+          ? null
+          : (iSeries, series, iData) {
+              if (range != null) iData += range!.$1;
+              onTap?.call(data[iSeries].category, data[iSeries].values[iData].time);
+            },
     );
   }
 }

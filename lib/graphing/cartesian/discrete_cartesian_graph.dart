@@ -157,18 +157,35 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   bool shouldRepaint(DiscreteCartesianGraphPainter<T> oldDelegate) {
     return xAxis != oldDelegate.xAxis || yAxis != oldDelegate.yAxis || data != oldDelegate.data;
   }
+
+  //---------------------------------------------------------------------------------
+  // Callbacks
+  //---------------------------------------------------------------------------------
+
+  (int, Series, int)? onTap(Offset offset) {
+    if (coordSpace == null) return null;
+    for (int i = 0; i < data.data.length; i++) {
+      final loc = data.data[i].hitTest(offset, coordSpace!);
+      if (loc != null) {
+        return (i, data.data[i], loc);
+      }
+    }
+    return null;
+  }
 }
 
 class DiscreteCartesianGraph extends StatefulWidget {
   final MonthAxis xAxis;
   final CartesianAxis yAxis;
   final SeriesCollection data;
+  final Function(int iSeries, Series series, int iData)? onTap;
 
   const DiscreteCartesianGraph({
     super.key,
     required this.xAxis,
     required this.yAxis,
     required this.data,
+    this.onTap,
   });
 
   @override
@@ -230,29 +247,40 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     });
   }
 
+  void onTapUp(TapUpDetails details) {
+    if (widget.onTap == null) return;
+    final result = painter?.onTap(details.localPosition);
+    if (result != null) {
+      widget.onTap!(result.$1, result.$2, result.$3);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // print(MediaQuery.of(context).devicePixelRatio);
     return MouseRegion(
       onHover: onHover,
       onExit: onExit,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          RepaintBoundary(
-            child: CustomPaint(
-              painter: painter,
-              size: Size.infinite,
-            ),
-          ),
-          if (painter != null)
+      child: GestureDetector(
+        onTapUp: onTapUp,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
             RepaintBoundary(
-              child: SnapLineHover(
-                mainGraph: painter!,
-                hoverLoc: hoverLocX,
+              child: CustomPaint(
+                painter: painter,
+                size: Size.infinite,
               ),
             ),
-        ],
+            if (painter != null)
+              RepaintBoundary(
+                child: SnapLineHover(
+                  mainGraph: painter!,
+                  hoverLoc: hoverLocX,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

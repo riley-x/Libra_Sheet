@@ -66,9 +66,7 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range,
-              trackballDisplayMode: state.showSubCategories
-                  ? TrackballDisplayMode.nearestPoint
-                  : TrackballDisplayMode.groupAllPoints,
+              onTap: (p0, p1) => print("$p0 $p1"),
             ),
           ),
           Text("Expenses", style: textStyle),
@@ -76,9 +74,6 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range,
-              trackballDisplayMode: state.showSubCategories
-                  ? TrackballDisplayMode.nearestPoint
-                  : TrackballDisplayMode.groupAllPoints,
             ),
           ),
         ],
