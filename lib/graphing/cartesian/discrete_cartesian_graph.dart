@@ -6,7 +6,6 @@ import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
-import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
 class DiscreteCartesianGraphPainter<T> extends CustomPainter {
@@ -160,103 +159,6 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   }
 }
 
-/// Draws a vertical line that snaps to x values
-// class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
-//   final DiscreteCartesianGraphPainter mainGraph;
-//   final ValueNotifier<int?> hoverLoc;
-
-//   _DiscreteXAxisSnapHoverPainter({
-//     required this.mainGraph,
-//     required this.hoverLoc,
-//   }) : super(repaint: hoverLoc);
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     if (size != mainGraph.currentSize) return;
-//     if (mainGraph.coordSpace == null) return;
-//     if (hoverLoc.value == null) return;
-
-//     final userLoc = hoverLoc.value!.toDouble();
-//     final pixelLoc = mainGraph.coordSpace!.xAxis.userToPixel(userLoc);
-//     canvas.drawLine(
-//       Offset(pixelLoc, mainGraph.coordSpace!.yAxis.pixelMin),
-//       Offset(pixelLoc, mainGraph.coordSpace!.yAxis.pixelMax),
-//       Paint()
-//         ..color = mainGraph.theme.colorScheme.onBackground
-//         ..isAntiAlias = false,
-//     );
-
-//     final title = mainGraph.xAxis.valToString(userLoc);
-//     final titlePainter = TextPainter(
-//       text: TextSpan(text: title, style: mainGraph.theme.textTheme.labelLarge),
-//       textDirection: TextDirection.ltr,
-//     );
-//     titlePainter.layout();
-
-//     final valuePainters = <TextPainter>[];
-//     var maxWidth = max(50.0, titlePainter.width);
-//     var totalHeight = titlePainter.height + 15;
-//     for (final series in mainGraph.data.data) {
-//       if (hoverLoc.value! >= series.data.length) continue;
-//       var (userValue, text) = series.hoverLabel(hoverLoc.value!);
-//       if (userValue == null && text == null) continue;
-
-//       text ??= mainGraph.yAxis.valToString(userValue!);
-//       final painter = TextPainter(
-//         text: TextSpan(text: text, style: mainGraph.theme.textTheme.bodyMedium),
-//         textDirection: TextDirection.ltr,
-//       );
-//       painter.layout(maxWidth: 200);
-
-//       valuePainters.add(painter);
-//       maxWidth = max(maxWidth, painter.width);
-//       totalHeight += painter.height + 4;
-//     }
-
-//     totalHeight = max(40, totalHeight - 4);
-//     const padX = 10;
-//     final width = 2 * padX + maxWidth;
-//     var left = pixelLoc + 10;
-//     var top = 30.0;
-
-//     if (left + width > size.width) {
-//       left = pixelLoc - 10 - width;
-//     }
-//     var center = left + width / 2;
-
-//     canvas.drawRRect(
-//       RRect.fromRectAndRadius(
-//         Rect.fromLTWH(left, top, width, totalHeight),
-//         const Radius.circular(4),
-//       ),
-//       Paint()..color = mainGraph.theme.colorScheme.outlineVariant.withAlpha(160),
-//     );
-
-//     top += 3;
-//     titlePainter.paint(canvas, Offset(center - titlePainter.width / 2, top));
-//     top += titlePainter.height + 2;
-
-//     canvas.drawLine(
-//       Offset(left + padX, top),
-//       Offset(left + width - padX, top),
-//       Paint()
-//         ..color = mainGraph.theme.colorScheme.onBackground
-//         ..isAntiAlias = false,
-//     );
-//     top += 4;
-
-//     for (final painter in valuePainters) {
-//       painter.paint(canvas, Offset(left + padX, top));
-//       top += painter.height + 4;
-//     }
-//   }
-
-//   @override
-//   bool shouldRepaint(_DiscreteXAxisSnapHoverPainter oldDelegate) {
-//     return mainGraph != oldDelegate.mainGraph;
-//   }
-// }
-
 class DiscreteCartesianGraph extends StatefulWidget {
   final MonthAxis xAxis;
   final CartesianAxis yAxis;
@@ -274,15 +176,12 @@ class DiscreteCartesianGraph extends StatefulWidget {
 }
 
 class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
-  // final hoverLocX = ValueNotifier<int?>(null);
   int? hoverLocX;
   DiscreteCartesianGraphPainter? painter;
-  // _DiscreteXAxisSnapHoverPainter? hoverPainter;
 
   @override
   void initState() {
     super.initState();
-    // hoverLocX.addListener(_setHoverDetails());
   }
 
   @override
@@ -294,10 +193,6 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       yAxis: widget.yAxis,
       data: widget.data,
     );
-    // hoverPainter = _DiscreteXAxisSnapHoverPainter(
-    //   mainGraph: painter!,
-    //   hoverLoc: hoverLocX,
-    // );
   }
 
   void onHover(PointerHoverEvent event) {
@@ -318,12 +213,6 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     });
   }
 
-  // void _setHoverDetails() {
-  //   if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) return;
-  //   if (hoverLocX.value == null) return;
-  //   final hoverLocPixel = painter!.coordSpace!.xAxis.userToPixel(hoverLocX.value!.toDouble());
-  // }
-
   @override
   Widget build(BuildContext context) {
     // print(MediaQuery.of(context).devicePixelRatio);
@@ -339,12 +228,6 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
               size: Size.infinite,
             ),
           ),
-          // RepaintBoundary(
-          //   child: CustomPaint(
-          //     foregroundPainter: hoverPainter,
-          //     size: Size.infinite,
-          //   ),
-          // ),
           if (painter != null)
             RepaintBoundary(
               child: SnapLineHover(
