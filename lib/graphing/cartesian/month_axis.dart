@@ -20,7 +20,7 @@ class MonthAxis extends CartesianAxis {
   }) : super(
           min: -0.5,
           max: dates.length - 0.5,
-          valToString: (val, [order = 0]) => _toString(dates, dateToString, val, order),
+          valToString: (val, [order]) => _toString(dates, dateToString, val, order),
         );
 
   /// Prioritizes showing year changes on each January, and formats remaining ticks with a short

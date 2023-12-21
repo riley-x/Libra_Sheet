@@ -193,7 +193,8 @@ class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
     titlePainter.layout();
 
     final valuePainters = <TextPainter>[];
-    var maxWidth = titlePainter.width;
+    var maxWidth = max(50.0, titlePainter.width);
+    var totalHeight = titlePainter.height + 15;
     for (final series in mainGraph.data) {
       if (hoverLoc.value! >= series.data.length) continue;
       final value = mainGraph.yAxis.valToString(series.data[hoverLoc.value!]);
@@ -204,13 +205,44 @@ class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
       painter.layout(maxWidth: 200);
       valuePainters.add(painter);
       maxWidth = max(maxWidth, painter.width);
+      totalHeight += painter.height + 4;
     }
 
+    totalHeight = max(50, totalHeight - 4);
+    const padX = 10;
+    final width = 2 * padX + maxWidth;
     var left = pixelLoc + 10;
-    var center = left + maxWidth / 2;
-    titlePainter.paint(canvas, Offset(center - titlePainter.width / 2, 50));
+    var top = 30.0;
+
+    if (left + width > size.width) {
+      left = pixelLoc - 10 - width;
+    }
+    var center = left + width / 2;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(left, top, width, totalHeight),
+        const Radius.circular(4),
+      ),
+      Paint()..color = mainGraph.theme.colorScheme.outlineVariant.withAlpha(160),
+    );
+
+    top += 3;
+    titlePainter.paint(canvas, Offset(center - titlePainter.width / 2, top));
+    top += titlePainter.height + 2;
+
+    canvas.drawLine(
+      Offset(left + padX, top),
+      Offset(left + width - padX, top),
+      Paint()
+        ..color = mainGraph.theme.colorScheme.onBackground
+        ..isAntiAlias = false,
+    );
+    top += 4;
+
     for (final painter in valuePainters) {
-      painter.paint(canvas, Offset(left, 60));
+      painter.paint(canvas, Offset(left + padX, top));
+      top += painter.height + 4;
     }
   }
 
