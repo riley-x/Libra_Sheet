@@ -16,114 +16,99 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_st
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
-// class CategoryFocusScreen extends StatefulWidget {
-//   const CategoryFocusScreen({
-//     super.key,
-//     required this.category,
-//     this.initialFilters,
-//   });
+class CategoryFocusScreen extends StatefulWidget {
+  const CategoryFocusScreen({
+    super.key,
+    required this.category,
+    this.initialFilters,
+  });
 
-//   final Category category;
-//   final TransactionFilters? initialFilters;
+  final Category category;
+  final TransactionFilters? initialFilters;
 
-//   @override
-//   State<CategoryFocusScreen> createState() => _CategoryFocusScreenState();
-// }
+  @override
+  State<CategoryFocusScreen> createState() => _CategoryFocusScreenState();
+}
 
-// class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
-//   List<CategoryHistory> data = [];
-//   TransactionService? service;
+class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
+  List<CategoryHistory> data = [];
+  TransactionService? service;
+  TransactionFilters? initialFilters;
 
-//   Future<void> loadData() async {
-//     if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
+  Future<void> loadData() async {
+    if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
 
-//     /// Load all category histories
-//     final appState = context.read<LibraAppState>();
-//     final map = await LibraDatabase.db.getCategoryHistory(
-//       callback: (_, vals) =>
-//           vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
-//     );
-//     if (!mounted) return; // across async await
+    /// Load all category histories
+    final appState = context.read<LibraAppState>();
+    final map = await LibraDatabase.db.getCategoryHistory(
+      callback: (_, vals) =>
+          vals.withAlignedTimes(appState.monthList).fixedForCharts(absValues: true),
+    );
+    if (!mounted) return; // across async await
 
-//     /// Output list
-//     final newData = <CategoryHistory>[];
+    /// Output list
+    final newData = <CategoryHistory>[];
 
-//     /// Add this cat
-//     final history = map[widget.category.key];
-//     if (history == null) return;
-//     newData.add(CategoryHistory(widget.category, history));
+    /// Add this cat
+    final history = map[widget.category.key];
+    if (history != null) {
+      newData.add(CategoryHistory(widget.category, history));
+    }
 
-//     /// Add subcats
-//     if (widget.category.level == 1) {
-//       for (final subCat in widget.category.subCats) {
-//         final history = map[subCat.key];
-//         if (history == null) return;
-//         newData.add(CategoryHistory(subCat, history));
-//       }
-//     }
+    /// Add subcats
+    if (widget.category.level == 1) {
+      for (final subCat in widget.category.subCats) {
+        final history = map[subCat.key];
+        if (history == null) continue;
+        newData.add(CategoryHistory(subCat, history));
+      }
+    }
 
-//     setState(() {
-//       data = newData;
-//     });
-//   }
+    setState(() {
+      data = newData;
+    });
+  }
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     service = context.read<TransactionService>();
-//     service!.addListener(loadData);
-//     loadData();
-//   }
+  @override
+  void initState() {
+    super.initState();
+    service = context.read<TransactionService>();
+    service!.addListener(loadData);
 
-//   @override
-//   void dispose() {
-//     super.dispose();
-//     service?.removeListener(loadData);
-//   }
+    initialFilters = widget.initialFilters ??
+        TransactionFilters(
+          categories: CategoryTristateMap({widget.category}),
+        );
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return ChangeNotifierProvider(
-//       create: (context) => AddCsvState(
-//         appState: context.read<LibraAppState>(),
-//         account: initialAccount,
-//       ),
-//       builder: (context, child) {
-//         final state = context.watch<AddCsvState>();
-//         if (state.transactions.isEmpty) {
-//           return const _MainScreen();
-//         } else {
-//           return const PreviewTransactionsScreen();
-//         }
-//       },
-//     );
-//   }
-// }
+    loadData();
+  }
 
-class CategoryFocusScreen extends StatelessWidget {
-  const CategoryFocusScreen({super.key});
+  @override
+  void dispose() {
+    super.dispose();
+    service?.removeListener(loadData);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<CategoryTabState>();
-    final category = state.categoriesFocused.lastOrNull;
-    if (category == null) return const Placeholder();
-
-    var title = category.name;
-    if (category == Category.income) title += " Income"; // "Uncategorized Income"
-    if (category == Category.expense) title += " Expense";
+    var title = widget.category.name;
+    if (widget.category == Category.income) title += " Income"; // "Uncategorized Income"
+    if (widget.category == Category.expense) title += " Expense";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),
         CommonBackBar(
           leftText: title,
-          rightText: state.aggregateValues[category.key]?.abs().dollarString() ?? '',
-          onBack: () {
-            context.read<CategoryTabState>().clearFocus();
-          },
+          // rightText: state.aggregateValues[category.key]?.abs().dollarString() ?? '',
         ),
-        Expanded(child: _Body(category: category)),
+        Expanded(
+          child: _Body(
+            category: widget.category,
+            initialFilters: initialFilters,
+            data: data,
+          ),
+        ),
       ],
     );
   }
@@ -133,13 +118,16 @@ class _Body extends StatelessWidget {
   const _Body({
     super.key,
     required this.category,
+    this.initialFilters,
+    required this.data,
   });
 
   final Category category;
+  final TransactionFilters? initialFilters;
+  final List<CategoryHistory> data;
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<CategoryTabState>();
     return Row(
       children: [
         Expanded(
@@ -147,10 +135,7 @@ class _Body extends StatelessWidget {
             padding: const EdgeInsets.only(left: 10), // this offsets the title
             child: TransactionFilterGrid(
               padding: const EdgeInsets.only(right: 10),
-              initialFilters: TransactionFilters(
-                categories: CategoryTristateMap({category}),
-                accounts: state.accounts,
-              ),
+              initialFilters: initialFilters,
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
@@ -170,33 +155,30 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: CategoryStackChart(
-                    state.categoryFocusedHistory,
-                    null,
-                  ),
+                  child: CategoryStackChart(data, null),
                 ),
               ),
-              if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
-                const SizedBox(height: 5),
-                Container(
-                  height: 1,
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CategoryHeatMap(
-                      categories: category.subCats + [category],
-                      individualValues: state.individualValues,
-                      aggregateValues: state.individualValues,
-                      // individual here because the focus screen is always nested categories
-                      onSelect: (it) {
-                        if (it != category) context.read<CategoryTabState>().focusCategory(it);
-                      },
-                    ),
-                  ),
-                ),
-              ],
+              // if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
+              //   const SizedBox(height: 5),
+              //   Container(
+              //     height: 1,
+              //     color: Theme.of(context).colorScheme.outlineVariant,
+              //   ),
+              //   Expanded(
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(8.0),
+              //       child: CategoryHeatMap(
+              //         categories: category.subCats + [category],
+              //         individualValues: state.individualValues,
+              //         aggregateValues: state.individualValues,
+              //         // individual here because the focus screen is always nested categories
+              //         onSelect: (it) {
+              //           if (it != category) context.read<CategoryTabState>().focusCategory(it);
+              //         },
+              //       ),
+              //     ),
+              //   ),
+              // ],
             ],
           ),
         ),

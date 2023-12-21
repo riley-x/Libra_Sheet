@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/objects/account.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/tabs/category/category_focus_screen.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/home/account_screen.dart';
 import 'package:libra_sheet/tabs/navigation/no_animation_route.dart';
@@ -13,6 +16,22 @@ void toAccountScreen(BuildContext context, Account account) {
     context,
     NoAnimationRoute(
       (context) => AccountScreen(account: account),
+    ),
+  );
+}
+
+void toCategoryScreen(
+  BuildContext context,
+  Category category, {
+  TransactionFilters? initialFilters,
+}) {
+  Navigator.push(
+    context,
+    NoAnimationRoute(
+      (context) => CategoryFocusScreen(
+        category: category,
+        initialFilters: initialFilters,
+      ),
     ),
   );
 }

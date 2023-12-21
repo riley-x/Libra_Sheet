@@ -2,32 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/graphing/category_heat_map.dart';
-import 'package:libra_sheet/tabs/category/category_focus_screen.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 import 'category_tab_filters.dart';
 
 /// This tab shows a heat map of the category values, with a list of filters/time selections on the
-/// right. Selecting a category transfers to a nested screen with transactions, a history line graph,
-/// and a subcat heatmap.
+/// right.
 class CategoryTab extends StatelessWidget {
   const CategoryTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<CategoryTabState>();
-    if (state.categoriesFocused.isNotEmpty) {
-      return const CategoryFocusScreen();
-    } else {
-      return const _CategoryTab();
-    }
-  }
-}
-
-/// Main screen of the category tab: main heatmap with filters column on the right.
-class _CategoryTab extends StatelessWidget {
-  const _CategoryTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +51,7 @@ class _HeatMap extends StatelessWidget {
       categories: categories,
       individualValues: state.individualValues,
       aggregateValues: state.aggregateValues,
-      onSelect: (it) => context.read<CategoryTabState>().focusCategory(it),
+      onSelect: (it) => toCategoryScreen(context, it),
       showSubCategories: state.showSubCategories,
     );
   }

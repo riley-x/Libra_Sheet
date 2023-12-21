@@ -91,7 +91,6 @@ class TransactionFilterState extends ChangeNotifier {
   List<Transaction> transactions = [];
 
   void loadTransactions() async {
-    print("is loading! ${service}");
     notifyListeners(); // for the UI form state
     if (!doLoads) return;
     transactions = await service.load(filters);
