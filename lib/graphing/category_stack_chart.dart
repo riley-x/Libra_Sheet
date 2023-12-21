@@ -13,20 +13,15 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
 ///
-/// [months] is the list of dates used. Each [CategoryHistory.values] list in [data] should have the
-/// same length; the time values in [data] are ignored.
-///
 /// [range] can be optionally specified to make filtering on [data] simple. These are the [start, end)
 /// indices in [data] to sublist. Setting it to null will use the full range.
 class CategoryStackChart extends StatelessWidget {
-  final List<DateTime> months;
-  final List<CategoryHistory> data;
+  final CategoryHistory data;
   final (int, int)? range;
   final Function(Category, DateTime)? onTap;
 
   const CategoryStackChart({
     super.key,
-    required this.months,
     required this.data,
     this.range,
     this.onTap,
@@ -43,83 +38,25 @@ class CategoryStackChart extends StatelessWidget {
       xAxis: MonthAxis(
         theme: Theme.of(context),
         axisLoc: 0,
-        dates: months.looseSublist(range!.$1, range!.$2),
+        dates: data.times.looseSublist(range!.$1, range!.$2),
       ),
       data: SeriesCollection([
-        for (final categoryHistory in data)
-          StackColumnSeries<TimeIntValue>(
+        for (final categoryHistory in data.categories)
+          StackColumnSeries<int>(
             name: categoryHistory.category.name,
             color: categoryHistory.category.color,
             data: (range != null)
                 ? categoryHistory.values.looseSublist(range!.$1, range!.$2)
                 : categoryHistory.values,
-            valueMapper: (i, item) => item.value.asDollarDouble(),
+            valueMapper: (i, item) => item.asDollarDouble(),
           ),
       ]),
       onTap: (onTap == null)
           ? null
           : (iSeries, series, iData) {
               if (range != null) iData += range!.$1;
-              onTap?.call(data[iSeries].category, months[iData]);
+              onTap?.call(data.categories[iSeries].category, data.times[iData]);
             },
-    );
-  }
-}
-
-class SyncfusionCategoryStackChart extends StatelessWidget {
-  final List<CategoryHistory> data;
-  final (int, int)? range;
-  final TrackballDisplayMode trackballDisplayMode;
-
-  const SyncfusionCategoryStackChart(
-    this.data,
-    this.range, {
-    super.key,
-    this.trackballDisplayMode = TrackballDisplayMode.groupAllPoints,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final format = DateFormat("MMM ''yy"); // single quote is escaped by doubling
-    return SfCartesianChart(
-      primaryXAxis: CategoryAxis(
-          // visibleMinimum: 0.5,
-          // visibleMaximum: 1.5,
-          ),
-      trackballBehavior: TrackballBehavior(
-        enable: true,
-        activationMode: ActivationMode.singleTap,
-        tooltipDisplayMode: trackballDisplayMode,
-        // builder: trackballDisplayMode == TrackballDisplayMode.nearestPoint ? trackballTooltipBuilder: null,
-        /// The custom tooltip format totally messes up the tooltip in the groupAllPoints for some reason
-        tooltipSettings: trackballDisplayMode == TrackballDisplayMode.groupAllPoints
-            ? const InteractiveTooltip()
-            : const InteractiveTooltip(format: 'series.name: \$point.y'),
-      ),
-      series: <ChartSeries>[
-        for (final categoryHistory in data)
-          StackedColumnSeries<TimeIntValue, String>(
-            animationDuration: 300,
-            dataSource: (range != null)
-                ? categoryHistory.values.sublist(range!.$1, range!.$2)
-                : categoryHistory.values,
-            name: categoryHistory.category.name,
-            color: categoryHistory.category.color,
-            xValueMapper: (TimeIntValue data, _) => format.format(data.time),
-            yValueMapper: (TimeIntValue data, _) => data.value.asDollarDouble(),
-
-            /// Problem with onPointTap: this can trigger multiple times on nearby points, seems to
-            /// have some fudge allowance on click position.
-            // onPointTap: (pointInteractionDetails) {
-            //   if (pointInteractionDetails.pointIndex != null) {
-            //     // CartesianChartPoint x =
-            //     //     pointInteractionDetails.dataPoints?[pointInteractionDetails.pointIndex!];
-            //     print(pointInteractionDetails.pointIndex);
-            //     print(pointInteractionDetails.seriesIndex);
-            //   }
-            // },
-          ),
-      ],
     );
   }
 }
