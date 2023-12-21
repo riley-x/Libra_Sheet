@@ -49,6 +49,11 @@ abstract class Series<T> {
 
   void paint(Canvas canvas, CartesianCoordinateSpace coordSpace);
 
+  /// This is the value / text shown when hovering over a data point.
+  /// If the String is not null, will use that. Otherwise will format the double value using the
+  /// axis default formatting. If both are null, no tooltip is shown.
+  (double?, String?) hoverLabel(int i) => (null, null);
+
   /// This returns the bounding rectangle of all drawing objects associated with data[i] = x.
   /// The returned BoundingBox is in user coordinates.
   BoundingBox? boundingBox(int i);

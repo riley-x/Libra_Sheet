@@ -83,6 +83,11 @@ class ColumnSeries<T> extends Series<T> {
     final width = this.width ?? defaultWidth;
     return BoundingBox(xMin: x - width / 2, xMax: x + width / 2, yMin: min(0, y), yMax: max(0, y));
   }
+
+  @override
+  (double?, String?) hoverLabel(int i) {
+    return (valueMapper(i), null);
+  }
 }
 
 final testColumnSeries = ColumnSeries(

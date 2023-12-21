@@ -5,10 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
 import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
-class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
+class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   final CartesianAxis xAxis;
   final CartesianAxis yAxis;
   final ThemeData theme;
@@ -20,7 +21,7 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   List<(double, TextPainter)>? xLabels;
   List<(double, TextPainter)>? yLabels;
 
-  _DiscreteCartesianGraphPainter({
+  DiscreteCartesianGraphPainter({
     super.repaint,
     required this.data,
     required this.xAxis,
@@ -154,14 +155,14 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DiscreteCartesianGraphPainter<T> oldDelegate) {
+  bool shouldRepaint(DiscreteCartesianGraphPainter<T> oldDelegate) {
     return xAxis != oldDelegate.xAxis || yAxis != oldDelegate.yAxis || data != oldDelegate.data;
   }
 }
 
 /// Draws a vertical line that snaps to x values
 class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
-  final _DiscreteCartesianGraphPainter mainGraph;
+  final DiscreteCartesianGraphPainter mainGraph;
   final ValueNotifier<int?> hoverLoc;
 
   _DiscreteXAxisSnapHoverPainter({
@@ -197,12 +198,16 @@ class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
     var totalHeight = titlePainter.height + 15;
     for (final series in mainGraph.data.data) {
       if (hoverLoc.value! >= series.data.length) continue;
-      final value = mainGraph.yAxis.valToString(series.data[hoverLoc.value!]);
+      var (userValue, text) = series.hoverLabel(hoverLoc.value!);
+      if (userValue == null && text == null) continue;
+
+      text ??= mainGraph.yAxis.valToString(userValue!);
       final painter = TextPainter(
-        text: TextSpan(text: value, style: mainGraph.theme.textTheme.bodyMedium),
+        text: TextSpan(text: text, style: mainGraph.theme.textTheme.bodyMedium),
         textDirection: TextDirection.ltr,
       );
       painter.layout(maxWidth: 200);
+
       valuePainters.add(painter);
       maxWidth = max(maxWidth, painter.width);
       totalHeight += painter.height + 4;
@@ -269,8 +274,9 @@ class DiscreteCartesianGraph extends StatefulWidget {
 }
 
 class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
-  final hoverLocX = ValueNotifier<int?>(null);
-  _DiscreteCartesianGraphPainter? painter;
+  // final hoverLocX = ValueNotifier<int?>(null);
+  int? hoverLocX;
+  DiscreteCartesianGraphPainter? painter;
   _DiscreteXAxisSnapHoverPainter? hoverPainter;
 
   @override
@@ -282,30 +288,34 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    painter = _DiscreteCartesianGraphPainter(
+    painter = DiscreteCartesianGraphPainter(
       theme: Theme.of(context),
       xAxis: widget.xAxis,
       yAxis: widget.yAxis,
       data: widget.data,
     );
-    hoverPainter = _DiscreteXAxisSnapHoverPainter(
-      mainGraph: painter!,
-      hoverLoc: hoverLocX,
-    );
+    // hoverPainter = _DiscreteXAxisSnapHoverPainter(
+    //   mainGraph: painter!,
+    //   hoverLoc: hoverLocX,
+    // );
   }
 
   void onHover(PointerHoverEvent event) {
     if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) return;
     final userX = painter!.coordSpace!.xAxis.pixelToUser(event.localPosition.dx).round();
-    if (userX < 0 || userX >= widget.xAxis.dates.length) {
-      hoverLocX.value = null;
-    } else {
-      hoverLocX.value = userX;
-    }
+    setState(() {
+      if (userX < 0 || userX >= widget.xAxis.dates.length) {
+        hoverLocX = null;
+      } else {
+        hoverLocX = userX;
+      }
+    });
   }
 
   void onExit(PointerExitEvent event) {
-    hoverLocX.value = null;
+    setState(() {
+      hoverLocX = null;
+    });
   }
 
   // void _setHoverDetails() {
@@ -329,12 +339,19 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
               size: Size.infinite,
             ),
           ),
-          RepaintBoundary(
-            child: CustomPaint(
-              foregroundPainter: hoverPainter,
-              size: Size.infinite,
+          // RepaintBoundary(
+          //   child: CustomPaint(
+          //     foregroundPainter: hoverPainter,
+          //     size: Size.infinite,
+          //   ),
+          // ),
+          if (painter != null)
+            RepaintBoundary(
+              child: SnapLineHover(
+                mainGraph: painter!,
+                hoverLoc: hoverLocX,
+              ),
             ),
-          ),
         ],
       ),
     );
