@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 
 class BoundingBox {
   final double xMin;
@@ -74,9 +75,15 @@ abstract class Series<T> {
   }
 }
 
-extension SeriesExtension<T> on List<Series<T>> {
+class SeriesCollection {
+  final List<Series> data;
+
+  SeriesCollection(this.data) {
+    accumulateStackColumnSeries(data);
+  }
+
   bool hasData() {
-    for (final series in this) {
+    for (final series in data) {
       if (series.data.isNotEmpty) return true;
     }
     return false;
@@ -87,7 +94,7 @@ extension SeriesExtension<T> on List<Series<T>> {
     var yMin = double.infinity;
     var xMax = double.negativeInfinity;
     var yMax = double.negativeInfinity;
-    for (final series in this) {
+    for (final series in data) {
       final ext = series.totalBoundingBox();
       if (ext == null) continue;
       xMin = min(xMin, ext.xMin);

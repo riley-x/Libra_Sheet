@@ -12,7 +12,7 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   final CartesianAxis xAxis;
   final CartesianAxis yAxis;
   final ThemeData theme;
-  final List<Series<T>> data;
+  final SeriesCollection data;
 
   /// Variables of a given paint
   Size currentSize = Size.zero;
@@ -146,7 +146,7 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
     layoutAxes(size);
     if (coordSpace == null) return;
     paintGridLines(canvas);
-    for (final series in data) {
+    for (final series in data.data) {
       series.paint(canvas, coordSpace!);
     }
     paintLabels(canvas);
@@ -195,7 +195,7 @@ class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
     final valuePainters = <TextPainter>[];
     var maxWidth = max(50.0, titlePainter.width);
     var totalHeight = titlePainter.height + 15;
-    for (final series in mainGraph.data) {
+    for (final series in mainGraph.data.data) {
       if (hoverLoc.value! >= series.data.length) continue;
       final value = mainGraph.yAxis.valToString(series.data[hoverLoc.value!]);
       final painter = TextPainter(
@@ -208,7 +208,7 @@ class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
       totalHeight += painter.height + 4;
     }
 
-    totalHeight = max(50, totalHeight - 4);
+    totalHeight = max(40, totalHeight - 4);
     const padX = 10;
     final width = 2 * padX + maxWidth;
     var left = pixelLoc + 10;
@@ -255,11 +255,13 @@ class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
 class DiscreteCartesianGraph extends StatefulWidget {
   final MonthAxis xAxis;
   final CartesianAxis yAxis;
+  final SeriesCollection data;
 
   const DiscreteCartesianGraph({
     super.key,
     required this.xAxis,
     required this.yAxis,
+    required this.data,
   });
 
   @override
@@ -284,7 +286,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       theme: Theme.of(context),
       xAxis: widget.xAxis,
       yAxis: widget.yAxis,
-      data: [testColumnSeries],
+      data: widget.data,
     );
     hoverPainter = _DiscreteXAxisSnapHoverPainter(
       mainGraph: painter!,

@@ -113,7 +113,7 @@ class CartesianCoordinateSpace {
   void autoRange({
     required CartesianAxis xAxis,
     required CartesianAxis yAxis,
-    required List<Series> data,
+    required SeriesCollection data,
     double defaultXDataPadFrac = 0,
     double defaultYDataPadFrac = 0.05,
   }) {
@@ -127,7 +127,7 @@ class CartesianCoordinateSpace {
     var autoYMin = double.infinity;
     var autoXMax = double.negativeInfinity;
     var autoYMax = double.negativeInfinity;
-    for (final series in data) {
+    for (final series in data.data) {
       final ext = series.totalBoundingBox();
       if (ext == null) continue;
       autoXMin = math.min(autoXMin, ext.xMin);
