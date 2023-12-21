@@ -159,11 +159,12 @@ class _DiscreteCartesianGraphPainter<T> extends CustomPainter {
   }
 }
 
-class _DiscreteCartesianGraphHoverPainter extends CustomPainter {
+/// Draws a vertical line that snaps to x values
+class _DiscreteXAxisSnapHoverPainter extends CustomPainter {
   final _DiscreteCartesianGraphPainter mainGraph;
   final ValueNotifier<int?> hoverLoc;
 
-  _DiscreteCartesianGraphHoverPainter({
+  _DiscreteXAxisSnapHoverPainter({
     required this.mainGraph,
     required this.hoverLoc,
   }) : super(repaint: hoverLoc);
@@ -174,18 +175,47 @@ class _DiscreteCartesianGraphHoverPainter extends CustomPainter {
     if (mainGraph.coordSpace == null) return;
     if (hoverLoc.value == null) return;
 
-    final loc = mainGraph.coordSpace!.xAxis.userToPixel(hoverLoc.value!.toDouble());
+    final userLoc = hoverLoc.value!.toDouble();
+    final pixelLoc = mainGraph.coordSpace!.xAxis.userToPixel(userLoc);
     canvas.drawLine(
-      Offset(loc, mainGraph.coordSpace!.yAxis.pixelMin),
-      Offset(loc, mainGraph.coordSpace!.yAxis.pixelMax),
+      Offset(pixelLoc, mainGraph.coordSpace!.yAxis.pixelMin),
+      Offset(pixelLoc, mainGraph.coordSpace!.yAxis.pixelMax),
       Paint()
-        ..color = Colors.white
+        ..color = mainGraph.theme.colorScheme.onBackground
         ..isAntiAlias = false,
     );
+
+    final title = mainGraph.xAxis.valToString(userLoc);
+    final titlePainter = TextPainter(
+      text: TextSpan(text: title, style: mainGraph.theme.textTheme.labelLarge),
+      textDirection: TextDirection.ltr,
+    );
+    titlePainter.layout();
+
+    final valuePainters = <TextPainter>[];
+    var maxWidth = titlePainter.width;
+    for (final series in mainGraph.data) {
+      if (hoverLoc.value! >= series.data.length) continue;
+      final value = mainGraph.yAxis.valToString(series.data[hoverLoc.value!]);
+      final painter = TextPainter(
+        text: TextSpan(text: value, style: mainGraph.theme.textTheme.bodyMedium),
+        textDirection: TextDirection.ltr,
+      );
+      painter.layout(maxWidth: 200);
+      valuePainters.add(painter);
+      maxWidth = max(maxWidth, painter.width);
+    }
+
+    var left = pixelLoc + 10;
+    var center = left + maxWidth / 2;
+    titlePainter.paint(canvas, Offset(center - titlePainter.width / 2, 50));
+    for (final painter in valuePainters) {
+      painter.paint(canvas, Offset(left, 60));
+    }
   }
 
   @override
-  bool shouldRepaint(_DiscreteCartesianGraphHoverPainter oldDelegate) {
+  bool shouldRepaint(_DiscreteXAxisSnapHoverPainter oldDelegate) {
     return mainGraph != oldDelegate.mainGraph;
   }
 }
@@ -207,7 +237,13 @@ class DiscreteCartesianGraph extends StatefulWidget {
 class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   final hoverLocX = ValueNotifier<int?>(null);
   _DiscreteCartesianGraphPainter? painter;
-  _DiscreteCartesianGraphHoverPainter? hoverPainter;
+  _DiscreteXAxisSnapHoverPainter? hoverPainter;
+
+  @override
+  void initState() {
+    super.initState();
+    // hoverLocX.addListener(_setHoverDetails());
+  }
 
   @override
   void didChangeDependencies() {
@@ -218,7 +254,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       yAxis: widget.yAxis,
       data: [testColumnSeries],
     );
-    hoverPainter = _DiscreteCartesianGraphHoverPainter(
+    hoverPainter = _DiscreteXAxisSnapHoverPainter(
       mainGraph: painter!,
       hoverLoc: hoverLocX,
     );
@@ -238,10 +274,15 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     hoverLocX.value = null;
   }
 
+  // void _setHoverDetails() {
+  //   if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) return;
+  //   if (hoverLocX.value == null) return;
+  //   final hoverLocPixel = painter!.coordSpace!.xAxis.userToPixel(hoverLocX.value!.toDouble());
+  // }
+
   @override
   Widget build(BuildContext context) {
     // print(MediaQuery.of(context).devicePixelRatio);
-    print(painter);
     return MouseRegion(
       onHover: onHover,
       onExit: onExit,

@@ -10,16 +10,17 @@ final _yearFormat = DateFormat.y();
 
 class MonthAxis extends CartesianAxis {
   final List<DateTime> dates;
+  final String Function(DateTime, bool concise)? dateToString;
 
   MonthAxis({
     required super.theme,
     required this.dates,
-    String Function(DateTime)? dateToString,
+    this.dateToString,
     super.axisLoc,
   }) : super(
           min: -0.5,
           max: dates.length - 0.5,
-          valToString: (val, _) => _toString(dates, dateToString, val),
+          valToString: (val, [order = 0]) => _toString(dates, dateToString, val, order),
         );
 
   /// Prioritizes showing year changes on each January, and formats remaining ticks with a short
@@ -68,11 +69,13 @@ class MonthAxis extends CartesianAxis {
   }
 }
 
-String _toString(List<DateTime> dates, String Function(DateTime)? dateToString, double val) {
+String _toString(
+    List<DateTime> dates, String Function(DateTime, bool)? dateToString, double val, int? order) {
   final i = val.round();
   if (i < 0 || i >= dates.length) return '';
   final date = dates[i];
-  return dateToString?.call(date) ?? DateFormat.yMMM().format(date);
+  return dateToString?.call(date, order != null) ??
+      (order != null ? DateFormat.yMMM().format(date) : DateFormat.yMMMM().format(date));
 }
 
 /// Returns the nearest divisor/multiple of 12.

@@ -86,6 +86,6 @@ class ColumnSeries<T> extends Series<T> {
 
 final testColumnSeries = ColumnSeries(
   name: 'test',
-  data: [10000.0, 20000.0, 15000.0, -8000.0, -9000.0, 7000.0],
+  data: [10000.0, 20000.0, 15000.0, -8000.0, -9000.001, 7123.45],
   valueMapper: (i, it) => it,
 );

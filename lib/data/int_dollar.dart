@@ -66,6 +66,9 @@ extension IntDollarString on String {
 }
 
 final _format = NumberFormat('#,###');
-String formatOrder(double val, int order) {
-  return _format.format(val);
+String formatOrder(double val, [int? order]) {
+  if (order == null) {
+    return NumberFormat('\$#,###.00').format(val);
+  }
+  return NumberFormat('#,###').format(val);
 }

@@ -5,7 +5,7 @@ import 'package:libra_sheet/graphing/auto_y_ticks.dart';
 
 import 'cartesian_coordinate_space.dart';
 
-String _defaultValToString(double val, int order) {
+String _defaultValToString(double val, [int? order]) {
   return "$val";
 }
 
@@ -54,7 +54,7 @@ class CartesianAxis {
   TextStyle? get labelStyle => _labelStyle ?? theme.textTheme.bodySmall;
 
   /// For hover, default axis labels, etc.
-  final String Function(double val, int order) valToString;
+  final String Function(double val, [int? order]) valToString;
 
   /// Grid line positions. If null, will be where the [labels] are.
   final List<double>? gridLines;
