@@ -195,6 +195,21 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     );
   }
 
+  @override
+  void didUpdateWidget(DiscreteCartesianGraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.xAxis != widget.xAxis ||
+        oldWidget.yAxis != widget.yAxis ||
+        oldWidget.data != widget.data) {
+      painter = DiscreteCartesianGraphPainter(
+        theme: Theme.of(context),
+        xAxis: widget.xAxis,
+        yAxis: widget.yAxis,
+        data: widget.data,
+      );
+    }
+  }
+
   void onHover(PointerHoverEvent event) {
     if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) return;
     final userX = painter!.coordSpace!.xAxis.pixelToUser(event.localPosition.dx).round();

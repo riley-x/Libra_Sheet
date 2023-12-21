@@ -92,9 +92,9 @@ class ColumnSeries<T> extends Series<T> {
 
   @override
   Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
-    if (i < 0 || i >= data.length) return null;
-    final val = valueMapper(i);
-    if (val == 0) return null;
+    if (i < 0 || i >= _renderedPoints.length) return null;
+    final point = _renderedPoints[i];
+    if (point.value == 0) return null;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -102,13 +102,13 @@ class ColumnSeries<T> extends Series<T> {
           width: 10.0,
           height: 10.0,
           decoration: BoxDecoration(
-            color: color,
+            color: point.color,
             shape: BoxShape.circle,
           ),
         ),
         const SizedBox(width: 5),
         Text(
-          "$name: ${mainGraph.yAxis.valToString(val)}",
+          "$name: ${mainGraph.yAxis.valToString(point.value)}",
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],

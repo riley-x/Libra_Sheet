@@ -3,15 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
+import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-Widget trackballTooltipBuilder(BuildContext context, TrackballDetails trackballDetails) {
-  return Container(
-    width: 70,
-    decoration: const BoxDecoration(color: Color.fromRGBO(66, 244, 164, 1)),
-    child: Text('${trackballDetails.point?.cumulativeValue}'),
-  );
-}
+final _defaultDates = [for (int i = 1; i <= 12; i++) DateTime.utc(2023, i)];
 
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
@@ -25,6 +24,47 @@ class CategoryStackChart extends StatelessWidget {
   final TrackballDisplayMode trackballDisplayMode;
 
   const CategoryStackChart(
+    this.data,
+    this.range, {
+    super.key,
+    this.trackballDisplayMode = TrackballDisplayMode.groupAllPoints,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DiscreteCartesianGraph(
+      yAxis: CartesianAxis(
+        theme: Theme.of(context),
+        axisLoc: null,
+        valToString: formatOrder,
+      ),
+      xAxis: MonthAxis(
+        theme: Theme.of(context),
+        axisLoc: 0,
+        dates: data.firstOrNull?.values.map((e) => e.time).toList() ?? _defaultDates,
+        // gridLines: [],
+      ),
+      data: SeriesCollection([
+        for (final categoryHistory in data)
+          StackColumnSeries<TimeIntValue>(
+            name: categoryHistory.category.name,
+            color: categoryHistory.category.color,
+            data: (range != null)
+                ? categoryHistory.values.sublist(range!.$1, range!.$2)
+                : categoryHistory.values,
+            valueMapper: (i, item) => item.value.asDollarDouble(),
+          ),
+      ]),
+    );
+  }
+}
+
+class SyncfusionCategoryStackChart extends StatelessWidget {
+  final List<CategoryHistory> data;
+  final (int, int)? range;
+  final TrackballDisplayMode trackballDisplayMode;
+
+  const SyncfusionCategoryStackChart(
     this.data,
     this.range, {
     super.key,
