@@ -9,10 +9,12 @@ class AccountCard extends StatelessWidget {
     super.key,
     required this.account,
     this.onTap,
+    this.padding,
   });
 
   final Account account;
   final Function(Account)? onTap;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class AccountCard extends StatelessWidget {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          padding: padding ?? const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: Row(
             children: [
               Container(

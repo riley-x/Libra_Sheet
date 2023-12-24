@@ -91,7 +91,7 @@ class EditAccountsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accounts = context.watch<AccountState>().list;
+    final accountState = context.watch<AccountState>();
     final state = context.watch<EditAccountState>();
 
     /// The IndexedStack preserves the scroll state of the ListView I think...
@@ -103,12 +103,16 @@ class EditAccountsScreen extends StatelessWidget {
           key: ObjectKey(state.focused),
         ),
         Scaffold(
-          body: ListView(
+          body: ReorderableListView(
             padding: const EdgeInsets.symmetric(horizontal: 10),
+            onReorder: (oldIndex, newIndex) => accountState.reorder(oldIndex, newIndex),
             children: [
-              for (final acc in accounts)
+              for (final acc in accountState.list)
                 AccountCard(
+                  key: ObjectKey(acc),
                   account: acc,
+                  // make space for drag handle
+                  padding: const EdgeInsets.only(left: 8, top: 4, bottom: 4, right: 50),
                   onTap: (it) => state.setFocus(it),
                 ),
             ],
@@ -132,96 +136,98 @@ class _EditAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<EditAccountState>();
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        Form(
-          key: state.formKey,
-          child: Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FixedColumnWidth(250),
-            },
-            children: [
-              labelRow(
-                context,
-                'Name',
-                LibraTextFormField(
-                  initial: state.focused?.name,
-                  validator: (it) => null,
-                  onSave: (it) => state.name = it ?? '',
-                ),
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Type',
-                SizedBox(
-                  height: 35,
-                  child: LibraDropdownFormField<AccountType>(
-                    initial: state.focused?.type,
-                    items: AccountType.values,
-                    builder: (context, it) =>
-                        Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
-                    onSave: (it) => state.type = it!,
+    return FocusScope(
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          Form(
+            key: state.formKey,
+            child: Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FixedColumnWidth(250),
+              },
+              children: [
+                labelRow(
+                  context,
+                  'Name',
+                  LibraTextFormField(
+                    initial: state.focused?.name,
+                    validator: (it) => null,
+                    onSave: (it) => state.name = it ?? '',
                   ),
                 ),
-                tooltip: "This is used mostly for organizing similar accounts together."
-                    "\nLiability accounts should only have negative values though.",
-              ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Description',
-                LibraTextFormField(
-                  initial: state.focused?.description,
-                  validator: (it) => null,
-                  onSave: (it) => state.description = it ?? '',
+                rowSpacing,
+                labelRow(
+                  context,
+                  'Type',
+                  SizedBox(
+                    height: 35,
+                    child: LibraDropdownFormField<AccountType>(
+                      initial: state.focused?.type,
+                      items: AccountType.values,
+                      builder: (context, it) =>
+                          Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
+                      onSave: (it) => state.type = it!,
+                    ),
+                  ),
+                  tooltip: "This is used mostly for organizing similar accounts together."
+                      "\nLiability accounts should only have negative values though.",
                 ),
-              ),
-              // rowSpacing,
-              // labelRow(
-              //   context,
-              //   'CSV Format',
-              //   LibraTextFormField(
-              //     initial: state.focused?.csvFormat,
-              //     validator: (it) => null,
-              //     onSave: (it) => state.saveSink.csvFormat = it ?? '',
-              //   ),
-              //   tooltip: "Instructions on how to parse the CSV.\n"
-              //       "You can leave this blank for new accounts.",
-              // ),
-              rowSpacing,
-              labelRow(
-                context,
-                'Color',
-                Container(
-                  height: 30,
-                  color: state.color,
-                  child: InkWell(
-                    onTap: () => showColorPicker(
-                      context: context,
-                      initialColor: state.color,
-                      onColorChanged: (it) => state.color = it,
-                      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-                      onClose: state.notifyListeners,
+                rowSpacing,
+                labelRow(
+                  context,
+                  'Description',
+                  LibraTextFormField(
+                    initial: state.focused?.description,
+                    validator: (it) => null,
+                    onSave: (it) => state.description = it ?? '',
+                  ),
+                ),
+                // rowSpacing,
+                // labelRow(
+                //   context,
+                //   'CSV Format',
+                //   LibraTextFormField(
+                //     initial: state.focused?.csvFormat,
+                //     validator: (it) => null,
+                //     onSave: (it) => state.saveSink.csvFormat = it ?? '',
+                //   ),
+                //   tooltip: "Instructions on how to parse the CSV.\n"
+                //       "You can leave this blank for new accounts.",
+                // ),
+                rowSpacing,
+                labelRow(
+                  context,
+                  'Color',
+                  Container(
+                    height: 30,
+                    color: state.color,
+                    child: InkWell(
+                      onTap: () => showColorPicker(
+                        context: context,
+                        initialColor: state.color,
+                        onColorChanged: (it) => state.color = it,
+                        // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+                        onClose: state.notifyListeners,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 15),
-        FormButtons(
-          showDelete: state.focused != null,
-          onDelete: null, // TODO
-          onCancel: state.clearFocus,
-          // onReset: state.reset,
-          onSave: state.save,
-        ),
-      ],
+          const SizedBox(height: 15),
+          FormButtons(
+            showDelete: state.focused != null,
+            onDelete: null, // TODO
+            onCancel: state.clearFocus,
+            // onReset: state.reset,
+            onSave: state.save,
+          ),
+        ],
+      ),
     );
   }
 }

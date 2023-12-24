@@ -74,15 +74,6 @@ FutureOr<int> insertAccount(Account acc, {int? listIndex}) async {
   );
 }
 
-Future<void> updateAccount(Account acc, {int? listIndex}) async {
-  await libraDatabase?.update(
-    accountsTable,
-    _toMap(acc, listIndex: listIndex),
-    where: '$_key = ?',
-    whereArgs: [acc.key],
-  );
-}
-
 Future<List<Account>> getAccounts() async {
   final List<Map<String, dynamic>> maps = await libraDatabase!.rawQuery(
     """
@@ -106,4 +97,24 @@ Future<List<Account>> getAccounts() async {
     """,
   );
   return List.generate(maps.length, (i) => _fromMap(maps[i]));
+}
+
+extension AccountDatabaseExtension on DatabaseExecutor {
+  Future<int> updateAccount(Account acc, {int? listIndex}) {
+    return update(
+      accountsTable,
+      _toMap(acc, listIndex: listIndex),
+      where: '$_key = ?',
+      whereArgs: [acc.key],
+    );
+  }
+
+  Future<int> shiftAccountIndicies(int start, int end, int delta) {
+    return rawUpdate(
+      "UPDATE $accountsTable "
+      "SET $_index = $_index + ? "
+      "WHERE $_index >= ? AND $_index < ?",
+      [delta, start, end],
+    );
+  }
 }

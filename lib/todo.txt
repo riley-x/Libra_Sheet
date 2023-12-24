@@ -1,6 +1,21 @@
+- Add total to each account section
+- Filter by reimbursed/allocated transactions
+- Reset filter on transaction lists
+- Search transactions by text
+- Bug moving parent of category; still shows up in old parent list (refresh bug)
+- Averages in cash flow? And totals in hover
+- Tooltip on reimbursements in CSV screen.
+- Transaction editor open to multiple screens...make sure nothing weird
+- Zoom/range certain graphs
+- Filter starting 0s on account balance history
+- Rerun category rule
+- Sort category rules; just add warning about order (or maybe internally order by specificity?)
+- Reorder accounts
+- Click on net income and investment returns
 - Export to CSV
 - Choose category/account on CSV column?
 - Maybe balance update? Specifically for investments?
 - Categories screen, change this mo. to custom range
 - Hover on heatmap
 - Replace all database calls with extension (see tags.dart).
+- Automatic cloud backup?
