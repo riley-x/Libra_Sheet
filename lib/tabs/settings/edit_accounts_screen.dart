@@ -167,8 +167,10 @@ class _EditAccount extends StatelessWidget {
                     child: LibraDropdownFormField<AccountType>(
                       initial: state.focused?.type,
                       items: AccountType.values,
-                      builder: (context, it) =>
-                          Text(it.toString(), style: Theme.of(context).textTheme.bodyMedium),
+                      builder: (context, it) => Text(
+                        it?.toString() ?? '',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                       onSave: (it) => state.type = it!,
                     ),
                   ),

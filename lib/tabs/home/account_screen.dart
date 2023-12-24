@@ -36,7 +36,9 @@ class _AccountScreenState extends State<AccountScreen> {
     if (!mounted) return;
     final appState = context.read<LibraAppState>();
     var newData = await LibraDatabase.db.getMonthlyNet(accountId: widget.account.key);
-    newData = newData.withAlignedTimes(appState.monthList, cumulate: true).fixedForCharts();
+    newData = newData
+        .withAlignedTimes(appState.monthList, cumulate: true, trimStart: true)
+        .fixedForCharts();
 
     if (!mounted) return;
     setState(() {

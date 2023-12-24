@@ -16,7 +16,7 @@ Widget accountMenuBuilder(BuildContext context, Account? account) {
         // This is necessary to make sure the text clips properly
         Flexible(
           child: Text(
-            account?.name ?? 'None',
+            account?.name ?? '',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelLarge,

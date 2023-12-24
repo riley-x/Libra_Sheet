@@ -38,20 +38,38 @@ List<TimeIntValue> addParallel(
 
 extension TimeValueList on List<TimeIntValue> {
   /// Returns a list based on [this] but with padded entries so that they align with [times].
-  /// If [this] is missing a value, it will add an entry with value 0 or a cumulative value if
-  /// [cumulate]. This function assumes [this] and [times] are sorted by time value already!
-  List<int> alignValues(List<DateTime> times, {bool cumulate = false}) {
-    List<int> out = [];
+  /// If [this] is missing a value, it will add an entry with value 0, or if [cumulate], a
+  /// cumulative sum starting from the beginning.
+  ///
+  /// This function assumes [this] and [times] are sorted by time value already!
+  ///
+  /// [trimStart] will ignore leading 0's in the output array.
+  List<TimeIntValue> withAlignedTimes(
+    List<DateTime> times, {
+    bool cumulate = false,
+    bool trimStart = false,
+  }) {
+    List<TimeIntValue> out = [];
     int iOrig = 0;
     int iTime = 0;
+    bool isLeadingZero = true;
 
-    int cumValue() => cumulate ? (out.lastOrNull ?? 0) : 0;
+    int cumValue() => cumulate ? (out.lastOrNull?.value ?? 0) : 0;
+
+    void addValue(DateTime time, int value) {
+      if (value != 0) {
+        isLeadingZero = false;
+        out.add(TimeIntValue(time: time, value: value));
+      } else if (!trimStart || !isLeadingZero) {
+        out.add(TimeIntValue(time: time, value: value));
+      }
+    }
 
     while (iOrig < length && iTime < times.length) {
       final orig = this[iOrig];
       final time = times[iTime];
       if (orig.time.isAtSameMomentAs(time)) {
-        out.add(orig.value + cumValue());
+        addValue(time, orig.value + cumValue());
         iOrig++;
         iTime++;
       } else if (orig.time.isBefore(time)) {
@@ -59,27 +77,29 @@ extension TimeValueList on List<TimeIntValue> {
         iOrig++;
       } else {
         /// Date from [times] missing in [this], add placeholder (cumulative) value
-        out.add(cumValue());
+        addValue(time, cumValue());
         iTime++;
       }
     }
 
     /// Wrap up any other missing values from [times]
     while (iTime < times.length) {
-      out.add(cumValue());
+      addValue(times[iTime], cumValue());
       iTime++;
     }
 
     return out;
   }
 
-  /// Returns a list based on [this] but with padded entries so that they align with [times].
-  /// If [this] is missing a value, it will add an entry with value 0 or a cumulative value if
-  /// [cumulate]. This function assumes [this] and [times] are sorted by time value already!
-  List<TimeIntValue> withAlignedTimes(List<DateTime> times, {bool cumulate = false}) {
-    final vals = alignValues(times, cumulate: cumulate);
+  /// See [withAlignedTimes].
+  List<int> alignValues(
+    List<DateTime> times, {
+    bool cumulate = false,
+    bool trimStart = false,
+  }) {
+    final vals = withAlignedTimes(times, cumulate: cumulate, trimStart: trimStart);
     return [
-      for (int i = 0; i < vals.length; i++) TimeIntValue(time: times[i], value: vals[i]),
+      for (final val in vals) val.value,
     ];
   }
 

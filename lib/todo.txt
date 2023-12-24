@@ -10,7 +10,6 @@
 - Filter starting 0s on account balance history
 - Rerun category rule
 - Sort category rules; just add warning about order (or maybe internally order by specificity?)
-- Reorder accounts
 - Click on net income and investment returns
 - Export to CSV
 - Choose category/account on CSV column?
