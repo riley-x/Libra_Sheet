@@ -39,6 +39,10 @@ class _AccountScreenState extends State<AccountScreen> {
     newData = newData
         .withAlignedTimes(appState.monthList, cumulate: true, trimStart: true)
         .fixedForCharts();
+    if (newData.length == 1) {
+      // Duplicate the data so the plot isn't empty
+      newData.add(newData[0].withTime((it) => it.add(const Duration(seconds: 1))));
+    }
 
     if (!mounted) return;
     setState(() {

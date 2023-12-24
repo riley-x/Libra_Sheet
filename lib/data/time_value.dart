@@ -5,6 +5,14 @@ class TimeIntValue {
   final int value;
 
   const TimeIntValue({required this.time, required this.value});
+
+  TimeIntValue copyWith({DateTime? time, int? value}) => TimeIntValue(
+        time: time ?? this.time,
+        value: value ?? this.value,
+      );
+
+  TimeIntValue withTime(DateTime Function(DateTime it) newTime) =>
+      TimeIntValue(time: newTime(time), value: value);
 }
 
 class TimeValue {
