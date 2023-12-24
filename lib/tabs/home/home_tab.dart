@@ -25,9 +25,9 @@ class _HomeTab extends StatelessWidget {
     return Row(
       children: [
         const SizedBox(
-          width: 370,
+          width: 400,
           child: AccountList(
-            padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
+            padding: EdgeInsets.only(top: 10, left: 10, right: 12, bottom: 10),
           ),
         ),
         Container(

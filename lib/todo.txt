@@ -1,4 +1,4 @@
-- Add total to each account section
+- Hover pie graph
 - Filter by reimbursed/allocated transactions
 - Reset filter on transaction lists
 - Search transactions by text

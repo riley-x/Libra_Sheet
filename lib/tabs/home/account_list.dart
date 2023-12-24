@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/account_card.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:provider/provider.dart';
 
@@ -17,40 +18,48 @@ class AccountList extends StatelessWidget {
   Widget build(BuildContext context) {
     final accounts = context.watch<AccountState>().list;
 
+    List<Widget> accountSection(AccountType type) {
+      final accs = [];
+      var sum = 0;
+      for (final account in accounts) {
+        if (account.type == type) {
+          sum += account.balance;
+          accs.add(AccountCard(account: account));
+        }
+      }
+      if (accs.isEmpty) return const [];
+      return [
+        Row(
+          children: [
+            Text(
+              "${type.label} Accounts",
+              style: Theme.of(context).textTheme.headlineSmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  sum.dollarString(),
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+            ),
+          ],
+        ),
+        ...accs,
+        const SizedBox(height: 20),
+      ];
+    }
+
     return ListView(
       padding: padding,
       children: [
-        Text(
-          "Cash Accounts",
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        for (final account in accounts) ...[
-          if (account.type == AccountType.cash) AccountCard(account: account),
-        ],
-        const SizedBox(height: 20),
-        Text(
-          "Bank Accounts",
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        for (final account in accounts) ...[
-          if (account.type == AccountType.bank) AccountCard(account: account),
-        ],
-        const SizedBox(height: 20),
-        Text(
-          "Investment Accounts",
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        for (final account in accounts) ...[
-          if (account.type == AccountType.investment) AccountCard(account: account),
-        ],
-        const SizedBox(height: 20),
-        Text(
-          "Liabilities",
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        for (final account in accounts) ...[
-          if (account.type == AccountType.liability) AccountCard(account: account),
-        ],
+        ...accountSection(AccountType.cash),
+        ...accountSection(AccountType.bank),
+        ...accountSection(AccountType.investment),
+        ...accountSection(AccountType.liability),
       ],
     );
   }
