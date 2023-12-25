@@ -32,6 +32,8 @@ const transactionNote = _note;
 const transactionAccount = _account;
 const transactionCategory = _category;
 
+const transactionTotalReimbursements = _reimb_total;
+
 const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "$_name TEXT NOT NULL, "

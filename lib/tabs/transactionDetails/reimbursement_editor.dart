@@ -6,6 +6,7 @@ import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/components/table_form_utils.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
@@ -96,7 +97,7 @@ class _Form extends StatelessWidget {
                 // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
                 margin: const EdgeInsets.all(0),
                 showTags: false,
-                onSelect: (t) {},
+                onSelect: (t) => toTransactionDetails(context, t),
               ),
             ),
           ),

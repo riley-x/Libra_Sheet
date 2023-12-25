@@ -56,8 +56,10 @@ class TransactionDetailsScreen extends StatelessWidget {
         children: [
           CommonBackBar(
             leftText: "Transaction Editor",
-            // rightText: "Database key: ${transaction?.key}",
-            // rightStyle: Theme.of(context).textTheme.labelMedium,
+            rightText: (original == null || original!.key == 0)
+                ? "New transaction"
+                : "Database key: ${original?.key}",
+            rightStyle: Theme.of(context).textTheme.labelMedium,
             onBack: () {
               final state = context.read<TransactionDetailsState>();
               if (state.focus != TransactionDetailActiveFocus.none) {

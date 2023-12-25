@@ -172,7 +172,7 @@ Future<List<Reimbursement>> loadReimbursements({
       t.*,
       GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
       COUNT(a.$allocationsKey) as nAllocs,
-      COUNT(r.$reimbExpense) as nReimbs,
+      SUM(r.$reimbValue) as $transactionTotalReimbursements,
       reimbs.$_value as reimb_value
     FROM (
         SELECT $targetColumn, $_value FROM $reimbursementsTable WHERE $parentColumn = ?
