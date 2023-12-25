@@ -9,6 +9,7 @@ import 'package:libra_sheet/graphing/category_stack_chart.dart';
 import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
+import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
@@ -58,7 +59,7 @@ class _CashFlowCharts extends StatelessWidget {
         startTime: month,
         endTime: month.monthEnd(),
         categories: CategoryTristateMap({category}),
-        accounts: context.read<CashFlowState>().accounts,
+        accounts: Set.from(context.read<CashFlowState>().accounts),
       ),
     );
   }
@@ -101,13 +102,27 @@ class _CashFlowCharts extends StatelessWidget {
       return Column(
         children: [
           Text("Net Income", style: textStyle),
-          Expanded(child: RedGreenBarChart(state.netIncome.sublist(range.$1, range.$2))),
+          Expanded(
+            child: RedGreenBarChart(
+              state.netIncome.sublist(range.$1, range.$2),
+              onSelect: (_, point) {
+                // Navigate to transaction tab and show transactions from this month.
+                // Top-level filter state is the one used by the transaction tab.
+                final filterState = context.read<TransactionFilterState>();
+                filterState.filters.accounts = Set.from(state.accounts);
+                filterState.filters.categories.clear();
+                filterState.setStartTime(point.time, false);
+                filterState.setEndTime(point.time.monthEnd());
+                context.read<LibraAppState>().setTab(LibraNavDestination.transactions.index);
+              },
+            ),
+          ),
           const SizedBox(height: 10),
           Text("Investment Returns", style: textStyle),
           Expanded(
             child: RedGreenBarChart(
               state.netReturns.sublist(range.$1, range.$2),
-              onSelect: (_, data) => onTap(context, Category.investment, data.time),
+              onSelect: (_, point) => onTap(context, Category.investment, point.time),
             ),
           ),
         ],

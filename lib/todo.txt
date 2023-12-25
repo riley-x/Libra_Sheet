@@ -8,7 +8,6 @@
 - Zoom/range certain graphs
 - Rerun category rule
 - Sort category rules; just add warning about order (or maybe internally order by specificity?)
-- Click on net income
 - Export to CSV
 - Choose category/account on CSV column?
 - Maybe balance update? Specifically for investments?

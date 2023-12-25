@@ -282,6 +282,8 @@ class CategoryTristateMap {
   Iterable<int> activeKeys() {
     return _map.keys;
   }
+
+  void clear() => _map.clear();
 }
 
 extension CategoryList on List<Category> {

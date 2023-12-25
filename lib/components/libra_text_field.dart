@@ -57,6 +57,10 @@ class _FocusTextFieldState extends State<FocusTextField> {
     return LimitedBox(
       maxWidth: 100,
       child: TextFormField(
+        // The key makes sure a new widget is created when the initial value is changed. This helps
+        // fix bugs where the initial value is changed from the widget. Maybe could achieve same
+        // effect with [State.didUpdateWidget].
+        key: ValueKey(widget.intial),
         initialValue: widget.intial,
         decoration: InputDecoration(
           filled: widget.active && !widget.error,

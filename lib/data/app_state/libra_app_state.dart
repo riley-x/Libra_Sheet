@@ -118,7 +118,9 @@ class LibraAppState extends ChangeNotifier {
 
   void setTab(int i) {
     currentTab = i;
-    navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    // TODO pop to beginning on internal navigators on re-select tab?
+    // NOT the top level navigator.
+    // navigatorKey.currentState?.popUntil((route) => route.isFirst);
     notifyListeners();
   }
 }

@@ -176,6 +176,7 @@ class _Body extends StatelessWidget {
                           ],
                           onSelect: (_, point) {
                             final filterState = context.read<TransactionFilterState>();
+                            filterState.filters.accounts = Set.from(initialFilters?.accounts ?? {});
                             filterState.filters.categories = CategoryTristateMap({category}, false);
                             filterState.setStartTime(point.time, false);
                             filterState.setEndTime(point.time.monthEnd());
