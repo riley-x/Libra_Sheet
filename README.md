@@ -4,7 +4,7 @@ This is a Flutter app for tracking and categorizing your expenses. It is designe
 
 ## Preview
 
-You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/). This naturally doesn't link to any database, but is a nice way to preview the UI.
+You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/). This uses fake data so some things don't work, but it is a nice way to preview the UI.
 
 ### Your accounts and net worth at a glance
 
