@@ -22,7 +22,7 @@ class FormButtons extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (showDelete || onDelete != null) ...[
+        if (showDelete && onDelete != null) ...[
           ElevatedButton(
             onPressed: onDelete,
             style: ElevatedButton.styleFrom(
