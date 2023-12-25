@@ -45,7 +45,7 @@ class BoundingBox {
 ///     [boundingBox]
 ///
 /// Suggested overrides:
-///     [hoverValue] or [hoverBuilder]
+///     [hoverValue] or also [hoverBuilder]
 ///     [hitTest]
 abstract class Series<T> {
   final String name;
@@ -59,7 +59,8 @@ abstract class Series<T> {
   void paint(Canvas canvas, CartesianCoordinateSpace coordSpace);
 
   /// This is the value shown when hovering over a data point. The value is formatted by the
-  /// corresponding axis. Note if [hoverBuilder] returns not null, this value is ignored.
+  /// corresponding axis. Note if [hoverBuilder] returns not null, it will take precedence, but this
+  /// value may still be used, i.e. the [PooledTooltip] which sums entries together.
   double? hoverValue(int i) => null;
 
   /// The widget to display when hovering. See also [hoverValue] for simple cases.

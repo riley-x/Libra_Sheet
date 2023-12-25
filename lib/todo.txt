@@ -2,7 +2,7 @@
 - Filter by reimbursed/allocated transactions
 - Reset filter on transaction lists
 - Search transactions by text
-- Averages in cash flow? And totals in hover
+- Averages in cash flow...
 - Tooltip on reimbursements in CSV screen.
 - Transaction editor open to multiple screens...make sure nothing weird
 - Zoom/range certain graphs

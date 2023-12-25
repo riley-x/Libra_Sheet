@@ -3,6 +3,14 @@ import 'package:flutter/rendering.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
+/// This widget controls the hover for a discrete x-axis graph. A solid vertical line is drawn at
+/// the hover position given by [hoverLoc], and the [tooltip] is drawn next to it and placed to not
+/// fall off the graph.
+///
+/// If [tooltip] is null, will use a [PooledTooltip] by default.
+///
+/// This widget should be used in a [Stack] with a [DiscreteCartesianGraphPainter] such that they
+/// have the same size.
 class SnapLineHover extends SingleChildRenderObjectWidget {
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
@@ -32,6 +40,8 @@ class SnapLineHover extends SingleChildRenderObjectWidget {
   }
 }
 
+/// The actual RenderObject for the [SnapLineHover]. This handles painting the line and placing
+/// the tooltip.
 class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   DiscreteCartesianGraphPainter? painter;
   int? hoverLoc;
@@ -71,6 +81,8 @@ class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<Rend
   }
 }
 
+/// This is a hover tooltip that pools together all the data at a single point in a discrete x-value
+/// graph. It displays a title followed by entries from each series in a column.
 class PooledTooltip extends StatelessWidget {
   const PooledTooltip(this.mainGraph, this.hoverLoc, {super.key});
   final DiscreteCartesianGraphPainter mainGraph;
@@ -84,7 +96,7 @@ class PooledTooltip extends StatelessWidget {
     if (widget != null) return widget;
 
     final val = series.hoverValue(hoverLoc!);
-    if (val == null) return null;
+    if (val == null || val == 0) return null;
 
     return Text(
       "${series.name}: ${mainGraph.yAxis.valToString(val)}",
@@ -95,6 +107,15 @@ class PooledTooltip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hoverLoc == null) return const SizedBox();
+
+    String getTotal() {
+      var total = 0.0;
+      for (final series in mainGraph.data.data) {
+        total += series.hoverValue(hoverLoc!) ?? 0;
+      }
+      return mainGraph.yAxis.valToString(total);
+    }
+
     return IntrinsicWidth(
       child: Container(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
@@ -122,6 +143,18 @@ class PooledTooltip extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: _getSeriesLabel(context, series),
               ),
+
+            /// Total
+            if (mainGraph.data.data.length > 1) ...[
+              Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onBackground),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Total: ${getTotal()}",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ]
           ],
         ),
       ),

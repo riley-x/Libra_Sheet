@@ -86,10 +86,12 @@ class ColumnSeries<T> extends Series<T> {
     return BoundingBox(xMin: x - width / 2, xMax: x + width / 2, yMin: min(0, y), yMax: max(0, y));
   }
 
-  // @override
-  // double? hoverValue(int i) {
-  //   return valueMapper(i);
-  // }
+  @override
+  double? hoverValue(int i) {
+    final val = valueMapper(i);
+    if (val == 0) return null;
+    return val;
+  }
 
   @override
   Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
