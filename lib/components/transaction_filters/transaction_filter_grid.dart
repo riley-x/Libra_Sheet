@@ -33,6 +33,8 @@ class TransactionFilterGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(createProvider || initialFilters == null);
+    // initialFilters is only used for initializing the provider state
     final grid = _TransactionFilterGrid(
       padding: padding,
       title: title,

@@ -29,6 +29,18 @@ class TransactionFilters {
   })  : accounts = accounts ?? {},
         tags = tags ?? {},
         categories = categories ?? CategoryTristateMap();
+
+  TransactionFilters copy() {
+    return TransactionFilters(
+      minValue: minValue,
+      maxValue: maxValue,
+      startTime: startTime,
+      endTime: endTime,
+      accounts: Set.from(accounts),
+      categories: categories.copy(),
+      limit: limit,
+    );
+  }
 }
 
 /// This class stores the common state for a TransactionFilterColumn and its corresponding transactions.
@@ -38,8 +50,8 @@ class TransactionFilterState extends ChangeNotifier {
     this.service, {
     TransactionFilters? initialFilters,
     this.doLoads = true,
-  }) {
-    if (initialFilters != null) filters = initialFilters;
+  }) : initialFilters = initialFilters ?? TransactionFilters() {
+    filters = this.initialFilters.copy();
     service.addListener(loadTransactions);
     loadTransactions();
   }
@@ -47,6 +59,8 @@ class TransactionFilterState extends ChangeNotifier {
   //----------------------------------------------------------------------
   // Config
   //----------------------------------------------------------------------
+  /// Initial filters passed to the state on creation. Used for resetting.
+  final TransactionFilters initialFilters;
   final TransactionService service;
   final bool doLoads;
 
@@ -185,5 +199,9 @@ class TransactionFilterState extends ChangeNotifier {
     minValueError = false;
     maxValueError = false;
     loadTransactions();
+  }
+
+  void resetFilters() {
+    setFilters(initialFilters.copy());
   }
 }

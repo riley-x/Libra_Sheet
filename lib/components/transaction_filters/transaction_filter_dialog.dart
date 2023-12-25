@@ -31,6 +31,7 @@ class TransactionFilterDialog extends StatelessWidget {
             child: TransactionFiltersColumn(
               showConfirmationButtons: true,
               onCancel: () => Navigator.pop(context),
+              // onReset: context.read<TransactionFilterState>().resetFilters,
               onSave: (onSave == null)
                   ? null
                   : () {

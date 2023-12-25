@@ -224,9 +224,12 @@ class CategoryHistory {
 ///
 /// This makes it easy to test for inclusion in the filter just by using contains().
 class CategoryTristateMap {
+  final Map<int, bool> _map;
+
   /// [initial]: An initial set of categories to be marked as selected.
   /// [withSubcats]: If true, automatically adds the subcats of [initial] too.
-  CategoryTristateMap([Iterable<Category> initial = const {}, bool withSubcats = true]) {
+  CategoryTristateMap([Iterable<Category> initial = const {}, bool withSubcats = true])
+      : _map = {} {
     for (final cat in initial) {
       if (withSubcats) {
         set(cat, true);
@@ -236,7 +239,7 @@ class CategoryTristateMap {
     }
   }
 
-  final Map<int, bool> _map = {};
+  CategoryTristateMap._internal(this._map);
 
   void set(Category cat, bool? selected) {
     if (selected == true) {
@@ -284,6 +287,8 @@ class CategoryTristateMap {
   }
 
   void clear() => _map.clear();
+
+  CategoryTristateMap copy() => CategoryTristateMap._internal(Map.from(_map));
 }
 
 extension CategoryList on List<Category> {

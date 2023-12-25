@@ -141,7 +141,6 @@ class _Body extends StatelessWidget {
             child: TransactionFilterGrid(
               padding: const EdgeInsets.only(right: 10),
               createProvider: false,
-              initialFilters: initialFilters,
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
