@@ -88,25 +88,30 @@ class PooledTooltip extends StatelessWidget {
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
 
-  Widget? _getSeriesLabel(BuildContext context, Series series) {
-    if (hoverLoc == null) return null;
-    if (hoverLoc! >= series.data.length) return null;
-
-    final widget = series.hoverBuilder(context, hoverLoc!, mainGraph);
-    if (widget != null) return widget;
-
-    final val = series.hoverValue(hoverLoc!);
-    if (val == null || val == 0) return null;
-
-    return Text(
-      "${series.name}: ${mainGraph.yAxis.valToString(val)}",
-      style: Theme.of(context).textTheme.bodyMedium,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (hoverLoc == null) return const SizedBox();
+
+    int count = 0;
+    Widget? _getSeriesLabel(BuildContext context, Series series) {
+      if (hoverLoc == null) return null;
+      if (hoverLoc! >= series.data.length) return null;
+
+      final widget = series.hoverBuilder(context, hoverLoc!, mainGraph);
+      if (widget != null) {
+        count++;
+        return widget;
+      }
+
+      final val = series.hoverValue(hoverLoc!);
+      if (val == null || val == 0) return null;
+
+      count++;
+      return Text(
+        "${series.name}: ${mainGraph.yAxis.valToString(val)}",
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
 
     String getTotal() {
       var total = 0.0;
@@ -145,7 +150,7 @@ class PooledTooltip extends StatelessWidget {
               ),
 
             /// Total
-            if (mainGraph.data.data.length > 1) ...[
+            if (count > 1) ...[
               Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onBackground),
               Align(
                 alignment: Alignment.centerLeft,
