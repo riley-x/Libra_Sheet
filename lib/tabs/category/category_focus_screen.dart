@@ -6,8 +6,11 @@ import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/category_stack_chart.dart';
+import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
@@ -157,28 +160,50 @@ class _Body extends StatelessWidget {
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: CategoryStackChart(
-                    data: data,
-                    onTap: (category, month) {
-                      if (category == this.category) {
-                        final filterState = context.read<TransactionFilterState>();
-                        filterState.filters.categories = CategoryTristateMap({category}, false);
-                        filterState.setStartTime(month, false);
-                        filterState.setEndTime(month.monthEnd());
-                      } else {
-                        toCategoryScreen(
-                          context,
-                          category,
-                          initialFilters: TransactionFilters(
-                            startTime: month,
-                            endTime: month.monthEnd(),
-                            categories: CategoryTristateMap({category}),
-                            accounts: initialFilters?.accounts,
-                          ),
-                        );
-                      }
-                    },
-                  ),
+                  child: (category.type == ExpenseFilterType.all)
+                      // This screen is also used for Investment Returns and Net income/expense
+                      // which both use type [all]. In these cases there's gauranteed only one
+                      // category but we have both positive and negative values. So show RedGreen
+                      // instead.
+                      ? RedGreenBarChart(
+                          [
+                            for (int i = 0; i < data.times.length; i++)
+                              TimeIntValue(
+                                time: data.times[i],
+                                value: data.categories.firstOrNull?.values[i] ?? 0,
+                              ),
+                          ],
+                          onSelect: (_, point) {
+                            final filterState = context.read<TransactionFilterState>();
+                            filterState.filters.categories = CategoryTristateMap({category}, false);
+                            filterState.setStartTime(point.time, false);
+                            filterState.setEndTime(point.time.monthEnd());
+                          },
+                        )
+                      // Otherwise, just a normal category, and show the stack chart.
+                      : CategoryStackChart(
+                          data: data,
+                          onTap: (category, month) {
+                            if (category == this.category) {
+                              final filterState = context.read<TransactionFilterState>();
+                              filterState.filters.categories =
+                                  CategoryTristateMap({category}, false);
+                              filterState.setStartTime(month, false);
+                              filterState.setEndTime(month.monthEnd());
+                            } else {
+                              toCategoryScreen(
+                                context,
+                                category,
+                                initialFilters: TransactionFilters(
+                                  startTime: month,
+                                  endTime: month.monthEnd(),
+                                  categories: CategoryTristateMap({category}),
+                                  accounts: initialFilters?.accounts,
+                                ),
+                              );
+                            }
+                          },
+                        ),
                 ),
               ),
               // TODO which values to show? Should match transaction filters? But the category history

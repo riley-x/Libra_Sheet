@@ -15,7 +15,13 @@ final _dateFormat = DateFormat("MMM ''yy"); // single quote is escaped by doubli
 /// values are shown as red bars.
 class RedGreenBarChart extends StatelessWidget {
   final List<TimeIntValue> data;
-  const RedGreenBarChart(this.data, {super.key});
+  const RedGreenBarChart(
+    this.data, {
+    super.key,
+    this.onSelect,
+  });
+
+  final Function(int i, TimeIntValue)? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +44,7 @@ class RedGreenBarChart extends StatelessWidget {
           colorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
         ),
       ]),
+      onTap: (onSelect == null) ? null : (_, __, i) => onSelect!(i, data[i]),
     );
   }
 }
