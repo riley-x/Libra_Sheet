@@ -52,14 +52,22 @@ class TransactionDetailsScreen extends StatelessWidget {
           );
         },
       ),
-      child: const Column(
+      builder: (context, child) => Column(
         children: [
           CommonBackBar(
             leftText: "Transaction Editor",
             // rightText: "Database key: ${transaction?.key}",
             // rightStyle: Theme.of(context).textTheme.labelMedium,
+            onBack: () {
+              final state = context.read<TransactionDetailsState>();
+              if (state.focus != TransactionDetailActiveFocus.none) {
+                state.clearFocus();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
           ),
-          Expanded(child: _TransactionDetailsScreen()),
+          const Expanded(child: _TransactionDetailsScreen()),
         ],
       ),
     );
