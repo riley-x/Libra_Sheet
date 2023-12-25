@@ -11,6 +11,7 @@ import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
 
 /// Simple form for adding a reimbursement, used in the second panel of the transaction detail screen.
+/// It shows a two-column form at the top and a list of target transactions on bottom.
 class ReimbursementEditor extends StatelessWidget {
   const ReimbursementEditor({super.key});
 
@@ -68,7 +69,7 @@ class _Form extends StatelessWidget {
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         columnWidths: const {
           0: IntrinsicColumnWidth(),
-          1: FixedColumnWidth(250),
+          1: FixedColumnWidth(300),
         },
         children: [
           labelRow(
@@ -95,6 +96,7 @@ class _Form extends StatelessWidget {
                 // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
                 margin: const EdgeInsets.all(0),
                 showTags: false,
+                onSelect: (t) {},
               ),
             ),
           ),

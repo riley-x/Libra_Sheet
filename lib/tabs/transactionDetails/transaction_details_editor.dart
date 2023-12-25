@@ -58,7 +58,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                   columnWidths: const {
                     0: IntrinsicColumnWidth(),
-                    1: FixedColumnWidth(250),
+                    1: FixedColumnWidth(275),
                   },
                   children: [
                     labelRow(
@@ -323,7 +323,6 @@ class _TagSelector extends StatelessWidget {
           isChecked: (it) => tags.contains(it),
           onChanged: onChanged,
         ),
-        const SizedBox(width: 2),
       ],
     );
   }

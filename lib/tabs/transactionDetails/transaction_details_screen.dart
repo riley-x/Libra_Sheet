@@ -85,7 +85,7 @@ class _TransactionDetailsScreen extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 850) {
+        if (constraints.maxWidth < 900) {
           /// The IndexedStack keeps the FormField states alive when transitioning to the
           /// auxEditor and back.
           return IndexedStack(
