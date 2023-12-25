@@ -52,9 +52,10 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     );
     if (!mounted) return; // across async await
 
-    /// Output list
+    /// Output list.
     final newData = CategoryHistory(appState.monthList);
     newData.addIndividual(widget.category, rawHistory, recurseSubcats: widget.category.level == 1);
+    // Don't add subcats for the super categories with level == 0
 
     setState(() {
       data = newData;
@@ -154,14 +155,14 @@ class _Body extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              /// this empircally matches the extra height caused by the icon button in the transaction filter grid
+              // This empircally matches the extra height caused by the icon button in the transaction filter grid
               const SizedBox(height: 7),
               Expanded(
                 child: ChartWithTitle(
                   textLeft: 'Category History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
                   child: (category.type == ExpenseFilterType.all)
-                      // This screen is also used for Investment Returns and Net income/expense
+                      // This screen is also used for Investment Returns and possibly Ignore
                       // which both use type [all]. In these cases there's gauranteed only one
                       // category but we have both positive and negative values. So show RedGreen
                       // instead.

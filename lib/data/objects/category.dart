@@ -248,7 +248,7 @@ class CategoryTristateMap {
       }
     } else if (selected == null) {
       _map[cat.key] = false;
-      if (cat.level == 1) {
+      if (isTristate(cat)) {
         for (final subCat in cat.subCats) {
           _map.remove(subCat.key);
         }
