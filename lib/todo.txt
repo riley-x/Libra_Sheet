@@ -2,7 +2,6 @@
 - Filter by reimbursed/allocated transactions
 - Reset filter on transaction lists
 - Search transactions by text
-- Bug moving parent of category; still shows up in old parent list (refresh bug)
 - Averages in cash flow? And totals in hover
 - Tooltip on reimbursements in CSV screen.
 - Transaction editor open to multiple screens...make sure nothing weird

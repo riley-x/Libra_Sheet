@@ -44,7 +44,7 @@ class CategoryState {
 
   void delete(Category cat, {Category? oldParent, bool deleteFromDatabase = true}) async {
     debugPrint("CategoryState::delete() $cat");
-    final parentList = cat.parent!.subCats;
+    final parentList = oldParent?.subCats ?? cat.parent!.subCats;
     final ind = parentList.indexWhere((it) => it.key == cat.key);
     parentList.removeAt(ind);
     appState.notifyListeners();
