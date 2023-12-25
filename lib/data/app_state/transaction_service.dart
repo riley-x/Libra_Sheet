@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -65,6 +66,16 @@ class TransactionService extends ChangeNotifier {
       accounts: appState.accounts.createAccountMap(),
       categories: appState.categories.createKeyMap(),
       tags: appState.tags.createKeyMap(),
+    );
+  }
+
+  Future<void> reloadReimbursements(Transaction t) async {
+    t.reimbursements = await loadReimbursements(
+      parent: t,
+      accounts: appState.accounts.createAccountMap(),
+      categories: appState.categories.createKeyMap(),
+      tags: appState.tags.createKeyMap(),
+      db: LibraDatabase.db,
     );
   }
 }

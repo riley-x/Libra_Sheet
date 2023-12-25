@@ -59,9 +59,20 @@ class Transaction {
   /// Similarly, we don't load all the reimbursements with the transaction in the list view, but
   /// we do get the total value. This field is not used when [reimbursements] is not null.
   final int _reimbTotal;
+
+  /// Remember that reimbursements are always stored as positive value. See [valueAfterReimbursements]
+  /// for a signed value.
   int get totalReimbusrements {
     if (reimbursements == null) return _reimbTotal;
     return reimbursements!.fold(0, (cum, e) => cum + e.value);
+  }
+
+  int valueAfterReimbursements() {
+    if (value < 0) {
+      return value + totalReimbusrements;
+    } else {
+      return value - totalReimbusrements;
+    }
   }
 
   @override

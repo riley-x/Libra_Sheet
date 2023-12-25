@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/database/reimbursements.dart';
+import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
@@ -28,6 +31,13 @@ class TransactionDetailsState extends ChangeNotifier {
     this.initialAccount,
   }) {
     _init();
+    appState.transactions.addListener(reloadReimbursements);
+  }
+
+  @override
+  void dispose() {
+    appState.transactions.removeListener(reloadReimbursements);
+    super.dispose();
   }
 
   //---------------------------------------------------------------------------------------------
@@ -73,8 +83,8 @@ class TransactionDetailsState extends ChangeNotifier {
   int reimbursementValue = 0;
 
   /// Allocation editor
-  final MutableAllocation updatedAllocation =
-      MutableAllocation(); // TODO replace these with the now non-const version of the class
+  final MutableAllocation updatedAllocation = MutableAllocation();
+  // TODO replace these with the now non-const version of the class
 
   //---------------------------------------------------------------------------------------------
   // These variables are the UI state for the relevant fields. They are used to finalize the output
@@ -91,7 +101,7 @@ class TransactionDetailsState extends ChangeNotifier {
 
   final List<Tag> tags = [];
   final List<Allocation> allocations = [];
-  final List<Reimbursement> reimbursements = [];
+  List<Reimbursement> reimbursements = [];
 
   /// Current reimbursement target selected in the reimbursement editor.
   Transaction? reimburseTarget;
@@ -117,6 +127,7 @@ class TransactionDetailsState extends ChangeNotifier {
     reset();
   }
 
+  /// Reset everything to the original [seed].
   void reset() {
     formKey.currentState?.reset();
     tags.clear();
@@ -127,19 +138,65 @@ class TransactionDetailsState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reset just the allocation editor
+  /// Reset just the allocation editor.
   void resetAllocation() {
     allocationFormKey.currentState?.reset();
     notifyListeners();
   }
 
-  /// Reset just the reimbursement editor
+  /// Reset just the reimbursement editor.
   void resetReimbursement() {
     reimbursementFormKey.currentState?.reset();
     reimburseTarget = focusedReimbursement?.target;
     reimbursementValueController.text =
         focusedReimbursement?.value.dollarString(dollarSign: false) ?? '';
     reimbursementError = null;
+    notifyListeners();
+  }
+
+  /// After changing any transaction, we need to reload the reimbursements in case one of them was
+  /// changed. This is used as a [TransactionService] listener callback.
+  void reloadReimbursements() async {
+    /// Collect the target keys
+    Set<int> keys = {};
+    if (reimburseTarget != null) {
+      keys.add(reimburseTarget!.key);
+    }
+    for (final reimb in reimbursements) {
+      keys.add(reimb.target.key);
+    }
+
+    /// Load the new transactions
+    final transactions = await LibraDatabase.db.loadTransactionsByKey(
+      keys,
+      accounts: appState.accounts.createAccountMap(),
+      categories: appState.categories.createKeyMap(),
+      tags: appState.tags.createKeyMap(),
+    );
+
+    /// Reset the reimbursements
+    final newReimbs = <Reimbursement>[];
+    for (final reimb in reimbursements) {
+      final t = transactions[reimb.target.key];
+      if (t == null) continue;
+      newReimbs.add(Reimbursement(
+        target: t,
+        value: reimb.value,
+        commitedValue: reimb.commitedValue, // TODO is this right?
+      ));
+      if (reimb == focusedReimbursement) {
+        focusedReimbursement = newReimbs.last;
+      }
+    }
+    reimbursements = newReimbs;
+    if (reimburseTarget != null) {
+      reimburseTarget = transactions[reimburseTarget!.key];
+    }
+
+    /// Reload the seed too, or else things like reset will retrieve a stale transaction.
+    if (seed != null) {
+      appState.transactions.reloadReimbursements(seed!);
+    }
     notifyListeners();
   }
 
@@ -284,10 +341,10 @@ class TransactionDetailsState extends ChangeNotifier {
     /// Check to make sure the reimbursement value doesn't cause the other transaction to become
     /// negative
     if (reimburseTarget!.totalReimbusrements > 0) {
-      final valueRemaining = reimburseTarget!.value.abs() - reimburseTarget!.totalReimbusrements;
+      var valueRemaining = reimburseTarget!.value.abs() - reimburseTarget!.totalReimbusrements;
       if (focusedReimbursement?.target == reimburseTarget) {
         // We're updating an existing reimbursement, so add back original value
-        valueRemaining + focusedReimbursement!.commitedValue;
+        valueRemaining += focusedReimbursement!.commitedValue;
       }
       if (reimbursementValue > valueRemaining) {
         return "Total reimbursements on the selected transaction exceeds its value.";
@@ -304,7 +361,7 @@ class TransactionDetailsState extends ChangeNotifier {
       final reimb = Reimbursement(
         target: reimburseTarget!,
         value: reimbursementValue,
-        commitedValue: 0,
+        commitedValue: focusedReimbursement?.commitedValue ?? 0,
       );
 
       if (focusedReimbursement == null) {

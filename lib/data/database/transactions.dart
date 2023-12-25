@@ -43,6 +43,25 @@ const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTabl
     "$_account INTEGER NOT NULL, "
     "$_category INTEGER NOT NULL)";
 
+/// Remember to "GROUP BY t.$_key"
+const transactionBaseSelectQuery = '''
+    SELECT 
+      t.*,
+      GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
+      COUNT(a.$allocationsKey) as nAllocs,
+      SUM(r.$reimbValue) as $_reimb_total
+    FROM 
+      $transactionsTable t
+    LEFT OUTER JOIN 
+      $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
+    LEFT OUTER JOIN
+      $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
+    LEFT OUTER JOIN 
+      $allocationsTable a ON a.$allocationsTransaction = t.$_key
+    LEFT OUTER JOIN
+      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
+  ''';
+
 Map<String, dynamic> _toMap(Transaction t) {
   final map = {
     _name: t.name,
@@ -236,26 +255,39 @@ Future<void> loadTransactionRelations(
   });
 }
 
+extension TransactionDatabaseExtension on db.DatabaseExecutor {
+  Future<Map<int, Transaction>> loadTransactionsByKey(
+    Iterable<int> keys, {
+    required Map<int, Account> accounts,
+    required Map<int, Category> categories,
+    required Map<int, Tag> tags,
+  }) async {
+    var q = transactionBaseSelectQuery;
+    q += " WHERE t.$_key in (${List.filled(keys.length, '?').join(',')})";
+    final args = List.from(keys);
+    q += " GROUP BY t.$_key";
+
+    final rows = await rawQuery(q, args);
+
+    Map<int, Transaction> out = {};
+    for (final row in rows) {
+      final t = transactionFromMap(
+        row,
+        accounts: accounts,
+        categories: categories,
+        tags: tags,
+      );
+      out[t.key] = t;
+    }
+
+    return out;
+  }
+}
+
 (String, List) _createQuery(TransactionFilters filters) {
   /// The GROUP_CONCAT(DISTINCT) is necessary since if you have multiple allocations or reimbursements,
   /// the tags will be duplicated accordingly.
-  var q = '''
-    SELECT 
-      t.*,
-      GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
-      COUNT(a.$allocationsKey) as nAllocs,
-      SUM(r.$reimbValue) as $_reimb_total
-    FROM 
-      $transactionsTable t
-    LEFT OUTER JOIN 
-      $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
-    LEFT OUTER JOIN
-      $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
-    LEFT OUTER JOIN 
-      $allocationsTable a ON a.$allocationsTransaction = t.$_key
-    LEFT OUTER JOIN
-      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
-  ''';
+  var q = transactionBaseSelectQuery;
 
   List args = [];
 
