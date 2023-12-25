@@ -56,14 +56,11 @@ class TransactionFiltersColumn extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
 
-              /// Not needed? Since already have a value filter
-              // const SizedBox(height: 10),
-              // Text("Type", style: textStyle),
-              // const SizedBox(height: 5),
-              // ExpenseTypeFilter(
-              //   state.expenseFilterSelected,
-              //   onSelect: state.setExpenseFilter,
-              // ),
+              /// Text
+              const SizedBox(height: 15),
+              Text("Name", style: textStyle),
+              const SizedBox(height: 5),
+              const _NameFilter(),
 
               /// Date
               const SizedBox(height: 15),
@@ -103,6 +100,42 @@ class TransactionFiltersColumn extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NameFilter extends StatelessWidget {
+  const _NameFilter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: TextFormField(
+        // The key makes sure a new widget is created when the initial value is changed. This helps
+        // fix bugs where the initial value is changed from the widget. Maybe could achieve same
+        // effect with [State.didUpdateWidget].
+        key: ValueKey(state.initialFilters.name),
+        initialValue: state.initialFilters.name,
+        decoration: const InputDecoration(
+          // filled: widget.active && !widget.error,
+          // fillColor: Theme.of(context).colorScheme.secondaryContainer,
+          // errorText: (widget.error) ? '' : null, // setting this to not null shows the error border
+          // errorStyle: const TextStyle(height: 0),
+          border: const OutlineInputBorder(), // this sets the shape, but the color is not used
+          // hintText: widget.hint,
+          // hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+          //       color: Theme.of(context).colorScheme.outline,
+          //     ),
+          // labelText: widget.label,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          isDense: true,
+        ),
+        onChanged: state.setName,
+        maxLines: 1,
+        // style: widget.style,
       ),
     );
   }

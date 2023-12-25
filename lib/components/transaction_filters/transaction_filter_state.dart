@@ -8,6 +8,7 @@ import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionFilters {
+  String? name;
   int? minValue;
   int? maxValue;
   DateTime? startTime;
@@ -18,6 +19,7 @@ class TransactionFilters {
   int? limit;
 
   TransactionFilters({
+    this.name,
     this.minValue,
     this.maxValue,
     this.startTime,
@@ -32,6 +34,7 @@ class TransactionFilters {
 
   TransactionFilters copy() {
     return TransactionFilters(
+      name: name,
       minValue: minValue,
       maxValue: maxValue,
       startTime: startTime,
@@ -109,6 +112,11 @@ class TransactionFilterState extends ChangeNotifier {
     if (!doLoads) return;
     transactions = await service.load(filters);
     notifyListeners();
+  }
+
+  void setName(String? text) {
+    filters.name = text;
+    loadTransactions();
   }
 
   void setMinValue(String? text) {

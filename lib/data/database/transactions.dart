@@ -261,32 +261,38 @@ Future<void> loadTransactionRelations(
   var firstWhere = true;
   void add(String query) {
     if (firstWhere) {
-      q += " WHERE t.$query";
+      q += " WHERE $query";
       firstWhere = false;
     } else {
-      q += " AND t.$query";
+      q += " AND $query";
     }
   }
 
   /// Basic filters ///
+  if (filters.name != null && filters.name!.isNotEmpty) {
+    add("(UPPER(t.$_name) LIKE UPPER(?) OR UPPER(t.$_note) LIKE UPPER(?))");
+    final wc = "%${filters.name}%";
+    args.add(wc);
+    args.add(wc);
+  }
   if (filters.minValue != null) {
-    add("$_value >= ?");
+    add("t.$_value >= ?");
     args.add(filters.minValue);
   }
   if (filters.maxValue != null) {
-    add("$_value <= ?");
+    add("t.$_value <= ?");
     args.add(filters.maxValue);
   }
   if (filters.startTime != null) {
-    add("$_date >= ?");
+    add("t.$_date >= ?");
     args.add(filters.startTime!.millisecondsSinceEpoch);
   }
   if (filters.endTime != null) {
-    add("$_date <= ?");
+    add("t.$_date <= ?");
     args.add(filters.endTime!.millisecondsSinceEpoch);
   }
   if (filters.accounts.isNotEmpty) {
-    add("$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
+    add("t.$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
     args.addAll(filters.accounts.map((e) => e.key));
   }
 
