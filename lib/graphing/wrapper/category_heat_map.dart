@@ -126,7 +126,7 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
     final loc = (res?.$2.labelDrawn == true) ? null : res?.$1;
     if (loc == hoverLoc) return;
     setState(() {
-      hoverLoc = res?.$1;
+      hoverLoc = loc;
     });
   }
 
