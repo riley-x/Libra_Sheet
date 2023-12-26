@@ -31,12 +31,13 @@ class TransactionDetailsState extends ChangeNotifier {
     this.initialAccount,
   }) {
     _init();
-    appState.transactions.addListener(reloadReimbursements);
+    appState.transactions.addListener(reloadAfterTransactionUpdate);
   }
 
   @override
   void dispose() {
-    appState.transactions.removeListener(reloadReimbursements);
+    _disposed = true;
+    appState.transactions.removeListener(reloadAfterTransactionUpdate);
     super.dispose();
   }
 
@@ -47,6 +48,8 @@ class TransactionDetailsState extends ChangeNotifier {
   final Function(Transaction? orig, Transaction updated)? onSave;
   final Function(CategoryRule rule)? onSaveRule;
   final Function(Transaction)? onDelete;
+  bool _disposed = false; // needed for async callbacks
+  bool seedStale = false;
 
   //---------------------------------------------------------------------------------------------
   // Form keys. These enable callbacks to the form state, like calling save() and reset().
@@ -156,7 +159,15 @@ class TransactionDetailsState extends ChangeNotifier {
 
   /// After changing any transaction, we need to reload the reimbursements in case one of them was
   /// changed. This is used as a [TransactionService] listener callback.
-  void reloadReimbursements() async {
+  void reloadAfterTransactionUpdate() async {
+    /// Super important to reload the seed, because that's what will be used for save/delete.
+    if (seed != null) {
+      seedStale = true;
+      seed = await appState.transactions.loadSingle(seed!.key);
+      seedStale = false;
+    }
+    if (_disposed) return;
+
     /// Collect the target keys
     Set<int> keys = {};
     if (reimburseTarget != null) {
@@ -167,12 +178,8 @@ class TransactionDetailsState extends ChangeNotifier {
     }
 
     /// Load the new transactions
-    final transactions = await LibraDatabase.db.loadTransactionsByKey(
-      keys,
-      accounts: appState.accounts.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
-    );
+    final transactions = await appState.transactions.loadByKey(keys);
+    if (_disposed) return;
 
     /// Reset the reimbursements
     final newReimbs = <Reimbursement>[];
@@ -193,10 +200,6 @@ class TransactionDetailsState extends ChangeNotifier {
       reimburseTarget = transactions[reimburseTarget!.key];
     }
 
-    /// Reload the seed too, or else things like reset will retrieve a stale transaction.
-    if (seed != null) {
-      appState.transactions.reloadReimbursements(seed!);
-    }
     notifyListeners();
   }
 
@@ -204,6 +207,7 @@ class TransactionDetailsState extends ChangeNotifier {
   // Deleting
   //---------------------------------------------------------------------------------------------
   void delete() {
+    if (seedStale) return;
     if (seed != null) onDelete?.call(seed!);
   }
 
@@ -270,6 +274,7 @@ class TransactionDetailsState extends ChangeNotifier {
   }
 
   void save() {
+    if (seedStale) return;
     String? err = _validate();
     if (err != null) {
       errorMessage = err;

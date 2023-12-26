@@ -188,12 +188,14 @@ class TransactionDetailsEditor extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 FormButtons(
-                  showDelete: (state.seed != null),
+                  showDelete: (state.seed != null && !state.seedStale),
                   onCancel: (onCancel != null) ? onCancel : Navigator.of(context).pop,
                   onDelete: state.delete,
                   // onReset: state.reset,
                   // disable save when the allocation/reimb editor is open
-                  onSave: (state.focus == TransactionDetailActiveFocus.none) ? state.save : null,
+                  onSave: (state.focus == TransactionDetailActiveFocus.none && !state.seedStale)
+                      ? state.save
+                      : null,
                 ),
                 const SizedBox(height: 10),
                 if (state.errorMessage != null)

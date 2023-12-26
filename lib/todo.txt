@@ -1,6 +1,7 @@
+- Pop all navigator routes to the same transaction when nav to same detail page OR update that transaction
 - Hover pie graph
 - Filter by reimbursed/allocated transactions
-- Reset filter on transaction lists
+- Reset filter on transaction lists?
 - Averages in cash flow...
 - Tooltip on reimbursements in CSV screen.
 - Transaction editor open to multiple screens...make sure nothing weird

@@ -34,7 +34,7 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> save(Transaction? old, Transaction nu) async {
-    debugPrint("TransactionService::save() $nu");
+    debugPrint("TransactionService::save() \nold=$old\nnew=$nu");
     if (old == null) {
       assert(nu.key == 0);
       await insertTransaction(nu);
@@ -77,5 +77,22 @@ class TransactionService extends ChangeNotifier {
       tags: appState.tags.createKeyMap(),
       db: LibraDatabase.db,
     );
+  }
+
+  Future<Map<int, Transaction>> loadByKey(Iterable<int> keys) {
+    return LibraDatabase.db.loadTransactionsByKey(
+      keys,
+      accounts: appState.accounts.createAccountMap(),
+      categories: appState.categories.createKeyMap(),
+      tags: appState.tags.createKeyMap(),
+    );
+  }
+
+  Future<Transaction?> loadSingle(int key) async {
+    final map = await loadByKey({key});
+    final t = map[key];
+    if (t == null) return null;
+    await loadRelations(t);
+    return t;
   }
 }
