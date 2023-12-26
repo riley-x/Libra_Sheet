@@ -39,19 +39,8 @@ class PieChartPainter<T> extends CustomPainter {
     required this.sweepAngles,
   });
 
-  // void paintLabels(Canvas canvas) {
-  //   /// y labels
-  //   if (yLabels != null) {
-  //     for (final (pos, painter) in yLabels!) {
-  //       final loc = Offset(
-  //         coordSpace!.xAxis.pixelMin - yAxis.labelOffset - painter.width,
-  //         coordSpace!.yAxis.userToPixel(pos) - painter.height / 2,
-  //       );
-  //       painter.paint(canvas, loc);
-  //     }
-  //   }
-  // }
-
+  /// Returns the bounding rect and strokeWidth given radius specifications. These should be between
+  /// 0 and 1.
   (Rect, double) getRect(Rect totalRect, double radiusStart, double radiusEnd) {
     var rectWidth = totalRect.shortestSide * radiusEnd;
     final strokeWidth = rectWidth / 2 * (1 - radiusStart);
@@ -124,6 +113,7 @@ class PieChart<T> extends StatefulWidget {
   final double Function(T) valueMapper;
   final Color? Function(T)? colorMapper;
   final String? Function(T, double frac)? labelMapper;
+  final Function(int i, T it)? onTap;
 
   const PieChart({
     super.key,
@@ -131,6 +121,7 @@ class PieChart<T> extends StatefulWidget {
     required this.valueMapper,
     this.colorMapper,
     this.labelMapper,
+    this.onTap,
   });
 
   @override
@@ -142,6 +133,8 @@ class _PieChartState<T> extends State<PieChart<T>> {
   /// p.s. it's better to have a single data list because 1. the user doesn't have to manually create
   /// the below lists and 2. prevents alignment errors.
   double total = 0.0;
+  List<int> dataIndex = [];
+  List<T> filteredItems = [];
   List<double> values = [];
   List<Color> colors = [];
   List<TextPainter> labels = [];
@@ -157,29 +150,36 @@ class _PieChartState<T> extends State<PieChart<T>> {
 
   void _initValues() {
     final theme = Theme.of(context);
-    total = 0.0;
 
+    /// Reset lists. Make sure to create new ones, not clear.
+    total = 0.0;
+    dataIndex = [];
+    filteredItems = [];
     values = [];
     colors = [];
     labels = [];
     startAngles = [];
     sweepAngles = [];
 
-    final filteredItems = <T>[];
-    for (final x in widget.data) {
-      final val = widget.valueMapper(x);
+    /// Filter items and get total in the meantime
+    for (int i = 0; i < widget.data.length; i++) {
+      final val = widget.valueMapper(widget.data[i]);
       if (val <= 0) continue;
 
       total += val;
       values.add(val);
-      filteredItems.add(x);
+      filteredItems.add(widget.data[i]);
+      dataIndex.add(i);
     }
     if (total == 0) {
       painter = null;
       values.clear();
+      filteredItems.clear();
+      dataIndex.clear();
       return;
     }
 
+    /// Get the other fields
     var currStart = 0.0;
     for (int i = 0; i < filteredItems.length; i++) {
       final x = filteredItems[i];
@@ -262,7 +262,13 @@ class _PieChartState<T> extends State<PieChart<T>> {
     }
   }
 
-  void onTapUp(TapUpDetails details) {}
+  void onTapUp(TapUpDetails details) {
+    if (painter == null || painter!.currentSize == Size.zero) return;
+    final pos = painter!.userHitTest(details.localPosition);
+    if (pos != null && pos < filteredItems.length) {
+      widget.onTap?.call(dataIndex[pos], filteredItems[pos]);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
