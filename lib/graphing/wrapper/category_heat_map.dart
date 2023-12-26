@@ -67,6 +67,8 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
     String name;
     if (cat.level == 0) {
       name = "Uncategorized";
+    } else if (cat.level == 1 && cat.subCats.isNotEmpty && depth == 1) {
+      name = "Other ${cat.name}";
     } else {
       name = cat.name;
     }
