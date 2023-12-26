@@ -11,6 +11,5 @@
 - Pop all navigator routes to the same transaction when nav to same detail page?
 - Maybe balance update? Specifically for investments?
 - Categories screen, change this mo. to custom range
-- Hover on heatmap
 - Replace all database calls with extension (see tags.dart).
 - Automatic cloud backup?

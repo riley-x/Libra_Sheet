@@ -168,6 +168,18 @@ List<Rect> layoutHeatMapGrid<T>({
   return output;
 }
 
+class HeatMapPoint<T> {
+  final T item;
+  final Rect rect;
+  final bool labelDrawn;
+
+  HeatMapPoint({
+    required this.item,
+    required this.rect,
+    required this.labelDrawn,
+  });
+}
+
 /// This painter class draw a heat map of values obtained from [valueMapper]. See [layoutHeatMapGrid].
 /// This class will strip non-positive entries.
 ///
@@ -193,8 +205,13 @@ class HeatMapPainter<T> extends CustomPainter {
   /// The pixel (width, height) of the border around each rectangle, indexed by the series depth.
   late final (double, double) Function(int depth) paddingMapper;
 
+  //-----------------------------------
+  // Variables per paint
+  //-----------------------------------
+  Size currentSize = Size.zero;
+
   /// Position of each entry, used for hit testing. This is replaced every call to [paint].
-  List<(Rect, T)> positions = [];
+  List<HeatMapPoint<T>> positions = [];
 
   HeatMapPainter(
     List<T> data, {
@@ -240,9 +257,9 @@ class HeatMapPainter<T> extends CustomPainter {
   void _paintEntry(T entry, int seriesDepth, Canvas canvas, Rect rect) {
     Paint brush = Paint()..color = colorMapper?.call(entry, seriesDepth) ?? Colors.transparent;
     canvas.drawRect(rect, brush);
-    positions.add((rect, entry));
 
     /// Draw label
+    bool hasLabel = false;
     if (labelMapper != null && rect.width > 50) {
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
@@ -256,8 +273,11 @@ class HeatMapPainter<T> extends CustomPainter {
       final textSize = Offset(textPainter.width, textPainter.height);
       if (textSize.dy < rect.height) {
         textPainter.paint(canvas, rect.center - textSize / 2);
+        hasLabel = true;
       }
     }
+
+    positions.add(HeatMapPoint(item: entry, rect: rect, labelDrawn: hasLabel));
   }
 
   /// Paints a single series in the given [rect].
@@ -287,6 +307,7 @@ class HeatMapPainter<T> extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     positions.clear();
+    currentSize = size;
     _paintSeries(data, 0, canvas, Offset.zero & size);
   }
 
@@ -301,5 +322,14 @@ class HeatMapPainter<T> extends CustomPainter {
   @override
   bool hitTest(Offset position) {
     return true;
+  }
+
+  (int, HeatMapPoint<T>)? hitTestUser(Offset position) {
+    for (int i = 0; i < positions.length; i++) {
+      if (positions[i].rect.contains(position)) {
+        return (i, positions[i]);
+      }
+    }
+    return null;
   }
 }

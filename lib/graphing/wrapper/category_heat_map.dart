@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/graphing/heatmap/heat_map_hover.dart';
 import 'package:libra_sheet/graphing/heatmap/heat_map_painter.dart';
 import 'package:provider/provider.dart';
 
@@ -40,53 +42,45 @@ class CategoryHeatMap extends StatefulWidget {
 }
 
 class _CategoryHeatMapState extends State<CategoryHeatMap> {
-  void _onTapUp(HeatMapPainter<Category> painter, TapUpDetails details) {
-    if (widget.onSelect == null) return;
-    for (int i = 0; i < painter.positions.length; i++) {
-      if (painter.positions[i].$1.contains(details.localPosition)) {
-        widget.onSelect!(painter.positions[i].$2);
-        return;
-      }
+  int? hoverLoc;
+  HeatMapPainter? painter;
+
+  int _getValue(Category cat, int depth) {
+    int? val;
+    if (depth == 0) {
+      val = widget.aggregateValues[cat.key];
+    } else {
+      val = widget.individualValues[cat.key];
+    }
+    return val?.abs() ?? 0;
+  }
+
+  List<Category>? _getNested(Category cat, int depth) {
+    if (depth == 0 && cat.level == 1 && cat.subCats.isNotEmpty) {
+      return List.of(cat.subCats) + [cat];
+    } else {
+      return null;
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    int getValue(Category cat, int depth) {
-      int? val;
-      if (depth == 0) {
-        val = widget.aggregateValues[cat.key];
-      } else {
-        val = widget.individualValues[cat.key];
-      }
-      return val?.abs() ?? 0;
+  String _labelMapper(Category cat, int depth) {
+    String name;
+    if (cat.level == 0) {
+      name = "Uncategorized";
+    } else {
+      name = cat.name;
     }
+    return "$name\n${_getValue(cat, depth).dollarString()}";
+  }
 
-    List<Category>? getNested(Category cat, int depth) {
-      if (depth == 0 && cat.level == 1 && cat.subCats.isNotEmpty) {
-        return List.of(cat.subCats) + [cat];
-      } else {
-        return null;
-      }
-    }
-
-    String labelMapper(Category cat, int depth) {
-      String name;
-      if (cat.level == 0) {
-        name = "Uncategorized";
-      } else {
-        name = cat.name;
-      }
-      return "$name\n${getValue(cat, depth).dollarString()}";
-    }
-
-    final isDarkMode = context.select<LibraAppState, bool>((value) => value.isDarkMode);
-    final painter = HeatMapPainter<Category>(
+  void _initPainter() {
+    final isDarkMode = context.read<LibraAppState>().isDarkMode;
+    painter = HeatMapPainter<Category>(
       widget.categories,
-      valueMapper: (it, depth) => getValue(it, depth).asDollarDouble(),
+      valueMapper: (it, depth) => _getValue(it, depth).asDollarDouble(),
       colorMapper: (it, depth) => (isDarkMode) ? it.color.withAlpha(210) : it.color,
-      labelMapper: labelMapper,
-      nestedData: (widget.showSubCategories) ? getNested : null,
+      labelMapper: _labelMapper,
+      nestedData: (widget.showSubCategories) ? _getNested : null,
       textStyle: Theme.of(context).textTheme.labelLarge,
       paddingMapper: (depth) => (!widget.showSubCategories)
           ? (2, 2)
@@ -94,14 +88,110 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
               ? (2, 2)
               : (1, 1),
     );
-    return GestureDetector(
-      onTapUp: (it) => _onTapUp(painter, it),
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: painter,
-          // foregroundPainter: ,
-          size: Size.infinite,
+  }
+
+  // Need to init here and not [initState] because we access Theme.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initPainter();
+  }
+
+  // This is necessary to update the state when the parent rebuilds.
+  // https://stackoverflow.com/questions/54759920/flutter-why-is-child-widgets-initstate-is-not-called-on-every-rebuild-of-pa
+  @override
+  void didUpdateWidget(CategoryHeatMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.showSubCategories != widget.showSubCategories ||
+        oldWidget.categories != widget.categories ||
+        oldWidget.aggregateValues != widget.aggregateValues ||
+        oldWidget.individualValues != widget.individualValues) {
+      _initPainter();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    if (painter == null) return;
+    if (widget.onSelect == null) return;
+    final res = painter!.hitTestUser(details.localPosition);
+    if (res != null) {
+      widget.onSelect!(res.$2.item);
+    }
+  }
+
+  void onHover(PointerHoverEvent event) {
+    if (painter == null) return;
+    if (painter!.currentSize == Size.zero) return;
+    final res = painter!.hitTestUser(event.localPosition);
+    final loc = (res?.$2.labelDrawn == true) ? null : res?.$1;
+    if (loc == hoverLoc) return;
+    setState(() {
+      hoverLoc = res?.$1;
+    });
+  }
+
+  void onExit(PointerExitEvent event) {
+    if (hoverLoc == null) return;
+    setState(() {
+      hoverLoc = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (painter == null) return const SizedBox();
+    return MouseRegion(
+      onHover: onHover,
+      onExit: onExit,
+      child: GestureDetector(
+        onTapUp: _onTapUp,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            RepaintBoundary(
+              child: CustomPaint(
+                painter: painter,
+                // foregroundPainter: ,
+                size: Size.infinite,
+              ),
+            ),
+            RepaintBoundary(
+              child: HeatMapHover(
+                mainGraph: painter!,
+                hoverLoc: hoverLoc,
+                child: _CategoryHeatMapHover(
+                  hoverLoc == null ? null : painter!.positions.elementAtOrNull(hoverLoc!)?.item,
+                  labelMapper: (cat) => _labelMapper(cat, widget.showSubCategories ? 1 : 0),
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _CategoryHeatMapHover extends StatelessWidget {
+  final Category? category;
+  final String Function(Category cat) labelMapper;
+
+  const _CategoryHeatMapHover(this.category, {super.key, required this.labelMapper});
+
+  @override
+  Widget build(BuildContext context) {
+    if (category == null) return const SizedBox();
+    return Container(
+      padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
+      constraints: const BoxConstraints(maxWidth: 300),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onInverseSurface.withAlpha(210),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        labelMapper(category!),
+        style: Theme.of(context).textTheme.labelLarge,
+        textAlign: TextAlign.center,
       ),
     );
   }
