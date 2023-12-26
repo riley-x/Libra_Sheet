@@ -1,4 +1,3 @@
-- Pop all navigator routes to the same transaction when nav to same detail page OR update that transaction
 - Hover pie graph
 - Filter by reimbursed/allocated transactions
 - Reset filter on transaction lists?
@@ -10,6 +9,7 @@
 - Sort category rules; just add warning about order (or maybe internally order by specificity?)
 - Export to CSV
 - Choose category/account on CSV column?
+- Pop all navigator routes to the same transaction when nav to same detail page?
 - Maybe balance update? Specifically for investments?
 - Categories screen, change this mo. to custom range
 - Hover on heatmap
