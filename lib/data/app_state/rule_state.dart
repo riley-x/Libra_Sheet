@@ -1,10 +1,10 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
 
 /// Helper module for handling the category rules
@@ -15,79 +15,77 @@ class RuleState {
   LibraAppState appState;
   RuleState(this.appState);
 
-  final List<CategoryRule> income = [];
-  final List<CategoryRule> expense = [];
+  Map<Category, List<CategoryRule>> income = {};
+  Map<Category, List<CategoryRule>> expense = {};
 
   //----------------------------------------------------------------------------
   // Modification Functions
   //----------------------------------------------------------------------------
   Future<void> load() async {
     final map = appState.categories.createKeyMap();
-    income.addAll(await getRules(ExpenseType.income, map));
-    expense.addAll(await getRules(ExpenseType.expense, map));
+    final incomeRules = await getRules(ExpenseType.income, map);
+    final expenseRules = await getRules(ExpenseType.expense, map);
+
+    // Doing this forces the order of the rules in each map to align with the category order
+    income = {for (final cat in map.values) cat: []};
+    expense = {for (final cat in map.values) cat: []};
+    for (final rule in incomeRules) {
+      if (rule.category == null) continue;
+      income[rule.category!]?.add(rule);
+    }
+    for (final rule in expenseRules) {
+      if (rule.category == null) continue;
+      expense[rule.category!]?.add(rule);
+    }
+
     appState.notifyListeners();
   }
 
   Future<void> add(CategoryRule rule) async {
     debugPrint("RuleState::add() $rule");
     if (rule.category == null) return;
-    final list = (rule.type == ExpenseType.income) ? income : expense;
-    int key = await insertRule(rule, listIndex: list.length);
+    final map = (rule.type == ExpenseType.income) ? income : expense;
+    int key = await insertRule(rule, listIndex: 0);
     rule = rule.copyWith(key: key);
-    list.add(rule);
+    map[rule.category!]?.add(rule);
     appState.notifyListeners();
   }
 
   Future<void> delete(CategoryRule rule) async {
+    debugPrint("RuleState::delete() $rule");
     if (rule.category == null) return;
-    final list = (rule.type == ExpenseType.income) ? income : expense;
-    final ind = list.indexWhere((it) => it.key == rule.key);
-    list.removeAt(ind);
+    final map = (rule.type == ExpenseType.income) ? income : expense;
+    map[rule.category!]?.removeWhere((it) => it.key == rule.key);
     appState.notifyListeners();
-
-    await libraDatabase?.transaction((txn) async {
-      await deleteRule(rule, db: txn);
-      await shiftRuleIndicies(rule.type, ind + 1, list.length + 1, -1, db: txn);
-    });
   }
 
-  /// Rules are modified in place already. This function serves to notify listeners, and also update
-  /// the database.
-  Future<void> notifyUpdate(CategoryRule rule) async {
+  /// The rule members are modified in place already. This function serves to move the rule if the
+  /// category has changed, notify listeners, and also update the database.
+  Future<void> update(CategoryRule rule, Category? originalCategory) async {
+    debugPrint("RuleState::update() $rule");
+    if (rule.category == null) return;
+
+    final map = (rule.type == ExpenseType.income) ? income : expense;
+    if (originalCategory != rule.category) {
+      if (originalCategory != null) map[originalCategory]?.removeWhere((it) => it.key == rule.key);
+      map[rule.category!]?.add(rule);
+    }
+
     appState.notifyListeners();
     await updateRule(rule);
-  }
-
-  void reorder(ExpenseType type, int oldIndex, int newIndex) async {
-    final list = (type == ExpenseType.income) ? income : expense;
-    final rule = list.removeAt(oldIndex);
-    if (newIndex > oldIndex) {
-      list.insert(newIndex - 1, rule);
-    } else {
-      list.insert(newIndex, rule);
-    }
-    appState.notifyListeners();
-
-    await libraDatabase?.transaction((txn) async {
-      if (newIndex > oldIndex) {
-        await shiftRuleIndicies(type, oldIndex, newIndex, -1, db: txn);
-        await updateRule(rule, listIndex: newIndex - 1, db: txn);
-      } else {
-        await shiftRuleIndicies(type, newIndex, oldIndex, 1, db: txn);
-        await updateRule(rule, listIndex: newIndex, db: txn);
-      }
-    });
   }
 
   //----------------------------------------------------------------------------
   // Parsing
   //----------------------------------------------------------------------------
   CategoryRule? match(String text, ExpenseType type) {
-    final list = (type == ExpenseType.expense) ? expense : income;
+    final map = (type == ExpenseType.expense) ? expense : income;
 
-    for (final rule in list) {
-      if (text.contains(rule.pattern)) {
-        return rule;
+    for (final entry in map.entries) {
+      for (final rule in entry.value) {
+        if (text.contains(rule.pattern)) {
+          return rule;
+        }
       }
     }
     return null;

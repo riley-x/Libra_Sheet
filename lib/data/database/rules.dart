@@ -10,8 +10,11 @@ const rulesTable = '`rules`';
 const _key = "key";
 const _pattern = "pattern";
 const _category = "categoryKey";
-const _account = "accountKey";
 const _type = "type";
+
+@Deprecated("Rule account is not used")
+const _account = "accountKey";
+@Deprecated("Rule list order is no longer used or relevant")
 const _index = "listIndex";
 
 const createRulesTableSql = "CREATE TABLE IF NOT EXISTS $rulesTable ("
@@ -84,7 +87,7 @@ Future<List<CategoryRule>> getRules(ExpenseType type, Map<int, Category> categor
     rulesTable,
     where: '$_type = ?',
     whereArgs: [type.name],
-    orderBy: _index,
+    orderBy: _pattern,
   );
   final out = <CategoryRule>[];
   for (final map in maps) {

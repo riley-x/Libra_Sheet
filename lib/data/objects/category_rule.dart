@@ -6,6 +6,7 @@ class CategoryRule {
   final int key;
   String pattern;
   Category? category; // TODO make these non-nullable, but forms need to remain nullable
+  @Deprecated("Rule account is not used")
   Account? account;
 
   /// We need to store this separately from the category because of generic super categories like

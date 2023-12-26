@@ -18,11 +18,15 @@ class EditRulesState extends ChangeNotifier {
 
   EditRulesState(this.appState);
 
-  /// State for editing a target rule. All fields are saved to [focused], on form.save(),
-  /// which edits it in place!
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isFocused = false;
+
+  /// Rule being edited. All fields are saved to [focused], on form.save(), which edits it in place!
   CategoryRule focused = CategoryRule.empty;
+
+  /// The original category of the rule, used to update properly. This is lost when form.save()
+  /// happens otherwise.
+  Category? originalCategory;
 
   void _init() {}
 
@@ -38,6 +42,7 @@ class EditRulesState extends ChangeNotifier {
     } else {
       focused = it;
     }
+    originalCategory = focused.category;
     isFocused = true;
     reset();
     // it's important to call reset() here so the forms don't keep stale data from previous focuses.
@@ -64,7 +69,7 @@ class EditRulesState extends ChangeNotifier {
       if (focused.key == 0) {
         appState.rules.add(focused);
       } else {
-        appState.rules.notifyUpdate(focused);
+        appState.rules.update(focused, originalCategory);
       }
       clearFocus();
     }
@@ -125,6 +130,22 @@ class EditRulesScreen extends StatelessWidget {
     final state = context.watch<EditRulesState>();
     final rules = (type == ExpenseType.income) ? appState.rules.income : appState.rules.expense;
 
+    List<Widget> getRuleList() {
+      final out = <Widget>[];
+      int i = 0;
+      for (final entry in rules.entries) {
+        for (final rule in entry.value) {
+          out.add(_RuleRow(
+            rule: rule,
+            key: ObjectKey(rule),
+            isLast: i == rules.length - 1,
+          ));
+          i++;
+        }
+      }
+      return out;
+    }
+
     /// The IndexedStack preserves the scroll state of the scroll I think...
     return IndexedStack(
       index: (state.isFocused) ? 0 : 1,
@@ -135,17 +156,9 @@ class EditRulesScreen extends StatelessWidget {
           type: type,
         ),
         Scaffold(
-          body: ReorderableListView(
+          body: ListView(
             padding: const EdgeInsets.only(top: 15, bottom: 80), // to account for FAB
-            onReorder: (oldIndex, newIndex) => appState.rules.reorder(type, oldIndex, newIndex),
-            children: [
-              for (int i = 0; i < rules.length; i++)
-                _RuleRow(
-                  rule: rules[i],
-                  key: ObjectKey(rules[i]),
-                  isLast: i == rules.length - 1,
-                )
-            ],
+            children: getRuleList(),
           ),
           floatingActionButton: FloatingActionButton(
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -200,14 +213,13 @@ class _RuleRow extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Text(
                 rule.category?.name ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 40), // this is where the drag handle is added
           ],
         ),
       ),
