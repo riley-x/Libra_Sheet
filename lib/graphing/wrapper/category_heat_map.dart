@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
-import 'package:libra_sheet/graphing/heat_map_painter.dart';
+import 'package:libra_sheet/graphing/heatmap/heat_map_painter.dart';
 import 'package:provider/provider.dart';
 
 /// Paints a list of [categories] as a heatmap based on their values. This is a StatefulWidget

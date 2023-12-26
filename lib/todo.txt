@@ -1,7 +1,6 @@
-- Hover pie graph
 - Filter by reimbursed/allocated transactions
 - Reset filter on transaction lists?
-- Averages in cash flow...
+- Averages in cash flow...maybe dashed line behind bars with flag label on y-axis?
 - Tooltip on reimbursements in CSV screen.
 - Transaction editor open to multiple screens...make sure nothing weird
 - Zoom/range certain graphs
