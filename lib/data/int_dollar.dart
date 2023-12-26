@@ -72,3 +72,7 @@ String formatOrder(double val, [int? order]) {
   }
   return NumberFormat('#,###').format(val);
 }
+
+String formatPercent(double val) {
+  return '${NumberFormat('0.00').format(val * 100)}%';
+}

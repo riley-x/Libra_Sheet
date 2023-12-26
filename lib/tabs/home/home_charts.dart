@@ -6,6 +6,7 @@ import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/libra_pie_chart.dart';
+import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -165,7 +166,12 @@ class _AssetsPie extends StatelessWidget {
       textRight: total.dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
-      child: AccountPieChart(accounts),
+      child: PieChart<Account>(
+        data: accounts,
+        valueMapper: (it) => it.balance.asDollarDouble(),
+        colorMapper: (it) => it.color,
+        labelMapper: (it, frac) => "${it.name}\n${formatPercent(frac)}",
+      ),
     );
   }
 }
