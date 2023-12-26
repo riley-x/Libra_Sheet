@@ -67,6 +67,8 @@ class TransactionFilterState extends ChangeNotifier {
   final TransactionService service;
   final bool doLoads;
 
+  final TextEditingController nameController = TextEditingController();
+
   //----------------------------------------------------------------------
   // Overrides
   //----------------------------------------------------------------------
@@ -113,6 +115,10 @@ class TransactionFilterState extends ChangeNotifier {
     transactions = await service.load(filters);
     notifyListeners();
   }
+
+  //----------------------------------------------------------------------
+  // Form callbacks
+  //----------------------------------------------------------------------
 
   void setName(String? text) {
     filters.name = text;
@@ -202,6 +208,7 @@ class TransactionFilterState extends ChangeNotifier {
 
   void setFilters(TransactionFilters filters) {
     this.filters = filters;
+    nameController.text = filters.name ?? '';
     startTimeError = false;
     endTimeError = false;
     minValueError = false;

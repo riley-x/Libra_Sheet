@@ -109,10 +109,11 @@ class _CashFlowCharts extends StatelessWidget {
                 // Navigate to transaction tab and show transactions from this month.
                 // Top-level filter state is the one used by the transaction tab.
                 final filterState = context.read<TransactionFilterState>();
-                filterState.filters.accounts = Set.from(state.accounts);
-                filterState.filters.categories.clear();
-                filterState.setStartTime(point.time, false);
-                filterState.setEndTime(point.time.monthEnd());
+                filterState.setFilters(TransactionFilters(
+                  startTime: point.time,
+                  endTime: point.time.monthEnd(),
+                  accounts: Set.from(state.accounts),
+                ));
                 context.read<LibraAppState>().setTab(LibraNavDestination.transactions.index);
               },
             ),

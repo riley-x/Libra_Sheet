@@ -114,23 +114,11 @@ class _NameFilter extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: TextFormField(
-        // The key makes sure a new widget is created when the initial value is changed. This helps
-        // fix bugs where the initial value is changed from the widget. Maybe could achieve same
-        // effect with [State.didUpdateWidget].
-        key: ValueKey(state.initialFilters.name),
+        controller: state.nameController,
         initialValue: state.initialFilters.name,
         decoration: const InputDecoration(
-          // filled: widget.active && !widget.error,
-          // fillColor: Theme.of(context).colorScheme.secondaryContainer,
-          // errorText: (widget.error) ? '' : null, // setting this to not null shows the error border
-          // errorStyle: const TextStyle(height: 0),
-          border: const OutlineInputBorder(), // this sets the shape, but the color is not used
-          // hintText: widget.hint,
-          // hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-          //       color: Theme.of(context).colorScheme.outline,
-          //     ),
-          // labelText: widget.label,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           isDense: true,
         ),
         onChanged: state.setName,
