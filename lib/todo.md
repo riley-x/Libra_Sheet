@@ -2,7 +2,6 @@
 
 ## High priority features
 - Reset filter on transaction lists? Highlight icon when changed?
-- Averages in cash flow...maybe dashed line behind bars with flag label on y-axis?
 - Zoom/range account/category screen graphs
 - Custom month ranges on graphs
 

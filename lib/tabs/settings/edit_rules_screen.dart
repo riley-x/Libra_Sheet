@@ -90,10 +90,15 @@ class RulesSettingsScreen extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Text("Each rule matches a pattern to a category. If a transaction's name "
-                "contains the pattern, the rule is triggered, and the transaction "
-                "is assigned the corresponding category. Rules are case sensitive, "
-                "and are matched first-come first-serve."),
+            child: Text("Each rule matches a pattern to a cateogry."
+                ' For example, you can set all transactions with "TST*" in their name to category "Food."'
+                ' Rules are case sensitive!'
+                // '\n\nIf multiple rules match a transaction, the rule with the longest pattern wins.'
+                // ' For example, if you have two rules:\n'
+                // '         - Uber => Taxis\n'
+                // '         - Uber eats => Takeout\n'
+                // ' the latter is longer and will take priority.',
+                ),
           ),
           const SizedBox(height: 8),
           SettingsCard(

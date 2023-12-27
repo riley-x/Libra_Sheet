@@ -179,8 +179,7 @@ class _SettingsTab extends StatelessWidget {
                 const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Categories',
-                  subText:
-                      "Customize your categories. Each transaction is classified into a single category.",
+                  subText: "Customize your income and expense categories.",
                   onTap: () => onSelect?.call(SettingsScreen.categories),
                 ),
                 const SizedBox(height: 8),
@@ -188,7 +187,7 @@ class _SettingsTab extends StatelessWidget {
                   text: 'Tags',
                   subText: "Customize your tags. "
                       // "Tags are lightweight labels to help organize similar transactions from different categories and accounts. "
-                      "Each transaction can have multiple tags.",
+                      "Tags help you easily track specific transactions.",
                   onTap: () => onSelect?.call(SettingsScreen.tags),
                 ),
                 const SizedBox(height: 8),
@@ -206,7 +205,7 @@ class _SettingsTab extends StatelessWidget {
                 // const SizedBox(height: 8),
                 SettingsCard(
                   text: 'Database',
-                  subText: "Backup or restore the app database.",
+                  subText: "Backup and export the app database.",
                   onTap: () => onSelect?.call(SettingsScreen.database),
                 ),
               ],
