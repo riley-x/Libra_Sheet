@@ -49,6 +49,19 @@ class CategoryFilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (map.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 0),
+        child: Text(
+          'All',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+                fontStyle: FontStyle.italic,
+              ),
+          // color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      );
+    }
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 10,

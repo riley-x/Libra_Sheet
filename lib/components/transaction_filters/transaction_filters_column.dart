@@ -160,7 +160,6 @@ class _CategoryChips extends StatelessWidget {
             notify: state.loadTransactions,
           ),
         ),
-        const SizedBox(height: 5),
         CategoryFilterChips(
           categories: categories,
           map: state.filters.categories,

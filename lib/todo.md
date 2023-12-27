@@ -12,6 +12,7 @@
 - Rerun category rule
 - Export to CSV
 - Choose category/account on CSV column?
+- Delete account
 
 
 ## Refactor
