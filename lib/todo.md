@@ -5,7 +5,6 @@
 - Averages in cash flow...maybe dashed line behind bars with flag label on y-axis?
 - Tooltip on reimbursements in CSV screen (can only reimburse saved transactions).
 - Zoom/range account/category screen graphs
-- Sort category rules; internally order by specificity!
 - Custom month ranges on graphs
 
 

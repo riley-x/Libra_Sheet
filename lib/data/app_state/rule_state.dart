@@ -78,16 +78,22 @@ class RuleState {
   //----------------------------------------------------------------------------
   // Parsing
   //----------------------------------------------------------------------------
+  /// Finds the category rule that matches [text] and [type]. If there are multiple matches, returns
+  /// the rule with the longest pattern length, priority to the first by category order.
   CategoryRule? match(String text, ExpenseType type) {
     final map = (type == ExpenseType.expense) ? expense : income;
 
+    CategoryRule? bestRule;
     for (final entry in map.entries) {
       for (final rule in entry.value) {
         if (text.contains(rule.pattern)) {
-          return rule;
+          if (rule.pattern.length > (bestRule?.pattern.length ?? 0)) {
+            bestRule = rule;
+          }
         }
       }
     }
-    return null;
+
+    return bestRule;
   }
 }
