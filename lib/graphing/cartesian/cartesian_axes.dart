@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/graphing/auto_y_ticks.dart';
+import 'package:libra_sheet/graphing/human_readable_double_step.dart';
 
 import 'cartesian_coordinate_space.dart';
 

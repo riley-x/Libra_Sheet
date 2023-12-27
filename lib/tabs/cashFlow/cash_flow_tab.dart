@@ -6,7 +6,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
-import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
+import 'package:libra_sheet/graphing/wrapper/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_tab_filters.dart';
 import 'package:libra_sheet/tabs/navigation/libra_nav.dart';

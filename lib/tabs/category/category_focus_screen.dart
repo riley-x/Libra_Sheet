@@ -10,7 +10,7 @@ import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
-import 'package:libra_sheet/graphing/red_green_bar_chart.dart';
+import 'package:libra_sheet/graphing/wrapper/red_green_bar_chart.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
