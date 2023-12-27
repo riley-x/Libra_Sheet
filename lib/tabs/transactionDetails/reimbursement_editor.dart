@@ -14,7 +14,8 @@ import 'package:provider/provider.dart';
 /// Simple form for adding a reimbursement, used in the second panel of the transaction detail screen.
 /// It shows a two-column form at the top and a list of target transactions on bottom.
 class ReimbursementEditor extends StatelessWidget {
-  const ReimbursementEditor({super.key});
+  final String? subTitle;
+  const ReimbursementEditor({super.key, this.subTitle});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,12 @@ class ReimbursementEditor extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 10),
+        if (subTitle != null)
+          Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+            child: Text(subTitle!),
+          ),
         const _Form(),
         const SizedBox(height: 20),
         FormButtons(
@@ -81,7 +88,7 @@ class _Form extends StatelessWidget {
               onSave: (it) => state.reimbursementValue = it,
               positiveOnly: true,
             ),
-            tooltip: "Value should always be positive.",
+            tooltip: "Value should always be positive, even for expenses.",
           ),
           rowSpacing,
           labelRow(

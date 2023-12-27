@@ -323,7 +323,10 @@ class TransactionDetailsState extends ChangeNotifier {
   /// Validates the form for the reimbursement editor only. Returns an error message, or null on
   /// success.
   String? validateReimbursement() {
-    if (reimbursementFormKey.currentState?.validate() != true) return '';
+    if (reimbursementFormKey.currentState?.validate() != true) {
+      // Value is the only thing in the form
+      return 'Value should always be positive, even for expenses.';
+    }
 
     /// Need to save the form first to get the values. This doesn't do anything other than set the
     /// save sink members above.

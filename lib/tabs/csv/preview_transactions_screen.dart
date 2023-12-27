@@ -76,13 +76,17 @@ class _Body extends StatelessWidget {
     final details = TransactionDetailsEditor(
       onCancel: () => csvState.focusTransaction(-1),
     );
+    const reimbursements = ReimbursementEditor(
+      subTitle: 'Only saved transactions appear below. If you want to reimburse two of the preview '
+          'transactions with each other, please save them first.',
+    );
 
     final focus =
         context.select<TransactionDetailsState, TransactionDetailActiveFocus>((it) => it.focus);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 875) {
+        if (constraints.maxWidth < 900) {
           /// Layout transaction grid and editor as a single stack
           return IndexedStack(
             index: csvState.focusedTransIndex == -1 ? 0 : 1 + focus.index,
@@ -90,7 +94,7 @@ class _Body extends StatelessWidget {
               transactions,
               details,
               const AllocationEditor(),
-              const ReimbursementEditor(),
+              reimbursements,
             ],
           );
         } else {
@@ -100,14 +104,14 @@ class _Body extends StatelessWidget {
               Expanded(child: transactions),
               const VerticalDivider(width: 1, thickness: 1),
               SizedBox(
-                width: 450,
+                width: 475,
                 child: IndexedStack(
                   index: csvState.focusedTransIndex == -1 ? 0 : 1 + focus.index,
                   children: [
                     const SizedBox(),
                     details,
                     const AllocationEditor(),
-                    const ReimbursementEditor(),
+                    reimbursements,
                   ],
                 ),
               ),
