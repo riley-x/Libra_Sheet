@@ -5,6 +5,8 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
+import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 
@@ -18,11 +20,15 @@ class CategoryStackChart extends StatelessWidget {
   final (int, int)? range;
   final Function(Category, DateTime)? onTap;
 
+  /// If not null, will draw a dashed line behind the bars to indicate the average.
+  final Color? averageColor;
+
   const CategoryStackChart({
     super.key,
     required this.data,
     this.range,
     this.onTap,
+    this.averageColor,
   });
 
   @override
@@ -41,6 +47,13 @@ class CategoryStackChart extends StatelessWidget {
         // build and [data] is calculated in a notifier callback or async, they can be out of sync.
       ),
       data: SeriesCollection([
+        if (averageColor != null)
+          DashedHorizontalLine(
+            data: [-0.5, data.times.length - 0.5],
+            y: data.getDollarAverageMonthlyTotal(),
+            color: averageColor!,
+            lineWidth: 2,
+          ),
         for (final categoryHistory in data.categories)
           StackColumnSeries<int>(
             name: categoryHistory.category.name,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
 class CategoryBase {}
@@ -133,7 +134,7 @@ class CategoryHistoryEntry {
   final Category category;
   final List<int> values;
 
-  CategoryHistoryEntry(this.category, this.values);
+  const CategoryHistoryEntry(this.category, this.values);
 }
 
 /// Utility class for aggregating category histories for bar charts. Only add entries using
@@ -141,6 +142,8 @@ class CategoryHistoryEntry {
 class CategoryHistory {
   final bool invertExpenses;
   final bool cumulateTimeValues;
+
+  /// DO NOT modify [times] after adding entries!
   final List<DateTime> times;
   final List<CategoryHistoryEntry> categories;
 
@@ -150,6 +153,7 @@ class CategoryHistory {
     this.cumulateTimeValues = false,
   }) : categories = [];
 
+  /// This constructor applies no checks on whether [categories] aligns with [times].
   const CategoryHistory.fromList(
     this.times,
     this.categories, {
@@ -159,6 +163,9 @@ class CategoryHistory {
 
   static const empty = CategoryHistory.fromList([], []);
 
+  //-----------------------------------------------------------
+  // Adding entries
+  //-----------------------------------------------------------
   List<int>? _fixVals(Category category, List<TimeIntValue>? values) {
     if (values == null) return null;
     final vals = values.alignValues(times, cumulate: cumulateTimeValues);
@@ -211,6 +218,29 @@ class CategoryHistory {
     if (vals != null) {
       categories.add(CategoryHistoryEntry(category, vals));
     }
+  }
+
+  //-----------------------------------------------------------
+  // Utils
+  //-----------------------------------------------------------
+  List<int> getMonthlyTotals() {
+    final out = List.filled(times.length, 0);
+    for (final cat in categories) {
+      for (int i = 0; i < out.length; i++) {
+        out[i] += cat.values[i];
+      }
+    }
+    return out;
+  }
+
+  double getDollarAverageMonthlyTotal() {
+    final totals = getMonthlyTotals();
+    if (totals.isEmpty) return 0;
+    var sum = 0;
+    for (final x in totals) {
+      sum += x;
+    }
+    return sum.asDollarDouble() / totals.length;
   }
 }
 
