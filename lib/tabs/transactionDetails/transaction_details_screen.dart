@@ -80,9 +80,7 @@ class TransactionDetailsScreen extends StatelessWidget {
 }
 
 class _TransactionDetailsScreen extends StatelessWidget {
-  const _TransactionDetailsScreen({
-    super.key,
-  });
+  const _TransactionDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

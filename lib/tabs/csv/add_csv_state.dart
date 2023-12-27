@@ -157,6 +157,7 @@ class AddCsvState extends ChangeNotifier {
   //---------------------------------------------------------------------------
   void _validate() {
     if (!_validateFields()) {
+      rowOk = List.filled(rawLines.length, false);
       notifyListeners();
     } else {
       _validateRows();

@@ -15,33 +15,56 @@ class PreviewTransactionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AddCsvState>();
+    final transactions = TransactionGrid(
+      state.transactions,
+      fixedColumns: 1,
+      maxRowsForName: 2,
+      onSelect: (t, i) => state.focusTransaction(i),
+    );
+
+    void onBack() {
+      if (state.focusedTransIndex == -1) {
+        state.clearTransactions();
+      } else {
+        state.focusTransaction(-1);
+      }
+    }
+
     return Column(
       children: [
         CommonBackBar(
           leftText: 'Preview Transactions',
-          onBack: () => state.clearTransactions(),
+          onBack: onBack,
         ),
         Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: TransactionGrid(
-                  state.transactions,
-                  fixedColumns: 1,
-                  maxRowsForName: 2,
-                  onSelect: (t, i) => state.focusTransaction(i),
-                ),
-              ),
-              const VerticalDivider(width: 1, thickness: 1),
-              const SizedBox(
-                width: 450,
-                child: _TransactionDetails(),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 875) {
+                /// The IndexedStack keeps the TransactionGrid state alive
+                return IndexedStack(
+                  index: state.focusedTransIndex == -1 ? 0 : 1,
+                  children: [
+                    transactions,
+                    const _TransactionDetails(),
+                  ],
+                );
+              } else {
+                return Row(
+                  children: [
+                    Expanded(child: transactions),
+                    const VerticalDivider(width: 1, thickness: 1),
+                    const SizedBox(
+                      width: 450,
+                      child: _TransactionDetails(),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ),
         const Divider(height: 1, thickness: 1),
-        const _BottomBar(),
+        _BottomBar(onBack: onBack),
       ],
     );
   }
@@ -91,7 +114,8 @@ class _TransactionDetails extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({super.key});
+  final Function() onBack;
+  const _BottomBar({super.key, required this.onBack});
 
   void save(BuildContext context, AddCsvState state) {
     Navigator.of(context).pop();
@@ -118,17 +142,17 @@ class _BottomBar extends StatelessWidget {
         children: [
           const SizedBox(width: 10),
           TextButton(
-            onPressed: state.clearTransactions,
+            onPressed: onBack,
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(width: 5),
                 Icon(
                   Icons.navigate_before,
                   size: 26,
                 ),
                 SizedBox(width: 5),
                 Text('Back'),
+                SizedBox(width: 5),
               ],
             ),
           ),
@@ -138,7 +162,7 @@ class _BottomBar extends StatelessWidget {
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(width: 5),
+                SizedBox(width: 10),
                 Text('Save'),
                 Icon(
                   Icons.navigate_next,
