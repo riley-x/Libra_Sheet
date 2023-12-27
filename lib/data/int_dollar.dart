@@ -65,6 +65,24 @@ extension IntDollarString on String {
   }
 }
 
+double getDollarAverage(Iterable<int> vals) {
+  if (vals.isEmpty) return 0;
+  int sum = 0;
+  for (final x in vals) {
+    sum += x;
+  }
+  return sum.asDollarDouble() / vals.length;
+}
+
+double getDollarAverage2<T>(Iterable<T> vals, int Function(T) valueMapper) {
+  if (vals.isEmpty) return 0;
+  int sum = 0;
+  for (final x in vals) {
+    sum += valueMapper(x);
+  }
+  return sum.asDollarDouble() / vals.length;
+}
+
 final _format = NumberFormat('#,###');
 String formatOrder(double val, [int? order]) {
   if (order == null) {

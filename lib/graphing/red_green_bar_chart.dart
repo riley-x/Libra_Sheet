@@ -5,6 +5,7 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:syncfusion_flutter_charts/charts.dart' as syf;
@@ -25,6 +26,7 @@ class RedGreenBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final average = getDollarAverage2(data, (it) => it.value);
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
         theme: Theme.of(context),
@@ -37,6 +39,11 @@ class RedGreenBarChart extends StatelessWidget {
         dates: data.map((e) => e.time).toList(),
       ),
       data: SeriesCollection([
+        DashedHorizontalLine(
+          data: [-0.5, 5],
+          color: average > 0 ? Colors.green : Colors.red,
+          y: average,
+        ),
         ColumnSeries<TimeIntValue>(
           name: '',
           data: data,

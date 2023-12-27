@@ -99,7 +99,7 @@ extension TimeValueList on List<TimeIntValue> {
     return out;
   }
 
-  /// See [withAlignedTimes].
+  /// See [withAlignedTimes], but only the values.
   List<int> alignValues(
     List<DateTime> times, {
     bool cumulate = false,

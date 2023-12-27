@@ -234,13 +234,7 @@ class CategoryHistory {
   }
 
   double getDollarAverageMonthlyTotal() {
-    final totals = getMonthlyTotals();
-    if (totals.isEmpty) return 0;
-    var sum = 0;
-    for (final x in totals) {
-      sum += x;
-    }
-    return sum.asDollarDouble() / totals.length;
+    return getDollarAverage(getMonthlyTotals());
   }
 }
 
