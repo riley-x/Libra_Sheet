@@ -19,6 +19,7 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   CartesianCoordinateSpace? coordSpace;
   List<(double, TextPainter)>? xLabels;
   List<(double, TextPainter)>? yLabels;
+  int? yLabelOrder;
 
   DiscreteCartesianGraphPainter({
     super.repaint,
@@ -40,8 +41,14 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
     );
     coordSpace!.autoRange(xAxis: xAxis, yAxis: yAxis, data: data);
 
-    /// Auto labels and axis padding; TODO this is hard coded for bottom and left aligned labels
-    yLabels = yAxis.autoYLabels(coordSpace!);
+    // TODO these are hard coded for bottom and left aligned labels
+
+    /// Auto y labels
+    final labels = yAxis.autoYLabels(coordSpace!);
+    yLabels = labels.$1;
+    yLabelOrder = labels.$2;
+
+    /// Auto x axis pad start based on max width of y labels.
     if (coordSpace!.xAxis.padStart == null) {
       var maxLabelWidth = 0.0;
       for (final (_, x) in yLabels!) {
@@ -49,7 +56,11 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
       }
       coordSpace!.xAxis.padStart = maxLabelWidth + yAxis.labelOffset;
     }
+
+    /// Auto x labels (make sure this is after the start padding is set).
     xLabels = xAxis.autoXLabels(coordSpace!);
+
+    /// Auto y axis pad start assuming single line x axis labels.
     if (coordSpace!.yAxis.padStart == null) {
       coordSpace!.yAxis.padStart = coordSpace!.xAxis.labelLineHeight + xAxis.labelOffset;
     }
@@ -147,7 +158,7 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
     if (coordSpace == null) return;
     paintGridLines(canvas);
     for (final series in data.data) {
-      series.paint(canvas, coordSpace!);
+      series.paint(this, canvas, coordSpace!);
     }
     paintLabels(canvas);
     paintAxisLines(canvas);

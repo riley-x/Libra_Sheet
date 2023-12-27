@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+@Deprecated("Old Syncfusion pie charts")
 class LibraPieChart extends StatelessWidget {
   const LibraPieChart(this.data, {super.key});
 
@@ -21,6 +22,7 @@ class LibraPieChart extends StatelessWidget {
   }
 }
 
+@Deprecated("Old Syncfusion pie charts")
 class AccountPieChart extends StatelessWidget {
   const AccountPieChart(this.accounts, {super.key});
 

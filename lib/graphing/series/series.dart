@@ -56,7 +56,7 @@ abstract class Series<T> {
     required this.data,
   });
 
-  void paint(Canvas canvas, CartesianCoordinateSpace coordSpace);
+  void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace);
 
   /// This is the value shown when hovering over a data point. The value is formatted by the
   /// corresponding axis. Note if [hoverBuilder] returns not null, it will take precedence, but this

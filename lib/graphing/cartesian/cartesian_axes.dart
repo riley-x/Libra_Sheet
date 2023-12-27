@@ -53,7 +53,10 @@ class CartesianAxis {
   final TextStyle? _labelStyle;
   TextStyle? get labelStyle => _labelStyle ?? theme.textTheme.bodySmall;
 
-  /// For hover, default axis labels, etc.
+  /// For hover, default axis labels, etc. Order is a utility value that when not null, indicates
+  /// to possibly return a more concise version of the string. For example, the [autoXLabels] and
+  /// [autoYLabels] functions set the order to the common exponent (power of ten) that separates
+  /// each tick.
   final String Function(double val, [int? order]) valToString;
 
   /// Grid line positions. If null, will be where the [labels] are.
@@ -101,15 +104,17 @@ class CartesianAxis {
   }
 
   /// Creates equally space human-readable labels assuming this is the y-axis. The labels are not
-  /// constrained by width, but will fit the given height constraints in [coordSpace].
-  List<(double, TextPainter)> autoYLabels(CartesianCoordinateSpace coordSpace) {
-    if (labels != null) return layoutLabels(labels!);
+  /// constrained by width, but will fit the given height constraints in [coordSpace]. Returns a
+  /// list of label painters and positions (in user y coordinates), and the step order used.
+  (List<(double, TextPainter)>, int?) autoYLabels(CartesianCoordinateSpace coordSpace) {
+    if (labels != null) return (layoutLabels(labels!), null);
 
+    /// Get the ideal step size
     final idealTickSeparation = coordSpace.yAxis.labelLineHeight + 30;
     var idealNTicks = coordSpace.yAxis.pixelWidth.abs() / idealTickSeparation;
     if (idealNTicks < 2) idealNTicks = 2;
     final idealStepSize = coordSpace.yAxis.userWidth / idealNTicks;
-    if (idealStepSize <= 0) return [];
+    if (idealStepSize <= 0) return ([], null);
 
     /// Start from the nearest integer multiple of a human readable step size.
     final humanReadableStep = roundToHumanReadable(idealStepSize);
@@ -124,7 +129,7 @@ class CartesianAxis {
       }
       currPos += stepSize;
     }
-    return out;
+    return (out, humanReadableStep.order);
   }
 
   /// Helper function that tries to use [humanReadableStep] to layout the x labels, or recurses to

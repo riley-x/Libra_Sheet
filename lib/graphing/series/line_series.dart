@@ -44,7 +44,7 @@ class LineSeries<T> extends Series<T> {
   }
 
   @override
-  void paint(Canvas canvas, CartesianCoordinateSpace coordSpace) {
+  void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace) {
     _renderedPoints.clear();
     if (data.length <= 1) return;
 

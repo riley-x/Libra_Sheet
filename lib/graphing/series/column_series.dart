@@ -67,7 +67,7 @@ class ColumnSeries<T> extends Series<T> {
   }
 
   @override
-  void paint(Canvas canvas, CartesianCoordinateSpace coordSpace) {
+  void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace) {
     _renderedPoints.clear();
     for (int i = 0; i < data.length; i++) {
       final point = _addPoint(coordSpace, i);
