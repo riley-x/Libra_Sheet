@@ -14,105 +14,113 @@ class PreviewTransactionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AddCsvState>();
-    final transactions = TransactionGrid(
-      state.transactions,
-      fixedColumns: 1,
-      maxRowsForName: 2,
-      onSelect: (t, i) => state.focusTransaction(i),
-    );
+    /// We have to create the [TransactionDetailsState] provider here because
+    ///   1. The [LayoutBuilder] in [_Body] would recreate it whenever the screen layout changes.
+    ///   2. Can override the back buttons to be more intuitive when navigating into the transaction
+    ///      details.
+    return ChangeNotifierProvider(
+      create: (context) => TransactionDetailsState(
+        null,
+        appState: context.read<LibraAppState>(),
+        onSave: context.read<AddCsvState>().saveTransaction,
+        onDelete: (t) => context.read<AddCsvState>().deleteTransaction(),
+        onSaveRule: context.read<AddCsvState>().reprocessRule,
+      ),
+      builder: (context, child) {
+        void onBack() {
+          final csvState = context.read<AddCsvState>();
+          final detailsState = context.read<TransactionDetailsState>();
+          if (csvState.focusedTransIndex == -1) {
+            csvState.clearTransactions();
+          } else if (detailsState.focus == TransactionDetailActiveFocus.none) {
+            csvState.focusTransaction(-1);
+          } else {
+            detailsState.clearFocus();
+          }
+        }
 
-    void onBack() {
-      if (state.focusedTransIndex == -1) {
-        state.clearTransactions();
-      } else {
-        state.focusTransaction(-1);
-      }
-    }
-
-    return Column(
-      children: [
-        CommonBackBar(
-          leftText: 'Preview Transactions',
-          onBack: onBack,
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth < 875) {
-                /// The IndexedStack keeps the TransactionGrid state alive
-                return IndexedStack(
-                  index: state.focusedTransIndex == -1 ? 0 : 1,
-                  children: [
-                    transactions,
-                    const _TransactionDetails(),
-                  ],
-                );
-              } else {
-                return Row(
-                  children: [
-                    Expanded(child: transactions),
-                    const VerticalDivider(width: 1, thickness: 1),
-                    const SizedBox(
-                      width: 450,
-                      child: _TransactionDetails(),
-                    ),
-                  ],
-                );
-              }
-            },
-          ),
-        ),
-        const Divider(height: 1, thickness: 1),
-        _BottomBar(onBack: onBack),
-      ],
+        return Column(
+          children: [
+            CommonBackBar(
+              leftText: 'Preview Transactions',
+              onBack: onBack,
+            ),
+            const Expanded(child: _Body()),
+            const Divider(height: 1, thickness: 1),
+            _BottomBar(onBack: onBack),
+          ],
+        );
+      },
     );
   }
 }
 
-class _TransactionDetails extends StatelessWidget {
-  const _TransactionDetails({super.key});
+/// The main body of the preview screen. It displays a list of the newly created transactions on the
+/// left and a transaction editor on the right. If the window is too narrow, the editor overlays
+/// the list instead.
+class _Body extends StatelessWidget {
+  const _Body({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AddCsvState>();
-    if (state.focusedTransIndex == -1) {
-      return const SizedBox();
-    } else {
-      /// It's kind of slow on clicking a transaction, probably because we're recreating the
-      /// Notifier everytime here? but not the end of the world.
-      /// Could elevate to above widget and call TransactionDetailsState.replaceSeed in addition
-      /// to state.focusTransaction.
-      final trans = state.transactions[state.focusedTransIndex];
-      return ChangeNotifierProvider(
-        key: ObjectKey(trans),
-        create: (context) => TransactionDetailsState(
-          trans,
-          appState: context.read<LibraAppState>(),
-          onSave: state.saveTransaction,
-          onDelete: (t) => state.deleteTransaction(),
-          onSaveRule: state.reprocessRule,
-        ),
-        builder: (context, child) {
-          final focus = context
-              .select<TransactionDetailsState, TransactionDetailActiveFocus>((it) => it.focus);
+    final csvState = context.watch<AddCsvState>();
+    final transactions = TransactionGrid(
+      csvState.transactions,
+      fixedColumns: 1,
+      maxRowsForName: 2,
+      onSelect: (t, i) {
+        csvState.focusTransaction(i);
+        context.read<TransactionDetailsState>().replaceSeed(t);
+      },
+    );
+    final details = TransactionDetailsEditor(
+      onCancel: () => csvState.focusTransaction(-1),
+    );
+
+    final focus =
+        context.select<TransactionDetailsState, TransactionDetailActiveFocus>((it) => it.focus);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 875) {
+          /// Layout transaction grid and editor as a single stack
           return IndexedStack(
-            index: focus.index,
+            index: csvState.focusedTransIndex == -1 ? 0 : 1 + focus.index,
             children: [
-              child!,
+              transactions,
+              details,
               const AllocationEditor(),
               const ReimbursementEditor(),
             ],
           );
-        },
-        child: TransactionDetailsEditor(
-          onCancel: () => state.focusTransaction(-1),
-        ),
-      );
-    }
+        } else {
+          /// Layout transaction grid side-by-side with editor
+          return Row(
+            children: [
+              Expanded(child: transactions),
+              const VerticalDivider(width: 1, thickness: 1),
+              SizedBox(
+                width: 450,
+                child: IndexedStack(
+                  index: csvState.focusedTransIndex == -1 ? 0 : 1 + focus.index,
+                  children: [
+                    const SizedBox(),
+                    details,
+                    const AllocationEditor(),
+                    const ReimbursementEditor(),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 }
 
+/// This is the bottom bar on the add csv navigation path. It contains a back button and a save
+/// button.
 class _BottomBar extends StatelessWidget {
   final Function() onBack;
   const _BottomBar({super.key, required this.onBack});
