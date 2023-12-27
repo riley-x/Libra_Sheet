@@ -40,9 +40,9 @@ class RedGreenBarChart extends StatelessWidget {
       ),
       data: SeriesCollection([
         DashedHorizontalLine(
-          data: [-0.5, 5],
           color: average > 0 ? Colors.green : Colors.red,
           y: average,
+          lineWidth: 1.5,
         ),
         ColumnSeries<TimeIntValue>(
           name: '',

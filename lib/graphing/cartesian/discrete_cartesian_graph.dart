@@ -157,10 +157,10 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
     layoutAxes(size);
     if (coordSpace == null) return;
     paintGridLines(canvas);
+    paintLabels(canvas);
     for (final series in data.data) {
       series.paint(this, canvas, coordSpace!);
     }
-    paintLabels(canvas);
     paintAxisLines(canvas);
   }
 
