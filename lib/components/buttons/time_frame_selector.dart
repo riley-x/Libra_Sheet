@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/dialogs/month_range_dialog.dart';
 
 enum TimeFrameEnum { oneYear, twoYear, all, custom }
 
@@ -12,12 +13,14 @@ class TimeFrame {
   final DateTime? customStart;
   final DateTime? customEnd;
 
-  TimeFrame(
+  const TimeFrame(
     this.selection, {
     this.customStart,
     this.customEnd,
-  });
+  }) : assert(selection != TimeFrameEnum.custom || (customStart != null && customEnd != null));
 
+  /// Returns the start and end (exclusive) indices into [times] that match this time frame. Assumes
+  /// that [times] is ordered by time, and in the case of [TimeFrameEnum.custom], that
   (int, int) getRange(List<DateTime> times) {
     if (selection != TimeFrameEnum.custom) {
       return switch (selection) {
@@ -27,12 +30,15 @@ class TimeFrame {
         TimeFrameEnum.custom => (0, 0),
       };
     } else {
-      assert(customStart != null && customEnd != null);
-      int start = 0;
-      int end = 0;
+      int start = -1;
+      int end = -1;
       for (int i = 0; i < times.length; i++) {
         if (times[i].isAtSameMomentAs(customStart!)) start = i;
         if (times[i].isAtSameMomentAs(customEnd!)) end = i;
+      }
+      if (start == -1 || end == -1) {
+        assert(false);
+        return (0, times.length);
       }
       return (start, end);
     }
@@ -69,7 +75,11 @@ class TimeFrameSelector extends StatelessWidget {
         if (it != TimeFrameEnum.custom) {
           onSelect?.call(TimeFrame(it));
         } else {
-          // TODO
+          showMonthRangeDialog(
+            context: context,
+            months: months,
+            onSelect: (start, endInclusive) => print("$start $endInclusive"),
+          );
         }
       },
     );
