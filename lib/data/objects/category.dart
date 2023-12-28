@@ -223,18 +223,19 @@ class CategoryHistory {
   //-----------------------------------------------------------
   // Utils
   //-----------------------------------------------------------
-  List<int> getMonthlyTotals() {
-    final out = List.filled(times.length, 0);
+  List<int> getMonthlyTotals([(int, int)? range]) {
+    range ??= (0, times.length);
+    final out = List.filled(range.$2 - range.$1, 0);
     for (final cat in categories) {
-      for (int i = 0; i < out.length; i++) {
-        out[i] += cat.values[i];
+      for (int i = range.$1; i < range.$2; i++) {
+        out[i - range.$1] += cat.values[i];
       }
     }
     return out;
   }
 
-  double getDollarAverageMonthlyTotal() {
-    return getDollarAverage(getMonthlyTotals());
+  double getDollarAverageMonthlyTotal([(int, int)? range]) {
+    return getDollarAverage(getMonthlyTotals(range));
   }
 }
 

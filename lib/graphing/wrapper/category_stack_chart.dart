@@ -48,7 +48,7 @@ class CategoryStackChart extends StatelessWidget {
       data: SeriesCollection([
         if (averageColor != null)
           DashedHorizontalLine(
-            y: data.getDollarAverageMonthlyTotal(),
+            y: data.getDollarAverageMonthlyTotal(range),
             color: averageColor!,
             lineWidth: 1.5,
           ),
