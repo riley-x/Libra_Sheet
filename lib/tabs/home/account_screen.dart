@@ -99,8 +99,11 @@ class _AccountScreenState extends State<AccountScreen> {
                     AreaSeries<TimeIntValue, DateTime>(
                       animationDuration: 300,
                       dataSource: data,
-                      xValueMapper: (TimeIntValue sales, _) => sales.time,
-                      yValueMapper: (TimeIntValue sales, _) => sales.value.abs().asDollarDouble(),
+                      xValueMapper: (TimeIntValue it, _) => it.time,
+                      yValueMapper: (TimeIntValue it, _) =>
+                          (widget.account.type == AccountType.liability)
+                              ? -it.value.asDollarDouble()
+                              : it.value.asDollarDouble(),
                       borderColor: widget.account.color,
                       borderWidth: 3,
                       borderDrawMode: BorderDrawMode.top,
