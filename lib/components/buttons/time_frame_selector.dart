@@ -11,13 +11,14 @@ class TimeFrame {
   /// These are only used if [selection] == [TimeFrameEnum.custom]. Otherwise, a change in the global
   /// month list might make the below fields stale if i.e. a new month is added.
   final DateTime? customStart;
-  final DateTime? customEnd;
+  final DateTime? customEndInclusive;
 
   const TimeFrame(
     this.selection, {
     this.customStart,
-    this.customEnd,
-  }) : assert(selection != TimeFrameEnum.custom || (customStart != null && customEnd != null));
+    this.customEndInclusive,
+  }) : assert(selection != TimeFrameEnum.custom ||
+            (customStart != null && customEndInclusive != null));
 
   /// Returns the start and end (exclusive) indices into [times] that match this time frame. Assumes
   /// that [times] is ordered by time, and in the case of [TimeFrameEnum.custom], that
@@ -34,7 +35,7 @@ class TimeFrame {
       int end = -1;
       for (int i = 0; i < times.length; i++) {
         if (times[i].isAtSameMomentAs(customStart!)) start = i;
-        if (times[i].isAtSameMomentAs(customEnd!)) end = i;
+        if (times[i].isAtSameMomentAs(customEndInclusive!)) end = i + 1;
       }
       if (start == -1 || end == -1) {
         assert(false);
@@ -78,7 +79,11 @@ class TimeFrameSelector extends StatelessWidget {
           showMonthRangeDialog(
             context: context,
             months: months,
-            onSelect: (start, endInclusive) => print("$start $endInclusive"),
+            onSelect: (start, endInclusive) => onSelect?.call(TimeFrame(
+              it,
+              customStart: start,
+              customEndInclusive: endInclusive,
+            )),
           );
         }
       },
