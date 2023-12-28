@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
@@ -58,9 +61,21 @@ class CategoryTabFilters extends StatelessWidget {
 
         /// Sub-cats switch
         const SizedBox(height: 20),
-        const Text("Show Sub-Categories"),
+        const Row(
+          children: [
+            Expanded(child: Text("Show Sub-Categories")),
+            _SubCategorySwitch(),
+          ],
+        ),
+
+        // Averages switch
         const SizedBox(height: 5),
-        const _SubCategorySwitch(),
+        const Row(
+          children: [
+            Expanded(child: Text("Show Averages")),
+            _AveragesSwitch(),
+          ],
+        ),
       ],
     );
   }
@@ -69,15 +84,32 @@ class CategoryTabFilters extends StatelessWidget {
 /// Segmented button for the time frame
 class _TimeFrameSelector extends StatelessWidget {
   const _TimeFrameSelector({super.key});
+  static final _format = DateFormat.yMMM();
 
   @override
   Widget build(BuildContext context) {
     final monthList = context.watch<LibraAppState>().monthList;
     final state = context.watch<CategoryTabState>();
-    return TimeFrameSelector(
-      months: monthList,
-      selected: state.timeFrame,
-      onSelect: state.setTimeFrame,
+
+    String getText() {
+      if (state.timeFrameMonths == null) return '';
+      if (state.timeFrameMonths!.$1.isAtSameMomentAs(state.timeFrameMonths!.$2)) {
+        return _format.format(state.timeFrameMonths!.$1);
+      } else {
+        return "${_format.format(state.timeFrameMonths!.$1)} - ${_format.format(state.timeFrameMonths!.$2)}";
+      }
+    }
+
+    return Column(
+      children: [
+        TimeFrameSelector(
+          months: monthList,
+          selected: state.timeFrame,
+          onSelect: state.setTimeFrame,
+        ),
+        const SizedBox(height: 3),
+        Text(getText(), style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }
@@ -88,22 +120,32 @@ class _SubCategorySwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryTabState = context.watch<CategoryTabState>();
-    return Switch(
-      value: categoryTabState.showSubCategories,
-      onChanged: categoryTabState.shouldShowSubCategories,
-      activeColor: Theme.of(context).colorScheme.surfaceTint,
-      activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
+    return Transform.scale(
+      scale: 0.8,
+      child: Switch(
+        value: categoryTabState.showSubCategories,
+        onChanged: categoryTabState.shouldShowSubCategories,
+        activeColor: Theme.of(context).colorScheme.surfaceTint,
+        activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
+      ),
     );
   }
 }
 
-// @override
-// Widget build(BuildContext context) {
-//   final categoryTabState = context.watch<CategoryTabState>();
-//   return FilterChip(
-//     label: const Text('Show'),
-//     selected: categoryTabState.showSubCategories,
-//     onSelected: categoryTabState.shouldShowSubCategories,
-//     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-//   );
-// }
+class _AveragesSwitch extends StatelessWidget {
+  const _AveragesSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryTabState = context.watch<CategoryTabState>();
+    return Transform.scale(
+      scale: 0.8,
+      child: Switch(
+        value: categoryTabState.showAverages,
+        onChanged: categoryTabState.shouldShowAverages,
+        activeColor: Theme.of(context).colorScheme.surfaceTint,
+        activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
+      ),
+    );
+  }
+}

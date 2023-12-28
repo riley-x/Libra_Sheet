@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/graphing/wrapper/category_heat_map.dart';
@@ -49,6 +50,7 @@ class _HeatMap extends StatelessWidget {
     final categories = (state.expenseType == ExpenseType.expense)
         ? [appState.categories.expense, ...appState.categories.expense.subCats]
         : [appState.categories.income, ...appState.categories.income.subCats];
+
     return CategoryHeatMap(
       categories: categories,
       individualValues: state.individualValues,
@@ -62,6 +64,9 @@ class _HeatMap extends StatelessWidget {
         ),
       ),
       showSubCategories: state.showSubCategories,
+      averageDenominator: state.showAverages && state.timeFrameMonths != null
+          ? 1 + state.timeFrameMonths!.$2.monthDiff(state.timeFrameMonths!.$1)
+          : null,
     );
   }
 }

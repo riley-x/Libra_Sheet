@@ -19,6 +19,11 @@ extension DateTimeUtils2 on DateTime {
   DateTime nextMonthStart() {
     return DateTime.utc(year, month + 1, 1);
   }
+
+  /// Returns [this] - [other] in months.
+  int monthDiff(DateTime other) {
+    return 12 * (year - other.year) + (month - other.month);
+  }
 }
 
 DateTime startOfMonth(DateTime x) {

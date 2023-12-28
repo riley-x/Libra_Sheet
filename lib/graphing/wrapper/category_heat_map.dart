@@ -24,6 +24,7 @@ import 'package:provider/provider.dart';
 class CategoryHeatMap extends StatefulWidget {
   final Function(Category)? onSelect;
   final bool showSubCategories;
+  final int? averageDenominator;
   final List<Category> categories;
   final Map<int, int> aggregateValues;
   final Map<int, int> individualValues;
@@ -35,6 +36,7 @@ class CategoryHeatMap extends StatefulWidget {
     super.key,
     this.onSelect,
     this.showSubCategories = false,
+    this.averageDenominator,
   });
 
   @override
@@ -45,7 +47,7 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
   int? hoverLoc;
   HeatMapPainter? painter;
 
-  int _getValue(Category cat, int depth) {
+  int _getIntValue(Category cat, int depth) {
     int? val;
     if (depth == 0) {
       val = widget.aggregateValues[cat.key];
@@ -53,6 +55,11 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
       val = widget.individualValues[cat.key];
     }
     return val?.abs() ?? 0;
+  }
+
+  double getValue(Category cat, int depth) {
+    final val = _getIntValue(cat, depth).asDollarDouble();
+    return val / (widget.averageDenominator ?? 1);
   }
 
   List<Category>? _getNested(Category cat, int depth) {
@@ -72,14 +79,18 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
     } else {
       name = cat.name;
     }
-    return "$name\n${_getValue(cat, depth).dollarString()}";
+    if (widget.averageDenominator == null) {
+      return "$name\n${_getIntValue(cat, depth).dollarString()}";
+    } else {
+      return "$name\n${formatDollar(getValue(cat, depth))}";
+    }
   }
 
   void _initPainter() {
     final isDarkMode = context.read<LibraAppState>().isDarkMode;
     painter = HeatMapPainter<Category>(
       widget.categories,
-      valueMapper: (it, depth) => _getValue(it, depth).asDollarDouble(),
+      valueMapper: (it, depth) => _getIntValue(it, depth).asDollarDouble(),
       colorMapper: (it, depth) => (isDarkMode) ? it.color.withAlpha(210) : it.color,
       labelMapper: _labelMapper,
       nestedData: (widget.showSubCategories) ? _getNested : null,

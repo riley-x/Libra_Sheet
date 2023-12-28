@@ -83,8 +83,7 @@ double getDollarAverage2<T>(Iterable<T> vals, int Function(T) valueMapper) {
   return sum.asDollarDouble() / vals.length;
 }
 
-final _format = NumberFormat('#,###');
-String formatOrder(double val, [int? order]) {
+String formatDollar(double val, [int? order]) {
   if (order == null) {
     return NumberFormat('\$#,##0.00').format(val);
   }

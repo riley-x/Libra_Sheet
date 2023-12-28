@@ -28,9 +28,19 @@ class CategoryTabState extends ChangeNotifier {
   //--------------------------------------------------------------------------
   ExpenseType expenseType = ExpenseType.expense;
   TimeFrame timeFrame = const TimeFrame(TimeFrameEnum.all);
+
+  /// This is the month range as specified by [timeFrame]; it is set on [loadValues] (which is
+  /// triggered by [setTimeFrame]), so it should be in sync with [timeFrame].
+  (DateTime, DateTime)? timeFrameMonths;
+
   final Set<Account> accounts = {};
   // final Set<Tag> tags = {}; TODO not trivial
   bool showSubCategories = false;
+  bool showAverages = false;
+
+  //--------------------------------------------------------------------------
+  // Callbacks
+  //--------------------------------------------------------------------------
 
   void setExpenseType(ExpenseType x) {
     expenseType = x;
@@ -39,11 +49,17 @@ class CategoryTabState extends ChangeNotifier {
 
   void setTimeFrame(TimeFrame x) {
     timeFrame = x;
+    notifyListeners();
     loadValues();
   }
 
   void shouldShowSubCategories(bool x) {
     showSubCategories = x;
+    notifyListeners(); // no need to reload values
+  }
+
+  void shouldShowAverages(bool x) {
+    showAverages = x;
     notifyListeners(); // no need to reload values
   }
 
@@ -69,21 +85,26 @@ class CategoryTabState extends ChangeNotifier {
   }
 
   void loadValues() async {
-    notifyListeners();
+    timeFrameMonths = null;
     if (appState.monthList.isEmpty) return;
-    final startTime = switch (timeFrame.selection) {
-      TimeFrameEnum.all => null,
+
+    /// Get months
+    final startMonth = switch (timeFrame.selection) {
+      TimeFrameEnum.all => appState.monthList.first,
       TimeFrameEnum.oneYear => appState.monthList[max(0, appState.monthList.length - 12)],
       TimeFrameEnum.twoYear => appState.monthList[max(0, appState.monthList.length - 24)],
-      TimeFrameEnum.custom => timeFrame.customStart,
+      TimeFrameEnum.custom => timeFrame.customStart!,
     };
-    final endTime = switch (timeFrame.selection) {
-      TimeFrameEnum.custom => timeFrame.customEndInclusive?.monthEnd(),
-      _ => null,
+    final endMonth = switch (timeFrame.selection) {
+      TimeFrameEnum.custom => timeFrame.customEndInclusive!,
+      _ => appState.monthList.last,
     };
+    timeFrameMonths = (startMonth, endMonth);
+
+    /// Load
     individualValues = await LibraDatabase.db.getCategoryTotals(
-      start: startTime,
-      end: endTime,
+      start: startMonth,
+      end: endMonth.monthEnd(),
       accounts: accounts.map((e) => e.key),
     );
 
