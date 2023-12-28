@@ -92,12 +92,12 @@ class _MonthRangeDialogState extends State<MonthRangeDialog> {
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: () {
-            if (start != null && end != null) {
-              widget.onConfirmed?.call(start!, end!);
-            }
-            Navigator.pop(context, 'Ok');
-          },
+          onPressed: (start == null || end == null)
+              ? null
+              : () {
+                  widget.onConfirmed?.call(start!, end!);
+                  Navigator.pop(context, 'Ok');
+                },
           child: const Text('Ok'),
         ),
       ],
@@ -172,11 +172,14 @@ class _MonthEntry extends StatelessWidget {
             : (highlighted)
                 ? colorScheme.inversePrimary.withAlpha(100)
                 : null,
-        borderRadius: (isStart)
-            ? const BorderRadius.horizontal(left: Radius.circular(_YearBlock.rowHeight / 2))
-            : (isEnd)
-                ? const BorderRadius.horizontal(right: Radius.circular(_YearBlock.rowHeight / 2))
-                : null,
+        borderRadius: (isStart && isEnd)
+            ? BorderRadius.circular(_YearBlock.rowHeight / 2)
+            : (isStart)
+                ? const BorderRadius.horizontal(left: Radius.circular(_YearBlock.rowHeight / 2))
+                : (isEnd)
+                    ? const BorderRadius.horizontal(
+                        right: Radius.circular(_YearBlock.rowHeight / 2))
+                    : null,
       ),
       child: Text(
         DateFormat.MMM().format(time),
@@ -194,8 +197,8 @@ class _MonthEntry extends StatelessWidget {
         onPointerUp: (it) => state.stopDrag(),
         onPointerCancel: (it) => state.stopDrag(),
         child: InkWell(
-          onTap: (enabled) ? () => state.onTap(time) : null,
-          onHover: (enabled) ? (isHover) => state.onHover(isHover, time) : null,
+          onTap: () => state.onTap(time),
+          onHover: (isHover) => state.onHover(isHover, time),
           child: body,
         ),
       ),
