@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' as fnd;
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
@@ -7,8 +8,6 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
 enum CashFlowType { categories, net }
-
-enum CashFlowTimeFrame { oneYear, lastYear, all }
 
 class CashFlowState extends fnd.ChangeNotifier {
   final LibraAppState appState;
@@ -26,7 +25,7 @@ class CashFlowState extends fnd.ChangeNotifier {
 
   /// Filters
   CashFlowType type = CashFlowType.categories;
-  CashFlowTimeFrame timeFrame = CashFlowTimeFrame.all;
+  TimeFrame timeFrame = TimeFrame(TimeFrameEnum.all);
   final Set<Account> accounts = {};
   bool showSubCategories = false;
 
@@ -84,7 +83,7 @@ class CashFlowState extends fnd.ChangeNotifier {
     notifyListeners();
   }
 
-  void setTimeFrame(CashFlowTimeFrame t) {
+  void setTimeFrame(TimeFrame t) {
     timeFrame = t;
     notifyListeners();
   }

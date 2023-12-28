@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:provider/provider.dart';
 
@@ -89,26 +91,12 @@ class _TimeFrameSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final monthList = context.watch<LibraAppState>().monthList;
     final state = context.watch<CashFlowState>();
-    return SegmentedButton<CashFlowTimeFrame>(
-      showSelectedIcon: false,
-      segments: const <ButtonSegment<CashFlowTimeFrame>>[
-        ButtonSegment<CashFlowTimeFrame>(
-          value: CashFlowTimeFrame.oneYear,
-          label: Text('Year'),
-        ),
-        // ButtonSegment<_TimeFrame>(
-        //   value: _TimeFrame.lastYear,
-        //   label: Text('Previous year'),
-        // ),
-        ButtonSegment<CashFlowTimeFrame>(
-          value: CashFlowTimeFrame.all,
-          label: Text('All'),
-        ),
-      ],
-      selected: <CashFlowTimeFrame>{state.timeFrame},
-      onSelectionChanged: (Set<CashFlowTimeFrame> newSelection) =>
-          state.setTimeFrame(newSelection.first),
+    return TimeFrameSelector(
+      months: monthList,
+      selected: state.timeFrame,
+      onSelect: state.setTimeFrame,
     );
   }
 }

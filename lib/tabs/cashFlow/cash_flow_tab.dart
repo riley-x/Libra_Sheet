@@ -67,14 +67,7 @@ class _CashFlowCharts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<CashFlowState>();
-    final monthList = context.watch<LibraAppState>().monthList;
-    final nDates = monthList.length;
-    final range = switch (state.timeFrame) {
-      CashFlowTimeFrame.oneYear => (max(0, nDates - 12), nDates),
-      CashFlowTimeFrame.lastYear => (max(0, nDates - 24), (max(0, nDates - 12))),
-      CashFlowTimeFrame.all => (0, nDates),
-    };
-
+    final range = state.timeFrame.getRange(state.incomeData.times);
     final textStyle = Theme.of(context).textTheme.headlineMedium;
     if (state.type == CashFlowType.categories) {
       return Column(

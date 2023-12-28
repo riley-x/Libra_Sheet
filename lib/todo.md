@@ -16,6 +16,7 @@
 
 ## Refactor
 - Replace all database calls with extension (see tags.dart).
+- Convert some appState stuff into independent ChangeNotifiers.
 
 
 ## Low priority features
