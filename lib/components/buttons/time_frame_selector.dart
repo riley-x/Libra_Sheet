@@ -21,7 +21,9 @@ class TimeFrame {
             (customStart != null && customEndInclusive != null));
 
   /// Returns the start and end (exclusive) indices into [times] that match this time frame. Assumes
-  /// that [times] is ordered by time, and in the case of [TimeFrameEnum.custom], that
+  /// that [times] is ordered by time, and in the case of [TimeFrameEnum.custom], that [times]
+  /// contains [customStart] and [customEndInclusive]. If it doesn't, will default start to 0 and
+  /// end to [times.length].
   (int, int) getRange(List<DateTime> times) {
     if (selection != TimeFrameEnum.custom) {
       return switch (selection) {
@@ -31,15 +33,13 @@ class TimeFrame {
         TimeFrameEnum.custom => (0, 0),
       };
     } else {
-      int start = -1;
-      int end = -1;
+      // These form the default values when we can't find the start and end dates.
+      // This can happen if i.e. the app month list changes (but the range is not updated).
+      int start = 0;
+      int end = times.length;
       for (int i = 0; i < times.length; i++) {
         if (times[i].isAtSameMomentAs(customStart!)) start = i;
         if (times[i].isAtSameMomentAs(customEndInclusive!)) end = i + 1;
-      }
-      if (start == -1 || end == -1) {
-        assert(false);
-        return (0, times.length);
       }
       return (start, end);
     }
@@ -70,9 +70,25 @@ class TimeFrameSelector extends StatelessWidget {
         ButtonSegment(value: TimeFrameEnum.all, label: Text("All")),
         ButtonSegment(value: TimeFrameEnum.custom, icon: Icon(Icons.date_range)),
       ],
+      // this enables clicking on the custom button again, but we need to check empty below
+      emptySelectionAllowed: true,
       selected: <TimeFrameEnum>{selected.selection},
       onSelectionChanged: (Set<TimeFrameEnum> newSelection) {
-        final it = newSelection.first;
+        final TimeFrameEnum it;
+        if (newSelection.isEmpty) {
+          // If custom, launch again
+          if (selected.selection == TimeFrameEnum.custom) {
+            it = TimeFrameEnum.custom;
+          }
+          // Otherwise we're clicking on the same button, do nothing
+          else {
+            return;
+          }
+        } else {
+          // Since multiSelectionAllowed = false, only ever <= 1 elements.
+          it = newSelection.first;
+        }
+
         if (it != TimeFrameEnum.custom) {
           onSelect?.call(TimeFrame(it));
         } else {

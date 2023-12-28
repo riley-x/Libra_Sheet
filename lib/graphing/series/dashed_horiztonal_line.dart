@@ -58,8 +58,9 @@ class DashedHorizontalLine extends Series<double?> {
   @override
   void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace) {
     assert(data.length == 2);
+    if (this.y == 0) return;
     if (painter is DiscreteCartesianGraphPainter) {
-      if (this.y == painter.yAxis.axisLoc) return;
+      if (this.y == painter.xAxis.axisLoc) return;
     }
 
     final paint = Paint()
