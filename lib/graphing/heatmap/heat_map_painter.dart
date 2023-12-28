@@ -1,238 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/graphing/heatmap/heat_map_layout.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
-
-/// Finds the reverse cumulative sum of [data].
-/// `out[i] = sum(data.values[i:])` with 0 appended at the end.
-List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
-  final out = <double>[0];
-  for (var i = data.length - 1; i >= 0; i--) {
-    final val = valueMapper(data[i]);
-    out.insert(0, val + out.first);
-  }
-  return out;
-}
-
-class _HeatMapGroup {
-  final bool wantsHorizontal;
-  final int indexStart;
-  int indexEnd;
-
-  _HeatMapGroup({
-    required this.wantsHorizontal,
-    required this.indexStart,
-    required this.indexEnd,
-  });
-}
-
-class _HeatMapHelper<T> {
-  final Rect totalRect;
-  final List<T> data;
-  final double Function(T) valueMapper;
-  final double minSameAxisRatio;
-  final double padding;
-  double paddingX;
-  double paddingY;
-
-  List<double> cumValues = [];
-  List<Rect> output = [];
-
-  _HeatMapHelper({
-    required this.totalRect,
-    required this.data,
-    required this.valueMapper,
-    required this.minSameAxisRatio,
-    required this.padding,
-    required this.paddingX,
-    required this.paddingY,
-  }) {
-    if (padding != 0) {
-      paddingX = padding;
-      paddingY = padding;
-    }
-    cumValues = reverseCumSum(data, valueMapper);
-  }
-
-  bool aprEq(double x, double y) {
-    return (x - y).abs() < 1;
-  }
-
-  /// The min/max here make sure the padding doesn't cause the Rect to have negative size
-  void add(Rect rect) {
-    output.add(Rect.fromLTRB(
-      (rect.left == totalRect.left) ? rect.left : min(rect.left + paddingX, rect.center.dx),
-      (rect.top == totalRect.top) ? rect.top : min(rect.top + paddingY, rect.center.dy),
-      (aprEq(rect.right, totalRect.right))
-          ? rect.right
-          : max(rect.right - paddingX, rect.center.dx),
-      (aprEq(rect.bottom, totalRect.bottom))
-          ? rect.bottom
-          : max(rect.bottom - paddingY, rect.center.dy),
-    ));
-  }
-
-  /// Returns the end index (exclusive) of the entry last large enough to be in the same as
-  /// [start]. Assumes [data] is sorted by decreasing value.
-  int getGroupEnd(int start) {
-    final valStart = valueMapper(data[start]);
-    var end = start + 1;
-    while (end < data.length) {
-      final val = valueMapper(data[end]);
-      if (val < minSameAxisRatio * valStart) return end;
-      end++;
-    }
-    return end;
-  }
-
-  /// Lays out the elements from [start, end) inside [rect] along the larger axis of [rect]. Each
-  /// element uses the full cross-axis width. [rect] is fully covered.
-  void layoutSideBySide(int start, int end, Rect rect) {
-    final total = cumValues[start] - cumValues[end];
-    if (rect.width >= rect.height) {
-      /// x axis is longest
-      var x = rect.topLeft.dx;
-      for (var i = start; i < end; i++) {
-        final thisWidth = rect.width * valueMapper(data[i]) / total;
-        final itemRect = Rect.fromLTWH(x, rect.topLeft.dy, thisWidth, rect.height);
-        add(itemRect);
-        x += thisWidth;
-      }
-    } else {
-      /// y axis is longest
-      var y = rect.topLeft.dy;
-      for (var i = start; i < end; i++) {
-        final thisHeight = rect.height * valueMapper(data[i]) / total;
-        final itemRect = Rect.fromLTWH(rect.topLeft.dx, y, rect.width, thisHeight);
-        add(itemRect);
-        y += thisHeight;
-      }
-    }
-  }
-
-  /// We want to layout the group given by [start, end) such that each element is as close to square
-  /// as possible. We assume that each group entry is approximately the same size.
-  void layoutGroupInRect(int start, int end, Rect rect) {
-    /// Base cases
-    final n = end - start;
-    if (n == 1) {
-      add(rect);
-      return;
-    } else if (n == 2) {
-      layoutSideBySide(start, end, rect);
-      return;
-    }
-
-    /// Recursive. Here the variable names assume the longest side is the x axis.
-    final affinity = (rect.longestSide / rect.shortestSide).round();
-    final nRows = 2;
-    print("$start ${data[start]} $n $affinity $nRows");
-    if (nRows == 1) {
-      /// The rectangle is super long, so just add the elements side by side
-      layoutSideBySide(start, end, rect);
-    } else if (n % nRows != 0) {
-      /// Take leftover from the start (largest elements)
-      final leftovers = n % nRows;
-      final newRect = layoutGroupAlongLargeAxis(start, start + leftovers, rect);
-      layoutGroupInRect(start + leftovers, end, newRect);
-    } else {
-      final nCols = n ~/ nRows;
-      final groupTotal = cumValues[start] - cumValues[end];
-      var pos = rect.width > rect.height ? rect.top : rect.left;
-      for (int i = start; i < end; i += nCols) {
-        final rowTotal = cumValues[i] - cumValues[i + nCols];
-        final extent = min(rect.height, rect.width);
-        final newPos = pos + extent * rowTotal / groupTotal;
-        final rowRect = rect.width > rect.height
-            ? Rect.fromLTRB(rect.left, pos, rect.right, newPos)
-            : Rect.fromLTRB(pos, rect.top, newPos, rect.bottom);
-        layoutSideBySide(i, i + nCols, rowRect);
-        pos = newPos;
-      }
-    }
-  }
-
-  /// Lays out a group indexed by [start, end) along the larger axis. The group will use the full
-  /// width of the cross axis.
-  Rect layoutGroupAlongLargeAxis(int start, int end, Rect rect) {
-    final total = cumValues[start];
-    final totalGroup = total - cumValues[end];
-    if (rect.width >= rect.height) {
-      /// x axis is longest
-      final newX = rect.left + rect.width * totalGroup / total;
-      final groupRect = Rect.fromPoints(rect.topLeft, Offset(newX, rect.bottom));
-      layoutGroupInRect(start, end, groupRect);
-      return Rect.fromPoints(groupRect.topRight, rect.bottomRight);
-    } else {
-      /// y axis is longest
-      final newY = rect.top + rect.height * totalGroup / total;
-      final groupRect = Rect.fromPoints(rect.topLeft, Offset(rect.right, newY));
-      layoutGroupInRect(start, end, groupRect);
-      return Rect.fromPoints(groupRect.bottomLeft, rect.bottomRight);
-    }
-  }
-
-  void layout() {
-    var start = 0;
-    var rect = totalRect;
-    while (start < data.length) {
-      final end = getGroupEnd(start);
-      rect = layoutGroupAlongLargeAxis(start, end, rect);
-      start = end;
-
-      // final remainingTotal = cumValues[end];
-      // final groupTotal = cumValues[start] - remainingTotal;
-
-      // Offset newTopLeft;
-      // if (groupTotal > remainingTotal) {
-      //   newTopLeft = layoutGroupAlongLargeAxis(start, end, topLeft);
-      // } else {
-      //   newTopLeft = layoutGroupAlongSmallAxis(start, end, topLeft);
-      // }
-    }
-  }
-}
-
-/// Returns a list of [Rect] positions for a heatmap. Each entry in [data] is given a rectangular
-/// region proportional to its value from [valueMapper].
-///
-/// The algorithm first collects entries into groups. The first group is created by selecting the
-/// largest element, then adding every element with value / seedValue > [minSameAxisRatio]. Then the
-/// next group is created by using the next largest element as the seed.
-///
-/// Each group is laid out along the same axis. When the remaining sum of the other groups is smaller
-/// than the sum of the current group, the group is laid out along the larger axis, and uses the
-/// full width of the cross axis. In the opposite case, the group is laid out along the full length
-/// of the smaller axis.
-///
-/// [data] should be sorted by decreasing value already. Values should all be positive.
-///
-/// [padding] is the amount of pixel padding to space between the boxes. It is a dumb padding that
-/// simply removes space from the interior sides of each rectangle. As such for large values of
-/// padding, the visible areas of the rectangles won't exactly be proportional to each side.
-List<Rect> layoutHeatMapGrid<T>({
-  required Rect rect,
-  required List<T> data,
-  required double Function(T) valueMapper,
-  double minSameAxisRatio = 0.6,
-  double padding = 0,
-  double paddingX = 0,
-  double paddingY = 0,
-}) {
-  if (data.isEmpty) return [];
-  final helper = _HeatMapHelper(
-    totalRect: rect,
-    data: data,
-    valueMapper: valueMapper,
-    minSameAxisRatio: minSameAxisRatio,
-    padding: padding,
-    paddingX: paddingX,
-    paddingY: paddingY,
-  );
-  helper.layout();
-  assert(helper.output.length == data.length);
-  return helper.output;
-}
 
 class HeatMapPoint<T> {
   final T item;
@@ -271,6 +39,10 @@ class HeatMapPainter<T> extends CustomPainter {
   /// The pixel (width, height) of the border around each rectangle, indexed by the series depth.
   late final (double, double) Function(int depth) paddingMapper;
 
+  /// Indexes into [data] of where the group boundaries are. Calculated in the constructor.
+  /// TODO expand to nestedData too
+  List<int> groupEdges = [];
+
   //-----------------------------------
   // Variables per paint
   //-----------------------------------
@@ -289,7 +61,7 @@ class HeatMapPainter<T> extends CustomPainter {
     double paddingX = 0,
     double paddingY = 0,
     (double, double) Function(int depth)? paddingMapper,
-    this.minSameAxisRatio = 0.8,
+    this.minSameAxisRatio = 0.5,
     this.textStyle,
   }) {
     if (paddingMapper != null) {
@@ -301,6 +73,7 @@ class HeatMapPainter<T> extends CustomPainter {
     }
 
     this.data = _sortAndFilterData(data, 0)!;
+    groupEdges = groupValues([for (final x in this.data) valueMapper(x, 0)], minSameAxisRatio);
   }
 
   List<T>? _sortAndFilterData(List<T>? orig, int depth) {
@@ -350,9 +123,9 @@ class HeatMapPainter<T> extends CustomPainter {
   void _paintSeries(List<T> seriesData, int seriesDepth, Canvas canvas, Rect rect) {
     final padding = paddingMapper(seriesDepth);
     final positions = layoutHeatMapGrid(
+      groups: (seriesDepth == 0) ? groupEdges : null,
       rect: rect,
-      data: seriesData,
-      valueMapper: (it) => valueMapper(it, seriesDepth),
+      data: [for (final x in seriesData) valueMapper(x, seriesDepth)],
       minSameAxisRatio: minSameAxisRatio,
       paddingX: padding.$1,
       paddingY: padding.$2,
