@@ -64,7 +64,8 @@ class CategoryStackChart extends StatelessWidget {
           ? null
           : (iSeries, series, iData) {
               if (range != null) iData += range!.$1;
-              onTap?.call(data.categories[iSeries].category, data.times[iData]);
+              onTap?.call(data.categories[iSeries - 1].category, data.times[iData]);
+              // The -1 because of the dashed horizontal line inflates the series index by 1.
             },
     );
   }
