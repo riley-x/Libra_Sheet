@@ -19,14 +19,16 @@ class MonthRangeDialog extends StatefulWidget {
 }
 
 class _MonthRangeDialogState extends State<MonthRangeDialog> {
-  /// NB: [GestureDetector.onPanStart] still triggers if the mouse moves minisculely during the tap.
-  /// So we need to manually track the pointer position instead. We track [onPointerDown]'s position.
-  /// If we receive a tap event, clear the drag. If we see the mouse moves to a different month
-  /// (using each month's [onHover]), initiate the drag.
+  /// [GestureDetector.onPanStart] still triggers if the mouse moves minisculely during the tap.
+  /// So we need to manually track the pointer position instead.
+  ///   1. Store [onPointerDown]'s position in [dragStart].
+  ///   2. The mouse is currently down and hovering over [dragStart]. We wait for one of the below.
+  ///       (a) We receive a tap event; clear the drag and use the tap logic.
+  ///       (b) The mouse moves to a different month. We watch this using each month's [onHover].
+  ///           Initiate the drag and cancel the tap logic.
   DateTime? dragStart;
   bool dragInitiated = false;
 
-  bool awaitingFirstTap = true;
   DateTime? start;
   DateTime? end;
 
@@ -35,28 +37,21 @@ class _MonthRangeDialogState extends State<MonthRangeDialog> {
     super.initState();
   }
 
-  /// For taps, the first tap sets the start time, and the second tap sets the end time (or vice
-  /// versa).
-  ///
-
+  /// 1. If [start] == [end], the tapped location forms the new end of the range.
+  /// 2. Otherwise (nothing selected or a range selected already), set both [start] and [end] to
+  ///    [time].
   void onTap(DateTime time) {
     stopDrag();
-    if (awaitingFirstTap) {
-      setState(() {
+    setState(() {
+      if (start != null && start == end) {
+        final ordered = order(start!, time);
+        start = ordered.$1;
+        end = ordered.$2;
+      } else {
         start = time;
         end = time;
-      });
-      awaitingFirstTap = false;
-    } else if (start != null) {
-      setState(() {
-        if (time.compareTo(start!) <= 0) {
-          start = time;
-        } else {
-          end = time;
-        }
-      });
-      awaitingFirstTap = true;
-    }
+      }
+    });
   }
 
   void onPointerDown(PointerDownEvent event, DateTime time) {
@@ -71,8 +66,6 @@ class _MonthRangeDialogState extends State<MonthRangeDialog> {
   void onHover(bool isHover, DateTime time) {
     if (!isHover || dragStart == null) return;
     if (time != dragStart || dragInitiated) {
-      /// Initiate drag; replace tap selection
-      awaitingFirstTap = true;
       dragInitiated = true;
       final ordered = order(dragStart!, time);
       setState(() {
@@ -122,20 +115,26 @@ class _YearBlock extends StatelessWidget {
   final int year;
   final _MonthRangeDialogState state;
 
+  static const rowHeight = 30.0;
+
   @override
   Widget build(BuildContext context) {
     final months = List.generate(12, (i) => DateTime.utc(year, i + 1));
     return Column(
       children: [
         Text('$year', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 6),
+        const SizedBox(height: 3),
         for (int start = 0; start < 12; start += 4)
-          SizedBox(
-            height: 30,
-            child: Row(
-              children: [
-                for (int i = start; i < start + 4; i++) _MonthEntry(time: months[i], state: state),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: SizedBox(
+              height: rowHeight,
+              child: Row(
+                children: [
+                  for (int i = start; i < start + 4; i++)
+                    _MonthEntry(time: months[i], state: state),
+                ],
+              ),
             ),
           ),
         if (year < state.widget.maxDate.year) const SizedBox(height: 12),
@@ -173,6 +172,11 @@ class _MonthEntry extends StatelessWidget {
             : (highlighted)
                 ? colorScheme.inversePrimary.withAlpha(100)
                 : null,
+        borderRadius: (isStart)
+            ? const BorderRadius.horizontal(left: Radius.circular(_YearBlock.rowHeight / 2))
+            : (isEnd)
+                ? const BorderRadius.horizontal(right: Radius.circular(_YearBlock.rowHeight / 2))
+                : null,
       ),
       child: Text(
         DateFormat.MMM().format(time),
@@ -191,14 +195,8 @@ class _MonthEntry extends StatelessWidget {
         onPointerCancel: (it) => state.stopDrag(),
         child: InkWell(
           onTap: (enabled) ? () => state.onTap(time) : null,
-          // onTapDown: (it) => print('tap down $time'),
-          // onTapCancel: () => print('tap cancel $time'),
           onHover: (enabled) ? (isHover) => state.onHover(isHover, time) : null,
-          // child: GestureDetector(
-          //   onPanStart: (enabled) ? (it) => state.onDragStart(time) : null,
-          //   onPanEnd: (it) => state.onDragEnd(),
           child: body,
-          // ),
         ),
       ),
     );
