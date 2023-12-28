@@ -242,9 +242,11 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     return out;
   }
 
-  /// Returns a map categoryId -> total, from the given [start] time (inclusive) and [accounts].
+  /// Returns a map categoryId -> total, between the given [start] and [end] times (inclusive) and
+  /// [accounts].
   Future<Map<int, int>> getCategoryTotals({
     DateTime? start,
+    DateTime? end,
     Iterable<int> accounts = const [],
   }) async {
     String where = "";
@@ -252,6 +254,11 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     if (start != null) {
       where = "$_date >= ?";
       args.add(start.millisecondsSinceEpoch);
+    }
+    if (end != null) {
+      if (where.isNotEmpty) where += " AND ";
+      where += "$_date <= ?";
+      args.add(end.millisecondsSinceEpoch);
     }
     where = _addAccountsFilter(accounts, where, args);
 

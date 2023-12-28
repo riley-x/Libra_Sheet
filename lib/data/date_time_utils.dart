@@ -15,6 +15,10 @@ extension DateTimeUtils2 on DateTime {
   DateTime monthEnd() {
     return DateTime.utc(year, month + 1, 0);
   }
+
+  DateTime nextMonthStart() {
+    return DateTime.utc(year, month + 1, 1);
+  }
 }
 
 DateTime startOfMonth(DateTime x) {

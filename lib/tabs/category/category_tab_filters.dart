@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 
@@ -70,27 +72,12 @@ class _TimeFrameSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final monthList = context.watch<LibraAppState>().monthList;
     final state = context.watch<CategoryTabState>();
-    return SegmentedButton<CategoryTabTimeFrame>(
-      showSelectedIcon: false,
-      segments: const <ButtonSegment<CategoryTabTimeFrame>>[
-        ButtonSegment<CategoryTabTimeFrame>(
-          value: CategoryTabTimeFrame.current,
-          label: Text('This Mo.'),
-        ),
-        ButtonSegment<CategoryTabTimeFrame>(
-          value: CategoryTabTimeFrame.oneYear,
-          label: Text('Year'),
-        ),
-        ButtonSegment<CategoryTabTimeFrame>(
-          value: CategoryTabTimeFrame.all,
-          label: Text('All'),
-        ),
-      ],
-      selected: <CategoryTabTimeFrame>{state.timeFrame},
-      onSelectionChanged: (Set<CategoryTabTimeFrame> newSelection) {
-        state.setTimeFrame(newSelection.first);
-      },
+    return TimeFrameSelector(
+      months: monthList,
+      selected: state.timeFrame,
+      onSelect: state.setTimeFrame,
     );
   }
 }

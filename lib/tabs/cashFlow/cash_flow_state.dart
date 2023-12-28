@@ -25,7 +25,7 @@ class CashFlowState extends fnd.ChangeNotifier {
 
   /// Filters
   CashFlowType type = CashFlowType.categories;
-  TimeFrame timeFrame = TimeFrame(TimeFrameEnum.all);
+  TimeFrame timeFrame = const TimeFrame(TimeFrameEnum.all);
   final Set<Account> accounts = {};
   bool showSubCategories = false;
 
@@ -44,7 +44,7 @@ class CashFlowState extends fnd.ChangeNotifier {
     final rawHistory = await LibraDatabase.db.getCategoryHistory(
       accounts: accounts.map((e) => e.key),
     );
-    final _netIncome = await LibraDatabase.db.getMonthlyNetIncome(
+    final rawIncome = await LibraDatabase.db.getMonthlyNetIncome(
       accounts: accounts.map((e) => e.key),
     );
 
@@ -67,7 +67,7 @@ class CashFlowState extends fnd.ChangeNotifier {
     incomeDataSubCats.addIndividual(appState.categories.income, rawHistory);
     expenseDataSubCats.addIndividual(appState.categories.expense, rawHistory);
 
-    netIncome = _netIncome.withAlignedTimes(appState.monthList).fixedForCharts();
+    netIncome = rawIncome.withAlignedTimes(appState.monthList).fixedForCharts();
 
     netReturns = rawHistory[Category.investment.key]?.withAlignedTimes(appState.monthList) ??
         appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList().fixedForCharts();
