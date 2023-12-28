@@ -14,42 +14,45 @@ List<double> reverseCumSum<T>(List<T> data, double Function(T) valueMapper) {
   return out;
 }
 
-/// Returns a list of [Rect] positions for a heatmap. Each entry in [data] is given a rectangular
-/// region proportional to its value from [valueMapper].
-///
-/// The algorithm first collects entries into groups. The first group is created by selecting the
-/// largest element, then adding every element with value / seedValue > [minSameAxisRatio]. Then the
-/// next group is created by using the next largest element as the seed.
-///
-/// Each group is laid out along the same axis. When the remaining sum of the other groups is smaller
-/// than the sum of the current group, the group is laid out along the larger axis, and uses the
-/// full width of the cross axis. In the opposite case, the group is laid out along the full length
-/// of the smaller axis.
-///
-/// [data] should be sorted by decreasing value already. You can optionally pass in [reverseCumValues]
-/// if they are precalculated. Values should all be positive.
-///
-/// [padding] is the amount of pixel padding to space between the boxes. It is a dumb padding that
-/// simply removes space from the interior sides of each rectangle. As such for large values of
-/// padding, the visible areas of the rectangles won't exactly be proportional to each side.
-List<Rect> layoutHeatMapGrid<T>({
-  Offset offset = Offset.zero,
-  required Size size,
-  required List<T> data,
-  required double Function(T) valueMapper,
-  double minSameAxisRatio = 0.6,
-  double padding = 0,
-  double paddingX = 0,
-  double paddingY = 0,
-  List<double>? reverseCumValues,
-}) {
-  if (data.isEmpty) return [];
-  if (padding != 0) {
-    paddingX = padding;
-    paddingY = padding;
+class _HeatMapGroup {
+  final bool wantsHorizontal;
+  final int indexStart;
+  int indexEnd;
+
+  _HeatMapGroup({
+    required this.wantsHorizontal,
+    required this.indexStart,
+    required this.indexEnd,
+  });
+}
+
+class _HeatMapHelper<T> {
+  final Rect totalRect;
+  final List<T> data;
+  final double Function(T) valueMapper;
+  final double minSameAxisRatio;
+  final double padding;
+  double paddingX;
+  double paddingY;
+
+  List<double> cumValues = [];
+  List<Rect> output = [];
+
+  _HeatMapHelper({
+    required this.totalRect,
+    required this.data,
+    required this.valueMapper,
+    required this.minSameAxisRatio,
+    required this.padding,
+    required this.paddingX,
+    required this.paddingY,
+  }) {
+    if (padding != 0) {
+      paddingX = padding;
+      paddingY = padding;
+    }
+    cumValues = reverseCumSum(data, valueMapper);
   }
-  final output = <Rect>[];
-  final cumValues = reverseCumValues ?? reverseCumSum(data, valueMapper);
 
   bool aprEq(double x, double y) {
     return (x - y).abs() < 1;
@@ -58,16 +61,14 @@ List<Rect> layoutHeatMapGrid<T>({
   /// The min/max here make sure the padding doesn't cause the Rect to have negative size
   void add(Rect rect) {
     output.add(Rect.fromLTRB(
-      offset.dx + ((rect.left == 0) ? 0 : min(rect.left + paddingX, rect.center.dx)),
-      offset.dy + ((rect.top == 0) ? 0 : min(rect.top + paddingY, rect.center.dy)),
-      offset.dx +
-          ((aprEq(rect.right, size.width))
-              ? rect.right
-              : max(rect.right - paddingX, rect.center.dx)),
-      offset.dy +
-          ((aprEq(rect.bottom, size.height))
-              ? rect.bottom
-              : max(rect.bottom - paddingY, rect.center.dy)),
+      (rect.left == totalRect.left) ? rect.left : min(rect.left + paddingX, rect.center.dx),
+      (rect.top == totalRect.top) ? rect.top : min(rect.top + paddingY, rect.center.dy),
+      (aprEq(rect.right, totalRect.right))
+          ? rect.right
+          : max(rect.right - paddingX, rect.center.dx),
+      (aprEq(rect.bottom, totalRect.bottom))
+          ? rect.bottom
+          : max(rect.bottom - paddingY, rect.center.dy),
     ));
   }
 
@@ -84,88 +85,153 @@ List<Rect> layoutHeatMapGrid<T>({
     return end;
   }
 
-  /// Lays out a group indexed by [start, end) along the larger axis. The boxes will use the full
-  /// width of the cross axis.
-  Offset layoutGroupAlongLargeAxis(int start, int end, Offset topLeft) {
-    final total = cumValues[start];
-    final width = size.width - topLeft.dx;
-    final height = size.height - topLeft.dy;
-
-    if (width >= height) {
+  /// Lays out the elements from [start, end) inside [rect] along the larger axis of [rect]. Each
+  /// element uses the full cross-axis width. [rect] is fully covered.
+  void layoutSideBySide(int start, int end, Rect rect) {
+    final total = cumValues[start] - cumValues[end];
+    if (rect.width >= rect.height) {
       /// x axis is longest
-      var x = topLeft.dx;
+      var x = rect.topLeft.dx;
       for (var i = start; i < end; i++) {
-        final thisWidth = width * valueMapper(data[i]) / total;
-        final rect = Rect.fromLTWH(x, topLeft.dy, thisWidth, height);
-        add(rect);
+        final thisWidth = rect.width * valueMapper(data[i]) / total;
+        final itemRect = Rect.fromLTWH(x, rect.topLeft.dy, thisWidth, rect.height);
+        add(itemRect);
         x += thisWidth;
       }
-      return Offset(x, topLeft.dy);
     } else {
       /// y axis is longest
-      var y = topLeft.dy;
+      var y = rect.topLeft.dy;
       for (var i = start; i < end; i++) {
-        final thisHeight = height * valueMapper(data[i]) / total;
-        final rect = Rect.fromLTWH(topLeft.dx, y, width, thisHeight);
-        add(rect);
+        final thisHeight = rect.height * valueMapper(data[i]) / total;
+        final itemRect = Rect.fromLTWH(rect.topLeft.dx, y, rect.width, thisHeight);
+        add(itemRect);
         y += thisHeight;
       }
-      return Offset(topLeft.dx, y);
     }
   }
 
-  /// Lays out a group indexed by [start, end) along the smaller axis. The boxes will use the full
-  /// length of the small axis.
-  Offset layoutGroupAlongSmallAxis(int start, int end, Offset topLeft) {
+  /// We want to layout the group given by [start, end) such that each element is as close to square
+  /// as possible. We assume that each group entry is approximately the same size.
+  void layoutGroupInRect(int start, int end, Rect rect) {
+    /// Base cases
+    final n = end - start;
+    if (n == 1) {
+      add(rect);
+      return;
+    } else if (n == 2) {
+      layoutSideBySide(start, end, rect);
+      return;
+    }
+
+    /// Recursive. Here the variable names assume the longest side is the x axis.
+    final affinity = (rect.longestSide / rect.shortestSide).round();
+    final nRows = 2;
+    print("$start ${data[start]} $n $affinity $nRows");
+    if (nRows == 1) {
+      /// The rectangle is super long, so just add the elements side by side
+      layoutSideBySide(start, end, rect);
+    } else if (n % nRows != 0) {
+      /// Take leftover from the start (largest elements)
+      final leftovers = n % nRows;
+      final newRect = layoutGroupAlongLargeAxis(start, start + leftovers, rect);
+      layoutGroupInRect(start + leftovers, end, newRect);
+    } else {
+      final nCols = n ~/ nRows;
+      final groupTotal = cumValues[start] - cumValues[end];
+      var pos = rect.width > rect.height ? rect.top : rect.left;
+      for (int i = start; i < end; i += nCols) {
+        final rowTotal = cumValues[i] - cumValues[i + nCols];
+        final extent = min(rect.height, rect.width);
+        final newPos = pos + extent * rowTotal / groupTotal;
+        final rowRect = rect.width > rect.height
+            ? Rect.fromLTRB(rect.left, pos, rect.right, newPos)
+            : Rect.fromLTRB(pos, rect.top, newPos, rect.bottom);
+        layoutSideBySide(i, i + nCols, rowRect);
+        pos = newPos;
+      }
+    }
+  }
+
+  /// Lays out a group indexed by [start, end) along the larger axis. The group will use the full
+  /// width of the cross axis.
+  Rect layoutGroupAlongLargeAxis(int start, int end, Rect rect) {
     final total = cumValues[start];
-    final groupTotal = total - cumValues[end];
-    final width = size.width - topLeft.dx;
-    final height = size.height - topLeft.dy;
-
-    if (width <= height) {
-      /// x axis is shorter
-      final groupHeight = height * groupTotal / total;
-      var x = topLeft.dx;
-      for (var i = start; i < end; i++) {
-        final thisWidth = width * valueMapper(data[i]) / groupTotal;
-        final rect = Rect.fromLTWH(x, topLeft.dy, thisWidth, groupHeight);
-        add(rect);
-        x += thisWidth;
-      }
-      return Offset(topLeft.dx, topLeft.dy + groupHeight);
+    final totalGroup = total - cumValues[end];
+    if (rect.width >= rect.height) {
+      /// x axis is longest
+      final newX = rect.left + rect.width * totalGroup / total;
+      final groupRect = Rect.fromPoints(rect.topLeft, Offset(newX, rect.bottom));
+      layoutGroupInRect(start, end, groupRect);
+      return Rect.fromPoints(groupRect.topRight, rect.bottomRight);
     } else {
-      /// y axis is shorter
-      final groupWidth = width * groupTotal / total;
-      var y = topLeft.dy;
-      for (var i = start; i < end; i++) {
-        final thisHeight = height * valueMapper(data[i]) / groupTotal;
-        final rect = Rect.fromLTWH(topLeft.dx, y, groupWidth, thisHeight);
-        add(rect);
-        y += thisHeight;
-      }
-      return Offset(topLeft.dx + groupWidth, topLeft.dy);
+      /// y axis is longest
+      final newY = rect.top + rect.height * totalGroup / total;
+      final groupRect = Rect.fromPoints(rect.topLeft, Offset(rect.right, newY));
+      layoutGroupInRect(start, end, groupRect);
+      return Rect.fromPoints(groupRect.bottomLeft, rect.bottomRight);
     }
   }
 
-  /// Lays out a single group with the element at [start] as the seed, then recurses.
-  void layoutGroup(int start, Offset topLeft) {
-    if (start >= data.length) return;
-    final end = getGroupEnd(start);
+  void layout() {
+    var start = 0;
+    var rect = totalRect;
+    while (start < data.length) {
+      final end = getGroupEnd(start);
+      rect = layoutGroupAlongLargeAxis(start, end, rect);
+      start = end;
 
-    final remainingTotal = cumValues[end];
-    final groupTotal = cumValues[start] - remainingTotal;
-    late Offset newTopLeft;
-    if (groupTotal > remainingTotal) {
-      newTopLeft = layoutGroupAlongLargeAxis(start, end, topLeft);
-    } else {
-      newTopLeft = layoutGroupAlongSmallAxis(start, end, topLeft);
+      // final remainingTotal = cumValues[end];
+      // final groupTotal = cumValues[start] - remainingTotal;
+
+      // Offset newTopLeft;
+      // if (groupTotal > remainingTotal) {
+      //   newTopLeft = layoutGroupAlongLargeAxis(start, end, topLeft);
+      // } else {
+      //   newTopLeft = layoutGroupAlongSmallAxis(start, end, topLeft);
+      // }
     }
-    layoutGroup(end, newTopLeft);
   }
+}
 
-  layoutGroup(0, Offset.zero);
-  assert(output.length == data.length);
-  return output;
+/// Returns a list of [Rect] positions for a heatmap. Each entry in [data] is given a rectangular
+/// region proportional to its value from [valueMapper].
+///
+/// The algorithm first collects entries into groups. The first group is created by selecting the
+/// largest element, then adding every element with value / seedValue > [minSameAxisRatio]. Then the
+/// next group is created by using the next largest element as the seed.
+///
+/// Each group is laid out along the same axis. When the remaining sum of the other groups is smaller
+/// than the sum of the current group, the group is laid out along the larger axis, and uses the
+/// full width of the cross axis. In the opposite case, the group is laid out along the full length
+/// of the smaller axis.
+///
+/// [data] should be sorted by decreasing value already. Values should all be positive.
+///
+/// [padding] is the amount of pixel padding to space between the boxes. It is a dumb padding that
+/// simply removes space from the interior sides of each rectangle. As such for large values of
+/// padding, the visible areas of the rectangles won't exactly be proportional to each side.
+List<Rect> layoutHeatMapGrid<T>({
+  required Rect rect,
+  required List<T> data,
+  required double Function(T) valueMapper,
+  double minSameAxisRatio = 0.6,
+  double padding = 0,
+  double paddingX = 0,
+  double paddingY = 0,
+}) {
+  if (data.isEmpty) return [];
+  final helper = _HeatMapHelper(
+    totalRect: rect,
+    data: data,
+    valueMapper: valueMapper,
+    minSameAxisRatio: minSameAxisRatio,
+    padding: padding,
+    paddingX: paddingX,
+    paddingY: paddingY,
+  );
+  helper.layout();
+  assert(helper.output.length == data.length);
+  return helper.output;
 }
 
 class HeatMapPoint<T> {
@@ -284,8 +350,7 @@ class HeatMapPainter<T> extends CustomPainter {
   void _paintSeries(List<T> seriesData, int seriesDepth, Canvas canvas, Rect rect) {
     final padding = paddingMapper(seriesDepth);
     final positions = layoutHeatMapGrid(
-      offset: rect.topLeft,
-      size: rect.size,
+      rect: rect,
       data: seriesData,
       valueMapper: (it) => valueMapper(it, seriesDepth),
       minSameAxisRatio: minSameAxisRatio,
