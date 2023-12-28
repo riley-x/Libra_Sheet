@@ -1,4 +1,5 @@
 ## Bugs
+- Click on custom range again
 
 ## High priority features
 - Reset filter on transaction lists? Highlight icon when changed?

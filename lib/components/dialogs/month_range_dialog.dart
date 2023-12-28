@@ -164,22 +164,23 @@ class _MonthEntry extends StatelessWidget {
         ? false
         : time.compareTo(state.start!) > 0 && time.compareTo(state.end!) < 0;
 
+    final borderRadius = (isStart && isEnd)
+        ? BorderRadius.circular(_YearBlock.rowHeight / 2)
+        : (isStart)
+            ? const BorderRadius.horizontal(left: Radius.circular(_YearBlock.rowHeight / 2))
+            : (isEnd)
+                ? const BorderRadius.horizontal(right: Radius.circular(_YearBlock.rowHeight / 2))
+                : BorderRadius.zero;
+
     final body = Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
+        borderRadius: borderRadius,
         color: (isStart || isEnd)
             ? colorScheme.inversePrimary
             : (highlighted)
                 ? colorScheme.inversePrimary.withAlpha(100)
                 : null,
-        borderRadius: (isStart && isEnd)
-            ? BorderRadius.circular(_YearBlock.rowHeight / 2)
-            : (isStart)
-                ? const BorderRadius.horizontal(left: Radius.circular(_YearBlock.rowHeight / 2))
-                : (isEnd)
-                    ? const BorderRadius.horizontal(
-                        right: Radius.circular(_YearBlock.rowHeight / 2))
-                    : null,
       ),
       child: Text(
         DateFormat.MMM().format(time),
@@ -199,6 +200,7 @@ class _MonthEntry extends StatelessWidget {
         child: InkWell(
           onTap: () => state.onTap(time),
           onHover: (isHover) => state.onHover(isHover, time),
+          borderRadius: BorderRadius.circular(_YearBlock.rowHeight / 2),
           child: body,
         ),
       ),
