@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
@@ -119,9 +122,26 @@ class LibraAppState extends ChangeNotifier {
   void setTab(int i) {
     currentTab = i;
     // TODO pop to beginning on internal navigators on re-select tab?
-    // NOT the top level navigator.
+    // NOT the top level navigator:
     // navigatorKey.currentState?.popUntil((route) => route.isFirst);
     notifyListeners();
+  }
+
+  //--------------------------------------------------------------------------------
+  // Database utils
+  //--------------------------------------------------------------------------------
+  final _csvDateFormat = DateFormat('yyyy-MM-dd');
+  Future<String?> exportBalanceHistoryToCsv() async {
+    final now = DateTime.now();
+    final fileName = 'balance_history_${_csvDateFormat.format(now)}.csv';
+    final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
+    if (result == null) return null;
+
+    final Uint8List fileData = Uint8List.fromList('Hello World!'.codeUnits);
+    const String mimeType = 'text/csv';
+    final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
+    await textFile.saveTo(result.path);
+    return result.path;
   }
 }
 

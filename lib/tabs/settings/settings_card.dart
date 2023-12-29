@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 /// A simple card with a large title and optional subtitle, plus a > arrow to indicate a submenu.
 class SettingsCard extends StatelessWidget {
-  const SettingsCard({super.key, required this.text, this.subText, this.onTap});
+  const SettingsCard({super.key, this.text, this.subText, this.onTap, this.content})
+      : assert((text == null) ^ (content == null));
 
-  final String text;
+  final String? text;
   final String? subText;
+  final Widget? content;
   final Function()? onTap;
 
   @override
@@ -20,19 +22,20 @@ class SettingsCard extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      text,
-                      style: Theme.of(context).textTheme.titleLarge,
+                child: content ??
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          text!,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        if (subText != null)
+                          Text(
+                            subText!,
+                          ),
+                      ],
                     ),
-                    if (subText != null)
-                      Text(
-                        subText!,
-                      ),
-                  ],
-                ),
               ),
               const SizedBox(width: 5),
               const Icon(Icons.arrow_forward_ios),
