@@ -52,17 +52,20 @@ class TimeFrameSelector extends StatelessWidget {
   final List<DateTime> months;
   final TimeFrame selected;
   final Function(TimeFrame)? onSelect;
+  final ButtonStyle? style;
 
   const TimeFrameSelector({
     super.key,
     required this.months,
     required this.selected,
     required this.onSelect,
+    this.style,
   });
 
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
+      style: style,
       showSelectedIcon: false,
       segments: const <ButtonSegment<TimeFrameEnum>>[
         ButtonSegment(value: TimeFrameEnum.oneYear, label: Text("Year")),
