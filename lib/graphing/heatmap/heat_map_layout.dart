@@ -28,6 +28,8 @@ class _Score {
       _Score(groups: [index] + groups, sumMinRatio: sumMinRatio + minRatio);
 }
 
+/// Helper for [groupValues]. Returns the optimal grouping given a subarray into [data] starting
+/// from [iStart]. Records/fetches the value from [cache].
 _Score _groupValuesHelper(
   List<double> data,
   double minSameGroupRatio,
@@ -36,15 +38,16 @@ _Score _groupValuesHelper(
 ) {
   final score = cache[iStart];
   if (score != null) return score;
+  assert(iStart <= data.length);
 
   _Score? out;
-  assert(iStart <= data.length);
   if (iStart == data.length) {
+    /// Recursion base case
     out = _Score(groups: [data.length], sumMinRatio: 0);
   } else {
     final startVal = data[iStart];
 
-    /// Create a group [iStart, iEnd) and recurse on [iEnd, last].
+    /// Create a single group [iStart, iEnd) and recurse on [iEnd, last].
     for (int iEnd = iStart + 1; iEnd <= data.length; iEnd++) {
       final tailScore = _groupValuesHelper(data, minSameGroupRatio, iEnd, cache);
       final totalScore = tailScore.addGroupStart(iStart, data[iEnd - 1] / startVal);
@@ -63,12 +66,18 @@ _Score _groupValuesHelper(
   return out;
 }
 
+/// Groups values in [data] together such that
+///     1. The ratio between the smallest and largest entry of each group is always greater than
+///        [minSameGroupRatio].
+///     2. The number of groups is minimized, and the above ratio is maximized.
+/// Assumes [data] is in decreasing order. The returned list contains the indices of where each
+/// group start (and is postpended with data.length).
 List<int> groupValues(List<double> data, double minSameGroupRatio) {
   Map<int, _Score> cache = {};
   final best = _groupValuesHelper(data, minSameGroupRatio, 0, cache);
-  for (final entry in cache.entries) {
-    print("${entry.key} ${entry.value.groups}");
-  }
+  // for (final entry in cache.entries) {
+  //   print("${entry.key} ${entry.value.groups}");
+  // }
   return best.groups;
 }
 
@@ -85,14 +94,10 @@ List<double> reverseCumSum(List<double> data) {
 
 /// Helper class for creating a heatmap.
 ///
-/// The algorithm first collects entries into groups. The first group is created by selecting the
-/// largest element, then adding every element with value / seedValue > [minSameAxisRatio]. It is
+/// The algorithm first collects entries into groups using [groupValues]. The first group is
 /// placed along the larger axis of [totalRect], such that it takes up the full cross-axis width;
-/// see [layoutGroupAlongLargeAxis].
-///
-/// The unused portion of the rectangle is then passed to the next group, which is created by using
-/// the next largest element as the seed, and placed in the same way. Thus the groups tend to spiral
-/// from the top-left to the bottom-right.
+/// see [layoutGroupAlongLargeAxis]. The unused portion of the rectangle is then passed to the next
+/// group. Thus the groups tend to spiral from the top-left to the bottom-right.
 ///
 /// Each group is laid out in its corresponding rectangle by [layoutGroupInRect], which tries to
 /// keep each entry as square as possible.

@@ -40,7 +40,7 @@ class HeatMapPainter<T> extends CustomPainter {
   late final (double, double) Function(int depth) paddingMapper;
 
   /// Indexes into [data] of where the group boundaries are. Calculated in the constructor.
-  /// TODO expand to nestedData too
+  /// TODO expand to nestedData too?
   List<int> groupEdges = [];
 
   //-----------------------------------
