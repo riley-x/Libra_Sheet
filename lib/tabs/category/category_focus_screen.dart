@@ -28,10 +28,12 @@ class CategoryFocusScreen extends StatefulWidget {
     super.key,
     required this.category,
     this.initialFilters,
+    this.initialHistoryTimeFrame,
   });
 
   final Category category;
   final TransactionFilters? initialFilters;
+  final TimeFrame? initialHistoryTimeFrame;
 
   @override
   State<CategoryFocusScreen> createState() => _CategoryFocusScreenState();
@@ -39,7 +41,7 @@ class CategoryFocusScreen extends StatefulWidget {
 
 class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   CategoryHistory data = CategoryHistory.empty;
-  TimeFrame timeFrame = const TimeFrame(TimeFrameEnum.all);
+  TimeFrame historyTimeFrame = const TimeFrame(TimeFrameEnum.all);
   late TransactionService service;
   late TransactionFilters initialFilters;
 
@@ -65,7 +67,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
 
   void onSetTimeFrame(TimeFrame it) {
     setState(() {
-      timeFrame = it;
+      historyTimeFrame = it;
     });
   }
 
@@ -78,6 +80,10 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     initialFilters = widget.initialFilters ?? TransactionFilters();
     if (initialFilters.categories.isEmpty) {
       initialFilters.categories = CategoryTristateMap({widget.category});
+    }
+
+    if (widget.initialHistoryTimeFrame != null) {
+      historyTimeFrame = widget.initialHistoryTimeFrame!;
     }
 
     loadData();
@@ -118,7 +124,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
               category: widget.category,
               initialFilters: initialFilters,
               data: data,
-              timeFrame: timeFrame,
+              historyTimeFrame: historyTimeFrame,
               onSetTimeFrame: onSetTimeFrame,
             ),
           ),
@@ -134,19 +140,19 @@ class _Body extends StatelessWidget {
     this.initialFilters,
     required this.category,
     required this.data,
-    required this.timeFrame,
+    required this.historyTimeFrame,
     required this.onSetTimeFrame,
   });
 
   final Category category;
   final TransactionFilters? initialFilters;
   final CategoryHistory data;
-  final TimeFrame timeFrame;
+  final TimeFrame historyTimeFrame;
   final Function(TimeFrame) onSetTimeFrame;
 
   @override
   Widget build(BuildContext context) {
-    final range = timeFrame.getRange(data.times);
+    final range = historyTimeFrame.getRange(data.times);
     return Row(
       children: [
         Expanded(
@@ -167,110 +173,149 @@ class _Body extends StatelessWidget {
         ),
         const SizedBox(width: 2),
         Expanded(
-          child: Column(
-            children: [
-              // This empircally matches the extra height caused by the icon button in the transaction filter grid
-              // const SizedBox(height: 7),
-              SizedBox(
-                height: 40,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Category History',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    ),
-                    TimeFrameSelector(
-                      style: const ButtonStyle(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                      ),
-                      months: data.times,
-                      selected: timeFrame,
-                      onSelect: onSetTimeFrame,
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: (category.type == ExpenseFilterType.all)
-                    // This screen is also used for Investment Returns and possibly Ignore
-                    // which both use type [all]. In these cases there's gauranteed only one
-                    // category but we have both positive and negative values. So show RedGreen
-                    // instead.
-                    ? RedGreenBarChart(
-                        [
-                          for (int i = range.$1; i < range.$2; i++)
-                            TimeIntValue(
-                              time: data.times[i],
-                              value: data.categories.firstOrNull?.values[i] ?? 0,
-                            ),
-                        ],
-                        onSelect: (_, point) {
-                          final filterState = context.read<TransactionFilterState>();
-                          filterState.filters.accounts = Set.from(initialFilters?.accounts ?? {});
-                          filterState.filters.categories = CategoryTristateMap({category}, false);
-                          filterState.setStartTime(point.time, false);
-                          filterState.setEndTime(point.time.monthEnd());
-                        },
-                      )
-                    // Otherwise, just a normal category, and show the stack chart.
-                    : CategoryStackChart(
-                        data: data,
-                        range: range,
-                        onTap: (category, month) {
-                          if (category == this.category) {
-                            final filterState = context.read<TransactionFilterState>();
-                            filterState.filters.categories = CategoryTristateMap({category}, false);
-                            filterState.setStartTime(month, false);
-                            filterState.setEndTime(month.monthEnd());
-                          } else {
-                            toCategoryScreen(
-                              context,
-                              category,
-                              initialFilters: TransactionFilters(
-                                startTime: month,
-                                endTime: month.monthEnd(),
-                                categories: CategoryTristateMap({category}),
-                                accounts: initialFilters?.accounts,
-                              ),
-                            );
-                          }
-                        },
-                      ),
-              ),
-              // TODO which values to show? Should match transaction filters? But the category history
-              // is all...and it's unintuitive what is being displayed. For example, if focusing on
-              // one month, don't want to display just one month history but do want to in heatmap.
-
-              // if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
-              //   const SizedBox(height: 5),
-              //   Container(
-              //     height: 1,
-              //     color: Theme.of(context).colorScheme.outlineVariant,
-              //   ),
-              //   Expanded(
-              //     child: Padding(
-              //       padding: const EdgeInsets.all(8.0),
-              //       child: CategoryHeatMap(
-              //         categories: category.subCats + [category],
-              //         individualValues: state.individualValues,
-              //         aggregateValues: state.individualValues,
-              //         // individual here because the focus screen is always nested categories
-              //         onSelect: (it) {
-              //           if (it != category) context.read<CategoryTabState>().focusCategory(it);
-              //         },
-              //       ),
-              //     ),
-              //   ),
-              // ],
-            ],
+          child: _HistoryChart(
+            category: category,
+            data: data,
+            range: range,
+            initialFilters: initialFilters,
+            historyTimeFrame: historyTimeFrame,
+            onSetTimeFrame: onSetTimeFrame,
           ),
         ),
         const SizedBox(width: 2),
+      ],
+    );
+  }
+}
+
+class _HistoryChart extends StatelessWidget {
+  const _HistoryChart({
+    super.key,
+    required this.data,
+    required this.historyTimeFrame,
+    required this.onSetTimeFrame,
+    required this.category,
+    required this.range,
+    required this.initialFilters,
+  });
+
+  final CategoryHistory data;
+  final TimeFrame historyTimeFrame;
+  final Function(TimeFrame p1) onSetTimeFrame;
+  final Category category;
+  final (int, int) range;
+  final TransactionFilters? initialFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    /// When clicking on the bar chart, if the same category, just update the transaction list to
+    /// the selected month.
+    void setFilterMonth(DateTime month) {
+      final filterState = context.read<TransactionFilterState>();
+      filterState.setFilters(TransactionFilters(
+        accounts: Set.from(initialFilters?.accounts ?? {}),
+        categories: CategoryTristateMap({category}, false),
+        startTime: month,
+        endTime: month.monthEnd(),
+      ));
+    }
+
+    return Column(
+      children: [
+        // This empircally matches the extra height caused by the icon button in the transaction
+        // filter grid
+        SizedBox(
+          height: 40,
+          child: Row(
+            children: [
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Category History',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              TimeFrameSelector(
+                style: const ButtonStyle(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                ),
+                months: data.times,
+                selected: historyTimeFrame,
+                onSelect: onSetTimeFrame,
+              ),
+              const SizedBox(width: 10),
+            ],
+          ),
+        ),
+        Expanded(
+          child: (data.categories.isEmpty)
+              ? const SizedBox() // this prevents a flicker from the default [0, 100] empty chart
+              : (category.type == ExpenseFilterType.all)
+                  // This screen is also used for Investment Returns and possibly Ignore
+                  // which both use type [all]. In these cases there's gauranteed only one
+                  // category but we have both positive and negative values. So show RedGreen
+                  // instead.
+                  ? RedGreenBarChart(
+                      [
+                        for (int i = range.$1; i < range.$2; i++)
+                          TimeIntValue(
+                            time: data.times[i],
+                            value: data.categories.first.values[i],
+                          ),
+                      ],
+                      onSelect: (_, point) => setFilterMonth(point.time),
+                    )
+                  // Otherwise, just a normal category, and show the stack chart.
+                  : CategoryStackChart(
+                      data: data,
+                      range: range,
+                      onTap: (category, month) {
+                        if (category == this.category) {
+                          setFilterMonth(month);
+                        } else {
+                          toCategoryScreen(
+                            context,
+                            category,
+                            initialHistoryTimeFrame: historyTimeFrame,
+                            initialFilters: TransactionFilters(
+                              startTime: month,
+                              endTime: month.monthEnd(),
+                              categories: CategoryTristateMap({category}),
+                              accounts: initialFilters?.accounts,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+        ),
+        // Which values to show? Should match transaction filters? But the category history
+        // is all...and it's unintuitive what is being displayed. For example, if focusing on
+        // one month, don't want to display just one month history but do want to in heatmap.
+        // Also, it's more consistent without this because subcats, supercats, and cats without
+        // children don't have the heatmap anyways.
+
+        // if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
+        //   const SizedBox(height: 5),
+        //   Container(
+        //     height: 1,
+        //     color: Theme.of(context).colorScheme.outlineVariant,
+        //   ),
+        //   Expanded(
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(8.0),
+        //       child: CategoryHeatMap(
+        //         categories: category.subCats + [category],
+        //         individualValues: state.individualValues,
+        //         aggregateValues: state.individualValues,
+        //         // individual here because the focus screen is always nested categories
+        //         onSelect: (it) {
+        //           if (it != category) context.read<CategoryTabState>().focusCategory(it);
+        //         },
+        //       ),
+        //     ),
+        //   ),
+        // ],
       ],
     );
   }

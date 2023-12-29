@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/objects/account.dart';
@@ -24,6 +25,7 @@ void toCategoryScreen(
   BuildContext context,
   Category category, {
   TransactionFilters? initialFilters,
+  TimeFrame? initialHistoryTimeFrame,
 }) {
   Navigator.push(
     context,
@@ -31,6 +33,7 @@ void toCategoryScreen(
       (context) => CategoryFocusScreen(
         category: category,
         initialFilters: initialFilters,
+        initialHistoryTimeFrame: initialHistoryTimeFrame,
       ),
     ),
   );
