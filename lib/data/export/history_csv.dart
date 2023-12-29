@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -66,12 +67,27 @@ Future<String> createTransactionHistoryCsvString({
   ]);
 
   /// Data
-  final maps = await LibraDatabase.db.loadAllTransactions(
+  final transactions = await LibraDatabase.db.loadAllTransactions(
     accounts: accounts,
     categories: categories,
     tags: tags,
   );
+  for (final t in transactions) {
+    out.add([
+      t.t.key.toString(),
+      t.t.date.MMddyy(),
+      t.t.name,
+      t.t.value.dollarString(commas: false, dollarSign: false),
+      t.t.account?.name ?? '',
+      t.t.category.name,
+      t.t.tags.map((e) => e.name).join(','),
+      t.t.note,
+      t.allocs
+          .map((e) => "${e.category}: ${e.value.dollarString(commas: false)} (${e.name})")
+          .join(', '),
+      t.reimbs.map((e) => "${e.$1}: ${e.$2.dollarString(commas: false)}").join(', '),
+    ]);
+  }
 
-  print(maps.length);
   return converter.convert(out);
 }

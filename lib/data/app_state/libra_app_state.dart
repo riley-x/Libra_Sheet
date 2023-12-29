@@ -147,13 +147,6 @@ class LibraAppState extends ChangeNotifier {
   }
 
   Future<String?> exportTransactionsToCsv() async {
-    await createTransactionHistoryCsvString(
-      accounts: accounts.createAccountMap(),
-      categories: categories.createKeyMap(),
-      tags: tags.createKeyMap(),
-    );
-    return null;
-
     final now = DateTime.now();
     final fileName = 'transaction_history_${_csvDateFormat.format(now)}.csv';
     final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);

@@ -384,7 +384,6 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
           $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
         GROUP BY
           t.$_key
-        ORDER BY date DESC
       ) t
       LEFT OUTER JOIN 
         $allocationsTable a ON a.$allocationsTransaction = t.$_key
@@ -395,6 +394,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
       $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
     GROUP BY
       t.$_key
+    ORDER BY date
 ''';
 
     final rows = await rawQuery(q);
