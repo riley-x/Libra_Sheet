@@ -108,6 +108,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
       rightText = "Multiple accounts";
     }
 
+    /// Provide the [TransactionFilterState] here so we can callback to it easily.
     return ChangeNotifierProvider(
       create: (context) => TransactionFilterState(service, initialFilters: initialFilters),
       child: Column(
@@ -164,6 +165,7 @@ class _Body extends StatelessWidget {
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
+              highlightIcon: (filters) => filters.startTime != null || filters.endTime != null,
             ),
           ),
         ),

@@ -1,8 +1,7 @@
 ## Bugs
 
+
 ## High priority features
-- Reset filter on transaction lists? Highlight icon when changed?
-- Zoom/range account/category screen graphs
 
 
 ## Medium priority features
@@ -11,6 +10,7 @@
 - Export to CSV
 - Choose category/account on CSV column?
 - Delete account
+- Range account screen graphs?
 
 
 ## Refactor
@@ -19,5 +19,6 @@
 
 
 ## Low priority features
+- Animate bar charts?
 - Automatic cloud backup?
 - Maybe balance update? Specifically for investments?

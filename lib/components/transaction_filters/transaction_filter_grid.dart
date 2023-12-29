@@ -20,6 +20,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.padding,
     this.fab,
     this.createProvider = true,
+    this.highlightIcon,
   });
 
   final Widget? title;
@@ -30,6 +31,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final EdgeInsets? padding;
   final Widget? fab;
   final bool createProvider;
+  final bool Function(TransactionFilters)? highlightIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class TransactionFilterGrid extends StatelessWidget {
       fixedColumns: fixedColumns,
       onSelect: onSelect,
       fab: fab,
+      highlightIcon: highlightIcon,
     );
     if (!createProvider) return grid;
     return ChangeNotifierProvider(
@@ -64,6 +67,7 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.onSelect,
     this.padding,
     this.fab,
+    this.highlightIcon,
   });
 
   final Widget? title;
@@ -72,6 +76,7 @@ class _TransactionFilterGrid extends StatelessWidget {
   final Function(Transaction)? onSelect;
   final EdgeInsets? padding;
   final Widget? fab;
+  final bool Function(TransactionFilters)? highlightIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +102,9 @@ class _TransactionFilterGrid extends StatelessWidget {
                       )),
               icon: Icon(
                 Icons.filter_list,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: (highlightIcon?.call(state.filters) == true)
+                    ? Colors.lightBlue
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
