@@ -150,6 +150,31 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     return _makeList(maps);
   }
 
+  /// Returns a map of the monthly net change for each account. Note this should be
+  /// cumulated first to get the balance history!
+  Future<Map<int, List<TimeIntValue>>> getMonthlyNetAllAccounts() async {
+    final maps = await query(
+      categoryHistoryTable,
+      columns: [_date, _account, "SUM($_value) as $_value"],
+      where: "$_value != 0",
+      groupBy: "$_date, $_account",
+      orderBy: _date,
+    );
+
+    final Map<int, List<TimeIntValue>> out = {};
+    for (final map in maps) {
+      final account = map[_account] as int;
+      final vals = out.putIfAbsent(account, () => []);
+      vals.add(
+        TimeIntValue(
+          time: DateTime.fromMillisecondsSinceEpoch(map[_date] as int, isUtc: true),
+          value: map[_value] as int,
+        ),
+      );
+    }
+    return out;
+  }
+
   /// Gets the monthly net income, which ignores the Ignore and Investment categories.
   Future<List<TimeIntValue>> getMonthlyNetIncome({
     Iterable<int> accounts = const [],

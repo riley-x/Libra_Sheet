@@ -11,6 +11,7 @@ import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/export/balance_history_csv.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
@@ -128,7 +129,7 @@ class LibraAppState extends ChangeNotifier {
   }
 
   //--------------------------------------------------------------------------------
-  // Database utils
+  // Export
   //--------------------------------------------------------------------------------
   final _csvDateFormat = DateFormat('yyyy-MM-dd');
   Future<String?> exportBalanceHistoryToCsv() async {
@@ -137,7 +138,8 @@ class LibraAppState extends ChangeNotifier {
     final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
     if (result == null) return null;
 
-    final Uint8List fileData = Uint8List.fromList('Hello World!'.codeUnits);
+    final csvString = await createBalanceHistoryCsvString(accounts.list, monthList);
+    final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
     const String mimeType = 'text/csv';
     final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
     await textFile.saveTo(result.path);

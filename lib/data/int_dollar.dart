@@ -5,9 +5,11 @@ extension IntDollar on int {
     return (this ~/ 100).toDouble() / 100;
   }
 
-  String dollarString({int decimals = 2, bool dollarSign = true}) {
+  String dollarString({int decimals = 2, bool dollarSign = true, bool commas = true}) {
     final absVal = abs();
-    final formatter = NumberFormat((dollarSign) ? '\$#,###' : '#,###');
+    var formatString = commas ? '#,###' : '#';
+    if (dollarSign) formatString = '\$$formatString';
+    final formatter = NumberFormat(formatString);
     final integer = formatter.format(absVal ~/ 10000);
 
     final int fraction;

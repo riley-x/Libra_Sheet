@@ -46,8 +46,10 @@ List<TimeIntValue> addParallel(
 
 extension TimeValueList on List<TimeIntValue> {
   /// Returns a list based on [this] but with padded entries so that they align with [times].
-  /// If [this] is missing a value, it will add an entry with value 0, or if [cumulate], a
-  /// cumulative sum starting from the beginning.
+  /// If [this] is missing a value, it will add an entry with value 0.
+  ///
+  /// If [cumulate], the returned values are replaced with the cumulative sum starting from the
+  /// beginning.
   ///
   /// This function assumes [this] and [times] are sorted by time value already!
   ///
