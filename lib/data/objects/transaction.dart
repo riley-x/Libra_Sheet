@@ -119,9 +119,23 @@ class Transaction {
 final dummyTransaction =
     Transaction(name: '___TEST___', date: DateTime(1987), value: 10000, category: Category.income);
 
-class TransactionWithSoftReimbursements {
+class SoftAllocation {
+  final String name;
+  final String category;
+  final int value;
+
+  SoftAllocation({required this.name, required this.category, required this.value});
+
+  @override
+  String toString() {
+    return "$name: $category $value";
+  }
+}
+
+class TransactionWithSoftRelations {
   Transaction t;
   List<(int, int)> reimbs; // (target key, value)
+  List<SoftAllocation> allocs;
 
-  TransactionWithSoftReimbursements(this.t, this.reimbs);
+  TransactionWithSoftRelations(this.t, this.allocs, this.reimbs);
 }

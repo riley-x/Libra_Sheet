@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';
+import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -75,6 +77,78 @@ Map<String, dynamic> _toMap(Transaction t) {
     map[_key] = t.key;
   }
   return map;
+}
+
+TransactionWithSoftRelations transactionFromMapSoft(
+  Map<String, dynamic> map, {
+  Map<int, Account>? accounts,
+  Map<int, Category>? categories,
+  Map<int, Tag>? tags,
+}) {
+  String? tagString = map['tags'];
+  List<Tag> tagList = [];
+  if (tags != null && tagString != null) {
+    for (final strkey in tagString.split(',')) {
+      final intKey = int.tryParse(strkey);
+      if (intKey == null) continue;
+      final tag = tags[intKey];
+      if (tag == null) continue;
+      tagList.add(tag);
+    }
+  }
+
+  String? allocString = map['allocs'];
+  List<SoftAllocation> allocs = [];
+  if (allocString != null && categories != null) {
+    for (final allocEntry in allocString.split(',')) {
+      final fields = allocEntry.split(':');
+      if (fields.length != 3) {
+        debugPrint("Alloc entry doesn't have 3 fields, transaction:\n\t$map");
+        continue;
+      }
+
+      final categoryKey = int.tryParse(fields[1]) ?? 0;
+      allocs.add(SoftAllocation(
+        name: fields[0].replaceAll('#COMMA', ',').replaceAll('#COLON', ':'),
+        category: categories[categoryKey]?.name ?? 'Unkown',
+        value: int.tryParse(fields[2]) ?? 0,
+      ));
+    }
+  }
+
+  String? reimbString = map['reimbs'];
+  List<(int, int)> reimbs = [];
+  if (reimbString != null) {
+    for (final entry in reimbString.split(',')) {
+      final fields = entry.split(':');
+      if (fields.length != 2) {
+        debugPrint("Reimb entry doesn't have 2 fields, transaction:\n\t$map");
+        continue;
+      }
+
+      reimbs.add((
+        int.tryParse(fields[0]) ?? 0,
+        int.tryParse(fields[1]) ?? 0,
+      ));
+    }
+  }
+
+  return TransactionWithSoftRelations(
+    Transaction(
+      key: map[_key],
+      name: map[_name],
+      date: DateTime.fromMillisecondsSinceEpoch(map[_date], isUtc: true),
+      note: map[_note],
+      value: map[_value],
+      account: accounts?[map[_account]],
+      category: categories?[map[_category]] ?? Category.empty,
+      tags: tagList,
+      nAllocations: map["nAllocs"] ?? 0,
+      totalReimbusrements: map[_reimb_total] ?? 0,
+    ),
+    allocs,
+    reimbs,
+  );
 }
 
 Transaction transactionFromMap(
@@ -278,7 +352,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     return out;
   }
 
-  Future<List<TransactionWithSoftReimbursements>> loadAllTransactions({
+  Future<List<TransactionWithSoftRelations>> loadAllTransactions({
     required Map<int, Account> accounts,
     required Map<int, Category> categories,
     required Map<int, Tag> tags,
@@ -325,18 +399,16 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
 
     final rows = await rawQuery(q);
 
-    List<TransactionWithSoftReimbursements> out = [];
+    List<TransactionWithSoftRelations> out = [];
     for (final row in rows) {
-      if (row['reimbs'] != null) print(row);
-      final t = transactionFromMap(
+      final t = transactionFromMapSoft(
         row,
         accounts: accounts,
         categories: categories,
         tags: tags,
       );
-      out.add(TransactionWithSoftReimbursements(t, []));
+      out.add(t);
     }
-
     return out;
   }
 }

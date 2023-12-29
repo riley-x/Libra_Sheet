@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
@@ -47,15 +48,30 @@ Future<String> createTransactionHistoryCsvString({
   required Map<int, Category> categories,
   required Map<int, Tag> tags,
 }) async {
-  final lineEnd = Platform.isWindows ? '\r\n' : '\n';
+  final converter = ListToCsvConverter(eol: Platform.isWindows ? '\r\n' : '\n');
+  List<List<String>> out = [];
 
   /// Header
-  String out = 'Key,Date,Name,Value,Account,Category,Tags,Note,Allocations,Reimbursements$lineEnd';
+  out.add([
+    'Key',
+    'Date',
+    'Name',
+    'Value',
+    'Account',
+    'Category',
+    'Tags',
+    'Note',
+    'Allocations',
+    'Reimbursements'
+  ]);
 
   /// Data
-  final maps = await LibraDatabase.db
-      .loadAllTransactions(accounts: accounts, categories: categories, tags: tags);
+  final maps = await LibraDatabase.db.loadAllTransactions(
+    accounts: accounts,
+    categories: categories,
+    tags: tags,
+  );
 
   print(maps.length);
-  return out;
+  return converter.convert(out);
 }
