@@ -78,7 +78,10 @@ class _MonthRangeDialogState extends State<MonthRangeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      contentPadding: const EdgeInsets.only(top: 20, bottom: 10),
       content: SingleChildScrollView(
+        reverse: true, // this makes the scroll start at the bottom, doesn't change anything else
+        padding: const EdgeInsets.symmetric(horizontal: 20), // so scroll bar is flush with dialog
         child: Column(
           children: [
             for (int year = widget.minDate.year; year <= widget.maxDate.year; year++)

@@ -1,10 +1,8 @@
 ## Bugs
-- Click on custom range again
 
 ## High priority features
 - Reset filter on transaction lists? Highlight icon when changed?
 - Zoom/range account/category screen graphs
-- Custom month ranges on graphs
 
 
 ## Medium priority features
