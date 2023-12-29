@@ -135,6 +135,18 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   }
 }
 
+String? dateRangeFilterDescription(TransactionFilters filters) {
+  if (filters.startTime != null && filters.endTime != null) {
+    return "${filters.startTime!.MMddyy()}\n- ${filters.endTime!.MMddyy()}";
+  } else if (filters.startTime != null) {
+    return "From\n${filters.startTime!.MMddyy()}";
+  } else if (filters.endTime != null) {
+    return "Up to\n${filters.endTime!.MMddyy()}";
+  } else {
+    return null;
+  }
+}
+
 class _Body extends StatelessWidget {
   const _Body({
     super.key,
@@ -158,14 +170,14 @@ class _Body extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 10), // this offsets the title
+            padding: const EdgeInsets.only(left: 0), // this offsets the title
             child: TransactionFilterGrid(
-              padding: const EdgeInsets.only(right: 10),
+              padding: const EdgeInsets.only(right: 10, left: 10),
               createProvider: false,
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
-              highlightIcon: (filters) => filters.startTime != null || filters.endTime != null,
+              filterDescription: dateRangeFilterDescription,
             ),
           ),
         ),
@@ -235,6 +247,8 @@ class _HistoryChart extends StatelessWidget {
                 child: Text(
                   'Category History',
                   style: Theme.of(context).textTheme.headlineSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               TimeFrameSelector(
