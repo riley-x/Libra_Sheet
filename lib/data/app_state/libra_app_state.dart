@@ -11,7 +11,7 @@ import 'package:libra_sheet/data/app_state/category_state.dart';
 import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
-import 'package:libra_sheet/data/export/balance_history_csv.dart';
+import 'package:libra_sheet/data/export/history_csv.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
@@ -139,6 +139,31 @@ class LibraAppState extends ChangeNotifier {
     if (result == null) return null;
 
     final csvString = await createBalanceHistoryCsvString(accounts.list, monthList);
+    final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
+    const String mimeType = 'text/csv';
+    final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
+    await textFile.saveTo(result.path);
+    return result.path;
+  }
+
+  Future<String?> exportTransactionsToCsv() async {
+    await createTransactionHistoryCsvString(
+      accounts: accounts.createAccountMap(),
+      categories: categories.createKeyMap(),
+      tags: tags.createKeyMap(),
+    );
+    return null;
+
+    final now = DateTime.now();
+    final fileName = 'transaction_history_${_csvDateFormat.format(now)}.csv';
+    final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
+    if (result == null) return null;
+
+    final csvString = await createTransactionHistoryCsvString(
+      accounts: accounts.createAccountMap(),
+      categories: categories.createKeyMap(),
+      tags: tags.createKeyMap(),
+    );
     final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
     const String mimeType = 'text/csv';
     final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);

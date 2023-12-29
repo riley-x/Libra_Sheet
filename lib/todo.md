@@ -1,4 +1,5 @@
 ## Bugs
+- Transaction multiple left joins double counts things
 
 
 ## High priority features

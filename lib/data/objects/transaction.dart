@@ -118,3 +118,10 @@ class Transaction {
 
 final dummyTransaction =
     Transaction(name: '___TEST___', date: DateTime(1987), value: 10000, category: Category.income);
+
+class TransactionWithSoftReimbursements {
+  Transaction t;
+  List<(int, int)> reimbs; // (target key, value)
+
+  TransactionWithSoftReimbursements(this.t, this.reimbs);
+}

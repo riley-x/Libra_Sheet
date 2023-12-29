@@ -94,21 +94,16 @@ Transaction transactionFromMap(
       tagList.add(tag);
     }
   }
-  final value = map[_value];
-
-  /// This can happen if the category has been deleted.
-  final defaultCategory = Category.empty;
-
   return Transaction(
     key: map[_key],
     name: map[_name],
     date: DateTime.fromMillisecondsSinceEpoch(map[_date], isUtc: true),
     note: map[_note],
-    value: value,
+    value: map[_value],
     account: accounts?[map[_account]],
-    category: categories?[map[_category]] ?? defaultCategory,
+    category: categories?[map[_category]] ?? Category.empty,
     tags: tagList,
-    nAllocations: map["nAllocs"],
+    nAllocations: map["nAllocs"] ?? 0,
     totalReimbusrements: map[_reimb_total] ?? 0,
   );
 }
@@ -278,6 +273,68 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
         tags: tags,
       );
       out[t.key] = t;
+    }
+
+    return out;
+  }
+
+  Future<List<TransactionWithSoftReimbursements>> loadAllTransactions({
+    required Map<int, Account> accounts,
+    required Map<int, Category> categories,
+    required Map<int, Tag> tags,
+  }) async {
+    /// WARNING be extra careful about adding the allocation names into a GROUP_CONCAT.
+    /// Need to deal with the commas and ':' separators in the name itself.
+    const q = '''
+    SELECT 
+      t.*,
+      GROUP_CONCAT(
+        (CASE WHEN (t.$_value > 0) then r.$reimbExpense else r.$reimbIncome END) ||
+        ':' || r.$reimbValue
+      ) as reimbs
+    FROM (
+      SELECT 
+        t.*,
+        GROUP_CONCAT(
+          REPLACE(REPLACE(a.$allocationsName, ',', '#COMMA'), ':', '#COLON') || ':' ||
+          a.$allocationsCategory || ':' || a.$allocationsValue) as allocs
+      FROM (
+        SELECT 
+          t.*,
+          GROUP_CONCAT(tag.$tagKey) as tags
+        FROM 
+          $transactionsTable t
+        LEFT OUTER JOIN 
+          $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
+        LEFT OUTER JOIN
+          $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
+        GROUP BY
+          t.$_key
+        ORDER BY date DESC
+      ) t
+      LEFT OUTER JOIN 
+        $allocationsTable a ON a.$allocationsTransaction = t.$_key
+      GROUP BY
+        t.$_key
+    ) t
+    LEFT OUTER JOIN
+      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
+    GROUP BY
+      t.$_key
+''';
+
+    final rows = await rawQuery(q);
+
+    List<TransactionWithSoftReimbursements> out = [];
+    for (final row in rows) {
+      if (row['reimbs'] != null) print(row);
+      final t = transactionFromMap(
+        row,
+        accounts: accounts,
+        categories: categories,
+        tags: tags,
+      );
+      out.add(TransactionWithSoftReimbursements(t, []));
     }
 
     return out;

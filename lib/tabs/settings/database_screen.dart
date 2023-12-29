@@ -65,7 +65,22 @@ class DatabaseScreen extends StatelessWidget {
               'Export Transactions',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            onTap: () {},
+            onTap: () {
+              final messenger = ScaffoldMessenger.of(context);
+              context.read<LibraAppState>().exportTransactionsToCsv().then(
+                (filepath) {
+                  if (filepath == null || !messenger.mounted) return;
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Center(child: Text('Saved transaction history to $filepath.')),
+                      width: 500.0,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
