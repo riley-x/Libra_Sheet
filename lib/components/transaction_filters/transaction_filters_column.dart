@@ -147,6 +147,9 @@ class _DateFilter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
+          /// TODO we set initial based on [state.filters] instead of [state.initialFilters] because
+          /// i.e. the net change bar chart can set [state.filters], but that won't update the
+          /// text in the focus field without this reset. Better to keep reference to the TextController.
           intial: state.filters.startTime?.MMddyy(),
           label: 'Start',
           active: state.filters.startTime != null,
@@ -184,7 +187,7 @@ class _ValueRange extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
-          intial: state.filters.minValue?.dollarString(dollarSign: false),
+          intial: state.filters.minValue?.asDollarDouble().toSimpleString(),
           label: 'Min',
           active: state.filters.minValue != null,
           error: state.minValueError,
@@ -198,7 +201,7 @@ class _ValueRange extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         FocusTextField(
-          intial: state.filters.maxValue?.dollarString(dollarSign: false),
+          intial: state.filters.maxValue?.asDollarDouble().toSimpleString(),
           label: 'Max',
           active: state.filters.maxValue != null,
           error: state.maxValueError,

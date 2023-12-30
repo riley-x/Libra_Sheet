@@ -35,6 +35,11 @@ extension IntDollarDouble on double {
   int? toIntDollar() {
     return toString().toIntDollar();
   }
+
+  /// Default [toString] formats integers as "10.0"
+  String toSimpleString() {
+    return NumberFormat("#").format(this);
+  }
 }
 
 extension IntDollarString on String {
