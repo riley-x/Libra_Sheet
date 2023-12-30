@@ -1,3 +1,5 @@
+/// This file contains database query/manipulation functions related to transactions.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart' as db;
 
 const transactionsTable = "`transactions_table`";
 
+/// Column names
 const _key = "id";
 const _name = "name";
 const _date = "date";
@@ -26,6 +29,7 @@ const _category = "category_id";
 const _nAlloc = "n_allocs";
 const _reimbTotal = "reimb_total";
 
+/// Public alias column names
 const transactionKey = _key;
 const transactionName = _name;
 const transactionDate = _date;
@@ -46,6 +50,9 @@ const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTabl
     "$_account INTEGER NOT NULL, "
     "$_category INTEGER NOT NULL)";
 
+//----------------------------------------------------------------------
+// Sqflite conversions
+//----------------------------------------------------------------------
 Map<String, dynamic> _toMap(Transaction t) {
   final map = {
     _name: t.name,
@@ -94,6 +101,10 @@ Transaction transactionFromMap(
     totalReimbusrements: map[_reimbTotal] ?? 0,
   );
 }
+
+//----------------------------------------------------------------------
+// Modify a single transaction
+//----------------------------------------------------------------------
 
 /// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
 /// set the transaction's key in-place!
@@ -169,14 +180,20 @@ Future<void> updateTransaction(Transaction old, Transaction nu, {db.Transaction?
   await insertTransaction(nu, txn: txn);
 }
 
+//----------------------------------------------------------------------
+// Query transactions
+//----------------------------------------------------------------------
+
+/// Main function to load transactions given a set of filters.
+///
 /// When the relevant linking objects are not present in the maps:
 ///     account => null
 ///     category => Category.income or Category.expense
 ///     tag => null
 ///
 /// Also, the following are always null
-///     allocations (but sets nAllocs)
-///     reimbursements (but sets nReimbs)
+///     allocations (but sets nAllocations)
+///     reimbursements (but sets totalReimbusrements)
 ///
 /// WARNING! Do not attempt to change this to an isolate using `compute()`. The database can't be
 /// accessed. Looks like will have to live with jank for now...could maybe move the _fromMap
@@ -193,7 +210,7 @@ Future<List<Transaction>> loadTransactions(
   List<Transaction> out = [];
   if (libraDatabase == null) return out;
 
-  final q = _createQuery(filters);
+  final q = _createQueryFromFilters(filters);
   final rows = await libraDatabase!.transaction((txn) async {
     return await txn.rawQuery(q.$1, q.$2);
   });
@@ -238,6 +255,7 @@ Future<void> loadTransactionRelations(
 }
 
 extension TransactionDatabaseExtension on db.DatabaseExecutor {
+  /// Loads transactions given a list of [keys] but applies no other filtering.
   Future<Map<int, Transaction>> loadTransactionsByKey(
     Iterable<int> keys, {
     required Map<int, Account> accounts,
@@ -459,7 +477,8 @@ String createTransactionQuery({
     ''';
 }
 
-(String, List) _createQuery(TransactionFilters filters) {
+/// Helper for [loadTransactions] that creates the query and args from [filters].
+(String, List) _createQueryFromFilters(TransactionFilters filters) {
   List args = [];
 
   /// Basic filters (innermost where clause) ///
