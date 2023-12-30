@@ -202,7 +202,7 @@ class _HeatMapHelper {
       return;
     } else if (n == 3) {
       /// Exceptional case for n == 3: here we want the largest element on the short side
-      final newRect = layoutGroupAlongLargeAxis(start, start + 1, rect);
+      final newRect = layoutGroupAlongLargeAxis(start, start + 1, rect, rectEnd: end);
       layoutSideBySide(start + 1, end, newRect);
     } else {
       /// Here we hardcode to splitting the rectangle into two rows...this is pretty much universally
@@ -229,18 +229,21 @@ class _HeatMapHelper {
 
   /// Lays out a group indexed by [start, end) along the larger axis. The group will use the full
   /// width of the cross axis. Returns the new [Rect] of remaining space.
-  Rect layoutGroupAlongLargeAxis(int start, int end, Rect rect) {
-    final total = cumValues[start];
-    final totalGroup = total - cumValues[end];
+  ///
+  /// Assumes [rect] is the space used by all elements from [start] to [data.last]. If not, pass
+  /// [rectEnd] for the last+1 element that is used in [rect].
+  Rect layoutGroupAlongLargeAxis(int start, int end, Rect rect, {int? rectEnd}) {
+    final totalGroup = cumValues[start] - cumValues[end];
+    final totalRect = cumValues[start] - (rectEnd != null ? cumValues[rectEnd] : 0);
     if (rect.width >= rect.height) {
       /// x axis is longest
-      final newX = rect.left + rect.width * totalGroup / total;
+      final newX = rect.left + rect.width * totalGroup / totalRect;
       final groupRect = Rect.fromPoints(rect.topLeft, Offset(newX, rect.bottom));
       layoutGroupInRect(start, end, groupRect);
       return Rect.fromPoints(groupRect.topRight, rect.bottomRight);
     } else {
       /// y axis is longest
-      final newY = rect.top + rect.height * totalGroup / total;
+      final newY = rect.top + rect.height * totalGroup / totalRect;
       final groupRect = Rect.fromPoints(rect.topLeft, Offset(rect.right, newY));
       layoutGroupInRect(start, end, groupRect);
       return Rect.fromPoints(groupRect.bottomLeft, rect.bottomRight);

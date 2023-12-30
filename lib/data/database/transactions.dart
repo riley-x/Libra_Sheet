@@ -418,9 +418,9 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
 
 /// Creates the base query to fetch a [Transaction] from the [transactionsTable]. The statement
 /// consists of three nested select statements, from innermost to outermost:
-///   1. [transactionsTable] joined with [tagsTable]
-///   2. Above joined with [allocationsTable]
-///   3. Above joine with [reimbursementsTable]
+///   1. [transactionsTable] joined with [tagsTable]; tag keys grouped into "tags" with GROUP_CONCAT
+///   2. Above joined with [allocationsTable]; allocations counted into [_nAlloc]
+///   3. Above joined with [reimbursementsTable]; total reimbursements summed into [_reimbTotal]
 ///
 /// The optional parameters can add extra filters. Ensure that you add the SQL keywords though; they
 /// are not added automatically!
