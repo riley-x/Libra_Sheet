@@ -5,7 +5,6 @@
 
 
 ## Medium priority features
-- Filter by reimbursed/allocated transactions
 - Rerun category rule
 - Choose category/account on CSV column?
 - Delete account
@@ -19,6 +18,7 @@
 
 
 ## Low priority features
+- Load more transactions on reach end of transaction grid?
 - Animate bar charts?
 - Automatic cloud backup?
 - Maybe balance update? Specifically for investments?

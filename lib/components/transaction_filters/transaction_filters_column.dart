@@ -41,63 +41,71 @@ class TransactionFiltersColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.titleMedium;
-    return SingleChildScrollView(
-      physics: const ClampingScrollPhysics(),
-      child: Padding(
-        padding: interiorPadding ?? EdgeInsets.zero,
-        child: FocusScope(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              /// Title
-              const SizedBox(height: 10),
-              Text(
-                "Filter",
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+    return LimitedBox(
+      maxWidth: 300,
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Padding(
+          padding: interiorPadding ?? EdgeInsets.zero,
+          child: FocusScope(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// Title
+                const SizedBox(height: 10),
+                Text(
+                  "Filter",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
 
-              /// Text
-              const SizedBox(height: 15),
-              Text("Name", style: textStyle),
-              const SizedBox(height: 5),
-              const _NameFilter(),
+                /// Text
+                const SizedBox(height: 15),
+                Text("Name", style: textStyle),
+                const SizedBox(height: 5),
+                const _NameFilter(),
 
-              /// Date
-              const SizedBox(height: 15),
-              Text("Date", style: textStyle),
-              const SizedBox(height: 5),
-              const _DateFilter(),
+                /// Date
+                const SizedBox(height: 15),
+                Text("Date", style: textStyle),
+                const SizedBox(height: 5),
+                const _DateFilter(),
 
-              /// Value
-              const SizedBox(height: 15),
-              Text("Value", style: textStyle),
-              const SizedBox(height: 5),
-              const _ValueRange(),
+                /// Value
+                const SizedBox(height: 15),
+                Text("Value", style: textStyle),
+                const SizedBox(height: 5),
+                const _ValueRange(),
 
-              /// Account
-              const SizedBox(height: 15),
-              const ExcludeFocus(child: _AccountChips()),
+                /// Account
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _AccountChips()),
 
-              /// Category
-              const SizedBox(height: 15),
-              const ExcludeFocus(child: _CategoryChips()),
+                /// Category
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _CategoryChips()),
 
-              /// Tags
-              const SizedBox(height: 15),
-              const ExcludeFocus(child: _TagSelector()),
-              const SizedBox(height: 10),
+                /// Tags
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _TagSelector()),
 
-              /// Confirmation Buttons
-              if (showConfirmationButtons) ...[
-                const SizedBox(height: 30),
-                FormButtons(
-                  showDelete: false,
-                  onCancel: onCancel,
-                  onReset: onReset,
-                  onSave: onSave,
-                )
-              ]
-            ],
+                /// Checkboxes
+                const SizedBox(height: 25),
+                Text("Other", style: textStyle),
+                const _AllocationCheckbox(),
+                const _ReimbursementCheckbox(),
+
+                /// Confirmation Buttons
+                if (showConfirmationButtons) ...[
+                  const SizedBox(height: 30),
+                  FormButtons(
+                    showDelete: false,
+                    onCancel: onCancel,
+                    onReset: onReset,
+                    onSave: onSave,
+                  )
+                ]
+              ],
+            ),
           ),
         ),
       ),
@@ -125,6 +133,78 @@ class _NameFilter extends StatelessWidget {
         maxLines: 1,
         // style: widget.style,
       ),
+    );
+  }
+}
+
+class _DateFilter extends StatelessWidget {
+  const _DateFilter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        FocusTextField(
+          intial: state.filters.startTime?.MMddyy(),
+          label: 'Start',
+          active: state.filters.startTime != null,
+          error: state.startTimeError,
+          hint: 'MM/DD/YY',
+          onChanged: state.parseStartTime,
+        ),
+        const SizedBox(width: 5),
+        Container(
+          width: 20,
+          height: 1,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        const SizedBox(width: 5),
+        FocusTextField(
+          intial: state.filters.endTime?.MMddyy(),
+          label: 'End',
+          active: state.filters.endTime != null,
+          error: state.endTimeError,
+          hint: 'MM/DD/YY',
+          onChanged: state.parseEndTime,
+        ),
+      ],
+    );
+  }
+}
+
+class _ValueRange extends StatelessWidget {
+  const _ValueRange({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        FocusTextField(
+          intial: state.filters.minValue?.dollarString(dollarSign: false),
+          label: 'Min',
+          active: state.filters.minValue != null,
+          error: state.minValueError,
+          onChanged: state.setMinValue,
+        ),
+        const SizedBox(width: 5),
+        Container(
+          width: 20,
+          height: 1,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        const SizedBox(width: 5),
+        FocusTextField(
+          intial: state.filters.maxValue?.dollarString(dollarSign: false),
+          label: 'Max',
+          active: state.filters.maxValue != null,
+          error: state.maxValueError,
+          onChanged: state.setMaxValue,
+        ),
+      ],
     );
   }
 }
@@ -170,78 +250,6 @@ class _CategoryChips extends StatelessWidget {
   }
 }
 
-class _ValueRange extends StatelessWidget {
-  const _ValueRange({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<TransactionFilterState>();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        FocusTextField(
-          intial: state.filters.minValue?.dollarString(dollarSign: false),
-          label: 'Min',
-          active: state.filters.minValue != null,
-          error: state.minValueError,
-          onChanged: state.setMinValue,
-        ),
-        const SizedBox(width: 5),
-        Container(
-          width: 20,
-          height: 1,
-          color: Theme.of(context).colorScheme.outline,
-        ),
-        const SizedBox(width: 5),
-        FocusTextField(
-          intial: state.filters.maxValue?.dollarString(dollarSign: false),
-          label: 'Max',
-          active: state.filters.maxValue != null,
-          error: state.maxValueError,
-          onChanged: state.setMaxValue,
-        ),
-      ],
-    );
-  }
-}
-
-class _DateFilter extends StatelessWidget {
-  const _DateFilter({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<TransactionFilterState>();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        FocusTextField(
-          intial: state.filters.startTime?.MMddyy(),
-          label: 'Start',
-          active: state.filters.startTime != null,
-          error: state.startTimeError,
-          hint: 'MM/DD/YY',
-          onChanged: state.parseStartTime,
-        ),
-        const SizedBox(width: 5),
-        Container(
-          width: 20,
-          height: 1,
-          color: Theme.of(context).colorScheme.outline,
-        ),
-        const SizedBox(width: 5),
-        FocusTextField(
-          intial: state.filters.endTime?.MMddyy(),
-          label: 'End',
-          active: state.filters.endTime != null,
-          error: state.endTimeError,
-          hint: 'MM/DD/YY',
-          onChanged: state.parseEndTime,
-        ),
-      ],
-    );
-  }
-}
-
 class _TagSelector extends StatelessWidget {
   const _TagSelector({super.key});
 
@@ -251,6 +259,54 @@ class _TagSelector extends StatelessWidget {
     return TagFilterSection(
       selected: state.filters.tags,
       whenChanged: (_, __) => state.loadTransactions(),
+    );
+  }
+}
+
+class _AllocationCheckbox extends StatelessWidget {
+  const _AllocationCheckbox({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
+
+    /// Careful! We need to map the checkbox tristate (null = dash, false = off) to the state tristate
+    /// (null = off, false = dash).
+    return Row(
+      children: [
+        const SizedBox(width: 10),
+        const Expanded(child: Text("Has allocations")),
+        Checkbox(
+          // tristate: true,
+          value: state.filters.hasAllocation == true,
+          onChanged: (bool? value) => state.setHasAllocation((value == true) ? true : null),
+        ),
+        const SizedBox(width: 4),
+      ],
+    );
+  }
+}
+
+class _ReimbursementCheckbox extends StatelessWidget {
+  const _ReimbursementCheckbox({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
+
+    /// Careful! We need to map the checkbox tristate (null = dash, false = off) to the state tristate
+    /// (null = off, false = dash).
+    return Row(
+      children: [
+        const SizedBox(width: 10),
+        const Expanded(child: Text("Has reimbursements")),
+        Checkbox(
+          // tristate: true,
+          value: state.filters.hasReimbursement == true,
+          onChanged: (bool? value) => state.setHasReimbursement((value == true) ? true : null),
+        ),
+        const SizedBox(width: 4),
+      ],
     );
   }
 }

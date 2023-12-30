@@ -4,6 +4,8 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filters.d
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:provider/provider.dart';
 
+/// This dialog shows a [TransactionFiltersColumn] to set new transaction filters. It creates a
+/// temporary [TransactionFilterState] to manage the UI fields and returns the filters in [onSave].
 class TransactionFilterDialog extends StatelessWidget {
   const TransactionFilterDialog({
     super.key,

@@ -554,6 +554,22 @@ String createTransactionQuery({
     allocHaving += " ELSE 0 END) = 1)";
   }
 
+  /// Allocations ///
+  if (filters.hasAllocation == true) {
+    if (allocHaving.isNotEmpty) {
+      allocHaving += " AND ";
+    } else {
+      allocHaving = "HAVING ";
+    }
+    allocHaving += "COUNT(a.$allocationsKey) > 0";
+  }
+
+  /// Reimbursements ///
+  var reimbHaving = '';
+  if (filters.hasReimbursement == true) {
+    reimbHaving = "HAVING COUNT(r.$reimbIncome) > 0";
+  }
+
   /// Order and limit ///
   String limit = '';
   if (filters.limit != null) {
@@ -566,6 +582,7 @@ String createTransactionQuery({
     tagWhere: tagWhere,
     tagHaving: tagHaving,
     allocHaving: allocHaving,
+    reimbHaving: reimbHaving,
     limit: limit,
   );
   return (q, args);

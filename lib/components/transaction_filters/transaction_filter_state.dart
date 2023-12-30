@@ -178,4 +178,14 @@ class TransactionFilterState extends ChangeNotifier {
   void resetFilters() {
     setFilters(initialFilters.copy());
   }
+
+  void setHasAllocation(bool? it) {
+    filters.hasAllocation = it;
+    loadTransactions();
+  }
+
+  void setHasReimbursement(bool? it) {
+    filters.hasReimbursement = it;
+    loadTransactions();
+  }
 }

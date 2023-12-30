@@ -12,6 +12,8 @@ class TransactionFilters {
   CategoryTristateMap categories;
   Set<Tag> tags;
   int? limit;
+  bool? hasReimbursement;
+  bool? hasAllocation;
 
   TransactionFilters({
     this.name,
@@ -23,6 +25,8 @@ class TransactionFilters {
     Set<Tag>? tags,
     CategoryTristateMap? categories,
     this.limit = 300,
+    this.hasAllocation,
+    this.hasReimbursement,
   })  : accounts = accounts ?? {},
         tags = tags ?? {},
         categories = categories ?? CategoryTristateMap();
@@ -37,6 +41,8 @@ class TransactionFilters {
       accounts: Set.from(accounts),
       categories: categories.copy(),
       limit: limit,
+      hasAllocation: hasAllocation,
+      hasReimbursement: hasReimbursement,
     );
   }
 }

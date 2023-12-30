@@ -7,9 +7,19 @@ import 'package:provider/provider.dart';
 
 import 'transaction_filter_dialog.dart';
 
-/// [initialFilters] is used as an object key, so make sure you keep a persistent object instead
+/// Shows a grid of transactions with a title row that exposes an icon button for adding filters.
+///
+/// This widget will create its own [TransactionFilterState] to manage the list of transactions.
+/// [initialFilters] can be passed to set the initial list. Note [initialFilters] is used as an
+/// object key for the [ChangeNotifierProvider], so make sure you keep a persistent object instead
 /// of recreating it in a build function. Otherwise random rebuilds will constantly reload the
 /// transactions and reset the filter.
+///
+/// Alternatively, if you want to manage the state directly, provide one above this widget and set
+/// [createProvider] to false.
+///
+/// [filterDescription] will display a tiny message beside the filter icon is not null, and highlight
+/// the icon [Colors.blue].
 class TransactionFilterGrid extends StatelessWidget {
   const TransactionFilterGrid({
     super.key,
@@ -141,6 +151,12 @@ class _TransactionFilterGrid extends StatelessWidget {
   }
 }
 
+/// Shows a grid of transactions.
+///
+/// [fixedColumns] is the number of columns in the grid. If null, will create as many columns such
+/// that each is at least 300 pixels wide.
+///
+/// [maxRowsForName] the number of rows allowed for the transaction name; see [TransactionCard].
 class TransactionGrid extends StatelessWidget {
   const TransactionGrid(
     this.transactions, {
