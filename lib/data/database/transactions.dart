@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
@@ -12,7 +13,6 @@ import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
-import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as db;
 
 const transactionsTable = "`transactions_table`";
