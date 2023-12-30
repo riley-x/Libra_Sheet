@@ -67,7 +67,7 @@ Future<String> createTransactionHistoryCsvString({
   ]);
 
   /// Data
-  final transactions = await LibraDatabase.db.loadAllTransactions(
+  final transactions = await LibraDatabase.db.loadAllTransactionsForCsv(
     accounts: accounts,
     categories: categories,
     tags: tags,

@@ -7,7 +7,6 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -24,7 +23,8 @@ const _note = "note";
 const _account = "account_id";
 const _category = "category_id";
 
-const _reimb_total = "reimb_total";
+const _nAlloc = "n_allocs";
+const _reimbTotal = "reimb_total";
 
 const transactionKey = _key;
 const transactionName = _name;
@@ -34,7 +34,8 @@ const transactionNote = _note;
 const transactionAccount = _account;
 const transactionCategory = _category;
 
-const transactionTotalReimbursements = _reimb_total;
+const transactionTotalReimbursements = _reimbTotal;
+const transactionNAllocations = _nAlloc;
 
 const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
@@ -44,25 +45,6 @@ const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTabl
     "$_value INTEGER NOT NULL, "
     "$_account INTEGER NOT NULL, "
     "$_category INTEGER NOT NULL)";
-
-/// Remember to "GROUP BY t.$_key"
-const transactionBaseSelectQuery = '''
-    SELECT 
-      t.*,
-      GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
-      COUNT(a.$allocationsKey) as nAllocs,
-      SUM(r.$reimbValue) as $_reimb_total
-    FROM 
-      $transactionsTable t
-    LEFT OUTER JOIN 
-      $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
-    LEFT OUTER JOIN
-      $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
-    LEFT OUTER JOIN 
-      $allocationsTable a ON a.$allocationsTransaction = t.$_key
-    LEFT OUTER JOIN
-      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
-  ''';
 
 Map<String, dynamic> _toMap(Transaction t) {
   final map = {
@@ -79,76 +61,18 @@ Map<String, dynamic> _toMap(Transaction t) {
   return map;
 }
 
-TransactionWithSoftRelations transactionFromMapSoft(
-  Map<String, dynamic> map, {
-  Map<int, Account>? accounts,
-  Map<int, Category>? categories,
-  Map<int, Tag>? tags,
-}) {
-  String? tagString = map['tags'];
+List<Tag> parseTags(String? string, Map<int, Tag>? tags) {
   List<Tag> tagList = [];
-  if (tags != null && tagString != null) {
-    for (final strkey in tagString.split(',')) {
-      final intKey = int.tryParse(strkey);
-      if (intKey == null) continue;
-      final tag = tags[intKey];
-      if (tag == null) continue;
-      tagList.add(tag);
-    }
+  if (string == null) return tagList;
+  if (tags == null) return tagList;
+  for (final strkey in string.split(',')) {
+    final intKey = int.tryParse(strkey);
+    if (intKey == null) continue;
+    final tag = tags[intKey];
+    if (tag == null) continue;
+    tagList.add(tag);
   }
-
-  String? allocString = map['allocs'];
-  List<SoftAllocation> allocs = [];
-  if (allocString != null && categories != null) {
-    for (final allocEntry in allocString.split(',')) {
-      final fields = allocEntry.split(':');
-      if (fields.length != 3) {
-        debugPrint("Alloc entry doesn't have 3 fields, transaction:\n\t$map");
-        continue;
-      }
-
-      final categoryKey = int.tryParse(fields[1]) ?? 0;
-      allocs.add(SoftAllocation(
-        name: fields[0].replaceAll('#COMMA', ',').replaceAll('#COLON', ':'),
-        category: categories[categoryKey]?.name ?? 'Unkown',
-        value: int.tryParse(fields[2]) ?? 0,
-      ));
-    }
-  }
-
-  String? reimbString = map['reimbs'];
-  List<(int, int)> reimbs = [];
-  if (reimbString != null) {
-    for (final entry in reimbString.split(',')) {
-      final fields = entry.split(':');
-      if (fields.length != 2) {
-        debugPrint("Reimb entry doesn't have 2 fields, transaction:\n\t$map");
-        continue;
-      }
-
-      reimbs.add((
-        int.tryParse(fields[0]) ?? 0,
-        int.tryParse(fields[1]) ?? 0,
-      ));
-    }
-  }
-
-  return TransactionWithSoftRelations(
-    Transaction(
-      key: map[_key],
-      name: map[_name],
-      date: DateTime.fromMillisecondsSinceEpoch(map[_date], isUtc: true),
-      note: map[_note],
-      value: map[_value],
-      account: accounts?[map[_account]],
-      category: categories?[map[_category]] ?? Category.empty,
-      tags: tagList,
-      nAllocations: map["nAllocs"] ?? 0,
-      totalReimbusrements: map[_reimb_total] ?? 0,
-    ),
-    allocs,
-    reimbs,
-  );
+  return tagList;
 }
 
 Transaction transactionFromMap(
@@ -157,17 +81,6 @@ Transaction transactionFromMap(
   Map<int, Category>? categories,
   Map<int, Tag>? tags,
 }) {
-  String? tagString = map['tags'];
-  List<Tag> tagList = [];
-  if (tags != null && tagString != null) {
-    for (final strkey in tagString.split(',')) {
-      final intKey = int.tryParse(strkey);
-      if (intKey == null) continue;
-      final tag = tags[intKey];
-      if (tag == null) continue;
-      tagList.add(tag);
-    }
-  }
   return Transaction(
     key: map[_key],
     name: map[_name],
@@ -176,9 +89,9 @@ Transaction transactionFromMap(
     value: map[_value],
     account: accounts?[map[_account]],
     category: categories?[map[_category]] ?? Category.empty,
-    tags: tagList,
-    nAllocations: map["nAllocs"] ?? 0,
-    totalReimbusrements: map[_reimb_total] ?? 0,
+    tags: parseTags(map['tags'], tags),
+    nAllocations: map[_nAlloc] ?? 0,
+    totalReimbusrements: map[_reimbTotal] ?? 0,
   );
 }
 
@@ -331,11 +244,10 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     required Map<int, Category> categories,
     required Map<int, Tag> tags,
   }) async {
-    var q = transactionBaseSelectQuery;
-    q += " WHERE t.$_key in (${List.filled(keys.length, '?').join(',')})";
+    final q = createTransactionQuery(
+      tagWhere: "WHERE t.$_key in (${List.filled(keys.length, '?').join(',')})",
+    );
     final args = List.from(keys);
-    q += " GROUP BY t.$_key";
-
     final rows = await rawQuery(q, args);
 
     Map<int, Transaction> out = {};
@@ -348,57 +260,130 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
       );
       out[t.key] = t;
     }
-
     return out;
   }
 
-  Future<List<TransactionWithSoftRelations>> loadAllTransactions({
+  /// Gets every transaction from the database. To deal with the relations easily, we only load soft
+  /// fields in [TransactionWithSoftRelations], containing the info needed for the CSV output.
+  Future<List<TransactionWithSoftRelations>> loadAllTransactionsForCsv({
     required Map<int, Account> accounts,
     required Map<int, Category> categories,
     required Map<int, Tag> tags,
   }) async {
-    /// WARNING be extra careful about adding the allocation names into a GROUP_CONCAT.
-    /// Need to deal with the commas and ':' separators in the name itself.
+    /// To get the soft relation values, we use GROUP_CONCAT on the reimbursements and and allocations.
+    /// The target values are:
+    ///   - Allocation: name, category, value
+    ///   - Reimbursement: other transaction's key, value
+    /// The value are separated by a ':' and GROUP_CONCAT defaults to separating each entry with ','.
+    /// Thus we need to be extra careful about deal with the commas and colon separators in the
+    /// allocation names (the other fields are all ints). Simply replace them with #COLON or #COMMA
+    /// as magic texts that hopefully never appear naturally.
+    const colonReplacement = '#COLON';
+    const commaReplacement = '#COMMA';
     const q = '''
-    SELECT 
-      t.*,
-      GROUP_CONCAT(
-        (CASE WHEN (t.$_value > 0) then r.$reimbExpense else r.$reimbIncome END) ||
-        ':' || r.$reimbValue
-      ) as reimbs
-    FROM (
-      SELECT 
-        t.*,
-        GROUP_CONCAT(
-          REPLACE(REPLACE(a.$allocationsName, ',', '#COMMA'), ':', '#COLON') || ':' ||
-          a.$allocationsCategory || ':' || a.$allocationsValue) as allocs
-      FROM (
         SELECT 
           t.*,
-          GROUP_CONCAT(tag.$tagKey) as tags
-        FROM 
-          $transactionsTable t
-        LEFT OUTER JOIN 
-          $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
+          GROUP_CONCAT(
+            (CASE WHEN (t.$_value > 0) then r.$reimbExpense else r.$reimbIncome END) 
+            || ':' || r.$reimbValue
+          ) as reimbs
+        FROM (
+          SELECT 
+            t.*,
+            GROUP_CONCAT(
+              REPLACE(REPLACE(a.$allocationsName, ',', '$commaReplacement'), ':', '$colonReplacement') 
+              || ':' || a.$allocationsCategory 
+              || ':' || a.$allocationsValue
+            ) as allocs
+          FROM (
+            SELECT 
+              t.*,
+              GROUP_CONCAT(tag.$tagKey) as tags
+            FROM 
+              $transactionsTable t
+            LEFT OUTER JOIN 
+              $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
+            LEFT OUTER JOIN
+              $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
+            GROUP BY
+              t.$_key
+          ) t
+          LEFT OUTER JOIN 
+            $allocationsTable a ON a.$allocationsTransaction = t.$_key
+          GROUP BY
+            t.$_key
+        ) t
         LEFT OUTER JOIN
-          $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
+          $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
         GROUP BY
           t.$_key
-      ) t
-      LEFT OUTER JOIN 
-        $allocationsTable a ON a.$allocationsTransaction = t.$_key
-      GROUP BY
-        t.$_key
-    ) t
-    LEFT OUTER JOIN
-      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
-    GROUP BY
-      t.$_key
-    ORDER BY date
-''';
-
+        ORDER BY date
+    ''';
     final rows = await rawQuery(q);
 
+    TransactionWithSoftRelations transactionFromMapSoft(
+      Map<String, dynamic> map, {
+      Map<int, Account>? accounts,
+      Map<int, Category>? categories,
+      Map<int, Tag>? tags,
+    }) {
+      /// Parse the allocations
+      String? allocString = map['allocs'];
+      List<SoftAllocation> allocs = [];
+      if (allocString != null && categories != null) {
+        for (final allocEntry in allocString.split(',')) {
+          final fields = allocEntry.split(':');
+          if (fields.length != 3) {
+            debugPrint("Alloc entry doesn't have 3 fields, transaction:\n\t$map");
+            continue;
+          }
+
+          final categoryKey = int.tryParse(fields[1]) ?? 0;
+          allocs.add(SoftAllocation(
+            name: fields[0].replaceAll(commaReplacement, ',').replaceAll(colonReplacement, ':'),
+            category: categories[categoryKey]?.name ?? 'Unkown',
+            value: int.tryParse(fields[2]) ?? 0,
+          ));
+        }
+      }
+
+      /// Parse the reimbursements
+      String? reimbString = map['reimbs'];
+      List<(int, int)> reimbs = [];
+      if (reimbString != null) {
+        for (final entry in reimbString.split(',')) {
+          final fields = entry.split(':');
+          if (fields.length != 2) {
+            debugPrint("Reimb entry doesn't have 2 fields, transaction:\n\t$map");
+            continue;
+          }
+
+          reimbs.add((
+            int.tryParse(fields[0]) ?? 0,
+            int.tryParse(fields[1]) ?? 0,
+          ));
+        }
+      }
+
+      return TransactionWithSoftRelations(
+        Transaction(
+          key: map[_key],
+          name: map[_name],
+          date: DateTime.fromMillisecondsSinceEpoch(map[_date], isUtc: true),
+          note: map[_note],
+          value: map[_value],
+          account: accounts?[map[_account]],
+          category: categories?[map[_category]] ?? Category.empty,
+          tags: parseTags(map['tags'], tags),
+          nAllocations: 0,
+          totalReimbusrements: 0,
+        ),
+        allocs,
+        reimbs,
+      );
+    }
+
+    /// Parse final list
     List<TransactionWithSoftRelations> out = [];
     for (final row in rows) {
       final t = transactionFromMapSoft(
@@ -413,25 +398,80 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
   }
 }
 
-(String, List) _createQuery(TransactionFilters filters) {
-  /// The GROUP_CONCAT(DISTINCT) is necessary since if you have multiple allocations or reimbursements,
-  /// the tags will be duplicated accordingly.
-  var q = transactionBaseSelectQuery;
+/// Creates the base query to fetch a [Transaction] from the [transactionsTable]. The statement
+/// consists of three nested select statements, from innermost to outermost:
+///   1. [transactionsTable] joined with [tagsTable]
+///   2. Above joined with [allocationsTable]
+///   3. Above joine with [reimbursementsTable]
+///
+/// The optional parameters can add extra filters. Ensure that you add the SQL keywords though; they
+/// are not added automatically!
+///
+/// [innerTable] replaces the [transactionsTable] statement in (1). Do not set an alias for
+///     the replacement, but do add parentheses if it's a nested SELECT.
+/// [tagWhere] is the WHERE clause for step (1)
+/// [tagHaving] is the HAVING clause for step (1)
+/// and so on.
+String createTransactionQuery({
+  String? innerTable,
+  String tagWhere = '',
+  String tagHaving = '',
+  String allocHaving = '',
+  String reimbHaving = '',
+  String limit = '',
+}) {
+  return '''
+    SELECT 
+      t.*,
+      SUM(r.$reimbValue) as $_reimbTotal
+    FROM (
+      SELECT 
+        t.*,
+        COUNT(a.$allocationsKey) as $_nAlloc
+      FROM (
+        SELECT 
+          t.*,
+          GROUP_CONCAT(tag.$tagKey) as tags
+        FROM 
+          ${innerTable ?? transactionsTable} t
+        LEFT OUTER JOIN 
+          $tagJoinTable tag_join ON tag_join.$tagJoinTrans = t.$_key
+        LEFT OUTER JOIN
+          $tagsTable tag ON tag.$tagKey = tag_join.$tagJoinTag
+        $tagWhere
+        GROUP BY
+          t.$_key
+        $tagHaving
+      ) t
+      LEFT OUTER JOIN 
+        $allocationsTable a ON a.$allocationsTransaction = t.$_key
+      GROUP BY
+        t.$_key
+      $allocHaving
+    ) t
+    LEFT OUTER JOIN
+      $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
+    GROUP BY
+      t.$_key
+    $reimbHaving
+    ORDER BY date DESC
+    $limit
+    ''';
+}
 
+(String, List) _createQuery(TransactionFilters filters) {
   List args = [];
 
-  /// Add a single query to a global WHERE-AND clause ///
-  var firstWhere = true;
+  /// Basic filters (innermost where clause) ///
+  String tagWhere = '';
   void add(String query) {
-    if (firstWhere) {
-      q += " WHERE $query";
-      firstWhere = false;
+    if (tagWhere.isEmpty) {
+      tagWhere = "WHERE $query";
     } else {
-      q += " AND $query";
+      tagWhere += " AND $query";
     }
   }
 
-  /// Basic filters ///
   if (filters.name != null && filters.name!.isNotEmpty) {
     add("(UPPER(t.$_name) LIKE UPPER(?) OR UPPER(t.$_note) LIKE UPPER(?))");
     final wc = "%${filters.name}%";
@@ -459,53 +499,55 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     args.addAll(filters.accounts.map((e) => e.key));
   }
 
-  /// Group by transaction (so aggregate the tags/allocs per transaction) ///
-  q += " GROUP BY t.$_key";
+  /// Tags ///
+  /// Here rows with the correct tag are assigned 1, and then we max over each transaction to
+  /// see if there was at least one 1.
+  var tagHaving = '';
+  if (filters.tags.isNotEmpty) {
+    tagHaving = "HAVING max( CASE tag.$tagKey";
+    for (final tag in filters.tags) {
+      tagHaving += " WHEN ? THEN 1";
+      args.add(tag.key);
+    }
+    tagHaving += " ELSE 0 END ) = 1";
+  }
 
-  /// Tags and Categories ///
-  // Here rows with the correct tag/alloc are assigned 1, and then we max over each transaction to
-  // see if there was at least one 1.
+  /// Categories ///
+  /// These must be done together during the allocation group-by HAVING clause.
   var categories = filters.categories.activeKeys();
-  bool firstHaving = true;
+  var allocHaving = '';
   if (categories.isNotEmpty) {
-    firstHaving = false;
+    /// Include [Category.income] and [Category.expense] if the filter calls for [Category.empty].
     if (categories.contains(Category.empty.key)) {
       categories = List.of(categories) + [Category.income.key, Category.expense.key];
     }
 
     /// When transaction category is in the list
-    q += " HAVING (t.$_category in (${List.filled(categories.length, '?').join(',')})";
+    allocHaving = "HAVING (t.$_category in (${List.filled(categories.length, '?').join(',')})";
     args.addAll(categories);
 
     /// When transaction has an allocation category in the list
-    q += " OR max(CASE a.$allocationsCategory";
+    allocHaving += " OR max(CASE a.$allocationsCategory";
     for (final cat in categories) {
-      q += " WHEN ? THEN 1";
+      allocHaving += " WHEN ? THEN 1";
       args.add(cat);
     }
-    q += " ELSE 0 END) = 1)";
-  }
-
-  if (filters.tags.isNotEmpty) {
-    if (firstHaving) {
-      firstHaving = false;
-      q += " HAVING";
-    } else {
-      q += " AND";
-    }
-    q += " max( CASE tag.$tagKey";
-    for (final tag in filters.tags) {
-      q += " WHEN ? THEN 1";
-      args.add(tag.key);
-    }
-    q += " ELSE 0 END ) = 1";
+    allocHaving += " ELSE 0 END) = 1)";
   }
 
   /// Order and limit ///
-  q += " ORDER BY date DESC";
+  String limit = '';
   if (filters.limit != null) {
-    q += " LIMIT ?";
+    limit = " LIMIT ?";
     args.add(filters.limit);
   }
+
+  /// Get query ///
+  final q = createTransactionQuery(
+    tagWhere: tagWhere,
+    tagHaving: tagHaving,
+    allocHaving: allocHaving,
+    limit: limit,
+  );
   return (q, args);
 }

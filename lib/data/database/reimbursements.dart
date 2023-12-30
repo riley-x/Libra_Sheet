@@ -1,6 +1,4 @@
-import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
-import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -32,10 +30,6 @@ Map<String, dynamic> _toMap(lt.Transaction parent, Reimbursement r) {
     _value: r.value,
   };
 }
-
-// Reimbursement _fromMap(Map<String, dynamic> map) {
-//
-// }
 
 Future<int> _insert(
   Reimbursement r, {
@@ -166,31 +160,22 @@ Future<List<Reimbursement>> loadReimbursements({
 }) async {
   final parentColumn = (parent.value > 0) ? _income : _expense;
   final targetColumn = (parent.value > 0) ? _expense : _income;
-  final maps = await db.rawQuery(
-    """
-    SELECT 
-      t.*,
-      GROUP_CONCAT(DISTINCT tag.$tagKey) as tags,
-      COUNT(a.$allocationsKey) as nAllocs,
-      SUM(r.$reimbValue) as $transactionTotalReimbursements,
-      reimbs.$_value as reimb_value
-    FROM (
-        SELECT $targetColumn, $_value FROM $reimbursementsTable WHERE $parentColumn = ?
-      ) reimbs
-    JOIN
-      $transactionsTable t on t.$transactionKey = reimbs.$targetColumn
-    LEFT OUTER JOIN
-      $tagJoinTable tag_join on tag_join.$tagJoinTrans = t.$transactionKey
-    LEFT OUTER JOIN
-      $tagsTable tag on tag.$tagKey = tag_join.$tagJoinTag
-    LEFT OUTER JOIN
-      $allocationsTable a on a.$allocationsTransaction = t.$transactionKey
-    LEFT OUTER JOIN
-      $reimbursementsTable r ON t.$transactionKey = r.$targetColumn
-    GROUP BY t.$transactionKey
-    """,
-    [parent.key],
-  );
+  final innerTable = '''
+    (
+      SELECT
+        t.*,
+        reimbs.$_value as reimb_value
+      FROM 
+        $reimbursementsTable reimbs
+      JOIN
+        $transactionsTable t on t.$transactionKey = reimbs.$targetColumn
+      WHERE
+        reimbs.$parentColumn = ?
+    )
+  ''';
+  final args = [parent.key];
+  final q = createTransactionQuery(innerTable: innerTable);
+  final maps = await db.rawQuery(q, args);
   return [
     for (final map in maps)
       Reimbursement(
