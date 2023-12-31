@@ -50,24 +50,26 @@ class _CashFlowTab extends StatelessWidget {
 class _CashFlowCharts extends StatelessWidget {
   const _CashFlowCharts({super.key});
 
-  void onTap(BuildContext context, Category category, DateTime month) {
-    toCategoryScreen(
-      context,
-      category,
-      initialFilters: TransactionFilters(
-        startTime: month,
-        endTime: month.monthEnd(),
-        categories: CategoryTristateMap({category}),
-        accounts: Set.from(context.read<CashFlowState>().accounts),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = context.watch<CashFlowState>();
     final range = state.timeFrame.getRange(state.incomeData.times);
     final textStyle = Theme.of(context).textTheme.headlineMedium;
+
+    void onTap(Category category, DateTime month) {
+      toCategoryScreen(
+        context,
+        category,
+        initialHistoryTimeFrame: state.timeFrame,
+        initialFilters: TransactionFilters(
+          startTime: month,
+          endTime: month.monthEnd(),
+          categories: CategoryTristateMap({category}),
+          accounts: Set.from(state.accounts),
+        ),
+      );
+    }
+
     if (state.type == CashFlowType.categories) {
       return Column(
         children: [
@@ -76,7 +78,7 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               data: state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range: range,
-              onTap: (category, month) => onTap(context, category, month),
+              onTap: (category, month) => onTap(category, month),
               averageColor: Category.income.color,
             ),
           ),
@@ -86,7 +88,7 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               data: state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range: range,
-              onTap: (category, month) => onTap(context, category, month),
+              onTap: (category, month) => onTap(category, month),
               averageColor: Category.expense.color,
             ),
           ),
@@ -117,7 +119,7 @@ class _CashFlowCharts extends StatelessWidget {
           Expanded(
             child: RedGreenBarChart(
               state.netReturns.sublist(range.$1, range.$2),
-              onSelect: (_, point) => onTap(context, Category.investment, point.time),
+              onSelect: (_, point) => onTap(Category.investment, point.time),
             ),
           ),
         ],
