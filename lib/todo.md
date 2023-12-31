@@ -1,5 +1,5 @@
 ## Bugs
-- Add warning if trying to save trans reimb the same target twice (database ignores since primary key on target).
+
 
 ## High priority features
 
