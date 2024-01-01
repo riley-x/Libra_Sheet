@@ -1,7 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
 import 'package:libra_sheet/components/menus/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -24,18 +23,9 @@ class TransactionFiltersColumn extends StatelessWidget {
   /// else the scroll bar is oddly offset.
   final EdgeInsetsGeometry? interiorPadding;
 
-  final bool showConfirmationButtons;
-  final Function()? onReset;
-  final Function()? onCancel;
-  final Function()? onSave;
-
   const TransactionFiltersColumn({
     super.key,
     this.interiorPadding,
-    this.showConfirmationButtons = false,
-    this.onCancel,
-    this.onReset,
-    this.onSave,
   });
 
   @override
@@ -43,77 +33,60 @@ class TransactionFiltersColumn extends StatelessWidget {
     final textStyle = Theme.of(context).textTheme.titleMedium;
     return LimitedBox(
       maxWidth: 300,
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: Padding(
-                padding: interiorPadding ?? EdgeInsets.zero,
-                child: FocusScope(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      /// Title
-                      const SizedBox(height: 10),
-                      Text(
-                        "Filter",
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-
-                      /// Text
-                      const SizedBox(height: 15),
-                      Text("Name", style: textStyle),
-                      const SizedBox(height: 5),
-                      const _NameFilter(),
-
-                      /// Date
-                      const SizedBox(height: 15),
-                      Text("Date", style: textStyle),
-                      const SizedBox(height: 5),
-                      const _DateFilter(),
-
-                      /// Value
-                      const SizedBox(height: 15),
-                      Text("Value", style: textStyle),
-                      const SizedBox(height: 5),
-                      const _ValueRange(),
-
-                      /// Account
-                      const SizedBox(height: 15),
-                      const ExcludeFocus(child: _AccountChips()),
-
-                      /// Category
-                      const SizedBox(height: 15),
-                      const ExcludeFocus(child: _CategoryChips()),
-
-                      /// Tags
-                      const SizedBox(height: 15),
-                      const ExcludeFocus(child: _TagSelector()),
-
-                      /// Checkboxes
-                      const SizedBox(height: 25),
-                      Text("Other", style: textStyle),
-                      const _AllocationCheckbox(),
-                      const _ReimbursementCheckbox(),
-                    ],
-                  ),
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Padding(
+          padding: interiorPadding ?? EdgeInsets.zero,
+          child: FocusScope(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// Title
+                const SizedBox(height: 10),
+                Text(
+                  "Filter",
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-              ),
+
+                /// Text
+                const SizedBox(height: 15),
+                Text("Name", style: textStyle),
+                const SizedBox(height: 5),
+                const _NameFilter(),
+
+                /// Date
+                const SizedBox(height: 15),
+                Text("Date", style: textStyle),
+                const SizedBox(height: 5),
+                const _DateFilter(),
+
+                /// Value
+                const SizedBox(height: 15),
+                Text("Value", style: textStyle),
+                const SizedBox(height: 5),
+                const _ValueRange(),
+
+                /// Account
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _AccountChips()),
+
+                /// Category
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _CategoryChips()),
+
+                /// Tags
+                const SizedBox(height: 15),
+                const ExcludeFocus(child: _TagSelector()),
+
+                /// Checkboxes
+                const SizedBox(height: 25),
+                Text("Other", style: textStyle),
+                const _AllocationCheckbox(),
+                const _ReimbursementCheckbox(),
+              ],
             ),
           ),
-
-          /// Confirmation Buttons
-          if (showConfirmationButtons) ...[
-            const SizedBox(height: 30),
-            FormButtons(
-              showDelete: false,
-              onCancel: onCancel,
-              onReset: onReset,
-              onSave: onSave,
-            )
-          ]
-        ],
+        ),
       ),
     );
   }

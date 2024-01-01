@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
@@ -26,26 +27,28 @@ class TransactionFilterDialog extends StatelessWidget {
         initialFilters: initialFilters,
         doLoads: false,
       ),
-      builder: (context, child) => Dialog(
-        child: SizedBox(
+      builder: (context, child) => AlertDialog(
+        contentPadding: const EdgeInsets.only(top: 20, bottom: 15, left: 4, right: 4),
+        content: const SizedBox(
           width: 300,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TransactionFiltersColumn(
-              interiorPadding: const EdgeInsets.symmetric(horizontal: 4),
-              showConfirmationButtons: true,
-              onCancel: () => Navigator.pop(context),
-              // onReset: context.read<TransactionFilterState>().resetFilters,
-              onSave: (onSave == null)
-                  ? null
-                  : () {
-                      final state = context.read<TransactionFilterState>();
-                      onSave!.call(state.filters);
-                      Navigator.pop(context);
-                    },
-            ),
+          child: TransactionFiltersColumn(
+            interiorPadding: EdgeInsets.symmetric(horizontal: 5), // for the scrollbar
           ),
         ),
+        actions: <Widget>[
+          FormButtons(
+            showDelete: false,
+            onCancel: () => Navigator.pop(context),
+            // onReset: context.read<TransactionFilterState>().resetFilters,
+            onSave: (onSave == null)
+                ? null
+                : () {
+                    final state = context.read<TransactionFilterState>();
+                    onSave!.call(state.filters);
+                    Navigator.pop(context);
+                  },
+          )
+        ],
       ),
     );
   }
