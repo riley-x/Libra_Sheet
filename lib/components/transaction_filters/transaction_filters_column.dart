@@ -43,71 +43,77 @@ class TransactionFiltersColumn extends StatelessWidget {
     final textStyle = Theme.of(context).textTheme.titleMedium;
     return LimitedBox(
       maxWidth: 300,
-      child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Padding(
-          padding: interiorPadding ?? EdgeInsets.zero,
-          child: FocusScope(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                /// Title
-                const SizedBox(height: 10),
-                Text(
-                  "Filter",
-                  style: Theme.of(context).textTheme.headlineMedium,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Padding(
+                padding: interiorPadding ?? EdgeInsets.zero,
+                child: FocusScope(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      /// Title
+                      const SizedBox(height: 10),
+                      Text(
+                        "Filter",
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+
+                      /// Text
+                      const SizedBox(height: 15),
+                      Text("Name", style: textStyle),
+                      const SizedBox(height: 5),
+                      const _NameFilter(),
+
+                      /// Date
+                      const SizedBox(height: 15),
+                      Text("Date", style: textStyle),
+                      const SizedBox(height: 5),
+                      const _DateFilter(),
+
+                      /// Value
+                      const SizedBox(height: 15),
+                      Text("Value", style: textStyle),
+                      const SizedBox(height: 5),
+                      const _ValueRange(),
+
+                      /// Account
+                      const SizedBox(height: 15),
+                      const ExcludeFocus(child: _AccountChips()),
+
+                      /// Category
+                      const SizedBox(height: 15),
+                      const ExcludeFocus(child: _CategoryChips()),
+
+                      /// Tags
+                      const SizedBox(height: 15),
+                      const ExcludeFocus(child: _TagSelector()),
+
+                      /// Checkboxes
+                      const SizedBox(height: 25),
+                      Text("Other", style: textStyle),
+                      const _AllocationCheckbox(),
+                      const _ReimbursementCheckbox(),
+                    ],
+                  ),
                 ),
-
-                /// Text
-                const SizedBox(height: 15),
-                Text("Name", style: textStyle),
-                const SizedBox(height: 5),
-                const _NameFilter(),
-
-                /// Date
-                const SizedBox(height: 15),
-                Text("Date", style: textStyle),
-                const SizedBox(height: 5),
-                const _DateFilter(),
-
-                /// Value
-                const SizedBox(height: 15),
-                Text("Value", style: textStyle),
-                const SizedBox(height: 5),
-                const _ValueRange(),
-
-                /// Account
-                const SizedBox(height: 15),
-                const ExcludeFocus(child: _AccountChips()),
-
-                /// Category
-                const SizedBox(height: 15),
-                const ExcludeFocus(child: _CategoryChips()),
-
-                /// Tags
-                const SizedBox(height: 15),
-                const ExcludeFocus(child: _TagSelector()),
-
-                /// Checkboxes
-                const SizedBox(height: 25),
-                Text("Other", style: textStyle),
-                const _AllocationCheckbox(),
-                const _ReimbursementCheckbox(),
-
-                /// Confirmation Buttons
-                if (showConfirmationButtons) ...[
-                  const SizedBox(height: 30),
-                  FormButtons(
-                    showDelete: false,
-                    onCancel: onCancel,
-                    onReset: onReset,
-                    onSave: onSave,
-                  )
-                ]
-              ],
+              ),
             ),
           ),
-        ),
+
+          /// Confirmation Buttons
+          if (showConfirmationButtons) ...[
+            const SizedBox(height: 30),
+            FormButtons(
+              showDelete: false,
+              onCancel: onCancel,
+              onReset: onReset,
+              onSave: onSave,
+            )
+          ]
+        ],
       ),
     );
   }
@@ -123,7 +129,6 @@ class _NameFilter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: TextFormField(
         controller: state.nameController,
-        initialValue: state.initialFilters.name,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),

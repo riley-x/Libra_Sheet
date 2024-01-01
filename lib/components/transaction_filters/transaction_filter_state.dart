@@ -14,6 +14,7 @@ class TransactionFilterState extends ChangeNotifier {
     this.doLoads = true,
   }) : initialFilters = initialFilters ?? TransactionFilters() {
     filters = this.initialFilters.copy();
+    nameController.text = filters.name ?? '';
     service.addListener(loadTransactions);
     loadTransactions();
   }

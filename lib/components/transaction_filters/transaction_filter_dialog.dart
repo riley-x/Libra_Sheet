@@ -32,6 +32,7 @@ class TransactionFilterDialog extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TransactionFiltersColumn(
+              interiorPadding: const EdgeInsets.symmetric(horizontal: 4),
               showConfirmationButtons: true,
               onCancel: () => Navigator.pop(context),
               // onReset: context.read<TransactionFilterState>().resetFilters,
