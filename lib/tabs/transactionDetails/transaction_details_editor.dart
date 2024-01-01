@@ -132,6 +132,8 @@ class TransactionDetailsEditor extends StatelessWidget {
                         initial: state.seed?.note,
                         validator: (it) => null,
                         onSave: (it) => state.note = it,
+                        minLines: 2,
+                        maxLines: 2,
                       ),
                     ),
                     rowSpacing,
