@@ -27,29 +27,32 @@ class TransactionFilterDialog extends StatelessWidget {
         initialFilters: initialFilters,
         doLoads: false,
       ),
-      builder: (context, child) => AlertDialog(
-        contentPadding: const EdgeInsets.only(top: 20, bottom: 15, left: 4, right: 4),
-        content: const SizedBox(
-          width: 300,
-          child: TransactionFiltersColumn(
-            interiorPadding: EdgeInsets.symmetric(horizontal: 5), // for the scrollbar
+      builder: (context, child) {
+        final state = context.watch<TransactionFilterState>();
+        return AlertDialog(
+          contentPadding: const EdgeInsets.only(top: 20, bottom: 15, left: 4, right: 4),
+          content: const SizedBox(
+            width: 300,
+            child: TransactionFiltersColumn(
+              interiorPadding: EdgeInsets.symmetric(horizontal: 5), // for the scrollbar
+            ),
           ),
-        ),
-        actions: <Widget>[
-          FormButtons(
-            showDelete: false,
-            onCancel: () => Navigator.pop(context),
-            // onReset: context.read<TransactionFilterState>().resetFilters,
-            onSave: (onSave == null)
-                ? null
-                : () {
-                    final state = context.read<TransactionFilterState>();
-                    onSave!.call(state.filters);
-                    Navigator.pop(context);
-                  },
-          )
-        ],
-      ),
+          actions: <Widget>[
+            FormButtons(
+              showDelete: false,
+              onCancel: () => Navigator.pop(context),
+              // onReset: context.read<TransactionFilterState>().resetFilters,
+              onSave: (onSave == null || state.hasError())
+                  ? null
+                  : () {
+                      if (state.hasError()) return;
+                      onSave!.call(state.filters);
+                      Navigator.pop(context);
+                    },
+            )
+          ],
+        );
+      },
     );
   }
 }

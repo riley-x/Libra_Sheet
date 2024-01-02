@@ -39,6 +39,7 @@ class _FocusTextFieldState extends State<FocusTextField> {
   void initState() {
     super.initState();
     _focus.addListener(_onFocusChange);
+    text = widget.controller?.text ?? widget.intial;
   }
 
   @override
@@ -46,6 +47,12 @@ class _FocusTextFieldState extends State<FocusTextField> {
     super.dispose();
     _focus.removeListener(_onFocusChange);
     _focus.dispose();
+  }
+
+  @override
+  void didUpdateWidget(FocusTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    text = widget.controller?.text ?? widget.intial;
   }
 
   void _onFocusChange() {

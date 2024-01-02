@@ -167,6 +167,7 @@ class TransactionFilterState extends ChangeNotifier {
   }
 
   void setFilters(TransactionFilters filters) {
+    if (_disposed) return;
     this.filters = filters;
     nameController.text = filters.name ?? '';
     startDateController.text = filters.startTime?.MMddyy() ?? '';
@@ -192,5 +193,12 @@ class TransactionFilterState extends ChangeNotifier {
   void setHasReimbursement(bool? it) {
     filters.hasReimbursement = it;
     loadTransactions();
+  }
+
+  //----------------------------------------------------------------------
+  // Utility
+  //----------------------------------------------------------------------
+  bool hasError() {
+    return startTimeError || endTimeError || minValueError || maxValueError;
   }
 }
