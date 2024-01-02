@@ -87,16 +87,17 @@ class LibraAppState extends ChangeNotifier {
 
     // no easy way to do this in dart, so do manually
     final now = DateTime.now();
-    final current = (now.year, now.month);
-    var iter = (earliestMonth.year, earliestMonth.month);
+    var year = earliestMonth.year;
+    var month = earliestMonth.month;
 
     monthList = [];
-    while (iter.$1 <= current.$1 && iter.$2 <= current.$2) {
-      monthList.add(DateTime.utc(iter.$1, iter.$2));
-      if (iter.$2 == 12) {
-        iter = (iter.$1 + 1, 1);
+    while (year < now.year || (year == now.year && month <= now.month)) {
+      monthList.add(DateTime.utc(year, month));
+      if (month == 12) {
+        year++;
+        month = 1;
       } else {
-        iter = (iter.$1, iter.$2 + 1);
+        month++;
       }
     }
     debugPrint("LibraAppState::_loadMonths() $monthList");
