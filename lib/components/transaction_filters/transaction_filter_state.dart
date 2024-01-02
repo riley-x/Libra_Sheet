@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
@@ -13,10 +14,8 @@ class TransactionFilterState extends ChangeNotifier {
     TransactionFilters? initialFilters,
     this.doLoads = true,
   }) : initialFilters = initialFilters ?? TransactionFilters() {
-    filters = this.initialFilters.copy();
-    nameController.text = filters.name ?? '';
     service.addListener(loadTransactions);
-    loadTransactions();
+    setFilters(this.initialFilters.copy());
   }
 
   //----------------------------------------------------------------------
@@ -28,6 +27,10 @@ class TransactionFilterState extends ChangeNotifier {
   final bool doLoads;
 
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
+  final TextEditingController minValueController = TextEditingController();
+  final TextEditingController maxValueController = TextEditingController();
 
   //----------------------------------------------------------------------
   // Overrides
@@ -43,6 +46,11 @@ class TransactionFilterState extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     service.removeListener(loadTransactions);
+    nameController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    minValueController.dispose();
+    maxValueController.dispose();
     super.dispose();
   }
 
@@ -136,21 +144,12 @@ class TransactionFilterState extends ChangeNotifier {
     return (time, error);
   }
 
-  void setStartTime(DateTime? time, [bool load = true]) {
-    filters.startTime = time;
-    if (load) loadTransactions();
-  }
-
-  void setEndTime(DateTime? time, [bool load = true]) {
-    filters.endTime = time;
-    if (load) loadTransactions();
-  }
-
   void parseStartTime(String? text) {
     final val = _parseDate(text);
     startTimeError = val.$2;
     if (!startTimeError) {
-      setStartTime(val.$1);
+      filters.startTime = val.$1;
+      loadTransactions();
     } else {
       notifyListeners();
     }
@@ -160,7 +159,8 @@ class TransactionFilterState extends ChangeNotifier {
     final val = _parseDate(text);
     endTimeError = val.$2;
     if (!endTimeError) {
-      setEndTime(val.$1);
+      filters.endTime = val.$1;
+      loadTransactions();
     } else {
       notifyListeners();
     }
@@ -169,6 +169,10 @@ class TransactionFilterState extends ChangeNotifier {
   void setFilters(TransactionFilters filters) {
     this.filters = filters;
     nameController.text = filters.name ?? '';
+    startDateController.text = filters.startTime?.MMddyy() ?? '';
+    endDateController.text = filters.endTime?.MMddyy() ?? '';
+    minValueController.text = filters.minValue?.asDollarDouble().toSimpleString() ?? '';
+    maxValueController.text = filters.maxValue?.asDollarDouble().toSimpleString() ?? '';
     startTimeError = false;
     endTimeError = false;
     minValueError = false;

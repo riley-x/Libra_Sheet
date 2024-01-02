@@ -5,6 +5,7 @@ class FocusTextField extends StatefulWidget {
   final String? label;
   final String? hint;
   final String? intial;
+  final TextEditingController? controller;
   final bool error;
   final bool active;
   final int? minLines;
@@ -17,6 +18,7 @@ class FocusTextField extends StatefulWidget {
     this.label,
     this.hint,
     this.intial,
+    this.controller,
     this.error = false,
     this.active = false,
     this.minLines,
@@ -59,9 +61,10 @@ class _FocusTextFieldState extends State<FocusTextField> {
       child: TextFormField(
         // The key makes sure a new widget is created when the initial value is changed. This helps
         // fix bugs where the initial value is changed from the widget. Maybe could achieve same
-        // effect with [State.didUpdateWidget].
-        key: ValueKey(widget.intial),
-        initialValue: widget.intial,
+        // effect with [State.didUpdateWidget]?
+        key: widget.controller != null ? null : ValueKey(widget.intial),
+        initialValue: widget.controller != null ? null : widget.intial,
+        controller: widget.controller,
         decoration: InputDecoration(
           filled: widget.active && !widget.error,
           fillColor: Theme.of(context).colorScheme.secondaryContainer,

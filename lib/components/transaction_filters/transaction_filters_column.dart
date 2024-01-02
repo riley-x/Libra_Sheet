@@ -6,8 +6,6 @@ import 'package:libra_sheet/components/menus/category_checkbox_menu.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/tag_checkbox_menu.dart';
 import 'package:libra_sheet/components/title_row.dart';
-import 'package:libra_sheet/data/date_time_utils.dart';
-import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -125,10 +123,7 @@ class _DateFilter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
-          /// TODO we set initial based on [state.filters] instead of [state.initialFilters] because
-          /// i.e. the net change bar chart can set [state.filters], but that won't update the
-          /// text in the focus field without this reset. Better to keep reference to the TextController.
-          intial: state.filters.startTime?.MMddyy(),
+          controller: state.startDateController,
           label: 'Start',
           active: state.filters.startTime != null,
           error: state.startTimeError,
@@ -143,7 +138,7 @@ class _DateFilter extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         FocusTextField(
-          intial: state.filters.endTime?.MMddyy(),
+          controller: state.endDateController,
           label: 'End',
           active: state.filters.endTime != null,
           error: state.endTimeError,
@@ -165,7 +160,7 @@ class _ValueRange extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
-          intial: state.initialFilters.minValue?.asDollarDouble().toSimpleString(),
+          controller: state.minValueController,
           label: 'Min',
           active: state.filters.minValue != null,
           error: state.minValueError,
@@ -179,7 +174,7 @@ class _ValueRange extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         FocusTextField(
-          intial: state.initialFilters.maxValue?.asDollarDouble().toSimpleString(),
+          controller: state.maxValueController,
           label: 'Max',
           active: state.filters.maxValue != null,
           error: state.maxValueError,
