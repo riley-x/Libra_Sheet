@@ -165,7 +165,7 @@ class _ValueRange extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FocusTextField(
-          intial: state.filters.minValue?.asDollarDouble().toSimpleString(),
+          intial: state.initialFilters.minValue?.asDollarDouble().toSimpleString(),
           label: 'Min',
           active: state.filters.minValue != null,
           error: state.minValueError,
@@ -179,7 +179,7 @@ class _ValueRange extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         FocusTextField(
-          intial: state.filters.maxValue?.asDollarDouble().toSimpleString(),
+          intial: state.initialFilters.maxValue?.asDollarDouble().toSimpleString(),
           label: 'Max',
           active: state.filters.maxValue != null,
           error: state.maxValueError,

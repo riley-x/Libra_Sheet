@@ -38,7 +38,7 @@ extension IntDollarDouble on double {
 
   /// Default [toString] formats integers as "10.0"
   String toSimpleString() {
-    return NumberFormat("#").format(this);
+    return NumberFormat("#.##").format(this);
   }
 }
 
