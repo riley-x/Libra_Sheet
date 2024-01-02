@@ -2,7 +2,8 @@
 
 
 ## High priority features
-
+- Reorder tags
+- Add warning to back on CSV transactions
 
 ## Medium priority features
 - Rerun category rule
@@ -19,6 +20,7 @@
 
 ## Low priority features
 - Load more transactions on reach end of transaction grid?
+- Rethink transaction details UI, especially reimbursements?
 - Animate bar charts?
 - Automatic cloud backup?
 - Maybe balance update? Specifically for investments?

@@ -342,8 +342,11 @@ class TransactionDetailsState extends ChangeNotifier {
       return "Value is greater than the selected transaction's value.";
       // p.s. We check the current transaction's value on the global validate().
     }
-    if (reimbursements.indexWhere((element) => element.target.key == reimburseTarget!.key) >= 0) {
-      return "A reimbursement between these two transactions exists already.";
+    for (final reimb in reimbursements) {
+      if (reimb == focusedReimbursement) continue;
+      if (reimb.target.key == reimburseTarget!.key) {
+        return "A reimbursement between these two transactions exists already.";
+      }
     }
 
     /// Check to make sure the reimbursement value doesn't cause the other transaction to become
