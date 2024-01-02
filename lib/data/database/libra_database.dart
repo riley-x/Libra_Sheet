@@ -15,7 +15,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// TODO deprecated
+@Deprecated("Replace with LibraDatabase.db and extension functions")
 Database? libraDatabase;
 
 final _backupDateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
@@ -43,10 +43,12 @@ class LibraDatabase {
   /// This measures the amount of "data" processed since the last backup happened. It is roughly
   /// equivalent to the number of rows affected. A new backup will be registered when this reaches
   /// [_maxScore].
+  @Deprecated("TODO replace score-based backup with something smarter.")
   static int _scoreSinceLastBackup = 0;
   static DateTime _lastBackupTime = DateTime.now();
 
-  static const int _maxScore = 100;
+  @Deprecated("TODO replace score-based backup with something smarter.")
+  static const int _maxScore = 500;
 
   //-------------------------------------------------------------------------------------
   // Database setup
@@ -99,6 +101,7 @@ class LibraDatabase {
   /// Adds to [_scoreSinceLastBackup], and triggers a backup if it exceeds [_maxScore] and hasn't
   /// been backed-up in the past 10 seconds (this helps prevent multiple backups in a single big
   /// transaction).
+  @Deprecated("TODO replace score-based backup with something smarter.")
   static void tallyBackup(int score) {
     _scoreSinceLastBackup += score;
     if (_scoreSinceLastBackup > _maxScore &&

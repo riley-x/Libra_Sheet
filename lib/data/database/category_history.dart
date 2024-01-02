@@ -108,7 +108,6 @@ extension CategoryHistoryExtensionT on Transaction {
     required DateTime date,
     required int delta,
   }) async {
-    LibraDatabase.tallyBackup(1);
     final data = _CategoryHistory(
       account: account,
       category: category,
