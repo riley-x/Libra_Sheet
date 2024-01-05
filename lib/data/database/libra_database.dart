@@ -9,6 +9,7 @@ import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
+import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -34,21 +35,28 @@ class LibraDatabase {
   // Members
   //-------------------------------------------------------------------------------------
   static Database? _database;
+  static bool syncGoogleDrive = false;
 
+  @Deprecated("Use read() or update() instead")
   static Database get db {
     if (_database == null) throw StateError("Database not initialized");
     return _database!;
   }
 
-  /// This measures the amount of "data" processed since the last backup happened. It is roughly
-  /// equivalent to the number of rows affected. A new backup will be registered when this reaches
-  /// [_maxScore].
-  @Deprecated("TODO replace score-based backup with something smarter.")
-  static int _scoreSinceLastBackup = 0;
-  static DateTime _lastBackupTime = DateTime.now();
+  static Future<void> read(Future Function(Database) callback) async {
+    if (_database == null) throw StateError("Database not initialized");
+    await callback(_database!);
+  }
 
-  @Deprecated("TODO replace score-based backup with something smarter.")
-  static const int _maxScore = 500;
+  static Future<void> update(Future Function(Database) callback) async {
+    if (_database == null) throw StateError("Database not initialized");
+    await callback(_database!);
+    if (syncGoogleDrive) {
+      GoogleDrive.logLocalUpdate();
+    }
+  }
+
+  static DateTime _lastBackupTime = DateTime.now();
 
   //-------------------------------------------------------------------------------------
   // Database setup
@@ -84,7 +92,6 @@ class LibraDatabase {
 
   static Future<void> backup() async {
     _lastBackupTime = DateTime.now();
-    _scoreSinceLastBackup = 0;
     final timestamp = _backupDateFormat.format(_lastBackupTime);
 
     String origPath = db.path;
@@ -98,15 +105,7 @@ class LibraDatabase {
     debugPrint("LibraDatabase::backup() Backed up to $newPath");
   }
 
-  /// Adds to [_scoreSinceLastBackup], and triggers a backup if it exceeds [_maxScore] and hasn't
-  /// been backed-up in the past 10 seconds (this helps prevent multiple backups in a single big
-  /// transaction).
-  @Deprecated("TODO replace score-based backup with something smarter.")
-  static void tallyBackup(int score) {
-    _scoreSinceLastBackup += score;
-    if (_scoreSinceLastBackup > _maxScore &&
-        DateTime.now().difference(_lastBackupTime).inSeconds > 10) backup();
-  }
+  // DateTime.now().difference(_lastBackupTime).inSeconds > 10) backup();
 }
 
 FutureOr<void> _createDatabase(Database db, int version) {
