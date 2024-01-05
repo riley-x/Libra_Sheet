@@ -35,7 +35,8 @@ class LibraDatabase {
   // Members
   //-------------------------------------------------------------------------------------
   static Database? _database;
-  static bool syncGoogleDrive = false;
+  static bool syncGoogleDrive = true;
+  static Function(dynamic)? errorCallback;
 
   @Deprecated("Use read() or update() instead")
   static Database get db {
@@ -44,23 +45,38 @@ class LibraDatabase {
   }
 
   static Future<void> read(Future Function(Database db) callback) async {
-    if (_database == null) throw StateError("Database not initialized");
-    await callback(_database!);
+    try {
+      if (_database == null) throw StateError("Database not initialized");
+      await callback(_database!);
+    } catch (e) {
+      debugPrint("LibraDatabase::read() caught $e");
+      errorCallback?.call(e);
+    }
   }
 
   static Future<void> update(Future Function(Database db) callback) async {
-    if (_database == null) throw StateError("Database not initialized");
-    await callback(_database!);
-    if (syncGoogleDrive) {
-      GoogleDrive.logLocalUpdate();
+    try {
+      if (_database == null) throw StateError("Database not initialized");
+      await callback(_database!);
+      if (syncGoogleDrive) {
+        GoogleDrive.logLocalUpdate();
+      }
+    } catch (e) {
+      debugPrint("LibraDatabase::update() caught $e");
+      errorCallback?.call(e);
     }
   }
 
   static Future<void> updateTransaction(Future Function(Transaction txn) callback) async {
-    if (_database == null) throw StateError("Database not initialized");
-    await _database!.transaction(callback);
-    if (syncGoogleDrive) {
-      GoogleDrive.logLocalUpdate();
+    try {
+      if (_database == null) throw StateError("Database not initialized");
+      await _database!.transaction(callback);
+      if (syncGoogleDrive) {
+        GoogleDrive.logLocalUpdate();
+      }
+    } catch (e) {
+      debugPrint("LibraDatabase::updateTransaction() caught $e");
+      errorCallback?.call(e);
     }
   }
 
@@ -69,12 +85,8 @@ class LibraDatabase {
   //-------------------------------------------------------------------------------------
   // Database setup
   //-------------------------------------------------------------------------------------
-  static Future<void> init() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    if (Platform.isWindows || Platform.isLinux) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
+  static Future<String> getDatabasePath() async {
+    if (_database != null) return _database!.path;
 
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
@@ -82,14 +94,22 @@ class LibraDatabase {
     // final path = join(await getDatabasesPath(), 'libra_sheet.db');
 
     final appDocumentsDir = await getApplicationDocumentsDirectory();
-    String path;
     if (kDebugMode) {
-      path = join(appDocumentsDir.path, "Libra Sheet", "Debug", "libra_sheet.db");
+      return join(appDocumentsDir.path, "Libra Sheet", "Debug", "libra_sheet.db");
     } else {
-      path = join(appDocumentsDir.path, "Libra Sheet", "libra_sheet.db");
+      return join(appDocumentsDir.path, "Libra Sheet", "libra_sheet.db");
     }
-    debugPrint('LibraDatabase::init() path=$path');
+  }
 
+  static Future<void> init() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    if (Platform.isWindows || Platform.isLinux) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+
+    final path = await getDatabasePath();
+    debugPrint('LibraDatabase::init() path=$path');
     _database = await openDatabase(
       path,
       onCreate: _createDatabase,
@@ -99,10 +119,12 @@ class LibraDatabase {
   }
 
   static Future<void> backup() async {
+    if (_database == null) return;
+
     _lastBackupTime = DateTime.now();
     final timestamp = _backupDateFormat.format(_lastBackupTime);
 
-    String origPath = db.path;
+    String origPath = _database!.path;
     String newPath;
     if (origPath.endsWith('.db')) {
       newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp.db";

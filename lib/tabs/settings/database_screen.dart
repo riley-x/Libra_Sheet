@@ -90,7 +90,7 @@ class DatabaseScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             onTap: () async {
-              GoogleDrive.handleSignIn();
+              await GoogleDrive.initializeSyncOnUserInput();
             },
           ),
         ],
