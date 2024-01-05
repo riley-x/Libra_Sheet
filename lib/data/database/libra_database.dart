@@ -35,13 +35,16 @@ class LibraDatabase {
   // Members
   //-------------------------------------------------------------------------------------
   static Database? _database;
-  static bool syncGoogleDrive = true;
   static Function(dynamic)? errorCallback;
 
   @Deprecated("Use read() or update() instead")
   static Database get db {
     if (_database == null) throw StateError("Database not initialized");
     return _database!;
+  }
+
+  static Future<void> sync() async {
+    GoogleDrive().logLocalUpdate();
   }
 
   static Future<void> read(Future Function(Database db) callback) async {
@@ -58,9 +61,7 @@ class LibraDatabase {
     try {
       if (_database == null) throw StateError("Database not initialized");
       await callback(_database!);
-      if (syncGoogleDrive) {
-        GoogleDrive.logLocalUpdate();
-      }
+      sync();
     } catch (e) {
       debugPrint("LibraDatabase::update() caught $e");
       errorCallback?.call(e);
@@ -71,9 +72,7 @@ class LibraDatabase {
     try {
       if (_database == null) throw StateError("Database not initialized");
       await _database!.transaction(callback);
-      if (syncGoogleDrive) {
-        GoogleDrive.logLocalUpdate();
-      }
+      sync();
     } catch (e) {
       debugPrint("LibraDatabase::updateTransaction() caught $e");
       errorCallback?.call(e);

@@ -7,9 +7,26 @@ import 'package:http/http.dart';
 
 import 'dart:io' as io;
 
+enum GoogleDriveSyncStatus {
+  noAuthentication,
+  localAhead,
+  driveAhead,
+  upToDate,
+}
+
 /// FYI can't use GoogleSignIn package, at least on Macs because it requires using an entitlement
 /// that can only be used by code-signed apps.
-class GoogleDrive {
+class GoogleDrive extends ChangeNotifier {
+  //-------------------------------------------------------------------------------------
+  // Singleton setup
+  //-------------------------------------------------------------------------------------
+  GoogleDrive._internal();
+  static final GoogleDrive _instance = GoogleDrive._internal();
+  factory GoogleDrive() {
+    return _instance;
+  }
+
+  //-------------------------------------------------------------------------------------
   static ClientId clientId = _desktopClientId;
   static AccessCredentials? credentials;
   static Future<bool> Function()? userConfirmOverwrite;
@@ -18,44 +35,72 @@ class GoogleDrive {
   static AutoRefreshingAuthClient? _httpClient;
   static DriveApi? _api;
 
-  static Future<void> init() async {
-    if (credentials != null) {
-      _baseClient ??= Client(); // this needs to be closed by us
-      _httpClient = autoRefreshingClient(clientId, credentials!, _baseClient!);
-      _httpClient!.credentialUpdates.listen(saveCredentials);
-      _api = DriveApi(_httpClient!);
-    }
-  }
-
-  static Future<void> saveCredentials(AccessCredentials newCredentials) async {
-    credentials = newCredentials;
-    debugPrint("saveCredentials() ${credentials!.toJson()}");
-    // TODO
-  }
-
-  static Future<void> promptUserConsent() async {
-    _httpClient = await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
-    saveCredentials(_httpClient!.credentials);
-    _httpClient!.credentialUpdates.listen(saveCredentials);
-    _api = DriveApi(_httpClient!);
-  }
+  bool active = false;
+  bool get isAuthorized => _httpClient != null;
 
   /// This is the last update time of the local database. It set by [LibraDatabase] everytime the
   /// database is accessed using [logLocalUpdate], and is used to debounce revision pushes when the
   /// user is actively doing things.
-  static DateTime? lastLocalUpdateTime;
+  static DateTime lastLocalUpdateTime = DateTime(1970);
 
   /// GoogleDrive file pointer to the latest database file on Google Drive. If null, assume one
   /// doesn't exist yet.
   /// TODO do we use this? because right now [sync] just resets it right away
   static File? driveFile;
 
-  /// WARNING! we have no way to check for divergent updates; the newer update will win and will
-  /// replace the other, which may delete some changes if the history has diverged.
-  static Future<void> sync() async {
+  Future<void> init() async {
+    /// Initialize local update time with local file OS last modified time
+    final localPath = await LibraDatabase.getDatabasePath();
+    lastLocalUpdateTime = await io.File(localPath).lastModified();
+
+    /// Load saved credentials
+    if (credentials != null) {
+      _baseClient ??= Client(); // this needs to be closed by us
+      _httpClient = autoRefreshingClient(clientId, credentials!, _baseClient!);
+      _httpClient!.credentialUpdates.listen(saveCredentials);
+      _api = DriveApi(_httpClient!);
+      active = true;
+    }
+
+    // TODO load this from persist
+    active = true;
+  }
+
+  void disable() {
+    active = false;
+    notifyListeners();
+    // TODO save this to persist
+  }
+
+  void enable() {
+    active = true;
+    sync();
+  }
+
+  GoogleDriveSyncStatus status() {
+    if (_httpClient == null || !active) {
+      return GoogleDriveSyncStatus.noAuthentication;
+    } else if (driveFile == null ||
+        driveFile!.modifiedTime == null ||
+        lastLocalUpdateTime.isAfter(driveFile!.modifiedTime!)) {
+      return GoogleDriveSyncStatus.localAhead;
+    } else if (driveFile!.modifiedTime!
+        .isAfter(lastLocalUpdateTime.add(const Duration(seconds: 30)))) {
+      return GoogleDriveSyncStatus.driveAhead;
+    } else {
+      return GoogleDriveSyncStatus.upToDate;
+    }
+  }
+
+  static Future<void> saveCredentials(AccessCredentials newCredentials) async {
+    credentials = newCredentials;
+    debugPrint("saveCredentials() ${credentials!.toJson()}");
+    // TODO save this to persistent storage or something
+  }
+
+  Future<void> fetchDriveFile() async {
     if (_api == null) return;
 
-    /// Check the cloud for any update
     final newFile = await getMostRecentFile(_api!);
     if (driveFile?.modifiedTime != null &&
         newFile?.modifiedTime?.isBefore(driveFile!.modifiedTime!) == true) {
@@ -65,47 +110,65 @@ class GoogleDrive {
       driveFile = newFile;
     }
 
-    /// Initialize local update time with local file OS last modified time
-    final localPath = await LibraDatabase.getDatabasePath();
-    lastLocalUpdateTime ??= await io.File(localPath).lastModified();
-    debugPrint("GoogleDrive::sync()\n"
+    debugPrint("GoogleDrive::fetchDriveFile()\n"
         "\tdrive:${driveFile?.id} @ ${driveFile?.modifiedTime}\n"
         "\tmemory:$lastLocalUpdateTime");
-
-    /// Drive file doesn't exist, upload current database
-    if (driveFile == null || driveFile!.id == null) {
-      driveFile = await createFile(_api!, localPath, "libra_sheet.db");
-    }
-
-    /// Replace local file with cloud file after user confirmation.
-    else if (driveFile!.modifiedTime?.isAfter(lastLocalUpdateTime!) == true) {
-      if (await userConfirmOverwrite?.call() ?? false) {
-        await downloadFile(_api!, driveFile!.id!, localPath);
-      }
-    }
-
-    /// In all other cases, mostly when the drive file is behind the local file but also if for
-    /// some reason [driveFile.modifiedTime] is null, replace the drive file with the local file.
-    else {
-      driveFile = await updateFile(_api!, localPath, driveFile!.id!);
-    }
+    notifyListeners();
   }
 
-  static Future<void> initializeSyncOnUserInput() async {
-    await promptUserConsent();
-    LibraDatabase.syncGoogleDrive = true;
-    // TODO save this to persistent storage or something
-    debugPrint("initializeSyncOnUserInput() ${_httpClient?.credentials.toJson()}");
+  /// WARNING! we have no way to check for divergent updates; the newer update will win and will
+  /// replace the other, which may delete some changes if the history has diverged.
+  Future<void> sync() async {
+    if (_api == null) return;
+    await fetchDriveFile();
+
+    final localPath = await LibraDatabase.getDatabasePath();
+    switch (status()) {
+      case GoogleDriveSyncStatus.localAhead:
+        if (driveFile == null || driveFile!.id == null) {
+          await createFile(_api!, localPath, "libra_sheet.db");
+        } else {
+          await updateFile(_api!, localPath, driveFile!.id!);
+        }
+        // the returned [File] objects from the above functions don't have
+        // a lot of the metadata set (and the $fields parameter didn't seem to work the same as in
+        // api.files.list), so just rerun the fetch.
+        await fetchDriveFile();
+      case GoogleDriveSyncStatus.driveAhead:
+        // Replace local file with cloud file after user confirmation.
+        if (await userConfirmOverwrite?.call() ?? false) {
+          await downloadFile(_api!, driveFile!.id!, localPath);
+          lastLocalUpdateTime = driveFile!.modifiedTime!;
+        }
+      default:
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> promptUserConsent() async {
+    _httpClient = await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
+    saveCredentials(_httpClient!.credentials);
+    _httpClient!.credentialUpdates.listen(saveCredentials);
+    _api = DriveApi(_httpClient!);
+
+    // TODO save this to persistent
+    active = true;
+
+    await sync();
   }
 
   /// Calls [sync] but with a short delay to debounce back-to-back updates. This function uses
   /// [lastLocalUpdateTime] to check if the current call stack has been superceded.
-  static void logLocalUpdate() async {
+  void logLocalUpdate() async {
+    if (!active || !isAuthorized) return;
+
     final now = DateTime.now();
     lastLocalUpdateTime = now;
+    notifyListeners();
+
     await Future.delayed(const Duration(seconds: 10));
     if (lastLocalUpdateTime == now) {
-      lastLocalUpdateTime = null;
       await sync();
     } else {
       // superceded, do nothing

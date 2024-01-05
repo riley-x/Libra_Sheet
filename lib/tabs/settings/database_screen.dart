@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
+import 'package:libra_sheet/tabs/settings/google_drive_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +30,16 @@ class DatabaseScreen extends StatelessWidget {
               "The app will also periodically make backups in the same folder. If you ever need to"
               " restore a backup, simply replace the file above. I recommend also saving a backup to the"
               " cloud."),
+          const SizedBox(height: 40),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Google Drive Sync',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const GoogleDriveCard(),
           const SizedBox(height: 40),
           Align(
             alignment: Alignment.centerLeft,
@@ -81,16 +92,6 @@ class DatabaseScreen extends StatelessWidget {
                   );
                 },
               );
-            },
-          ),
-          const SizedBox(height: 10),
-          SettingsCard(
-            content: Text(
-              'Sync with Google Drive',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            onTap: () async {
-              await GoogleDrive.initializeSyncOnUserInput();
             },
           ),
         ],
