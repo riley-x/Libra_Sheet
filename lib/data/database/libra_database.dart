@@ -43,14 +43,22 @@ class LibraDatabase {
     return _database!;
   }
 
-  static Future<void> read(Future Function(Database) callback) async {
+  static Future<void> read(Future Function(Database db) callback) async {
     if (_database == null) throw StateError("Database not initialized");
     await callback(_database!);
   }
 
-  static Future<void> update(Future Function(Database) callback) async {
+  static Future<void> update(Future Function(Database db) callback) async {
     if (_database == null) throw StateError("Database not initialized");
     await callback(_database!);
+    if (syncGoogleDrive) {
+      GoogleDrive.logLocalUpdate();
+    }
+  }
+
+  static Future<void> updateTransaction(Future Function(Transaction txn) callback) async {
+    if (_database == null) throw StateError("Database not initialized");
+    await _database!.transaction(callback);
     if (syncGoogleDrive) {
       GoogleDrive.logLocalUpdate();
     }

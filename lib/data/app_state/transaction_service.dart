@@ -37,17 +37,17 @@ class TransactionService extends ChangeNotifier {
     debugPrint("TransactionService::save() \nold=$old\nnew=$nu");
     if (old == null) {
       assert(nu.key == 0);
-      await insertTransaction(nu);
+      await LibraDatabase.updateTransaction((txn) async => await txn.insertTransaction(nu));
     } else {
-      await updateTransaction(old, nu);
+      await LibraDatabase.updateTransaction((txn) async => await txn.updateTransaction(old, nu));
     }
     _onUpdate();
   }
 
   Future<void> addAll(List<Transaction> transactions) async {
-    await libraDatabase?.transaction((txn) async {
+    await LibraDatabase.updateTransaction((txn) async {
       for (final t in transactions) {
-        await insertTransaction(t, txn: txn);
+        await txn.insertTransaction(t);
       }
     });
     _onUpdate();
@@ -56,7 +56,7 @@ class TransactionService extends ChangeNotifier {
 
   Future<void> delete(Transaction t) async {
     debugPrint("TransactionService::delete() $t");
-    await deleteTransaction(t);
+    await LibraDatabase.updateTransaction((txn) async => await txn.deleteTransaction(t));
     _onUpdate();
   }
 
@@ -70,13 +70,14 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> reloadReimbursements(Transaction t) async {
-    t.reimbursements = await loadReimbursements(
-      parent: t,
-      accounts: appState.accounts.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
-      db: LibraDatabase.db,
-    );
+    await LibraDatabase.read((db) async {
+      t.reimbursements = await db.loadReimbursements(
+        parent: t,
+        accounts: appState.accounts.createAccountMap(),
+        categories: appState.categories.createKeyMap(),
+        tags: appState.tags.createKeyMap(),
+      );
+    });
   }
 
   Future<Map<int, Transaction>> loadByKey(Iterable<int> keys) {

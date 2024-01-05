@@ -106,78 +106,69 @@ Transaction transactionFromMap(
 // Modify a single transaction
 //----------------------------------------------------------------------
 
-/// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
-/// set the transaction's key in-place!
-FutureOr<void> insertTransaction(Transaction t, {db.Transaction? txn}) async {
-  if (txn == null) {
-    return libraDatabase?.transaction((txn) async => await insertTransaction(t, txn: txn));
-  }
-
-  t.key = await txn.insert(
-    transactionsTable,
-    _toMap(t),
-    conflictAlgorithm: db.ConflictAlgorithm.replace,
-  );
-  await txn.updateCategoryHistory(
-    account: t.account!.key,
-    category: t.category.key,
-    date: t.date,
-    delta: t.value,
-  );
-
-  for (final tag in t.tags) {
-    await txn.insertTagJoin(t, tag);
-  }
-  if (t.allocations != null) {
-    for (int i = 0; i < t.allocations!.length; i++) {
-      await addAllocation(parent: t, index: i, txn: txn);
-    }
-  }
-  if (t.reimbursements != null) {
-    for (final r in t.reimbursements!) {
-      await addReimbursement(r, parent: t, txn: txn);
-    }
-  }
-}
-
-Future<void> deleteTransaction(Transaction t, {db.Transaction? txn}) async {
-  if (txn == null) {
-    return libraDatabase?.transaction((txn) async => await deleteTransaction(t, txn: txn));
-  }
-
-  if (t.reimbursements != null) {
-    for (final r in t.reimbursements!) {
-      await deleteReimbursement(r, parent: t, txn: txn);
-    }
-  }
-  if (t.allocations != null) {
-    for (int i = 0; i < t.allocations!.length; i++) {
-      await deleteAllocation(parent: t, index: i, txn: txn);
-    }
-  }
-  await txn.removeAllTagsFrom(t);
-
-  if (t.account != null) {
-    await txn.updateCategoryHistory(
+extension TransactionExtension on db.Transaction {
+  /// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
+  /// set the transaction's key in-place!
+  FutureOr<void> insertTransaction(Transaction t) async {
+    t.key = await insert(
+      transactionsTable,
+      _toMap(t),
+      conflictAlgorithm: db.ConflictAlgorithm.replace,
+    );
+    await updateCategoryHistory(
       account: t.account!.key,
       category: t.category.key,
       date: t.date,
-      delta: -t.value,
+      delta: t.value,
+    );
+
+    for (final tag in t.tags) {
+      await insertTagJoin(t, tag);
+    }
+    if (t.allocations != null) {
+      for (int i = 0; i < t.allocations!.length; i++) {
+        await addAllocation(parent: t, index: i, txn: this);
+      }
+    }
+    if (t.reimbursements != null) {
+      for (final r in t.reimbursements!) {
+        await addReimbursement(r, parent: t);
+      }
+    }
+  }
+
+  Future<void> deleteTransaction(Transaction t) async {
+    if (t.reimbursements != null) {
+      for (final r in t.reimbursements!) {
+        await deleteReimbursement(r, parent: t);
+      }
+    }
+    if (t.allocations != null) {
+      for (int i = 0; i < t.allocations!.length; i++) {
+        await deleteAllocation(parent: t, index: i, txn: this);
+      }
+    }
+    await removeAllTagsFrom(t);
+
+    if (t.account != null) {
+      await updateCategoryHistory(
+        account: t.account!.key,
+        category: t.category.key,
+        date: t.date,
+        delta: -t.value,
+      );
+    }
+    await delete(
+      transactionsTable,
+      where: "$_key = ?",
+      whereArgs: [t.key],
     );
   }
-  await txn.delete(
-    transactionsTable,
-    where: "$_key = ?",
-    whereArgs: [t.key],
-  );
-}
 
-Future<void> updateTransaction(Transaction old, Transaction nu, {db.Transaction? txn}) async {
-  if (txn == null) {
-    return libraDatabase?.transaction((txn) async => await updateTransaction(old, nu, txn: txn));
+  Future<void> updateTransaction(Transaction old, Transaction nu) async {
+    await deleteTransaction(old);
+    await insertTransaction(nu);
   }
-  await deleteTransaction(old, txn: txn);
-  await insertTransaction(nu, txn: txn);
 }
 
 //----------------------------------------------------------------------
@@ -241,12 +232,11 @@ Future<void> loadTransactionRelations(
       t.allocations = [];
     }
     if (t.totalReimbusrements > 0) {
-      t.reimbursements = await loadReimbursements(
+      t.reimbursements = await txn.loadReimbursements(
         parent: t,
         accounts: accounts,
         categories: categories,
         tags: tags,
-        db: txn,
       );
     } else {
       t.reimbursements = [];
