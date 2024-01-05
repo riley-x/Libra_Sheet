@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:provider/provider.dart';
 
@@ -80,6 +81,16 @@ class DatabaseScreen extends StatelessWidget {
                   );
                 },
               );
+            },
+          ),
+          const SizedBox(height: 10),
+          SettingsCard(
+            content: Text(
+              'Sync with Google Drive',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            onTap: () async {
+              handleSignIn();
             },
           ),
         ],
