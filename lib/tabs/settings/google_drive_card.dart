@@ -12,7 +12,7 @@ class GoogleDriveCard extends StatelessWidget {
     final status = drive.status();
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        padding: const EdgeInsets.only(left: 15, top: 8, bottom: 8, right: 5),
         child: Row(
           children: [
             Expanded(

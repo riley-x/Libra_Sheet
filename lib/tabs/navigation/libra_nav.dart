@@ -98,7 +98,7 @@ class LibraNav extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 30),
                       Row(
                         children: [
                           Icon(Icons.dark_mode_outlined, color: textColor),

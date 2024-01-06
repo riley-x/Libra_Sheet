@@ -27,8 +27,7 @@ class DatabaseScreen extends StatelessWidget {
           ),
           const Text(
               "The app will also periodically make backups in the same folder. If you ever need to"
-              " restore a backup, simply replace the file above. I recommend also saving a backup to the"
-              " cloud."),
+              " restore a backup, simply replace the file above."),
           const SizedBox(height: 40),
           Row(
             children: [
