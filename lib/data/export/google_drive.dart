@@ -226,6 +226,7 @@ class GoogleDrive extends ChangeNotifier {
           final tempFile = await downloadFile(_api!, driveFile!.id!, "${localPath}_temp");
           lastLocalUpdateTime = driveFile!.modifiedTime!;
           await LibraDatabase.close();
+          await LibraDatabase.backup();
           await tempFile.copy(localPath);
           tempFile.delete();
           await LibraDatabase.open();

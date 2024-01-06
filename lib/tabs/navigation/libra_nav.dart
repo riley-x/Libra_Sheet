@@ -91,9 +91,9 @@ class LibraNav extends StatelessWidget {
                         width: 220,
                         child: Row(
                           children: [
-                            const SizedBox(width: 20),
+                            const SizedBox(width: 30),
                             cloudIcon,
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 20),
                             cloudText,
                           ],
                         ),
