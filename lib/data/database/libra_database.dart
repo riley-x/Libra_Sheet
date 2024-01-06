@@ -50,7 +50,12 @@ class LibraDatabase {
   }
 
   static Future<void> sync() async {
-    GoogleDrive().logLocalUpdate();
+    try {
+      await GoogleDrive().logLocalUpdate();
+    } catch (e) {
+      debugPrint("LibraDatabase::update() caught $e");
+      errorCallback?.call(e);
+    }
   }
 
   static Future<bool> isEmpty() async {

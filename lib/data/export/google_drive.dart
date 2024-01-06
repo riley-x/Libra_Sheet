@@ -135,6 +135,15 @@ class GoogleDrive extends ChangeNotifier {
   /// WARNING! we have no way to check for divergent updates; the newer update will win and will
   /// replace the other, which may delete some changes if the history has diverged.
   Future<void> sync() async {
+    try {
+      await _sync();
+    } catch (e) {
+      debugPrint("LibraDatabase::update() caught $e");
+      LibraDatabase.errorCallback?.call(e);
+    }
+  }
+
+  Future<void> _sync() async {
     if (_api == null) return;
     await fetchDriveFile();
 
@@ -168,20 +177,26 @@ class GoogleDrive extends ChangeNotifier {
   }
 
   Future<void> promptUserConsent() async {
-    _httpClient = await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
-    saveCredentials(_httpClient!.credentials);
-    _httpClient!.credentialUpdates.listen(saveCredentials);
-    _api = DriveApi(_httpClient!);
+    try {
+      _httpClient =
+          await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
+      saveCredentials(_httpClient!.credentials);
+      _httpClient!.credentialUpdates.listen(saveCredentials);
+      _api = DriveApi(_httpClient!);
 
-    // TODO save this to persistent
-    active = true;
+      // TODO save this to persistent
+      active = true;
 
-    await sync();
+      await sync();
+    } catch (e) {
+      debugPrint("LibraDatabase::update() caught $e");
+      LibraDatabase.errorCallback?.call(e);
+    }
   }
 
   /// Calls [sync] but with a short delay to debounce back-to-back updates. This function uses
   /// [lastLocalUpdateTime] to check if the current call stack has been superceded.
-  void logLocalUpdate() async {
+  Future<void> logLocalUpdate() async {
     if (!active || !isAuthorized) return;
 
     final now = DateTime.now();

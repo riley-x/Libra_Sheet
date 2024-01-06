@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
-import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:libra_sheet/tabs/settings/google_drive_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +20,7 @@ class DatabaseScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: SelectableText(
-                LibraDatabase.db.path,
+                LibraDatabase.database?.path ?? 'Error: Database failed to open',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -31,14 +30,21 @@ class DatabaseScreen extends StatelessWidget {
               " restore a backup, simply replace the file above. I recommend also saving a backup to the"
               " cloud."),
           const SizedBox(height: 40),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Google Drive Sync',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Google Drive Sync',
+                  style: Theme.of(context).textTheme.titleLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const GoogleDriveSwitch(),
+            ],
           ),
           const SizedBox(height: 10),
+          // TODO add way to change account
           const GoogleDriveCard(),
           const SizedBox(height: 40),
           Align(

@@ -34,6 +34,11 @@ class LibraAppState extends ChangeNotifier {
   //--------------------------------------------------------------------------------
   // Init
   //--------------------------------------------------------------------------------
+
+  /// Initializes all app state data from the database. Must be called after the database has been
+  /// initialized.
+  ///
+  /// Warning, this can be called again on a database replacement.
   Future<void> init() async {
     /// Load account, categories
     var futures = <Future>[];
@@ -173,7 +178,9 @@ class LibraAppState extends ChangeNotifier {
     return showConfirmationDialog(
       context: context,
       title: 'Google Drive Sync',
-      msg: 'A newer database file exists on Google drive. Overwrite the current database file?',
+      msg: 'A newer database file exists on Google Drive. Overwrite the current database file?'
+          '\n\nIf you want to replace the file on Google Drive instead, click "Cancel" for now. '
+          'Delete the file on Google Drive then retry the sync.',
     );
   }
 
