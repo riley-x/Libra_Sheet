@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:provider/provider.dart';
 
 enum LibraNavDestination {
@@ -46,6 +47,25 @@ class LibraNav extends StatelessWidget {
     final bkgColor = (isDarkMode) ? colorScheme.background : colorScheme.secondary;
     final textColor = (isDarkMode) ? colorScheme.onBackground : colorScheme.onSecondary;
 
+    final cloudStatus = context.watch<GoogleDrive>().status();
+
+    final cloudIcon = switch (cloudStatus) {
+      GoogleDriveSyncStatus.upToDate => const Icon(Icons.cloud_done, color: Colors.green),
+      GoogleDriveSyncStatus.driveAhead => const Icon(Icons.cloud_download, color: Colors.amber),
+      GoogleDriveSyncStatus.localAhead => const Icon(Icons.cloud_upload, color: Colors.amber),
+      GoogleDriveSyncStatus.disabled => const SizedBox(),
+    };
+
+    final cloudText = switch (cloudStatus) {
+      GoogleDriveSyncStatus.upToDate =>
+        Text("Up to date", style: textTheme.bodyMedium?.copyWith(color: Colors.green)),
+      GoogleDriveSyncStatus.driveAhead =>
+        Text("Download pending", style: textTheme.bodyMedium?.copyWith(color: Colors.amber)),
+      GoogleDriveSyncStatus.localAhead =>
+        Text("Upload pending", style: textTheme.bodyMedium?.copyWith(color: Colors.amber)),
+      GoogleDriveSyncStatus.disabled => const SizedBox(),
+    };
+
     return ExcludeFocus(
       child: NavigationRail(
         backgroundColor: bkgColor,
@@ -58,29 +78,47 @@ class LibraNav extends StatelessWidget {
         destinations: libraNavDestinations,
         selectedIndex: selectedIndex,
         onDestinationSelected: onDestinationSelected,
-        trailing: (!extended)
-            ? null
-            : Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        Icon(Icons.dark_mode_outlined, color: textColor),
-                        const SizedBox(width: 5),
-                        Switch(
-                          value: !isDarkMode,
-                          onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
-                          activeColor: colorScheme.surfaceVariant,
+        // TODO this is janky when expanding because the animation starts off narrow but the column
+        // expands to the width of the wider content already
+        trailing: Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: extended
+                  ? [
+                      SizedBox(
+                        width: 220,
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 20),
+                            cloudIcon,
+                            const SizedBox(width: 10),
+                            cloudText,
+                          ],
                         ),
-                        const SizedBox(width: 5),
-                        Icon(Icons.light_mode, color: textColor),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.dark_mode_outlined, color: textColor),
+                          const SizedBox(width: 5),
+                          Switch(
+                            value: !isDarkMode,
+                            onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
+                            activeColor: colorScheme.surfaceVariant,
+                          ),
+                          const SizedBox(width: 5),
+                          Icon(Icons.light_mode, color: textColor),
+                        ],
+                      ),
+                    ]
+                  : [
+                      cloudIcon,
+                    ],
+            ),
+          ),
+        ),
       ),
     );
   }

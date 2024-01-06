@@ -10,12 +10,18 @@ import 'package:http/http.dart';
 import 'dart:io' as io;
 
 enum GoogleDriveSyncStatus {
-  noAuthentication,
+  disabled,
   localAhead,
   driveAhead,
   upToDate,
 }
 
+/// Specifies behavior when a drive file is ahead of the local file.
+///
+/// [confirmOverwrite] should return true if the overwrite should proceed. This is a useful time to
+/// ask for user confirmation.
+///
+/// [onReplaced] is called after the database file has been replaced, and the database reopened.
 class OverwriteFileCallback {
   final FutureOr<bool> Function()? confirmOverwrite;
   final Function()? onReplaced;
@@ -43,7 +49,11 @@ class GoogleDrive extends ChangeNotifier {
   //-------------------------------------------------------------------------------------
   static ClientId clientId = _desktopClientId;
   static AccessCredentials? credentials;
-  static OverwriteFileCallback? overwriteFileCallback;
+
+  /// When the drive file is ahead of the local file, this field determines the behavior. The
+  /// [OverwriteFileCallback.confirmOverwrite] field is a useful place to ask for a user confirmation.
+  /// Will default to false, so the local file will never be overwritten.
+  OverwriteFileCallback? overwriteFileCallback;
 
   static Client? _baseClient;
   static AutoRefreshingAuthClient? _httpClient;
@@ -68,7 +78,12 @@ class GoogleDrive extends ChangeNotifier {
 
   /// Initializes the service, loading credentials from persistent storage if needed. This should be
   /// called after [LibraDatabase.init].
-  Future<void> init() async {
+  ///
+  /// [overwriteFileCallback] should be set to confirm overwriting the local database file with one
+  /// from the cloud.
+  Future<void> init({required OverwriteFileCallback? overwriteFileCallback}) async {
+    this.overwriteFileCallback = overwriteFileCallback;
+
     /// Initialize local update time with local file OS last modified time.
     /// Keep the default (1970) time when the database is empty (newly created) to always allow
     /// drive sync to override a new database file.
@@ -119,7 +134,7 @@ class GoogleDrive extends ChangeNotifier {
   /// This does not refresh [driveFile], call [fetchDriveFile] if needed.
   GoogleDriveSyncStatus status() {
     if (_httpClient == null || !active) {
-      return GoogleDriveSyncStatus.noAuthentication;
+      return GoogleDriveSyncStatus.disabled;
     } else if (driveFile == null ||
         driveFile!.modifiedTime == null ||
         lastLocalUpdateTime.isAfter(driveFile!.modifiedTime!)) {
@@ -179,12 +194,12 @@ class GoogleDrive extends ChangeNotifier {
   /// WARNING! we have no way to check for divergent updates; the newer update will win and will
   /// replace the other, which may delete some changes if the history has diverged.
   Future<void> sync() async {
-    await fetchDriveFile();
-    return;
+    // await fetchDriveFile();
+    // return;
     try {
       await _sync();
     } catch (e) {
-      debugPrint("LibraDatabase::update() caught $e");
+      debugPrint("LibraDatabase::sync() caught $e");
       LibraDatabase.errorCallback?.call(e);
     }
   }

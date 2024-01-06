@@ -12,6 +12,7 @@
 - Choose category/account on CSV column?
 - Delete account
 - Range account screen graphs?
+- Fix navbar animation
 
 
 ## Refactor

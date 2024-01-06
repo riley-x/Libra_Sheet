@@ -46,7 +46,7 @@ class GoogleDriveCard extends StatelessWidget {
                                 .bodyLarge
                                 ?.copyWith(color: Colors.amber),
                           ),
-                        GoogleDriveSyncStatus.noAuthentication => Text(
+                        GoogleDriveSyncStatus.disabled => Text(
                             "disabled",
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   color: Theme.of(context).colorScheme.error,
@@ -55,7 +55,7 @@ class GoogleDriveCard extends StatelessWidget {
                       },
                     ],
                   ),
-                  if (status != GoogleDriveSyncStatus.noAuthentication) ...[
+                  if (status != GoogleDriveSyncStatus.disabled) ...[
                     _FieldRow(
                       'Drive ID:',
                       '${GoogleDrive.driveFile?.id}',
