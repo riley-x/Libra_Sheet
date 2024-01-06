@@ -47,6 +47,11 @@ class LibraDatabase {
     GoogleDrive().logLocalUpdate();
   }
 
+  static Future<bool> isEmpty() async {
+    if (_database == null) return true;
+    return await _database!.countAccounts() == 0;
+  }
+
   static Future<void> read(Future Function(Database db) callback) async {
     try {
       if (_database == null) throw StateError("Database not initialized");
@@ -161,8 +166,8 @@ FutureOr<void> _createDatabase14(Database db) async {
   await db.execute(createTagJoinTableSql);
   await db.execute(createDefaultCategories);
   if (kDebugMode) {
-    await db.execute(createTestAccountsSql);
-    await db.execute(createTestTagsSql);
+    // await db.execute(createTestAccountsSql);
+    // await db.execute(createTestTagsSql);
   }
 }
 

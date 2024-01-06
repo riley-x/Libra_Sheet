@@ -51,7 +51,9 @@ class GoogleDrive extends ChangeNotifier {
   Future<void> init() async {
     /// Initialize local update time with local file OS last modified time
     final localPath = await LibraDatabase.getDatabasePath();
-    lastLocalUpdateTime = await io.File(localPath).lastModified();
+    if (!await LibraDatabase.isEmpty()) {
+      lastLocalUpdateTime = await io.File(localPath).lastModified();
+    }
 
     /// Load saved credentials
     if (credentials != null) {
@@ -59,11 +61,12 @@ class GoogleDrive extends ChangeNotifier {
       _httpClient = autoRefreshingClient(clientId, credentials!, _baseClient!);
       _httpClient!.credentialUpdates.listen(saveCredentials);
       _api = DriveApi(_httpClient!);
-      active = true;
     }
 
     // TODO load this from persist
     active = true;
+
+    sync();
   }
 
   void disable() {

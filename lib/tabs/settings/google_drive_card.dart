@@ -24,7 +24,7 @@ class GoogleDriveCard extends StatelessWidget {
           print(GoogleDrive.lastLocalUpdateTime);
         },
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
           child: Column(
             children: [
               Row(

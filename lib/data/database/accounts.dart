@@ -100,6 +100,14 @@ Future<List<Account>> getAccounts() async {
 }
 
 extension AccountDatabaseExtension on DatabaseExecutor {
+  Future<int> countAccounts() async {
+    final maps = await query(
+      accountsTable,
+      columns: ['COUNT($_key) as count'],
+    );
+    return maps[0]['count'] as int? ?? 0;
+  }
+
   Future<int> updateAccount(Account acc, {int? listIndex}) {
     return update(
       accountsTable,

@@ -117,6 +117,7 @@ class LibraAppState extends ChangeNotifier {
   // Screen handling
   //--------------------------------------------------------------------------------
   final navigatorKey = GlobalKey<NavigatorState>();
+  final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   /// Current tab as an index into [LibraNavDestination.values].
   int currentTab = 0;
@@ -163,6 +164,11 @@ class LibraAppState extends ChangeNotifier {
     final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
     await textFile.saveTo(result.path);
     return result.path;
+  }
+
+  Future<bool> userConfirmOverwrite() async {
+    print('hi!');
+    return false;
   }
 }
 

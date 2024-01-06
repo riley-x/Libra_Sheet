@@ -33,6 +33,7 @@ Future<void> main() async {
 
   /// Drive
   await GoogleDrive().init();
+  GoogleDrive.userConfirmOverwrite = state.userConfirmOverwrite;
 
   runApp(LibraApp(state));
 }
@@ -59,6 +60,7 @@ class LibraApp extends StatelessWidget {
         final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
         return MaterialApp(
           navigatorKey: context.read<LibraAppState>().navigatorKey,
+          scaffoldMessengerKey: context.read<LibraAppState>().scaffoldKey,
           title: 'Libra Sheet',
           theme: ThemeData(
             useMaterial3: true,
