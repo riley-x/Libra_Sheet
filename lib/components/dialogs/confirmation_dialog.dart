@@ -37,22 +37,22 @@ class ConfirmationDialog extends StatelessWidget {
   }
 }
 
-void showConfirmationDialog({
+Future<bool> showConfirmationDialog({
   required BuildContext context,
   String? title,
   String? msg,
   Function(bool confirmed)? onClose,
   Function()? onConfirmed,
   bool showCancel = true,
-}) {
-  showDialog(
+}) async {
+  final result = await showDialog(
     context: context,
     builder: (BuildContext context) {
       return ConfirmationDialog(title: title, msg: msg, showCancel: showCancel);
     },
-  ).then((msg) {
-    final confirmed = msg == 'Ok';
-    if (onClose != null) onClose(confirmed);
-    if (confirmed && onConfirmed != null) onConfirmed();
-  });
+  );
+  final confirmed = result == 'Ok';
+  if (onClose != null) onClose(confirmed);
+  if (confirmed && onConfirmed != null) onConfirmed();
+  return confirmed;
 }

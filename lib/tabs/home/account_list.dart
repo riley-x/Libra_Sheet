@@ -18,6 +18,16 @@ class AccountList extends StatelessWidget {
   Widget build(BuildContext context) {
     final accounts = context.watch<AccountState>().list;
 
+    // TODO maybe a splash screen and auto redirect
+    if (accounts.isEmpty) {
+      return const Center(
+        child: Text(
+          'Welcome to Libra Sheet!\nPlease add an account in the Settings tab to get started.',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
     List<Widget> accountSection(AccountType type) {
       final accs = [];
       var sum = 0;

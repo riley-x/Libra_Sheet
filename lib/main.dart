@@ -60,7 +60,6 @@ class LibraApp extends StatelessWidget {
         final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
         return MaterialApp(
           navigatorKey: context.read<LibraAppState>().navigatorKey,
-          scaffoldMessengerKey: context.read<LibraAppState>().scaffoldKey,
           title: 'Libra Sheet',
           theme: ThemeData(
             useMaterial3: true,
@@ -85,6 +84,7 @@ class LibraHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
+        key: context.read<LibraAppState>().scaffoldKey,
         body: Row(
           children: [
             SafeArea(

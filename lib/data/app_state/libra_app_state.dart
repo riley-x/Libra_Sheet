@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/app_state/rule_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
@@ -166,9 +167,14 @@ class LibraAppState extends ChangeNotifier {
     return result.path;
   }
 
-  Future<bool> userConfirmOverwrite() async {
-    print('hi!');
-    return false;
+  FutureOr<bool> userConfirmOverwrite() {
+    final context = scaffoldKey.currentContext;
+    if (context == null || !context.mounted) return false;
+    return showConfirmationDialog(
+      context: context,
+      title: 'Google Drive Sync',
+      msg: 'A newer database file exists on Google drive. Overwrite the current database file?',
+    );
   }
 }
 

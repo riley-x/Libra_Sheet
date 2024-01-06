@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis_auth/auth_io.dart';
@@ -29,7 +31,7 @@ class GoogleDrive extends ChangeNotifier {
   //-------------------------------------------------------------------------------------
   static ClientId clientId = _desktopClientId;
   static AccessCredentials? credentials;
-  static Future<bool> Function()? userConfirmOverwrite;
+  static FutureOr<bool> Function()? userConfirmOverwrite;
 
   static Client? _baseClient;
   static AutoRefreshingAuthClient? _httpClient;
@@ -64,7 +66,7 @@ class GoogleDrive extends ChangeNotifier {
     }
 
     // TODO load this from persist
-    active = true;
+    active = false;
 
     sync();
   }
@@ -77,6 +79,7 @@ class GoogleDrive extends ChangeNotifier {
 
   void enable() {
     active = true;
+    // TODO save this to persist
     sync();
   }
 
@@ -140,6 +143,7 @@ class GoogleDrive extends ChangeNotifier {
       case GoogleDriveSyncStatus.driveAhead:
         // Replace local file with cloud file after user confirmation.
         if (await userConfirmOverwrite?.call() ?? false) {
+          // TODO close and reopen database
           await downloadFile(_api!, driveFile!.id!, localPath);
           lastLocalUpdateTime = driveFile!.modifiedTime!;
         }

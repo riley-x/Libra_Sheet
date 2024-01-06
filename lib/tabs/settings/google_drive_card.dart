@@ -20,6 +20,7 @@ class GoogleDriveCard extends StatelessWidget {
           } else {
             await drive.promptUserConsent();
           }
+          // TODO add way to change account
           print(GoogleDrive.driveFile?.modifiedTime);
           print(GoogleDrive.lastLocalUpdateTime);
         },
