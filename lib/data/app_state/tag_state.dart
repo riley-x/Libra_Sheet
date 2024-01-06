@@ -19,6 +19,7 @@ class TagState {
   // Modification Functions
   //----------------------------------------------------------------------------
   Future<void> load() async {
+    list.clear();
     list.addAll(await LibraDatabase.db.getAllTags());
     appState.notifyListeners();
   }

@@ -16,6 +16,16 @@ enum GoogleDriveSyncStatus {
   upToDate,
 }
 
+class OverwriteFileCallback {
+  final FutureOr<bool> Function()? confirmOverwrite;
+  final Function()? onReplaced;
+
+  OverwriteFileCallback({
+    required this.confirmOverwrite,
+    required this.onReplaced,
+  });
+}
+
 /// FYI can't use GoogleSignIn package, at least on Macs because it requires using an entitlement
 /// that can only be used by code-signed apps.
 class GoogleDrive extends ChangeNotifier {
@@ -31,7 +41,7 @@ class GoogleDrive extends ChangeNotifier {
   //-------------------------------------------------------------------------------------
   static ClientId clientId = _desktopClientId;
   static AccessCredentials? credentials;
-  static FutureOr<bool> Function()? userConfirmOverwrite;
+  static OverwriteFileCallback? overwriteFileCallback;
 
   static Client? _baseClient;
   static AutoRefreshingAuthClient? _httpClient;
@@ -142,10 +152,14 @@ class GoogleDrive extends ChangeNotifier {
         await fetchDriveFile();
       case GoogleDriveSyncStatus.driveAhead:
         // Replace local file with cloud file after user confirmation.
-        if (await userConfirmOverwrite?.call() ?? false) {
-          // TODO close and reopen database
-          await downloadFile(_api!, driveFile!.id!, localPath);
+        if (await overwriteFileCallback?.confirmOverwrite?.call() ?? false) {
+          final tempFile = await downloadFile(_api!, driveFile!.id!, "${localPath}_temp");
           lastLocalUpdateTime = driveFile!.modifiedTime!;
+          await LibraDatabase.close();
+          await tempFile.copy(localPath);
+          tempFile.delete();
+          await LibraDatabase.open();
+          await overwriteFileCallback?.onReplaced?.call();
         }
       default:
     }
@@ -231,12 +245,14 @@ Future<File> updateFile(DriveApi api, String localPath, String objectId) async {
 
 /// This will replace the local file at [filename] with the downloaded file. Pass the Google Drive
 /// [objectId] to identify the file.
-Future<void> downloadFile(DriveApi api, String objectId, String filename) async {
-  final file = await api.files.get(objectId, downloadOptions: DownloadOptions.fullMedia) as Media;
-  final stream = io.File(filename).openWrite();
-  await stream.addStream(file.stream);
+Future<io.File> downloadFile(DriveApi api, String objectId, String filename) async {
+  final media = await api.files.get(objectId, downloadOptions: DownloadOptions.fullMedia) as Media;
+  final file = io.File(filename);
+  final stream = file.openWrite();
+  await stream.addStream(media.stream);
   stream.close();
   debugPrint("downloadFile() downloaded $objectId to $filename");
+  return file;
 }
 
 /// Returns a drive file pointer for the most recent file on the drive. Since we use the

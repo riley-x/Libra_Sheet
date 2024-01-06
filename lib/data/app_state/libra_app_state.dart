@@ -176,6 +176,11 @@ class LibraAppState extends ChangeNotifier {
       msg: 'A newer database file exists on Google drive. Overwrite the current database file?',
     );
   }
+
+  void onDatabaseReplaced() async {
+    await init();
+    transactions.notifyListeners();
+  }
 }
 
 List<DateTime> _getDefaultMonths() {

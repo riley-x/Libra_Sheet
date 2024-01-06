@@ -24,6 +24,8 @@ class CategoryState {
   // Loading
   //----------------------------------------------------------------------------
   Future<void> load() async {
+    income.subCats.clear();
+    expense.subCats.clear();
     await libraDatabase?.transaction((txn) async {
       await loadChildCategories(txn, income);
       await loadChildCategories(txn, expense);

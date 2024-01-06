@@ -33,7 +33,10 @@ Future<void> main() async {
 
   /// Drive
   await GoogleDrive().init();
-  GoogleDrive.userConfirmOverwrite = state.userConfirmOverwrite;
+  GoogleDrive.overwriteFileCallback = OverwriteFileCallback(
+    confirmOverwrite: state.userConfirmOverwrite,
+    onReplaced: state.onDatabaseReplaced,
+  );
 
   runApp(LibraApp(state));
 }

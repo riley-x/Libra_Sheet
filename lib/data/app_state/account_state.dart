@@ -18,9 +18,10 @@ class AccountState extends ChangeNotifier {
 
   final List<Account> list = [];
 
-  /// Initial load of accounts from the database. DO NOT replace objects!
+  /// Initial load of accounts from the database. DO NOT replace objects other than a complete app
+  /// restart!
   Future<void> load() async {
-    assert(list.isEmpty);
+    list.clear();
     list.addAll(await db.getAccounts());
     if (!kReleaseMode) {
       for (final acc in list) {

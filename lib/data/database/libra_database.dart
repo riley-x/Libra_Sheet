@@ -34,13 +34,19 @@ class LibraDatabase {
   //-------------------------------------------------------------------------------------
   // Members
   //-------------------------------------------------------------------------------------
-  static Database? _database;
+  static Database? database;
   static Function(dynamic)? errorCallback;
 
   @Deprecated("Use read() or update() instead")
   static Database get db {
-    if (_database == null) throw StateError("Database not initialized");
-    return _database!;
+    if (database == null) throw StateError("Database not initialized");
+    return database!;
+  }
+
+  static Future<void> close() async {
+    database?.close();
+    database = null;
+    libraDatabase = null;
   }
 
   static Future<void> sync() async {
@@ -48,14 +54,14 @@ class LibraDatabase {
   }
 
   static Future<bool> isEmpty() async {
-    if (_database == null) return true;
-    return await _database!.countAccounts() == 0;
+    if (database == null) return true;
+    return await database!.countAccounts() == 0;
   }
 
   static Future<void> read(Future Function(Database db) callback) async {
     try {
-      if (_database == null) throw StateError("Database not initialized");
-      await callback(_database!);
+      if (database == null) throw StateError("Database not initialized");
+      await callback(database!);
     } catch (e) {
       debugPrint("LibraDatabase::read() caught $e");
       errorCallback?.call(e);
@@ -64,8 +70,8 @@ class LibraDatabase {
 
   static Future<void> update(Future Function(Database db) callback) async {
     try {
-      if (_database == null) throw StateError("Database not initialized");
-      await callback(_database!);
+      if (database == null) throw StateError("Database not initialized");
+      await callback(database!);
       sync();
     } catch (e) {
       debugPrint("LibraDatabase::update() caught $e");
@@ -75,8 +81,8 @@ class LibraDatabase {
 
   static Future<void> updateTransaction(Future Function(Transaction txn) callback) async {
     try {
-      if (_database == null) throw StateError("Database not initialized");
-      await _database!.transaction(callback);
+      if (database == null) throw StateError("Database not initialized");
+      await database!.transaction(callback);
       sync();
     } catch (e) {
       debugPrint("LibraDatabase::updateTransaction() caught $e");
@@ -90,7 +96,7 @@ class LibraDatabase {
   // Database setup
   //-------------------------------------------------------------------------------------
   static Future<String> getDatabasePath() async {
-    if (_database != null) return _database!.path;
+    if (database != null) return database!.path;
 
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
@@ -105,6 +111,17 @@ class LibraDatabase {
     }
   }
 
+  static Future<void> open() async {
+    final path = await getDatabasePath();
+    debugPrint('LibraDatabase::open() path=$path');
+    database = await openDatabase(
+      path,
+      onCreate: _createDatabase,
+      version: 14,
+    );
+    libraDatabase = database;
+  }
+
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
     if (Platform.isWindows || Platform.isLinux) {
@@ -112,23 +129,16 @@ class LibraDatabase {
       databaseFactory = databaseFactoryFfi;
     }
 
-    final path = await getDatabasePath();
-    debugPrint('LibraDatabase::init() path=$path');
-    _database = await openDatabase(
-      path,
-      onCreate: _createDatabase,
-      version: 14,
-    );
-    libraDatabase = _database;
+    await open();
   }
 
   static Future<void> backup() async {
-    if (_database == null) return;
+    if (database == null) return;
 
     _lastBackupTime = DateTime.now();
     final timestamp = _backupDateFormat.format(_lastBackupTime);
 
-    String origPath = _database!.path;
+    String origPath = database!.path;
     String newPath;
     if (origPath.endsWith('.db')) {
       newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp.db";
