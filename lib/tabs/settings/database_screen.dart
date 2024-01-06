@@ -20,7 +20,7 @@ class DatabaseScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: SelectableText(
-                LibraDatabase.database?.path ?? 'Error: Database failed to open',
+                LibraDatabase.databasePath,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

@@ -39,7 +39,7 @@ class GoogleDrive extends ChangeNotifier {
   }
 
   //-------------------------------------------------------------------------------------
-  // Credentials
+  // Members
   //-------------------------------------------------------------------------------------
   static ClientId clientId = _desktopClientId;
   static AccessCredentials? credentials;
@@ -58,8 +58,13 @@ class GoogleDrive extends ChangeNotifier {
   static DateTime lastLocalUpdateTime = DateTime(1970);
 
   /// GoogleDrive file pointer to the latest database file on Google Drive. If null, assume one
-  /// doesn't exist yet. This is set from [fetchDriveFile].
+  /// doesn't exist yet. This is set from [fetchDriveFile], and is used for both UI and determining
+  /// the sync status.
   static File? driveFile;
+
+  //-------------------------------------------------------------------------------------
+  // Init and enable
+  //-------------------------------------------------------------------------------------
 
   /// Initializes the service, loading credentials from persistent storage if needed. This should be
   /// called after [LibraDatabase.init].
@@ -67,7 +72,7 @@ class GoogleDrive extends ChangeNotifier {
     /// Initialize local update time with local file OS last modified time.
     /// Keep the default (1970) time when the database is empty (newly created) to always allow
     /// drive sync to override a new database file.
-    final localPath = await LibraDatabase.getDatabasePath();
+    final localPath = LibraDatabase.databasePath;
     if (!await LibraDatabase.isEmpty()) {
       lastLocalUpdateTime = await io.File(localPath).lastModified();
     }
@@ -76,7 +81,7 @@ class GoogleDrive extends ChangeNotifier {
     if (credentials != null) {
       _baseClient ??= Client(); // this needs to be closed by us
       _httpClient = autoRefreshingClient(clientId, credentials!, _baseClient!);
-      _httpClient!.credentialUpdates.listen(saveCredentials);
+      _httpClient!.credentialUpdates.listen(_saveCredentials);
       _api = DriveApi(_httpClient!);
     }
 
@@ -99,14 +104,19 @@ class GoogleDrive extends ChangeNotifier {
   Future<void> enable() async {
     active = true;
     // TODO save this to persist
-    notifyListeners();
-    if (_api == null) {
-      await promptUserConsent();
-    } else {
-      await sync();
-    }
+    if (_api == null) await promptUserConsent();
+    notifyListeners(); // so UI is responsive before the async functions
+    await sync();
   }
 
+  //-------------------------------------------------------------------------------------
+  // Status
+  //-------------------------------------------------------------------------------------
+
+  /// Compares the timestamps between the local state [lastLocalUpdateTime] and the cloud state
+  /// [driveFile.modifiedTime].
+  ///
+  /// This does not refresh [driveFile], call [fetchDriveFile] if needed.
   GoogleDriveSyncStatus status() {
     if (_httpClient == null || !active) {
       return GoogleDriveSyncStatus.noAuthentication;
@@ -122,24 +132,10 @@ class GoogleDrive extends ChangeNotifier {
     }
   }
 
-  static Future<void> saveCredentials(AccessCredentials newCredentials) async {
-    credentials = newCredentials;
-    debugPrint("saveCredentials() ${credentials!.toJson()}");
-    // TODO save this to persistent storage or something
-  }
-
+  /// Queries GoogleDrive to retrieve the file metadata, setting [driveFile].
   Future<void> fetchDriveFile() async {
     if (_api == null) return;
-
-    final newFile = await getMostRecentFile(_api!);
-    if (driveFile?.modifiedTime != null &&
-        newFile?.modifiedTime?.isBefore(driveFile!.modifiedTime!) == true) {
-      debugPrint("WARNING GoogleDrive::sync() somehow cloud file (${newFile?.modifiedTime}) "
-          "is older than in-memory pointer ${driveFile?.modifiedTime}");
-    } else {
-      driveFile = newFile;
-    }
-
+    driveFile = await getMostRecentFile(_api!);
     debugPrint("GoogleDrive::fetchDriveFile()\n"
         "\tdrive:${driveFile?.id} @ ${driveFile?.modifiedTime}\n"
         "\t${driveFile?.appProperties}\n"
@@ -147,6 +143,39 @@ class GoogleDrive extends ChangeNotifier {
     notifyListeners();
   }
 
+  //-------------------------------------------------------------------------------------
+  // Authorization
+  //-------------------------------------------------------------------------------------
+
+  /// Launches the user consent prompt flow, retrieving an authorized [_httpClient].
+  Future<void> promptUserConsent() async {
+    try {
+      _httpClient =
+          await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
+      _saveCredentials(_httpClient!.credentials);
+      _httpClient!.credentialUpdates.listen(_saveCredentials);
+      _api = DriveApi(_httpClient!);
+    } catch (e) {
+      debugPrint("GoogleDrive::promptUserConsent() caught $e");
+      LibraDatabase.errorCallback?.call(e);
+    }
+  }
+
+  /// We need to make sure new [AccessCredentials] are saved whenever they are generated by
+  /// [AutoRefreshingAuthClient].
+  static Future<void> _saveCredentials(AccessCredentials newCredentials) async {
+    credentials = newCredentials;
+    debugPrint("saveCredentials() ${credentials!.toJson()}");
+    // TODO save this to persistent storage or something
+  }
+
+  //-------------------------------------------------------------------------------------
+  // Sync
+  //-------------------------------------------------------------------------------------
+
+  /// This function uploads the local database file or downloads the cloud file when either
+  /// is ahead. Will call [fetchDriveFile] to get the most up-to-date file pointer.
+  ///
   /// WARNING! we have no way to check for divergent updates; the newer update will win and will
   /// replace the other, which may delete some changes if the history has diverged.
   Future<void> sync() async {
@@ -164,7 +193,7 @@ class GoogleDrive extends ChangeNotifier {
     if (_api == null) return;
     await fetchDriveFile();
 
-    final localPath = await LibraDatabase.getDatabasePath();
+    final localPath = LibraDatabase.databasePath;
     switch (status()) {
       case GoogleDriveSyncStatus.localAhead:
         if (driveFile == null || driveFile!.id == null) {
@@ -191,24 +220,6 @@ class GoogleDrive extends ChangeNotifier {
     }
 
     notifyListeners();
-  }
-
-  Future<void> promptUserConsent() async {
-    try {
-      _httpClient =
-          await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
-      saveCredentials(_httpClient!.credentials);
-      _httpClient!.credentialUpdates.listen(saveCredentials);
-      _api = DriveApi(_httpClient!);
-
-      // TODO save this to persistent
-      active = true;
-
-      await sync();
-    } catch (e) {
-      debugPrint("LibraDatabase::update() caught $e");
-      LibraDatabase.errorCallback?.call(e);
-    }
   }
 
   /// Calls [sync] but with a short delay to debounce back-to-back updates. This function uses

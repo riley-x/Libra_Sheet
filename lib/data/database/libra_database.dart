@@ -34,74 +34,26 @@ class LibraDatabase {
   //-------------------------------------------------------------------------------------
   // Members
   //-------------------------------------------------------------------------------------
-  static Database? database;
+  static late String databasePath;
+  static Database? _db;
   static Function(dynamic)? errorCallback;
 
   @Deprecated("Use read() or update() instead")
   static Database get db {
-    if (database == null) throw StateError("Database not initialized");
-    return database!;
-  }
-
-  static Future<void> close() async {
-    database?.close();
-    database = null;
-    libraDatabase = null;
-  }
-
-  static Future<void> sync() async {
-    try {
-      await GoogleDrive().logLocalUpdate();
-    } catch (e) {
-      debugPrint("LibraDatabase::update() caught $e");
-      errorCallback?.call(e);
-    }
+    if (_db == null) throw StateError("Database not initialized");
+    return _db!;
   }
 
   static Future<bool> isEmpty() async {
-    if (database == null) return true;
-    return await database!.countAccounts() == 0;
+    if (_db == null) return true;
+    return await _db!.countAccounts() == 0;
   }
-
-  static Future<void> read(Future Function(Database db) callback) async {
-    try {
-      if (database == null) throw StateError("Database not initialized");
-      await callback(database!);
-    } catch (e) {
-      debugPrint("LibraDatabase::read() caught $e");
-      errorCallback?.call(e);
-    }
-  }
-
-  static Future<void> update(Future Function(Database db) callback) async {
-    try {
-      if (database == null) throw StateError("Database not initialized");
-      await callback(database!);
-      sync();
-    } catch (e) {
-      debugPrint("LibraDatabase::update() caught $e");
-      errorCallback?.call(e);
-    }
-  }
-
-  static Future<void> updateTransaction(Future Function(Transaction txn) callback) async {
-    try {
-      if (database == null) throw StateError("Database not initialized");
-      await database!.transaction(callback);
-      sync();
-    } catch (e) {
-      debugPrint("LibraDatabase::updateTransaction() caught $e");
-      errorCallback?.call(e);
-    }
-  }
-
-  static DateTime _lastBackupTime = DateTime.now();
 
   //-------------------------------------------------------------------------------------
   // Database setup
   //-------------------------------------------------------------------------------------
-  static Future<String> getDatabasePath() async {
-    if (database != null) return database!.path;
+  static Future<String> _getDatabasePath() async {
+    if (_db != null) return _db!.path;
 
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
@@ -117,14 +69,12 @@ class LibraDatabase {
   }
 
   static Future<void> open() async {
-    final path = await getDatabasePath();
-    debugPrint('LibraDatabase::open() path=$path');
-    database = await openDatabase(
-      path,
+    _db = await openDatabase(
+      databasePath,
       onCreate: _createDatabase,
       version: 14,
     );
-    libraDatabase = database;
+    libraDatabase = _db;
   }
 
   static Future<void> init() async {
@@ -133,24 +83,78 @@ class LibraDatabase {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
-
+    databasePath = await _getDatabasePath();
+    debugPrint('LibraDatabase::init() path=$databasePath');
     await open();
   }
 
-  static Future<void> backup() async {
-    if (database == null) return;
+  static Future<void> close() async {
+    _db?.close();
+    _db = null;
+    libraDatabase = null;
+  }
 
+  //-------------------------------------------------------------------------------------
+  // Actions
+  //-------------------------------------------------------------------------------------
+
+  static Future<void> sync() async {
+    try {
+      await GoogleDrive().logLocalUpdate();
+    } catch (e) {
+      debugPrint("LibraDatabase::sync() caught $e");
+      errorCallback?.call(e);
+    }
+  }
+
+  static Future<void> read(Future Function(Database db) callback) async {
+    try {
+      if (_db == null) throw StateError("Database not initialized");
+      await callback(_db!);
+    } catch (e) {
+      debugPrint("LibraDatabase::read() caught $e");
+      errorCallback?.call(e);
+    }
+  }
+
+  static Future<void> update(Future Function(Database db) callback) async {
+    try {
+      if (_db == null) throw StateError("Database not initialized");
+      await callback(_db!);
+      sync();
+    } catch (e) {
+      debugPrint("LibraDatabase::update() caught $e");
+      errorCallback?.call(e);
+    }
+  }
+
+  static Future<void> updateTransaction(Future Function(Transaction txn) callback) async {
+    try {
+      if (_db == null) throw StateError("Database not initialized");
+      await _db!.transaction(callback);
+      sync();
+    } catch (e) {
+      debugPrint("LibraDatabase::updateTransaction() caught $e");
+      errorCallback?.call(e);
+    }
+  }
+
+  //-------------------------------------------------------------------------------------
+  // Backup
+  //-------------------------------------------------------------------------------------
+  static DateTime _lastBackupTime = DateTime.now();
+
+  static Future<void> backup() async {
     _lastBackupTime = DateTime.now();
     final timestamp = _backupDateFormat.format(_lastBackupTime);
 
-    String origPath = database!.path;
     String newPath;
-    if (origPath.endsWith('.db')) {
-      newPath = "${origPath.substring(0, origPath.length - 3)}_$timestamp.db";
+    if (databasePath.endsWith('.db')) {
+      newPath = "${databasePath.substring(0, databasePath.length - 3)}_$timestamp.db";
     } else {
-      newPath = "${origPath}_$timestamp";
+      newPath = "${databasePath}_$timestamp";
     }
-    await File(origPath).copy(newPath);
+    await File(databasePath).copy(newPath);
     debugPrint("LibraDatabase::backup() Backed up to $newPath");
   }
 

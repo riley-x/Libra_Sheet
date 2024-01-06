@@ -135,10 +135,8 @@ class GoogleDriveSwitch extends StatelessWidget {
       onChanged: (it) async {
         if (drive.active) {
           drive.disable();
-        } else if (drive.isAuthorized) {
-          drive.enable();
         } else {
-          await drive.promptUserConsent();
+          await drive.enable();
         }
       },
     );
