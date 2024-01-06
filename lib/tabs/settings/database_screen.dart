@@ -10,7 +10,7 @@ class DatabaseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,9 +43,14 @@ class DatabaseScreen extends StatelessWidget {
               const GoogleDriveSwitch(),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           // TODO add way to change account
           const GoogleDriveCard(),
+          const SizedBox(height: 10),
+          const Text(
+              'On the first sync, a file "libra_sheet.db" will be created in your "My Drive" folder. '
+              'Feel free to move it afterwards though. Warning: if you upload a database file manually, '
+              'the app will not have permissions to sync with it.'),
           const SizedBox(height: 40),
           Align(
             alignment: Alignment.centerLeft,
