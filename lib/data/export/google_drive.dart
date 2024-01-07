@@ -1,13 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart';
 
 import 'dart:io' as io;
+
+const _gdriveCredentialsPrefKey = 'gdrive_credentials';
+const _gdriveSyncActivePrefKey = 'gdrive_sync_active';
 
 enum GoogleDriveSyncStatus {
   disabled,
@@ -93,32 +98,39 @@ class GoogleDrive extends ChangeNotifier {
     }
 
     /// Load saved credentials
-    if (credentials != null) {
+    final prefs = await SharedPreferences.getInstance();
+    active = prefs.getBool(_gdriveSyncActivePrefKey) ?? false;
+
+    final json = prefs.getString(_gdriveCredentialsPrefKey);
+    if (json != null) {
+      debugPrint('GoogleDrive::init() saved credentials: $json');
+      credentials = AccessCredentials.fromJson(jsonDecode(json));
       _baseClient ??= Client(); // this needs to be closed by us
       _httpClient = autoRefreshingClient(clientId, credentials!, _baseClient!);
       _httpClient!.credentialUpdates.listen(_saveCredentials);
       _api = DriveApi(_httpClient!);
     }
-
-    // TODO load this from persist
-    active = false;
-
     sync();
+  }
+
+  Future<void> _saveActive(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_gdriveSyncActivePrefKey, value);
   }
 
   /// Cancel syncing. We don't remove the credentials so that we can easily re-enable syncing without
   /// going through the user consent flow again.
   void disable() {
     active = false;
+    _saveActive(false);
     notifyListeners();
-    // TODO save this to persist
   }
 
   /// Enable or re-enable syncing. If an active authorized client exists, will continue using that.
   /// Otherwise prompts for user consent.
   Future<void> enable() async {
     active = true;
-    // TODO save this to persist
+    _saveActive(true);
     if (_api == null) await promptUserConsent();
     notifyListeners(); // so UI is responsive before the async functions
     await sync();
@@ -180,8 +192,9 @@ class GoogleDrive extends ChangeNotifier {
   /// [AutoRefreshingAuthClient].
   static Future<void> _saveCredentials(AccessCredentials newCredentials) async {
     credentials = newCredentials;
-    debugPrint("saveCredentials() ${credentials!.toJson()}");
-    // TODO save this to persistent storage or something
+    debugPrint("_saveCredentials() ${credentials!.toJson()}");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_gdriveCredentialsPrefKey, jsonEncode(credentials!.toJson()));
   }
 
   //-------------------------------------------------------------------------------------

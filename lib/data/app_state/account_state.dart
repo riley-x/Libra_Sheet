@@ -23,11 +23,7 @@ class AccountState extends ChangeNotifier {
   Future<void> load() async {
     list.clear();
     list.addAll(await db.getAccounts());
-    if (!kReleaseMode) {
-      for (final acc in list) {
-        debugPrint("AccountState::load() ${acc.dump()}");
-      }
-    }
+    debugPrint("AccountState::load() Loaded ${list.length} accounts");
     notifyListeners();
   }
 

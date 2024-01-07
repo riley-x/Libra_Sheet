@@ -42,7 +42,6 @@ class LibraAppState extends ChangeNotifier {
   ///
   /// Warning, this can be called again on a database replacement.
   Future<void> init() async {
-    /// Load account, categories
     var futures = <Future>[];
     futures.add(accounts.load());
     futures.add(categories.load());
@@ -108,7 +107,8 @@ class LibraAppState extends ChangeNotifier {
         month++;
       }
     }
-    debugPrint("LibraAppState::_loadMonths() $monthList");
+    debugPrint("LibraAppState::_loadMonths() Loaded ${monthList.length} months "
+        "between $earliestMonth and $now");
   }
 
   /// Warning this data contains dates using the local time zone because that's what the syncfusion
