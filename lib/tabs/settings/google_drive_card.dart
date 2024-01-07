@@ -58,11 +58,10 @@ class GoogleDriveCard extends StatelessWidget {
                   if (status != GoogleDriveSyncStatus.disabled) ...[
                     _FieldRow(
                       'Drive ID:',
-                      '${GoogleDrive.driveFile?.id}',
-                      url: GoogleDrive.driveFile?.webViewLink,
+                      '${GoogleDrive().driveFile?.id}',
+                      url: GoogleDrive().driveFile?.webViewLink,
                     ),
-                    _FieldRow(
-                        'Drive Timestamp:', '${GoogleDrive.driveFile?.modifiedTime?.toLocal()}'),
+                    _FieldRow('Drive Timestamp:', '${GoogleDrive().getDriveTime()?.toLocal()}'),
                     _FieldRow(
                         'Device Timestamp:', '${GoogleDrive().lastLocalUpdateTime.toLocal()}'),
                   ]

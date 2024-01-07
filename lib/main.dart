@@ -15,7 +15,6 @@ import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/tabs/transaction/transaction_tab.dart';
 import 'package:libra_sheet/theme/text_theme.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   /// Disable debugPrint() in release mode

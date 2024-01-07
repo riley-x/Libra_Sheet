@@ -14,6 +14,9 @@ import 'dart:io' as io;
 const _gdriveCredentialsPrefKey = 'gdrive_credentials';
 const _gdriveSyncActivePrefKey = 'gdrive_sync_active';
 
+// ignore: constant_identifier_names
+const _driveFileProperty_lastModified = 'dbTime';
+
 enum GoogleDriveSyncStatus {
   disabled,
   localAhead,
@@ -75,7 +78,12 @@ class GoogleDrive extends ChangeNotifier {
   /// GoogleDrive file pointer to the latest database file on Google Drive. If null, assume one
   /// doesn't exist yet. This is set from [fetchDriveFile], and is used for both UI and determining
   /// the sync status.
-  static File? driveFile;
+  File? driveFile;
+  DateTime? getDriveTime() {
+    final time = driveFile?.appProperties?[_driveFileProperty_lastModified];
+    if (time != null) return DateTime.tryParse(time);
+    return null;
+  }
 
   //-------------------------------------------------------------------------------------
   // Init and enable
@@ -141,18 +149,16 @@ class GoogleDrive extends ChangeNotifier {
   //-------------------------------------------------------------------------------------
 
   /// Compares the timestamps between the local state [lastLocalUpdateTime] and the cloud state
-  /// [driveFile.modifiedTime].
+  /// [driveFile] via [getDriveTime].
   ///
   /// This does not refresh [driveFile], call [fetchDriveFile] if needed.
   GoogleDriveSyncStatus status() {
+    final driveTime = getDriveTime();
     if (_httpClient == null || !active) {
       return GoogleDriveSyncStatus.disabled;
-    } else if (driveFile == null ||
-        driveFile!.modifiedTime == null ||
-        lastLocalUpdateTime.isAfter(driveFile!.modifiedTime!)) {
+    } else if (driveTime == null || lastLocalUpdateTime.isAfter(driveTime)) {
       return GoogleDriveSyncStatus.localAhead;
-    } else if (driveFile!.modifiedTime!
-        .isAfter(lastLocalUpdateTime.add(const Duration(seconds: 30)))) {
+    } else if (driveTime.isAfter(lastLocalUpdateTime.add(const Duration(seconds: 30)))) {
       return GoogleDriveSyncStatus.driveAhead;
     } else {
       return GoogleDriveSyncStatus.upToDate;
@@ -162,11 +168,10 @@ class GoogleDrive extends ChangeNotifier {
   /// Queries GoogleDrive to retrieve the file metadata, setting [driveFile].
   Future<void> fetchDriveFile() async {
     if (_api == null) return;
-    driveFile = await getMostRecentFile(_api!);
+    driveFile = await _getMostRecentFile(_api!);
     debugPrint("GoogleDrive::fetchDriveFile()\n"
-        "\tdrive:${driveFile?.id} @ ${driveFile?.modifiedTime?.toLocal()}\n"
-        "\t${driveFile?.appProperties}\n"
-        "\tmemory:${lastLocalUpdateTime.toLocal()}");
+        "\tdrive:${driveFile?.id} @ ${getDriveTime()?.toLocal()}\n"
+        "\tlocal:${lastLocalUpdateTime.toLocal()}");
     notifyListeners();
   }
 
@@ -219,29 +224,37 @@ class GoogleDrive extends ChangeNotifier {
 
   Future<void> _sync() async {
     if (_api == null) return;
-    await fetchDriveFile();
 
+    /// Refresh both the drive and local times. This is important to overwrite the in-memory
+    /// placeholder time set by [logLocalUpdate].
+    await fetchDriveFile();
     final localPath = LibraDatabase.databasePath;
+    final localFile = io.File(localPath);
+    lastLocalUpdateTime = await localFile.lastModified();
+
+    /// Case on the status
     switch (status()) {
       case GoogleDriveSyncStatus.localAhead:
         if (driveFile == null || driveFile!.id == null) {
-          // set this again to make sure it's as close to the drive time as possible.
-          lastLocalUpdateTime = DateTime.now();
           await createFile(_api!, localPath, "libra_sheet.db");
         } else {
-          // set this again to make sure it's as close to the drive time as possible.
-          lastLocalUpdateTime = DateTime.now();
           await updateFile(_api!, localPath, driveFile!.id!);
         }
-        // the returned [File] objects from the above functions don't have
-        // a lot of the metadata set (and the $fields parameter didn't seem to work the same as in
-        // api.files.list), so just rerun the fetch.
+        // the returned [File] objects from the above functions don't have a lot of the metadata set
+        // (and the $fields parameter didn't seem to work the same as in api.files.list), so just
+        // rerun the fetch.
         await fetchDriveFile();
       case GoogleDriveSyncStatus.driveAhead:
         // Replace local file with cloud file after user confirmation.
         if (await overwriteFileCallback?.confirmOverwrite?.call() ?? false) {
           final tempFile = await downloadFile(_api!, driveFile!.id!, "${localPath}_temp");
-          lastLocalUpdateTime = driveFile!.modifiedTime!;
+
+          /// Note that the downloaded file's last modified time will be ahead of the drive time and
+          /// what is set here. The only problem this causes is that on the next app load, we will
+          /// think that drive is behind and reupload (which serves to update the drive time to again
+          /// match the local file's last modified time).
+          lastLocalUpdateTime = getDriveTime() ?? DateTime.now();
+
           await LibraDatabase.close();
           await LibraDatabase.backup();
           await tempFile.copy(localPath);
@@ -293,20 +306,14 @@ Future<void> _prompt(String url) async {
 /// This uploads a local [localPath] to Google Drive with a new [name]. Note that this function will
 /// not replace any older file, since Google Drive doesn't use [name] as an identifier. It will
 /// just create a new file with a new id.
-Future<File> createFile(
-  DriveApi api,
-  String localPath,
-  String name, {
-  Map<String, String?>? appProperties,
-}) async {
+Future<File> createFile(DriveApi api, String localPath, String name) async {
   final localFile = io.File(localPath);
+  final modifiedTime = await localFile.lastModified();
   final media = Media(localFile.openRead(), localFile.lengthSync());
   final driveFile = File()
     ..name = name
-    ..appProperties = appProperties;
-  final now = DateTime.now();
+    ..appProperties = {_driveFileProperty_lastModified: modifiedTime.toUtc().toString()};
   final out = await api.files.create(driveFile, uploadMedia: media);
-  out.modifiedTime = now;
   debugPrint('createFile() uploaded $localPath to id: ${out.id}');
   return out;
 }
@@ -315,18 +322,13 @@ Future<File> createFile(
 ///
 /// https://pub.dev/documentation/googleapis/12.0.0/drive_v3/FilesResource/update.html
 /// https://developers.google.com/drive/api/reference/rest/v3/files/update
-Future<File> updateFile(
-  DriveApi api,
-  String localPath,
-  String objectId, {
-  Map<String, String?>? appProperties,
-}) async {
+Future<File> updateFile(DriveApi api, String localPath, String objectId) async {
   final localFile = io.File(localPath);
+  final modifiedTime = await localFile.lastModified();
   final media = Media(localFile.openRead(), localFile.lengthSync());
-  final driveFile = File()..appProperties = appProperties;
-  final now = DateTime.now();
+  final driveFile = File()
+    ..appProperties = {_driveFileProperty_lastModified: modifiedTime.toUtc().toString()};
   final out = await api.files.update(driveFile, objectId, uploadMedia: media);
-  out.modifiedTime = now;
   debugPrint('updateFile() uploaded $localPath to id: ${out.id}');
   return out;
 }
@@ -343,13 +345,20 @@ Future<io.File> downloadFile(DriveApi api, String objectId, String filename) asy
   return file;
 }
 
-/// Returns a drive file pointer for the most recent file on the drive. Since we use the
-/// DriveApi.driveFileScope scope, this only lists the files that are created by Libra Sheet.
+DateTime? _getAppPropertyTime(File file) {
+  final time = file.appProperties?[_driveFileProperty_lastModified];
+  if (time != null) return DateTime.tryParse(time);
+  return null;
+}
+
+/// Returns a drive file pointer for the most recent file on the drive using the saved appProperty
+/// [_driveFileProperty_lastModified]. Since we use the DriveApi.driveFileScope scope, this only
+/// lists the files that are created by Libra Sheet.
 ///
 /// See also:
 /// https://developers.google.com/drive/api/guides/search-files
 /// https://pub.dev/documentation/googleapis/12.0.0/drive_v3/FilesResource/list.html
-Future<File?> getMostRecentFile(DriveApi api) async {
+Future<File?> _getMostRecentFile(DriveApi api) async {
   final response = await api.files.list(
     q: "trashed = false",
     $fields: "files(id, name, size, modifiedTime, webViewLink, appProperties)",
@@ -366,14 +375,20 @@ Future<File?> getMostRecentFile(DriveApi api) async {
 
   /// But we still do the loop formally
   File? mostRecentFile;
+  DateTime? mostRecentTime;
+
   if (response.files != null) {
     for (final file in response.files!) {
+      final time = _getAppPropertyTime(file);
+      debugPrint('GoogleDrive::getMostRecentFile()\n'
+          '\t${file.id} @ ${file.modifiedTime}\n'
+          '\t${file.appProperties}');
       if (mostRecentFile == null) {
         mostRecentFile = file;
-      } else if (file.modifiedTime != null &&
-          mostRecentFile.modifiedTime != null &&
-          mostRecentFile.modifiedTime!.isBefore(file.modifiedTime!)) {
+        mostRecentTime = time;
+      } else if (mostRecentTime != null && time != null && mostRecentTime.isBefore(time)) {
         mostRecentFile = file;
+        mostRecentTime = time;
       }
     }
   }
