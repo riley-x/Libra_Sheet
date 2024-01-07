@@ -17,6 +17,9 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/main.dart';
 import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+const _prefKeyDarkMode = 'dark_mode';
 
 class LibraAppState extends ChangeNotifier {
   late final CategoryState categories;
@@ -37,11 +40,17 @@ class LibraAppState extends ChangeNotifier {
   // Init
   //--------------------------------------------------------------------------------
 
+  Future<void> initPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    isDarkMode = prefs.getBool(_prefKeyDarkMode) ?? true;
+    if (!isDarkMode) colorScheme = libraLightColorScheme;
+  }
+
   /// Initializes all app state data from the database. Must be called after the database has been
   /// initialized.
   ///
   /// Warning, this can be called again on a database replacement.
-  Future<void> init() async {
+  Future<void> initData() async {
     var futures = <Future>[];
     futures.add(accounts.load());
     futures.add(categories.load());
@@ -69,7 +78,7 @@ class LibraAppState extends ChangeNotifier {
   ColorScheme colorScheme = libraDarkColorScheme;
   bool isDarkMode = true;
 
-  void toggleDarkMode() {
+  Future<void> toggleDarkMode() async {
     if (isDarkMode) {
       isDarkMode = false;
       colorScheme = libraLightColorScheme;
@@ -78,6 +87,9 @@ class LibraAppState extends ChangeNotifier {
       colorScheme = libraDarkColorScheme;
     }
     notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefKeyDarkMode, isDarkMode);
   }
 
   //--------------------------------------------------------------------------------
@@ -194,7 +206,7 @@ class LibraAppState extends ChangeNotifier {
     for (final nav in tabNavigatorKeys) {
       nav.currentState?.popUntil((route) => route.isFirst);
     }
-    await init();
+    await initData();
 
     final context = scaffoldKey.currentContext;
     if (context != null && context.mounted) {
