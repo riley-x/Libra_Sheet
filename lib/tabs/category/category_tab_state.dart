@@ -12,6 +12,7 @@ import 'package:libra_sheet/data/enums.dart';
 
 class CategoryTabState extends ChangeNotifier {
   final LibraAppState appState;
+  bool _disposed = false;
   CategoryTabState(this.appState) {
     appState.transactions.addListener(loadValues);
     loadValues();
@@ -19,8 +20,17 @@ class CategoryTabState extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     appState.transactions.removeListener(loadValues);
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      // can happen due to async gaps
+      super.notifyListeners();
+    }
   }
 
   //--------------------------------------------------------------------------
@@ -107,6 +117,7 @@ class CategoryTabState extends ChangeNotifier {
       end: endMonth.monthEnd(),
       accounts: accounts.map((e) => e.key),
     );
+    if (_disposed) return;
 
     /// Aggregate
     aggregateValues = Map.of(individualValues);

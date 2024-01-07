@@ -39,7 +39,41 @@ Future<void> main() async {
     ),
   );
 
-  runApp(LibraApp(state));
+  runApp(RestartWidget(LibraApp(state)));
+}
+
+/// https://stackoverflow.com/questions/50115311/how-to-force-a-flutter-application-restart-in-production-mode
+/// Note this DOESNT reset Navigator states, but does recreate the states in [ChangeNotifierProvider]
+/// constructed with the create argument.
+class RestartWidget extends StatefulWidget {
+  RestartWidget(this.child, {super.key});
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<RestartWidgetState>()?.restartApp();
+  }
+
+  @override
+  RestartWidgetState createState() => RestartWidgetState();
+}
+
+class RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
+    );
+  }
 }
 
 class LibraApp extends StatelessWidget {
@@ -63,7 +97,7 @@ class LibraApp extends StatelessWidget {
       builder: (context, child) {
         final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
         return MaterialApp(
-          navigatorKey: context.read<LibraAppState>().navigatorKey,
+          navigatorKey: context.read<LibraAppState>().appNavigatorKey,
           title: 'Libra Sheet',
           theme: ThemeData(
             useMaterial3: true,
@@ -133,6 +167,7 @@ class _Home extends StatelessWidget {
             // https://github.com/flutter/flutter/issues/114213
             excluding: i != currentTab,
             child: Navigator(
+              key: context.read<LibraAppState>().tabNavigatorKeys[i],
               onGenerateRoute: (settings) {
                 // This just generates a single default route, since we have no named routes
                 return NoAnimationRoute((context) => w);

@@ -35,11 +35,7 @@ class TransactionFilterState extends ChangeNotifier {
   //----------------------------------------------------------------------
   // Overrides
   //----------------------------------------------------------------------
-  /// This is necessary because the [TransactionFilterState] is often disposed when navigating between
-  /// different screent that use a [TransactionFilterGrid], so [notifyListeners] might be called
-  /// after being disposed.
-  ///
-  /// TODO this might just be because forgot to [removeListener]? Still needed?
+  /// The state can be disposed mid async functions, so we need to track it to make sure
   bool _disposed = false;
 
   @override

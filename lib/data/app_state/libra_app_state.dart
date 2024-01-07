@@ -14,6 +14,8 @@ import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/export/history_csv.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/main.dart';
+import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
 class LibraAppState extends ChangeNotifier {
@@ -122,7 +124,11 @@ class LibraAppState extends ChangeNotifier {
   //--------------------------------------------------------------------------------
   // Screen handling
   //--------------------------------------------------------------------------------
-  final navigatorKey = GlobalKey<NavigatorState>();
+  final appNavigatorKey = GlobalKey<NavigatorState>();
+  final tabNavigatorKeys = List.generate(
+    libraNavDestinations.length,
+    (index) => GlobalKey<NavigatorState>(),
+  );
   final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   /// Current tab as an index into [LibraNavDestination.values].
@@ -185,7 +191,17 @@ class LibraAppState extends ChangeNotifier {
   }
 
   void onDatabaseReplaced() async {
+    for (final nav in tabNavigatorKeys) {
+      nav.currentState?.popUntil((route) => route.isFirst);
+    }
     await init();
+
+    final context = scaffoldKey.currentContext;
+    if (context != null && context.mounted) {
+      // This only rebuilds the widget tree and therefore recreates the state of any
+      // ChangeNotifierProvider, but doesn't reset Navigator state.
+      RestartWidget.restartApp(context);
+    }
     transactions.notifyListeners();
   }
 }
