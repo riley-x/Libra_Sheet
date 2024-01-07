@@ -60,7 +60,7 @@ TODO
 
 ### Stateful widgets
 
-Be careful with Stateful widgets containing major state because an app rebuild using `RestartWidget`, i.e. when replacing the database file, will NOT reset the state of these widgets.
+Be careful with Stateful widgets containing major state because an app rebuild using `RestartWidget`, i.e. when replacing the database file, will NOT reset the state of these widgets. Make sure StatefulWidgets also override didUpdateWidget when necessary.
 
 TODO
 

@@ -203,6 +203,8 @@ class LibraAppState extends ChangeNotifier {
   }
 
   void onDatabaseReplaced() async {
+    /// All the navigation destinations are dependent on data objects, like transaction details
+    /// or account focus screen, so back out of all of them.
     for (final nav in tabNavigatorKeys) {
       nav.currentState?.popUntil((route) => route.isFirst);
     }
@@ -211,7 +213,7 @@ class LibraAppState extends ChangeNotifier {
     final context = scaffoldKey.currentContext;
     if (context != null && context.mounted) {
       // This only rebuilds the widget tree and therefore recreates the state of any
-      // ChangeNotifierProvider, but doesn't reset Navigator state.
+      // ChangeNotifierProvider, but doesn't reset StatefulWidget state.
       RestartWidget.restartApp(context);
     }
     transactions.notifyListeners();
