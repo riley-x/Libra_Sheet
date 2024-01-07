@@ -1,7 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+class GoogleDriveSection extends StatelessWidget {
+  const GoogleDriveSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<GoogleDrive>();
+    return Column(
+      children: [
+        const GoogleDriveTitle(),
+        const SizedBox(height: 5),
+        const GoogleDriveCard(),
+        if (state.active) ...[
+          const SizedBox(height: 2),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              InkWell(
+                onTap: GoogleDrive().promptUserConsent,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+                  child: Text(
+                    'Change account',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+          const SizedBox(height: 25),
+        ],
+        if (!state.active) const SizedBox(height: 40),
+      ],
+    );
+  }
+}
 
 class GoogleDriveCard extends StatelessWidget {
   const GoogleDriveCard({super.key});
@@ -139,6 +181,44 @@ class GoogleDriveSwitch extends StatelessWidget {
           await drive.enable();
         }
       },
+    );
+  }
+}
+
+class GoogleDriveTitle extends StatelessWidget {
+  const GoogleDriveTitle({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Google Drive Sync',
+            style: Theme.of(context).textTheme.titleLarge,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.info_outline),
+          onPressed: () {
+            showConfirmationDialog(
+              context: context,
+              title: 'Google Drive Sync',
+              msg: 'Automatically backup your data onto Google Drive!\n\n'
+                  'On the first sync, a file "libra_sheet.db" will be created in your "My Drive" folder. '
+                  'You can move the file somewhere else though.'
+                  '\n\nWarning: the app can not sync with any file that you upload manually.',
+              showCancel: false,
+            );
+          },
+        ),
+        const SizedBox(width: 5),
+        const GoogleDriveSwitch(),
+      ],
     );
   }
 }
