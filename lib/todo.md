@@ -16,7 +16,7 @@
 
 
 ## Refactor
-- Replace all database calls with extension (see tags.dart).
+- Replace all database calls with extension (see tags.dart) and new callback functions
 - Convert some appState stuff into independent ChangeNotifiers? Be careful with this though...like everything that 
   watches a transaction actually watches both account state and category state...
 

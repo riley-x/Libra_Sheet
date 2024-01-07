@@ -10,9 +10,6 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 /// watch this service, so that they can be notified when transactions are added or edited (which
 /// affects all value-based entities and, because of reimbursements, can affect all other
 /// transactions).
-///
-/// This service isn't meant to be used in the widget tree, although it is provided nonetheless to
-/// enable easy callbacks, usually via context.read().
 class TransactionService extends ChangeNotifier {
   final LibraAppState appState;
   TransactionService(this.appState);

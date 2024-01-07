@@ -32,7 +32,7 @@ We have several top-level states that are global (or declared in `main()` at lea
 - `TransactionsService`: does not actually store any state, but is the main interface class for anything affecting transactions. Objects that rely on transaction data should subscribe to this service to be notified of when to reload their data. Likewise, all actions affecting transactions MUST be interfaced through this service, which will call `notifyListeners` appropriately.
 
 
-### Top level for tabs
+#### For tabs
 
 These are `ChangeNotifier`s for the individual tabs provided at the same level as the ones above.
 
@@ -43,11 +43,18 @@ These are `ChangeNotifier`s for the individual tabs provided at the same level a
 
 ### Nested ChangeNotifiers
 
+- `AddCsvState`: Created for each `AddCsvScreen` added to `Navigator`s.
 - `TransactionFilterState`: one of these is created for each transaction list widget:
   - `AccountScreen`
   - `CategoryFocusScreen`
   - `ReimbursementEditor`
   - maybe more
+- Settings tab states:
+  - `EditAccountState`
+  - `EditCategoriesState`
+  - `EditTagsState`
+  - `EditRulesState`
+
 
 TODO
 
@@ -57,4 +64,4 @@ Be careful with Stateful widgets containing major state because an app rebuild u
 
 TODO
 
-- 
+- `SettingsTab`: simply stores the current tab open
