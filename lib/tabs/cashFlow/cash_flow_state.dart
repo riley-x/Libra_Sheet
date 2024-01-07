@@ -11,6 +11,7 @@ enum CashFlowType { categories, net }
 
 class CashFlowState extends fnd.ChangeNotifier {
   final LibraAppState appState;
+  bool _disposed = false;
 
   CashFlowState(this.appState) {
     appState.transactions.addListener(load);
@@ -19,6 +20,7 @@ class CashFlowState extends fnd.ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     appState.transactions.removeListener(load);
     super.dispose();
   }
@@ -47,6 +49,7 @@ class CashFlowState extends fnd.ChangeNotifier {
     final rawIncome = await LibraDatabase.db.getMonthlyNetIncome(
       accounts: accounts.map((e) => e.key),
     );
+    if (_disposed) return; // can happen due to async gap
 
     /// Accumulate to level = 1 categories
     incomeData = CategoryHistory(appState.monthList);

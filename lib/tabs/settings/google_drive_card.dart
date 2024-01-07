@@ -63,7 +63,8 @@ class GoogleDriveCard extends StatelessWidget {
                     ),
                     _FieldRow(
                         'Drive Timestamp:', '${GoogleDrive.driveFile?.modifiedTime?.toLocal()}'),
-                    _FieldRow('Device Timestamp:', '${GoogleDrive.lastLocalUpdateTime.toLocal()}'),
+                    _FieldRow(
+                        'Device Timestamp:', '${GoogleDrive().lastLocalUpdateTime.toLocal()}'),
                   ]
                 ],
               ),

@@ -65,7 +65,7 @@ class GoogleDrive extends ChangeNotifier {
   /// This is the last update time of the local database. It set by [LibraDatabase] everytime the
   /// database is accessed using [logLocalUpdate], and is used to debounce revision pushes when the
   /// user is actively doing things.
-  static DateTime lastLocalUpdateTime = DateTime(1970);
+  DateTime lastLocalUpdateTime = DateTime(1970);
 
   /// GoogleDrive file pointer to the latest database file on Google Drive. If null, assume one
   /// doesn't exist yet. This is set from [fetchDriveFile], and is used for both UI and determining
@@ -152,9 +152,9 @@ class GoogleDrive extends ChangeNotifier {
     if (_api == null) return;
     driveFile = await getMostRecentFile(_api!);
     debugPrint("GoogleDrive::fetchDriveFile()\n"
-        "\tdrive:${driveFile?.id} @ ${driveFile?.modifiedTime}\n"
+        "\tdrive:${driveFile?.id} @ ${driveFile?.modifiedTime?.toLocal()}\n"
         "\t${driveFile?.appProperties}\n"
-        "\tmemory:$lastLocalUpdateTime");
+        "\tmemory:${lastLocalUpdateTime.toLocal()}");
     notifyListeners();
   }
 
@@ -212,8 +212,12 @@ class GoogleDrive extends ChangeNotifier {
     switch (status()) {
       case GoogleDriveSyncStatus.localAhead:
         if (driveFile == null || driveFile!.id == null) {
+          // set this again to make sure it's as close to the drive time as possible.
+          lastLocalUpdateTime = DateTime.now();
           await createFile(_api!, localPath, "libra_sheet.db");
         } else {
+          // set this again to make sure it's as close to the drive time as possible.
+          lastLocalUpdateTime = DateTime.now();
           await updateFile(_api!, localPath, driveFile!.id!);
         }
         // the returned [File] objects from the above functions don't have
