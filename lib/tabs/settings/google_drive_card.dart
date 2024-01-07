@@ -81,7 +81,7 @@ class GoogleDriveCard extends StatelessWidget {
 }
 
 class _FieldRow extends StatelessWidget {
-  const _FieldRow(this.label, this.value, {super.key, this.url});
+  const _FieldRow(this.label, this.value, {this.url});
 
   final String label;
   final String value;

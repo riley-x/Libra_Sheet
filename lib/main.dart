@@ -47,7 +47,7 @@ Future<void> main() async {
 /// Note this DOESNT reset Navigator states, or any other Stateful widget state I think, but does
 /// recreate the states in [ChangeNotifierProvider] constructed with the create argument.
 class RestartWidget extends StatefulWidget {
-  RestartWidget(this.child, {super.key});
+  const RestartWidget(this.child, {super.key});
 
   final Widget child;
 
@@ -117,7 +117,7 @@ class LibraApp extends StatelessWidget {
 }
 
 class _NavBuilder extends StatelessWidget {
-  const _NavBuilder({super.key});
+  const _NavBuilder();
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +141,7 @@ class _NavBuilder extends StatelessWidget {
 }
 
 class _Home extends StatelessWidget {
-  const _Home({super.key});
+  const _Home();
 
   @override
   Widget build(BuildContext context) {
