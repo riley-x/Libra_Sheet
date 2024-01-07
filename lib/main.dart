@@ -43,8 +43,8 @@ Future<void> main() async {
 }
 
 /// https://stackoverflow.com/questions/50115311/how-to-force-a-flutter-application-restart-in-production-mode
-/// Note this DOESNT reset Navigator states, but does recreate the states in [ChangeNotifierProvider]
-/// constructed with the create argument.
+/// Note this DOESNT reset Navigator states, or any other Stateful widget state I think, but does
+/// recreate the states in [ChangeNotifierProvider] constructed with the create argument.
 class RestartWidget extends StatefulWidget {
   RestartWidget(this.child, {super.key});
 
@@ -110,13 +110,13 @@ class LibraApp extends StatelessWidget {
           home: child,
         );
       },
-      child: const LibraHomePage(),
+      child: const _NavBuilder(),
     );
   }
 }
 
-class LibraHomePage extends StatelessWidget {
-  const LibraHomePage({super.key});
+class _NavBuilder extends StatelessWidget {
+  const _NavBuilder({super.key});
 
   @override
   Widget build(BuildContext context) {
