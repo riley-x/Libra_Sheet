@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/cards/allocation_card.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
+import 'package:libra_sheet/components/cards/transaction_card.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
-import 'package:libra_sheet/components/cards/reimbursement_card.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/components/menus/account_selection_menu.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
@@ -24,6 +26,9 @@ class TransactionDetailsEditor extends StatelessWidget {
   const TransactionDetailsEditor({super.key, this.onCancel});
 
   final Function()? onCancel;
+
+  static const maxWidth = 600.0;
+  static const horizontalPadding = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +54,9 @@ class TransactionDetailsEditor extends StatelessWidget {
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       child: SizedBox(
-        width: 600,
+        width: maxWidth,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: horizontalPadding),
           child: FocusScope(
             child: Form(
               key: state.formKey,
@@ -225,10 +230,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                   ),
                   for (final r in state.reimbursements) ...[
                     const SizedBox(height: 6),
-                    ReimbursementCard2(
-                      reimbursement: r,
-                      onTap: (it) => state.focusReimbursement(it),
-                    ),
+                    _ReimbursementRow(r, onTap: (it) => state.focusReimbursement(it)),
                   ],
 
                   /// --------------------------------------------------
@@ -248,7 +250,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                   const SizedBox(height: 10),
                   if (state.errorMessage != null)
                     SizedBox(
-                      width: 300,
+                      width: maxWidth - 100,
                       child: Text(
                         state.errorMessage!,
                         style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -369,6 +371,36 @@ class _TagSelector extends StatelessWidget {
           ),
           isChecked: (it) => tags.contains(it),
           onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _ReimbursementRow extends StatelessWidget {
+  const _ReimbursementRow(this.reimbursement, {this.onTap});
+
+  final Reimbursement reimbursement;
+  final Function(Reimbursement?)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 100,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(reimbursement.value.dollarString()),
+          ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: TransactionCard(
+            margin: EdgeInsets.zero,
+            trans: reimbursement.target,
+            onSelect: (onTap == null) ? null : (it) => onTap!.call(reimbursement),
+          ),
         ),
       ],
     );
