@@ -128,14 +128,16 @@ class LibraDatabase {
     }
   }
 
-  static Future<void> update(Future Function(Database db) callback) async {
+  static Future<T?> update<T>(Future<T> Function(Database db) callback) async {
     try {
       if (_db == null) throw StateError("Database not initialized");
-      await callback(_db!);
+      final out = await callback(_db!);
       sync();
+      return out;
     } catch (e) {
       debugPrint("LibraDatabase::update() caught $e");
       errorCallback?.call(e);
+      return null;
     }
   }
 

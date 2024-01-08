@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/objects/transaction.dart' as lt;
 import 'package:sqflite/sqlite_api.dart';
@@ -55,7 +54,7 @@ Tag _fromMap(Map<String, dynamic> map) {
   );
 }
 
-extension Tags on DatabaseExecutor {
+extension TagsDatabaseExtension on DatabaseExecutor {
   Future<int> insertTag(Tag tag) {
     return insert(
       tagsTable,
@@ -69,23 +68,6 @@ extension Tags on DatabaseExecutor {
       tagsTable,
       _toMap(tag),
       where: '$_key = ?',
-      whereArgs: [tag.key],
-    );
-  }
-
-  Future<void> deleteTag(Tag tag) async {
-    if (this is Database) {
-      (this as Database).transaction((txn) => txn.deleteTag(tag));
-      return;
-    }
-    await delete(
-      tagsTable,
-      where: '$_key = ?',
-      whereArgs: [tag.key],
-    );
-    await delete(
-      tagJoinTable,
-      where: "tag_id = ?",
       whereArgs: [tag.key],
     );
   }
@@ -124,6 +106,21 @@ extension Tags on DatabaseExecutor {
       tagJoinTable,
       where: "transaction_id = ?",
       whereArgs: [trans.key],
+    );
+  }
+}
+
+extension TagsTransactionExtension on Transaction {
+  Future<void> deleteTag(Tag tag) async {
+    await delete(
+      tagsTable,
+      where: '$_key = ?',
+      whereArgs: [tag.key],
+    );
+    await delete(
+      tagJoinTable,
+      where: "tag_id = ?",
+      whereArgs: [tag.key],
     );
   }
 }
