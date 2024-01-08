@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -23,17 +24,17 @@ class RuleState {
   //----------------------------------------------------------------------------
   Future<void> load() async {
     final map = appState.categories.createKeyMap();
-    final incomeRules = await getRules(ExpenseType.income, map);
-    final expenseRules = await getRules(ExpenseType.expense, map);
+    final incomeRules = await LibraDatabase.read((db) => db.getRules(ExpenseType.income, map));
+    final expenseRules = await LibraDatabase.read((db) => db.getRules(ExpenseType.expense, map));
 
     // Doing this forces the order of the rules in each map to align with the category order
     income = {for (final cat in map.values) cat: []};
     expense = {for (final cat in map.values) cat: []};
-    for (final rule in incomeRules) {
+    for (final rule in incomeRules ?? []) {
       if (rule.category == null) continue;
       income[rule.category!]?.add(rule);
     }
-    for (final rule in expenseRules) {
+    for (final rule in expenseRules ?? []) {
       if (rule.category == null) continue;
       expense[rule.category!]?.add(rule);
     }
@@ -44,19 +45,25 @@ class RuleState {
   Future<void> add(CategoryRule rule) async {
     debugPrint("RuleState::add() $rule");
     if (rule.category == null) return;
-    final map = (rule.type == ExpenseType.income) ? income : expense;
-    int key = await insertRule(rule, listIndex: 0);
-    rule = rule.copyWith(key: key);
-    map[rule.category!]?.add(rule);
-    appState.notifyListeners();
+
+    final key = await LibraDatabase.update((db) => db.insertRule(rule));
+    if (key != null) {
+      rule = rule.copyWith(key: key);
+      final map = (rule.type == ExpenseType.income) ? income : expense;
+      map[rule.category!]?.add(rule);
+      appState.notifyListeners();
+    }
   }
 
   Future<void> delete(CategoryRule rule) async {
     debugPrint("RuleState::delete() $rule");
     if (rule.category == null) return;
+
     final map = (rule.type == ExpenseType.income) ? income : expense;
     map[rule.category!]?.removeWhere((it) => it.key == rule.key);
     appState.notifyListeners();
+
+    await LibraDatabase.update((db) => db.deleteRule(rule));
   }
 
   /// The rule members are modified in place already. This function serves to move the rule if the
@@ -70,9 +77,9 @@ class RuleState {
       if (originalCategory != null) map[originalCategory]?.removeWhere((it) => it.key == rule.key);
       map[rule.category!]?.add(rule);
     }
-
     appState.notifyListeners();
-    await updateRule(rule);
+
+    await LibraDatabase.update((db) => db.updateRule(rule));
   }
 
   //----------------------------------------------------------------------------

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/category_rule.dart';
@@ -52,69 +51,57 @@ CategoryRule? _fromMap(Map<String, dynamic> map, Map<int, Category> categoryMap,
   );
 }
 
-Future<int> insertRule(CategoryRule rule, {required int listIndex}) async {
-  if (libraDatabase == null) return 0;
-  return libraDatabase!.insert(
-    rulesTable,
-    _toMap(rule, listIndex),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-}
-
-Future<int> updateRule(CategoryRule rule, {int? listIndex, DatabaseExecutor? db}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.update(
-    rulesTable,
-    _toMap(rule, listIndex),
-    where: '$_key = ?',
-    whereArgs: [rule.key],
-  );
-}
-
-Future<int> deleteRule(CategoryRule rule, {DatabaseExecutor? db}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.delete(
-    rulesTable,
-    where: '$_key = ?',
-    whereArgs: [rule.key],
-  );
-}
-
-Future<List<CategoryRule>> getRules(ExpenseType type, Map<int, Category> categoryMap) async {
-  final List<Map<String, dynamic>> maps = await libraDatabase!.query(
-    rulesTable,
-    where: '$_type = ?',
-    whereArgs: [type.name],
-    orderBy: _pattern,
-  );
-  final out = <CategoryRule>[];
-  for (final map in maps) {
-    final r = _fromMap(map, categoryMap, type);
-    if (r != null) out.add(r);
-  }
-  return out;
-}
-
-Future<int> shiftRuleIndicies(
-  ExpenseType type,
-  int start,
-  int end,
-  int delta, {
-  DatabaseExecutor? db,
-}) async {
-  db = db ?? libraDatabase;
-  if (db == null) return 0;
-  return db.rawUpdate(
-    "UPDATE $rulesTable "
-    "SET $_index = $_index + ? "
-    "WHERE $_type = ? AND $_index >= ? AND $_index < ?",
-    [delta, type.name, start, end],
-  );
-}
-
 extension RuleDatabaseExtension on DatabaseExecutor {
+  Future<int> insertRule(CategoryRule rule, {int listIndex = 0}) {
+    return insert(
+      rulesTable,
+      _toMap(rule, listIndex),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<int> updateRule(CategoryRule rule, {int? listIndex}) {
+    return update(
+      rulesTable,
+      _toMap(rule, listIndex),
+      where: '$_key = ?',
+      whereArgs: [rule.key],
+    );
+  }
+
+  Future<int> deleteRule(CategoryRule rule) {
+    return delete(
+      rulesTable,
+      where: '$_key = ?',
+      whereArgs: [rule.key],
+    );
+  }
+
+  Future<List<CategoryRule>> getRules(ExpenseType type, Map<int, Category> categoryMap) async {
+    final List<Map<String, dynamic>> maps = await query(
+      rulesTable,
+      where: '$_type = ?',
+      whereArgs: [type.name],
+      orderBy: _pattern,
+    );
+    final out = <CategoryRule>[];
+    for (final map in maps) {
+      final r = _fromMap(map, categoryMap, type);
+      if (r != null) out.add(r);
+    }
+    return out;
+  }
+
+  @Deprecated("Rule list order is no longer used or relevant")
+  Future<int> shiftRuleIndicies(ExpenseType type, int start, int end, int delta) {
+    return rawUpdate(
+      "UPDATE $rulesTable "
+      "SET $_index = $_index + ? "
+      "WHERE $_type = ? AND $_index >= ? AND $_index < ?",
+      [delta, type.name, start, end],
+    );
+  }
+
   Future<int> deleteRulesWithCategory(int categoryId) {
     return delete(
       rulesTable,

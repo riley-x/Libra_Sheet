@@ -16,9 +16,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-@Deprecated("Replace with LibraDatabase functions")
-Database? libraDatabase;
-
 final _backupDateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
 
 class LibraDatabase {
@@ -74,7 +71,6 @@ class LibraDatabase {
       onCreate: _createDatabase,
       version: 14,
     );
-    libraDatabase = _db;
   }
 
   static Future<void> init() async {
@@ -91,7 +87,6 @@ class LibraDatabase {
   static Future<void> close() async {
     _db?.close();
     _db = null;
-    libraDatabase = null;
   }
 
   //-------------------------------------------------------------------------------------
