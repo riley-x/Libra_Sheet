@@ -73,7 +73,7 @@ class GoogleDrive extends ChangeNotifier {
   /// This is the last update time of the local database. It set by [LibraDatabase] everytime the
   /// database is accessed using [logLocalUpdate], and is used to debounce revision pushes when the
   /// user is actively doing things.
-  DateTime lastLocalUpdateTime = DateTime(1970);
+  DateTime lastLocalUpdateTime = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// GoogleDrive file pointer to the latest database file on Google Drive. If null, assume one
   /// doesn't exist yet. This is set from [fetchDriveFile], and is used for both UI and determining
@@ -175,6 +175,15 @@ class GoogleDrive extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> retrieveLocalUpdateTime() async {
+    if (!await LibraDatabase.isEmpty()) {
+      final localPath = LibraDatabase.databasePath;
+      lastLocalUpdateTime = await io.File(localPath).lastModified();
+    } else {
+      lastLocalUpdateTime = DateTime.fromMillisecondsSinceEpoch(0);
+    }
+  }
+
   //-------------------------------------------------------------------------------------
   // Authorization
   //-------------------------------------------------------------------------------------
@@ -227,12 +236,11 @@ class GoogleDrive extends ChangeNotifier {
 
     /// Refresh both the drive and local times. This is important to overwrite the in-memory
     /// placeholder time set by [logLocalUpdate].
-    final localPath = LibraDatabase.databasePath;
-    final localFile = io.File(localPath);
-    lastLocalUpdateTime = await localFile.lastModified();
+    await retrieveLocalUpdateTime();
     await fetchDriveFile();
 
     /// Case on the status
+    final localPath = LibraDatabase.databasePath;
     switch (status()) {
       case GoogleDriveSyncStatus.localAhead:
         if (driveFile == null || driveFile!.id == null) {
@@ -258,7 +266,7 @@ class GoogleDrive extends ChangeNotifier {
           await LibraDatabase.close();
           await LibraDatabase.backup();
           await tempFile.copy(localPath);
-          tempFile.delete();
+          tempFile.delete(); // no await needed
           await LibraDatabase.open();
           await overwriteFileCallback?.onReplaced?.call();
         }

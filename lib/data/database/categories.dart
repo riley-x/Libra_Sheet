@@ -6,7 +6,6 @@ import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/category.dart';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const categoryTable = '`categories`';
