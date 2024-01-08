@@ -264,7 +264,7 @@ class GoogleDrive extends ChangeNotifier {
           lastLocalUpdateTime = getDriveTime() ?? DateTime.now();
 
           await LibraDatabase.close();
-          await LibraDatabase.backup();
+          await LibraDatabase.backup(tag: 'before_replace_from_cloud');
           await tempFile.copy(localPath);
           tempFile.delete(); // no await needed
           await LibraDatabase.open();

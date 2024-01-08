@@ -42,13 +42,13 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> addAll(List<Transaction> transactions) async {
+    await LibraDatabase.backup(tag: '.before_add_csv');
     await LibraDatabase.updateTransaction((txn) async {
       for (final t in transactions) {
         await txn.insertTransaction(t);
       }
     });
     onUpdate();
-    LibraDatabase.backup();
   }
 
   Future<void> delete(Transaction t) async {

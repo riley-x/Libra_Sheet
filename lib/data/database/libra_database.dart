@@ -155,15 +155,15 @@ class LibraDatabase {
   //-------------------------------------------------------------------------------------
   static DateTime _lastBackupTime = DateTime.now();
 
-  static Future<void> backup() async {
+  static Future<void> backup({String? tag}) async {
     _lastBackupTime = DateTime.now();
     final timestamp = _backupDateFormat.format(_lastBackupTime);
 
     String newPath;
     if (databasePath.endsWith('.db')) {
-      newPath = "${databasePath.substring(0, databasePath.length - 3)}_$timestamp.db";
+      newPath = "${databasePath.substring(0, databasePath.length - 3)}_$timestamp$tag.db";
     } else {
-      newPath = "${databasePath}_$timestamp";
+      newPath = "${databasePath}_$timestamp$tag";
     }
     await File(databasePath).copy(newPath);
     debugPrint("LibraDatabase::backup() Backed up to $newPath");

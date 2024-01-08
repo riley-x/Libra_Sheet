@@ -53,7 +53,7 @@ class CategoryState {
     parentList.removeAt(ind);
     appState.notifyListeners();
 
-    await LibraDatabase.backup();
+    await LibraDatabase.backup(tag: '.before_delete_category');
     await LibraDatabase.updateTransaction((txn) async {
       if (deleteFromDatabase) {
         await txn.deleteCategory(cat);

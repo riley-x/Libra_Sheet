@@ -34,6 +34,7 @@ class TagState {
   Future<void> delete(Tag tag) async {
     list.removeWhere((it) => it.key == tag.key);
     appState.notifyListeners();
+    await LibraDatabase.backup(tag: '.before_delete_tag');
     await LibraDatabase.db.deleteTag(tag);
   }
 

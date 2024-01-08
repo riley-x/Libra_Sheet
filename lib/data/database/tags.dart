@@ -78,7 +78,6 @@ extension Tags on DatabaseExecutor {
       (this as Database).transaction((txn) => txn.deleteTag(tag));
       return;
     }
-    LibraDatabase.backup();
     await delete(
       tagsTable,
       where: '$_key = ?',
