@@ -35,18 +35,18 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> loadData() async {
     if (!mounted) return;
     final appState = context.read<LibraAppState>();
-    var newData = await LibraDatabase.db.getMonthlyNet(accountId: widget.account.key);
+    var newData = await LibraDatabase.read((db) => db.getMonthlyNet(accountId: widget.account.key));
+    if (!mounted || newData == null) return;
+
     newData = newData
         .withAlignedTimes(appState.monthList, cumulate: true, trimStart: true)
         .fixedForCharts();
     if (newData.length == 1) {
-      // Duplicate the data so the plot isn't empty
+      // Duplicate the data point so the plot isn't empty
       newData.add(newData[0].withTime((it) => it.add(const Duration(seconds: 1))));
     }
-
-    if (!mounted) return;
     setState(() {
-      data = newData;
+      data = newData!;
     });
   }
 

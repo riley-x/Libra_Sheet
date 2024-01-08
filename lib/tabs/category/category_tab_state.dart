@@ -112,12 +112,13 @@ class CategoryTabState extends ChangeNotifier {
     timeFrameMonths = (startMonth, endMonth);
 
     /// Load
-    individualValues = await LibraDatabase.db.getCategoryTotals(
-      start: startMonth,
-      end: endMonth.monthEnd(),
-      accounts: accounts.map((e) => e.key),
-    );
-    if (_disposed) return;
+    final vals = await LibraDatabase.read((db) => db.getCategoryTotals(
+          start: startMonth,
+          end: endMonth.monthEnd(),
+          accounts: accounts.map((e) => e.key),
+        ));
+    if (_disposed || vals == null) return;
+    individualValues = vals;
 
     /// Aggregate
     aggregateValues = Map.of(individualValues);

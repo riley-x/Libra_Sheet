@@ -35,12 +35,6 @@ class LibraDatabase {
   static Database? _db;
   static Function(dynamic)? errorCallback;
 
-  @Deprecated("Use read() or update() instead")
-  static Database get db {
-    if (_db == null) throw StateError("Database not initialized");
-    return _db!;
-  }
-
   static Future<bool> isEmpty() async {
     if (_db == null) return true;
     return await _db!.countAccounts() == 0;

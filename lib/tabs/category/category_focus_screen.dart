@@ -51,10 +51,10 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
 
     /// Load all category histories
     final appState = context.read<LibraAppState>();
-    final rawHistory = await LibraDatabase.db.getCategoryHistory(
-      accounts: initialFilters.accounts.map((e) => e.key),
-    );
-    if (!mounted) return; // across async await
+    final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
+          accounts: initialFilters.accounts.map((e) => e.key),
+        ));
+    if (!mounted || rawHistory == null) return; // across async await
 
     /// Output list.
     final newData = CategoryHistory(appState.monthList);

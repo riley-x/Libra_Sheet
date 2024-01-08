@@ -43,13 +43,14 @@ class CashFlowState extends fnd.ChangeNotifier {
   List<TimeIntValue> netReturns = [];
 
   Future<void> load() async {
-    final rawHistory = await LibraDatabase.db.getCategoryHistory(
-      accounts: accounts.map((e) => e.key),
-    );
-    final rawIncome = await LibraDatabase.db.getMonthlyNetIncome(
-      accounts: accounts.map((e) => e.key),
-    );
+    final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
+          accounts: accounts.map((e) => e.key),
+        ));
+    final rawIncome = await LibraDatabase.read((db) => db.getMonthlyNetIncome(
+          accounts: accounts.map((e) => e.key),
+        ));
     if (_disposed) return; // can happen due to async gap
+    if (rawHistory == null || rawIncome == null) return;
 
     /// Accumulate to level = 1 categories
     incomeData = CategoryHistory(appState.monthList);
