@@ -284,8 +284,8 @@ class _EditCategory extends StatelessWidget {
             context: context,
             title: "Delete Category?",
             msg: 'Are you sure you want to delete category "${state.focused.name}"? '
-                "This cannot be undone! Any sub-categories and linked transactions and "
-                "rules will be broken.",
+                "This cannot be undone! Any sub-categories will also be deleted, "
+                "linked transactions will be set to uncategorized, and any matching rules will be deleted too.",
             onClose: state.delete,
           ),
         ),

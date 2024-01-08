@@ -97,6 +97,8 @@ extension CategoryDatabaseExtension on DatabaseExecutor {
 }
 
 extension CategoryTransactionExtension on Transaction {
+  /// This will recurse and delete the sub categories too. Warning, this doesn't modify the list
+  /// indexes in the parent list though.
   Future<void> deleteCategory(Category cat) async {
     for (final sub in cat.subCats) {
       await deleteCategory(sub);
@@ -106,7 +108,6 @@ extension CategoryTransactionExtension on Transaction {
 
   Future<void> deleteCategoryNoChildren(Category cat) async {
     assert(cat.level > 0);
-    assert(cat.subCats.isEmpty);
     await delete(
       categoryTable,
       where: '`$_id` = ?',

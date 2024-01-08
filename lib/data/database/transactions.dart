@@ -409,7 +409,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
   Future<int> unsetCategoryFromAllTransactions(int categoryKey) {
     return rawUpdate(
       "UPDATE $transactionsTable "
-      "SET $_category = (CASE WHEN $_value > 0 THEN ${Category.income.key} ELSE ${Category.expense.key}) "
+      "SET $_category = (CASE WHEN $_value > 0 THEN ${Category.income.key} ELSE ${Category.expense.key} END) "
       "WHERE $_category = ?",
       [categoryKey],
     );

@@ -14,7 +14,7 @@ class TransactionService extends ChangeNotifier {
   final LibraAppState appState;
   TransactionService(this.appState);
 
-  void onUpdate() async {
+  Future<void> onUpdate() async {
     // This updates the monthsList, which is used downstream
     await appState.reloadAfterTransactions();
     notifyListeners();

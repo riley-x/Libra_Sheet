@@ -53,13 +53,19 @@ class CategoryState {
     parentList.removeAt(ind);
     appState.notifyListeners();
 
+    await LibraDatabase.backup();
     await LibraDatabase.updateTransaction((txn) async {
       if (deleteFromDatabase) {
         await txn.deleteCategory(cat);
       }
       await txn.shiftCategoryListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1);
     });
-    appState.transactions.onUpdate();
+    if (deleteFromDatabase) {
+      /// We basically have to reset everything. Anything that watches transactions, reload the rules,
+      /// reset any category filters, etc. So this is easier, though it does reset the navigation
+      /// (which is necessary because nested states have category filters, etc.)
+      await appState.onDatabaseReplaced();
+    }
   }
 
   Future<void> update(Category cat, Category? oldParent) async {

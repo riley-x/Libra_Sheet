@@ -138,12 +138,14 @@ extension CategoryHistoryExtensionT on Transaction {
       UPDATE $categoryHistoryTable
       SET $_value = o.$_value
       FROM (
-        SELECT SUM($_value) AS $_value 
+        SELECT SUM($_value) AS $_value, $_account, $_date
         FROM $categoryHistoryTable
         WHERE $_category IN ($superKey, ${cat.key})
         GROUP BY $_account, $_date
       ) AS o
-      WHERE $_account = o.$_account AND $_date = o.$_date AND $_category = $superKey
+      WHERE $categoryHistoryTable.$_account = o.$_account 
+        AND $categoryHistoryTable.$_date = o.$_date 
+        AND $categoryHistoryTable.$_category = $superKey
     ''');
 
     /// Delete the old category entries

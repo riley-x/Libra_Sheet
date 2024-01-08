@@ -202,7 +202,7 @@ class LibraAppState extends ChangeNotifier {
     );
   }
 
-  void onDatabaseReplaced() async {
+  Future<void> onDatabaseReplaced() async {
     /// All the navigation destinations are dependent on data objects, like transaction details
     /// or account focus screen, so back out of all of them.
     for (final nav in tabNavigatorKeys) {
