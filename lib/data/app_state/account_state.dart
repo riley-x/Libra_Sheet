@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
-import 'package:libra_sheet/data/database/accounts.dart' as db;
+import 'package:libra_sheet/data/database/accounts.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 
@@ -22,7 +22,9 @@ class AccountState extends ChangeNotifier {
   /// restart!
   Future<void> load() async {
     list.clear();
-    list.addAll(await db.getAccounts());
+    LibraDatabase.read((db) async {
+      list.addAll(await db.getAccounts());
+    });
     debugPrint("AccountState::load() Loaded ${list.length} accounts");
     notifyListeners();
   }
@@ -32,7 +34,7 @@ class AccountState extends ChangeNotifier {
   /// DO NOT replace the original objects! Accounts are kept as pointers by other objects.
   Future<void> _updateAfterTransactions() async {
     final map = createAccountMap();
-    final tempList = await db.getAccounts();
+    final tempList = await LibraDatabase.read((db) => db.getAccounts()) ?? [];
     for (final newAcc in tempList) {
       final oldAcc = map[newAcc.key];
       oldAcc?.balance = newAcc.balance;
@@ -43,9 +45,12 @@ class AccountState extends ChangeNotifier {
 
   Future<void> add(Account acc) async {
     debugPrint("AccountState::add() ${acc.dump()}");
-    acc.key = await db.insertAccount(acc, listIndex: list.length);
-    list.add(acc);
-    notifyListeners();
+    final key = await LibraDatabase.update((db) => db.insertAccount(acc, listIndex: list.length));
+    if (key != null) {
+      acc.key = key;
+      list.add(acc);
+      notifyListeners();
+    }
   }
 
   /// The account is modified in-place (because accounts must have single instances so that pointers
@@ -53,7 +58,7 @@ class AccountState extends ChangeNotifier {
   Future<void> notifyUpdate(Account acc) async {
     debugPrint("AccountState::notifyUpdate() ${acc.dump()}");
     notifyListeners();
-    LibraDatabase.db.updateAccount(acc);
+    await LibraDatabase.update((db) => db.updateAccount(acc));
   }
 
   void reorder(int oldIndex, int newIndex) async {
@@ -65,7 +70,7 @@ class AccountState extends ChangeNotifier {
     }
     notifyListeners();
 
-    await LibraDatabase.db.transaction((txn) async {
+    await LibraDatabase.updateTransaction((txn) async {
       if (newIndex > oldIndex) {
         await txn.shiftAccountIndicies(oldIndex, newIndex, -1);
         await txn.updateAccount(acc, listIndex: newIndex - 1);

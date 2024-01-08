@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const accountsTable = 'accounts';
@@ -65,41 +64,38 @@ Account _fromMap(Map<String, dynamic> map) {
   );
 }
 
-FutureOr<int> insertAccount(Account acc, {int? listIndex}) async {
-  if (libraDatabase == null) return 0;
-  return libraDatabase!.insert(
-    accountsTable,
-    _toMap(acc, listIndex: listIndex),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-}
-
-Future<List<Account>> getAccounts() async {
-  final List<Map<String, dynamic>> maps = await libraDatabase!.rawQuery(
-    """
-    SELECT
-      a.*,
-      t.last_updated,
-      h.$_balance
-    FROM
-      $accountsTable a
-    LEFT OUTER JOIN
-      (SELECT $transactionAccount, MAX($transactionDate) as last_updated
-        FROM $transactionsTable
-        GROUP BY $transactionAccount) t
-      ON t.$transactionAccount = a.$_key
-    LEFT OUTER JOIN
-      (SELECT $historyAccount, SUM($historyValue) as $_balance
-        FROM $categoryHistoryTable
-        GROUP BY $historyAccount) h
-      ON h.$historyAccount = a.$_key
-    ORDER BY a.$_index
-    """,
-  );
-  return List.generate(maps.length, (i) => _fromMap(maps[i]));
-}
-
 extension AccountDatabaseExtension on DatabaseExecutor {
+  Future<int> insertAccount(Account acc, {int? listIndex}) async {
+    return insert(
+      accountsTable,
+      _toMap(acc, listIndex: listIndex),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Account>> getAccounts() async {
+    final List<Map<String, dynamic>> maps = await rawQuery("""
+      SELECT
+        a.*,
+        t.last_updated,
+        h.$_balance
+      FROM
+        $accountsTable a
+      LEFT OUTER JOIN
+        (SELECT $transactionAccount, MAX($transactionDate) as last_updated
+          FROM $transactionsTable
+          GROUP BY $transactionAccount) t
+        ON t.$transactionAccount = a.$_key
+      LEFT OUTER JOIN
+        (SELECT $historyAccount, SUM($historyValue) as $_balance
+          FROM $categoryHistoryTable
+          GROUP BY $historyAccount) h
+        ON h.$historyAccount = a.$_key
+      ORDER BY a.$_index
+    """);
+    return List.generate(maps.length, (i) => _fromMap(maps[i]));
+  }
+
   Future<int> countAccounts() async {
     final maps = await query(
       accountsTable,
