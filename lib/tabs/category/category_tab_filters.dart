@@ -70,7 +70,7 @@ class CategoryTabFilters extends StatelessWidget {
         const SizedBox(height: 5),
         const Row(
           children: [
-            Expanded(child: Text("Show Averages")),
+            Expanded(child: Text("Show Monthly Average")),
             _AveragesSwitch(),
           ],
         ),

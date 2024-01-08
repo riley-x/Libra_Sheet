@@ -40,6 +40,7 @@ class TransactionFilters {
       endTime: endTime,
       accounts: Set.from(accounts),
       categories: categories.copy(),
+      tags: Set.from(tags),
       limit: limit,
       hasAllocation: hasAllocation,
       hasReimbursement: hasReimbursement,
