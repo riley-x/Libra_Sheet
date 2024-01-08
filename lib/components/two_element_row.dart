@@ -6,7 +6,7 @@ class TwoElementRow extends StatelessWidget {
     super.key,
     required this.left,
     required this.right,
-    this.leftWidth = 200,
+    this.leftWidth = 100,
     this.rightWidth = 280,
     this.spacing = 20,
     this.verticalAlignment = CrossAxisAlignment.center,

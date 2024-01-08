@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/cards/color_indicator_card.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
+import 'package:libra_sheet/components/cards/transaction_tooltip.dart';
+import 'package:libra_sheet/components/widget_tooltip.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -16,6 +18,7 @@ class TransactionCard extends StatelessWidget {
     this.onSelect,
     this.margin,
     this.showTags = true,
+    this.showTooltip = true,
     this.rightContent,
   });
 
@@ -25,6 +28,7 @@ class TransactionCard extends StatelessWidget {
   final EdgeInsets? margin;
   final bool showTags;
   final Widget? rightContent;
+  final bool showTooltip;
 
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
@@ -39,7 +43,7 @@ class TransactionCard extends StatelessWidget {
     final signedReimb = (trans.value > 0) ? -trans.totalReimbusrements : trans.totalReimbusrements;
     final valueAfterReimb = trans.value + signedReimb;
 
-    return ColorIndicatorCard(
+    final card = ColorIndicatorCard(
       color: color,
       borderColor: (isUncategorized && valueAfterReimb != 0)
           ? Theme.of(context).colorScheme.error
@@ -73,6 +77,14 @@ class TransactionCard extends StatelessWidget {
           ]
         ],
       ),
+    );
+
+    if (!showTooltip) return card;
+    return WidgetTooltip(
+      verticalOffset: 30,
+      delay: 1000,
+      tooltip: TransactionTooltip(trans),
+      child: card,
     );
   }
 }
