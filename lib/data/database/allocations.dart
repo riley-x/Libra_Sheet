@@ -161,51 +161,46 @@ extension AllocationsTransactionExtension on Transaction {
   }
 }
 
-Future<List<Allocation>> loadAllocations(
-  int transactionKey,
-  Map<int, Category> categories,
-  DatabaseExecutor db,
-) async {
-  final maps = await db.query(
-    allocationsTable,
-    where: "$_transaction = ?",
-    whereArgs: [transactionKey],
-    orderBy: _index,
-  );
-  return [for (final map in maps) _fromMap(categories, map)];
-}
+extension AllocationsDatabaseExtension on DatabaseExecutor {
+  Future<List<Allocation>> loadAllocations(
+    int transactionKey,
+    Map<int, Category> categories,
+  ) async {
+    final maps = await query(
+      allocationsTable,
+      where: "$_transaction = ?",
+      whereArgs: [transactionKey],
+      orderBy: _index,
+    );
+    return [for (final map in maps) _fromMap(categories, map)];
+  }
 
-/// Returns every allocation as a map from transaction key to the allocations. Probably excessive...
-Future<Map<int, List<Allocation>>> loadAllAllocations(
-  Map<int, Category> categories, {
-  DatabaseExecutor? db,
-}) async {
-  final out = <int, List<Allocation>>{};
+  /// Returns every allocation as a map from transaction key to the allocations. Probably excessive...
+  Future<Map<int, List<Allocation>>> loadAllAllocations(Map<int, Category> categories) async {
+    final out = <int, List<Allocation>>{};
 
-  db = db ?? libraDatabase;
-  if (db == null) return out;
+    final maps = await query(
+      allocationsTable,
+      orderBy: "$_transaction, $_index",
+    );
 
-  final maps = await db.query(
-    allocationsTable,
-    orderBy: "$_transaction, $_index",
-  );
+    int currentTransaction = -1;
+    List<Allocation> currentList = [];
 
-  int currentTransaction = -1;
-  List<Allocation> currentList = [];
-
-  void checkSaveList(int nextId) {
-    if (currentTransaction != -1 && currentTransaction != nextId) {
-      out[currentTransaction] = currentList;
-      currentTransaction = nextId;
-      currentList = [];
+    void checkSaveList(int nextId) {
+      if (currentTransaction != -1 && currentTransaction != nextId) {
+        out[currentTransaction] = currentList;
+        currentTransaction = nextId;
+        currentList = [];
+      }
     }
-  }
 
-  for (final row in maps) {
-    checkSaveList(row[_transaction] as int);
-    currentList.add(_fromMap(categories, row));
-  }
-  checkSaveList(-1);
+    for (final row in maps) {
+      checkSaveList(row[_transaction] as int);
+      currentList.add(_fromMap(categories, row));
+    }
+    checkSaveList(-1);
 
-  return out;
+    return out;
+  }
 }

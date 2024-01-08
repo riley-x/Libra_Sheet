@@ -109,7 +109,7 @@ Transaction transactionFromMap(
 extension TransactionExtension on db.Transaction {
   /// Inserts a transaction with its tags, allocations, and reimbursements. Note this function will
   /// set the transaction's key in-place!
-  FutureOr<void> insertTransaction(Transaction t) async {
+  Future<void> insertTransaction(Transaction t) async {
     t.key = await insert(
       transactionsTable,
       _toMap(t),
@@ -169,70 +169,21 @@ extension TransactionExtension on db.Transaction {
     await deleteTransaction(old);
     await insertTransaction(nu);
   }
-}
 
-//----------------------------------------------------------------------
-// Query transactions
-//----------------------------------------------------------------------
-
-/// Main function to load transactions given a set of filters.
-///
-/// When the relevant linking objects are not present in the maps:
-///     account => null
-///     category => Category.income or Category.expense
-///     tag => null
-///
-/// Also, the following are always null
-///     allocations (but sets nAllocations)
-///     reimbursements (but sets totalReimbusrements)
-///
-/// WARNING! Do not attempt to change this to an isolate using `compute()`. The database can't be
-/// accessed. Looks like will have to live with jank for now...could maybe move the _fromMap
-/// stuff to an isolate though.
-///
-/// https://stackoverflow.com/questions/56343611/insert-sqlite-flutter-without-freezing-the-interface
-/// https://github.com/flutter/flutter/issues/13937
-Future<List<Transaction>> loadTransactions(
-  TransactionFilters filters, {
-  required Map<int, Account> accounts,
-  required Map<int, Category> categories,
-  required Map<int, Tag> tags,
-}) async {
-  List<Transaction> out = [];
-  if (libraDatabase == null) return out;
-
-  final q = _createQueryFromFilters(filters);
-  final rows = await libraDatabase!.transaction((txn) async {
-    return await txn.rawQuery(q.$1, q.$2);
-  });
-
-  for (final row in rows) {
-    out.add(transactionFromMap(
-      row,
-      accounts: accounts,
-      categories: categories,
-      tags: tags,
-    ));
-  }
-
-  return out;
-}
-
-/// Loads the allocations and reimbursements for this transaction, modifies in-place.
-Future<void> loadTransactionRelations(
-  Transaction t, {
-  required Map<int, Account> accounts,
-  required Map<int, Category> categories,
-  required Map<int, Tag> tags,
-}) async {
-  await libraDatabase!.transaction((txn) async {
+  /// Loads the allocations and reimbursements for this transaction, modifies in-place.
+  Future<void> loadTransactionRelations(
+    Transaction t, {
+    required Map<int, Account> accounts,
+    required Map<int, Category> categories,
+    required Map<int, Tag> tags,
+  }) async {
     if (t.nAllocations > 0) {
-      t.allocations = await loadAllocations(t.key, categories, txn);
+      t.allocations = await loadAllocations(t.key, categories);
     } else {
       t.allocations = [];
     }
     if (t.totalReimbusrements > 0) {
-      t.reimbursements = await txn.loadReimbursements(
+      t.reimbursements = await loadReimbursements(
         parent: t,
         accounts: accounts,
         categories: categories,
@@ -241,10 +192,48 @@ Future<void> loadTransactionRelations(
     } else {
       t.reimbursements = [];
     }
-  });
+  }
 }
 
 extension TransactionDatabaseExtension on db.DatabaseExecutor {
+  /// Main function to load transactions given a set of filters.
+  ///
+  /// When the relevant linking objects are not present in the maps:
+  ///     account => null
+  ///     category => Category.income or Category.expense
+  ///     tag => null
+  ///
+  /// Also, the following are always null
+  ///     allocations (but sets nAllocations)
+  ///     reimbursements (but sets totalReimbusrements)
+  ///
+  /// WARNING! Do not attempt to change this to an isolate using `compute()`. The database can't be
+  /// accessed. Looks like will have to live with jank for now...could maybe move the _fromMap
+  /// stuff to an isolate though.
+  ///
+  /// https://stackoverflow.com/questions/56343611/insert-sqlite-flutter-without-freezing-the-interface
+  /// https://github.com/flutter/flutter/issues/13937
+  Future<List<Transaction>> loadTransactions(
+    TransactionFilters filters, {
+    required Map<int, Account> accounts,
+    required Map<int, Category> categories,
+    required Map<int, Tag> tags,
+  }) async {
+    final q = _createQueryFromFilters(filters);
+    final rows = await rawQuery(q.$1, q.$2);
+
+    List<Transaction> out = [];
+    for (final row in rows) {
+      out.add(transactionFromMap(
+        row,
+        accounts: accounts,
+        categories: categories,
+        tags: tags,
+      ));
+    }
+    return out;
+  }
+
   /// Loads transactions given a list of [keys] but applies no other filtering.
   Future<Map<int, Transaction>> loadTransactionsByKey(
     Iterable<int> keys, {

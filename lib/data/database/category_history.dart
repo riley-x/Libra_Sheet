@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -258,8 +257,6 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     Iterable<int> categories = const [],
     Iterable<int>? accounts,
   }) async {
-    if (libraDatabase == null) return {};
-
     var where = "$_value != 0";
     List whereArgs = [];
     where = _addAccountsFilter(accounts, where, whereArgs);

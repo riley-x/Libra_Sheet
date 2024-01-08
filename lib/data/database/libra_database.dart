@@ -16,7 +16,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-@Deprecated("Replace with LibraDatabase.db and extension functions")
+@Deprecated("Replace with LibraDatabase functions")
 Database? libraDatabase;
 
 final _backupDateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
@@ -107,13 +107,14 @@ class LibraDatabase {
     }
   }
 
-  static Future<void> read(Future Function(Database db) callback) async {
+  static Future<T?> read<T>(Future<T> Function(Database db) callback) async {
     try {
       if (_db == null) throw StateError("Database not initialized");
-      await callback(_db!);
+      return callback(_db!);
     } catch (e) {
       debugPrint("LibraDatabase::read() caught $e");
       errorCallback?.call(e);
+      return null;
     }
   }
 
@@ -156,6 +157,7 @@ class LibraDatabase {
   // Backup
   //-------------------------------------------------------------------------------------
   static DateTime _lastBackupTime = DateTime.now();
+  // DateTime.now().difference(_lastBackupTime).inSeconds > 10) backup();
 
   static Future<void> backup({String? tag}) async {
     _lastBackupTime = DateTime.now();
@@ -170,8 +172,6 @@ class LibraDatabase {
     await File(databasePath).copy(newPath);
     debugPrint("LibraDatabase::backup() Backed up to $newPath");
   }
-
-  // DateTime.now().difference(_lastBackupTime).inSeconds > 10) backup();
 }
 
 FutureOr<void> _createDatabase(Database db, int version) {

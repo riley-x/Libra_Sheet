@@ -21,22 +21,24 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<List<Transaction>> load(TransactionFilters filters) async {
-    final ts = await loadTransactions(
-      filters,
-      accounts: appState.accounts.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
+    final ts = await LibraDatabase.read(
+      (db) async => await db.loadTransactions(
+        filters,
+        accounts: appState.accounts.createAccountMap(),
+        categories: appState.categories.createKeyMap(),
+        tags: appState.tags.createKeyMap(),
+      ),
     );
-    return ts;
+    return ts ?? [];
   }
 
   Future<void> save(Transaction? old, Transaction nu) async {
     debugPrint("TransactionService::save() \nold=$old\nnew=$nu");
     if (old == null) {
       assert(nu.key == 0);
-      await LibraDatabase.updateTransaction((txn) async => await txn.insertTransaction(nu));
+      await LibraDatabase.updateTransaction((txn) => txn.insertTransaction(nu));
     } else {
-      await LibraDatabase.updateTransaction((txn) async => await txn.updateTransaction(old, nu));
+      await LibraDatabase.updateTransaction((txn) => txn.updateTransaction(old, nu));
     }
     onUpdate();
   }
@@ -53,37 +55,42 @@ class TransactionService extends ChangeNotifier {
 
   Future<void> delete(Transaction t) async {
     debugPrint("TransactionService::delete() $t");
-    await LibraDatabase.updateTransaction((txn) async => await txn.deleteTransaction(t));
+    await LibraDatabase.updateTransaction((txn) => txn.deleteTransaction(t));
     onUpdate();
   }
 
-  Future<void> loadRelations(Transaction t) {
-    return loadTransactionRelations(
-      t,
-      accounts: appState.accounts.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
+  Future<void> loadRelations(Transaction t) async {
+    await LibraDatabase.readTransaction(
+      (txn) => txn.loadTransactionRelations(
+        t,
+        accounts: appState.accounts.createAccountMap(),
+        categories: appState.categories.createKeyMap(),
+        tags: appState.tags.createKeyMap(),
+      ),
     );
   }
 
   Future<void> reloadReimbursements(Transaction t) async {
-    await LibraDatabase.read((db) async {
-      t.reimbursements = await db.loadReimbursements(
+    t.reimbursements = await LibraDatabase.read(
+      (db) => db.loadReimbursements(
         parent: t,
         accounts: appState.accounts.createAccountMap(),
         categories: appState.categories.createKeyMap(),
         tags: appState.tags.createKeyMap(),
-      );
-    });
+      ),
+    );
   }
 
-  Future<Map<int, Transaction>> loadByKey(Iterable<int> keys) {
-    return LibraDatabase.db.loadTransactionsByKey(
-      keys,
-      accounts: appState.accounts.createAccountMap(),
-      categories: appState.categories.createKeyMap(),
-      tags: appState.tags.createKeyMap(),
+  Future<Map<int, Transaction>> loadByKey(Iterable<int> keys) async {
+    final out = await LibraDatabase.read(
+      (db) => db.loadTransactionsByKey(
+        keys,
+        accounts: appState.accounts.createAccountMap(),
+        categories: appState.categories.createKeyMap(),
+        tags: appState.tags.createKeyMap(),
+      ),
     );
+    return out ?? {};
   }
 
   Future<Transaction?> loadSingle(int key) async {
