@@ -8,6 +8,7 @@ import 'package:libra_sheet/components/menus/account_selection_menu.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
+import 'package:libra_sheet/components/right_left_row.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
@@ -159,35 +160,37 @@ class TransactionDetailsEditor extends StatelessWidget {
                       tooltip: "An allocation assigns a portion of the\n"
                           "transaction's value to a separate category.",
                     ),
-                    rowSpacing,
-                    rowSpacing,
-                    labelRow(
-                      context,
-                      'Reimbursements',
-                      Column(
-                        children: [
-                          for (final r in state.reimbursements) ...[
-                            ReimbursementCard(
-                              r,
-                              onTap: (it) => state.focusReimbursement(it),
-                            ),
-                            const SizedBox(height: 6)
-                          ],
-                          ReimbursementCard(
-                            null,
-                            onTap: (it) => state.focusReimbursement(it),
-                          ),
-                        ],
-                      ),
-                      labelAlign: TableCellVerticalAlignment.top,
-                      tooltip: "A reimbursement cancels a specified amount\n"
-                          "from two opposite transactions. For example,\n"
-                          "a \$100 dining transaction can be reimbursed\n"
-                          "by four \$20 Venmo payments. The net effect \n"
-                          "is a \$20 addition to the dining category.",
-                    ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                RightLeftRow(
+                  left: Tooltip(
+                    message: "A reimbursement cancels a specified amount\n"
+                        "from two opposite transactions. For example,\n"
+                        "a \$100 dining transaction can be reimbursed\n"
+                        "by four \$20 Venmo payments. The net effect \n"
+                        "is a \$20 addition to the dining category.",
+                    textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onInverseSurface,
+                          fontSize: 14,
+                        ),
+                    child: Text(
+                      'Reimbursements',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  right: ReimbursementCard(
+                    null,
+                    onTap: (it) => state.focusReimbursement(it),
+                  ),
+                ),
+                for (final r in state.reimbursements) ...[
+                  ReimbursementCard(
+                    r,
+                    onTap: (it) => state.focusReimbursement(it),
+                  ),
+                  const SizedBox(height: 6)
+                ],
                 const SizedBox(height: 20),
                 FormButtons(
                   showDelete: (state.seed != null && !state.seedStale),
