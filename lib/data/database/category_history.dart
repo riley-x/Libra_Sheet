@@ -160,7 +160,7 @@ extension CategoryHistoryExtensionT on Transaction {
 //----------------------------------------------------------------------------------
 extension CategoryHistoryExtension on DatabaseExecutor {
   /// Returns the earliest month in the database with data
-  FutureOr<DateTime?> getEarliestMonth() async {
+  Future<DateTime?> getEarliestMonth() async {
     final out = await query(
       categoryHistoryTable,
       columns: ["MIN($_date) as $_date"],

@@ -45,20 +45,17 @@ class DatabaseScreen extends StatelessWidget {
                 'Export Balance History',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              onTap: () {
+              onTap: () async {
                 final messenger = ScaffoldMessenger.of(context);
-                context.read<LibraAppState>().exportBalanceHistoryToCsv().then(
-                  (filepath) {
-                    if (filepath == null || !messenger.mounted) return;
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Center(child: Text('Saved balance history to $filepath.')),
-                        width: 500.0,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-                      ),
-                    );
-                  },
+                final filepath = await context.read<LibraAppState>().exportBalanceHistoryToCsv();
+                if (filepath == null || !messenger.mounted) return;
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Center(child: Text('Saved balance history to $filepath.')),
+                    width: 500.0,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                  ),
                 );
               },
             ),
@@ -68,20 +65,17 @@ class DatabaseScreen extends StatelessWidget {
                 'Export Transactions',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              onTap: () {
+              onTap: () async {
                 final messenger = ScaffoldMessenger.of(context);
-                context.read<LibraAppState>().exportTransactionsToCsv().then(
-                  (filepath) {
-                    if (filepath == null || !messenger.mounted) return;
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Center(child: Text('Saved transaction history to $filepath.')),
-                        width: 500.0,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-                      ),
-                    );
-                  },
+                final filepath = await context.read<LibraAppState>().exportTransactionsToCsv();
+                if (filepath == null || !messenger.mounted) return;
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Center(child: Text('Saved transaction history to $filepath.')),
+                    width: 500.0,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                  ),
                 );
               },
             ),

@@ -113,6 +113,12 @@ class LibraDatabase {
     }
   }
 
+  /// Like [read] but will not catch any errors, instead passing them up to the caller.
+  static Future<T> readThrow<T>(Future<T> Function(Database db) callback) async {
+    if (_db == null) throw StateError("Database not initialized");
+    return callback(_db!);
+  }
+
   static Future<void> readTransaction(Future Function(Transaction txn) callback) async {
     try {
       if (_db == null) throw StateError("Database not initialized");

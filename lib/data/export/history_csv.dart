@@ -25,7 +25,7 @@ Future<String> createBalanceHistoryCsvString(List<Account> accounts, List<DateTi
   out += lineEnd;
 
   /// Data
-  final netChanges = await LibraDatabase.db.getMonthlyNetAllAccounts();
+  final netChanges = await LibraDatabase.readThrow((db) => db.getMonthlyNetAllAccounts());
   final balances = {
     for (final entry in netChanges.entries)
       entry.key: entry.value.alignValues(months, cumulate: true),
@@ -67,11 +67,11 @@ Future<String> createTransactionHistoryCsvString({
   ]);
 
   /// Data
-  final transactions = await LibraDatabase.db.loadAllTransactionsForCsv(
-    accounts: accounts,
-    categories: categories,
-    tags: tags,
-  );
+  final transactions = await LibraDatabase.readThrow((db) => db.loadAllTransactionsForCsv(
+        accounts: accounts,
+        categories: categories,
+        tags: tags,
+      ));
   for (final t in transactions) {
     out.add([
       t.t.key.toString(),

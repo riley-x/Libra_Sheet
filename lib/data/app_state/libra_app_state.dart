@@ -98,7 +98,7 @@ class LibraAppState extends ChangeNotifier {
   List<DateTime> monthList = [];
 
   Future<void> _loadMonths() async {
-    final earliestMonth = await LibraDatabase.db.getEarliestMonth();
+    final earliestMonth = await LibraDatabase.read((db) => db.getEarliestMonth());
     if (earliestMonth == null) {
       monthList = _getDefaultMonths(); // So that the charts don't look too weird
       return;
@@ -128,7 +128,7 @@ class LibraAppState extends ChangeNotifier {
   List<TimeIntValue> netWorthData = [];
 
   Future<void> _loadNetWorth() async {
-    final newData = await LibraDatabase.db.getMonthlyNet();
+    final newData = await LibraDatabase.read((db) => db.getMonthlyNet()) ?? [];
     netWorthData = newData.withAlignedTimes(monthList, cumulate: true).fixedForCharts();
     notifyListeners();
   }
@@ -158,36 +158,48 @@ class LibraAppState extends ChangeNotifier {
   // Export
   //--------------------------------------------------------------------------------
   final _csvDateFormat = DateFormat('yyyy-MM-dd');
-  Future<String?> exportBalanceHistoryToCsv() async {
-    final now = DateTime.now();
-    final fileName = 'balance_history_${_csvDateFormat.format(now)}.csv';
-    final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
-    if (result == null) return null;
 
-    final csvString = await createBalanceHistoryCsvString(accounts.list, monthList);
-    final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
-    const String mimeType = 'text/csv';
-    final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
-    await textFile.saveTo(result.path);
-    return result.path;
+  /// Returns the filepath of the newly saved CSV file, or null on cancel/error
+  Future<String?> exportBalanceHistoryToCsv() async {
+    try {
+      final now = DateTime.now();
+      final fileName = 'balance_history_${_csvDateFormat.format(now)}.csv';
+      final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
+      if (result == null) return null; // cancelled by user
+
+      final csvString = await createBalanceHistoryCsvString(accounts.list, monthList);
+      final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
+      const String mimeType = 'text/csv';
+      final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
+      await textFile.saveTo(result.path);
+      return result.path;
+    } catch (e) {
+      debugPrint("$e");
+      return null;
+    }
   }
 
   Future<String?> exportTransactionsToCsv() async {
-    final now = DateTime.now();
-    final fileName = 'transaction_history_${_csvDateFormat.format(now)}.csv';
-    final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
-    if (result == null) return null;
+    try {
+      final now = DateTime.now();
+      final fileName = 'transaction_history_${_csvDateFormat.format(now)}.csv';
+      final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
+      if (result == null) return null;
 
-    final csvString = await createTransactionHistoryCsvString(
-      accounts: accounts.createAccountMap(),
-      categories: categories.createKeyMap(),
-      tags: tags.createKeyMap(),
-    );
-    final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
-    const String mimeType = 'text/csv';
-    final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
-    await textFile.saveTo(result.path);
-    return result.path;
+      final csvString = await createTransactionHistoryCsvString(
+        accounts: accounts.createAccountMap(),
+        categories: categories.createKeyMap(),
+        tags: tags.createKeyMap(),
+      );
+      final Uint8List fileData = Uint8List.fromList(csvString.codeUnits);
+      const String mimeType = 'text/csv';
+      final XFile textFile = XFile.fromData(fileData, mimeType: mimeType, name: fileName);
+      await textFile.saveTo(result.path);
+      return result.path;
+    } catch (e) {
+      debugPrint("$e");
+      return null;
+    }
   }
 
   FutureOr<bool> userConfirmOverwrite() {
