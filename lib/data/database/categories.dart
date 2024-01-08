@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
@@ -114,6 +115,7 @@ extension CategoryTransactionExtension on Transaction {
       whereArgs: [cat.key],
     );
     await unsetCategoryFromAllTransactions(cat.key);
+    await unsetCategoryFromAllAllocations(cat);
     await mergeAndDeleteCategoryHistory(cat);
     await deleteRulesWithCategory(cat.key);
   }

@@ -127,7 +127,7 @@ extension TransactionExtension on db.Transaction {
     }
     if (t.allocations != null) {
       for (int i = 0; i < t.allocations!.length; i++) {
-        await addAllocation(parent: t, index: i, txn: this);
+        await addAllocation(parent: t, index: i);
       }
     }
     if (t.reimbursements != null) {
@@ -145,7 +145,7 @@ extension TransactionExtension on db.Transaction {
     }
     if (t.allocations != null) {
       for (int i = 0; i < t.allocations!.length; i++) {
-        await deleteAllocation(parent: t, index: i, txn: this);
+        await deleteAllocation(parent: t, index: i);
       }
     }
     await removeAllTagsFrom(t);

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -54,91 +55,110 @@ Allocation _fromMap(Map<int, Category> categories, Map<String, dynamic> map) {
   );
 }
 
-/// This modifies the allocation's key in-place!
-FutureOr<void> _insertAllocation({
-  required lt.Transaction parent,
-  required Allocation allocation,
-  required int listIndex,
-  required DatabaseExecutor db,
-}) async {
-  allocation.key = await db.insert(
-    allocationsTable,
-    _toMap(parent, allocation, listIndex),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-  return;
-}
+extension AllocationsTransactionExtension on Transaction {
+  /// This modifies the allocation's key in-place!
+  Future<void> _insertAllocation({
+    required lt.Transaction parent,
+    required Allocation allocation,
+    required int listIndex,
+  }) async {
+    allocation.key = await insert(
+      allocationsTable,
+      _toMap(parent, allocation, listIndex),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
-Future<int> _deleteAllocation({
-  required Allocation allocation,
-  required DatabaseExecutor db,
-}) async {
-  return db.delete(allocationsTable, where: "$_key = ?", whereArgs: [allocation.key]);
-}
+  Future<int> _deleteAllocation(Allocation allocation) {
+    return delete(allocationsTable, where: "$_key = ?", whereArgs: [allocation.key]);
+  }
 
-/// This modifies the allocation's key in-place!
-FutureOr<void> addAllocation({
-  required lt.Transaction parent,
-  required int index,
-  required Transaction txn,
-}) async {
-  if (parent.account == null) return;
-  if (parent.allocations == null) return;
-  if (index >= parent.allocations!.length) return;
-  final alloc = parent.allocations![index];
-  if (alloc.category == null) return;
+  /// This modifies the allocation's key in-place!
+  Future<void> addAllocation({
+    required lt.Transaction parent,
+    required int index,
+  }) async {
+    if (parent.account == null) return;
+    if (parent.allocations == null) return;
+    if (index >= parent.allocations!.length) return;
+    final alloc = parent.allocations![index];
+    if (alloc.category == null) return;
 
-  await _insertAllocation(parent: parent, allocation: alloc, listIndex: index, db: txn);
+    await _insertAllocation(parent: parent, allocation: alloc, listIndex: index);
 
-  final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
-  await txn.updateCategoryHistory(
-    account: parent.account!.key,
-    category: parent.category.key,
-    date: parent.date,
-    delta: -signedValue,
-  );
-  await txn.updateCategoryHistory(
-    account: parent.account!.key,
-    category: alloc.category!.key,
-    date: parent.date,
-    delta: signedValue,
-  );
-}
+    final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
+    await updateCategoryHistory(
+      account: parent.account!.key,
+      category: parent.category.key,
+      date: parent.date,
+      delta: -signedValue,
+    );
+    await updateCategoryHistory(
+      account: parent.account!.key,
+      category: alloc.category!.key,
+      date: parent.date,
+      delta: signedValue,
+    );
+  }
 
-FutureOr<void> deleteAllocation({
-  required lt.Transaction parent,
-  required int index,
-  required Transaction txn,
-}) async {
-  if (parent.account == null) return;
-  if (parent.allocations == null) return;
-  if (index >= parent.allocations!.length) return;
-  final alloc = parent.allocations![index];
-  if (alloc.category == null) return;
+  Future<void> deleteAllocation({
+    required lt.Transaction parent,
+    required int index,
+  }) async {
+    if (parent.account == null) return;
+    if (parent.allocations == null) return;
+    if (index >= parent.allocations!.length) return;
+    final alloc = parent.allocations![index];
+    if (alloc.category == null) return;
 
-  await _deleteAllocation(allocation: alloc, db: txn);
+    await _deleteAllocation(alloc);
 
-  await shiftAllocationListIndicies(
-    transKey: parent.key,
-    start: index,
-    end: parent.allocations!.length,
-    delta: -1,
-    txn: txn,
-  );
+    await shiftAllocationListIndicies(
+      transKey: parent.key,
+      start: index,
+      end: parent.allocations!.length,
+      delta: -1,
+    );
 
-  final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
-  await txn.updateCategoryHistory(
-    account: parent.account!.key,
-    category: parent.category.key,
-    date: parent.date,
-    delta: signedValue,
-  );
-  await txn.updateCategoryHistory(
-    account: parent.account!.key,
-    category: alloc.category!.key,
-    date: parent.date,
-    delta: -signedValue,
-  );
+    final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
+    await updateCategoryHistory(
+      account: parent.account!.key,
+      category: parent.category.key,
+      date: parent.date,
+      delta: signedValue,
+    );
+    await updateCategoryHistory(
+      account: parent.account!.key,
+      category: alloc.category!.key,
+      date: parent.date,
+      delta: -signedValue,
+    );
+  }
+
+  /// Start is inclusive, end is exclusive
+  Future<int> shiftAllocationListIndicies({
+    required int transKey,
+    required int start,
+    required int end,
+    required int delta,
+  }) {
+    return rawUpdate(
+      "UPDATE $allocationsTable "
+      "SET $_index = $_index + ? "
+      "WHERE $_transaction = ? AND $_index >= ? AND $_index < ?",
+      [delta, transKey, start, end],
+    );
+  }
+
+  Future<void> unsetCategoryFromAllAllocations(Category cat) async {
+    final superKey =
+        cat.type == ExpenseFilterType.income ? Category.income.key : Category.expense.key;
+    await rawUpdate(
+      "UPDATE $allocationsTable "
+      "SET $_category = $superKey "
+      "WHERE $_category = ${cat.key}",
+    );
+  }
 }
 
 Future<List<Allocation>> loadAllocations(
@@ -188,20 +208,4 @@ Future<Map<int, List<Allocation>>> loadAllAllocations(
   checkSaveList(-1);
 
   return out;
-}
-
-/// Start is inclusive, end is exclusive
-FutureOr<int> shiftAllocationListIndicies({
-  required int transKey,
-  required int start,
-  required int end,
-  required int delta,
-  required Transaction txn,
-}) async {
-  return txn.rawUpdate(
-    "UPDATE $allocationsTable "
-    "SET $_index = $_index + ? "
-    "WHERE $_transaction = ? AND $_index >= ? AND $_index < ?",
-    [delta, transKey, start, end],
-  );
 }
