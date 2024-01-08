@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/tags.dart';
 import 'package:libra_sheet/data/objects/account.dart';

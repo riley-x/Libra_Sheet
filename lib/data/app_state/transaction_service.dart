@@ -72,13 +72,14 @@ class TransactionService extends ChangeNotifier {
 
   Future<void> reloadReimbursements(Transaction t) async {
     t.reimbursements = await LibraDatabase.read(
-      (db) => db.loadReimbursements(
-        parent: t,
-        accounts: appState.accounts.createAccountMap(),
-        categories: appState.categories.createKeyMap(),
-        tags: appState.tags.createKeyMap(),
-      ),
-    );
+          (db) => db.loadReimbursements(
+            parent: t,
+            accounts: appState.accounts.createAccountMap(),
+            categories: appState.categories.createKeyMap(),
+            tags: appState.tags.createKeyMap(),
+          ),
+        ) ??
+        [];
   }
 
   Future<Map<int, Transaction>> loadByKey(Iterable<int> keys) async {
