@@ -26,9 +26,9 @@ class CategoryState {
   Future<void> load() async {
     income.subCats.clear();
     expense.subCats.clear();
-    await libraDatabase?.transaction((txn) async {
-      await loadChildCategories(txn, income);
-      await loadChildCategories(txn, expense);
+    await LibraDatabase.readTransaction((txn) async {
+      await txn.loadChildCategories(income);
+      await txn.loadChildCategories(expense);
     });
     debugPrint(
         "CategoryState::load() Loaded ${income.subCats.length}+${expense.subCats.length} categories");
@@ -39,7 +39,9 @@ class CategoryState {
   //----------------------------------------------------------------------------
   void add(Category cat) async {
     debugPrint("CategoryState::add() $cat");
-    cat.key = await insertCategory(cat, listIndex: cat.parent!.subCats.length);
+    LibraDatabase.update((db) async {
+      cat.key = await db.insertCategory(cat, listIndex: cat.parent!.subCats.length);
+    });
     cat.parent!.subCats.add(cat);
     appState.notifyListeners();
   }
@@ -51,12 +53,13 @@ class CategoryState {
     parentList.removeAt(ind);
     appState.notifyListeners();
 
-    libraDatabase!.transaction((txn) async {
+    await LibraDatabase.updateTransaction((txn) async {
       if (deleteFromDatabase) {
-        await deleteCategory(cat, db: txn);
+        await txn.deleteCategory(cat);
       }
-      await shiftCategoryListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1, db: txn);
+      await txn.shiftCategoryListIndicies(cat.parent!.key, ind + 1, parentList.length + 1, -1);
     });
+    appState.transactions.onUpdate();
   }
 
   Future<void> update(Category cat, Category? oldParent) async {
@@ -68,7 +71,7 @@ class CategoryState {
       cat.parent!.subCats.add(cat);
     }
     appState.notifyListeners();
-    updateCategory(cat, listIndex: listIndex);
+    await LibraDatabase.update((db) async => await db.updateCategory(cat, listIndex: listIndex));
   }
 
   void reorder(Category parent, int oldIndex, int newIndex) async {
@@ -80,13 +83,13 @@ class CategoryState {
     }
     appState.notifyListeners();
 
-    await libraDatabase?.transaction((txn) async {
+    await LibraDatabase.updateTransaction((txn) async {
       if (newIndex > oldIndex) {
-        await shiftCategoryListIndicies(parent.key, oldIndex, newIndex, -1, db: txn);
-        await updateCategory(cat, listIndex: newIndex - 1, db: txn);
+        await txn.shiftCategoryListIndicies(parent.key, oldIndex, newIndex, -1);
+        await txn.updateCategory(cat, listIndex: newIndex - 1);
       } else {
-        await shiftCategoryListIndicies(parent.key, newIndex, oldIndex, 1, db: txn);
-        await updateCategory(cat, listIndex: newIndex, db: txn);
+        await txn.shiftCategoryListIndicies(parent.key, newIndex, oldIndex, 1);
+        await txn.updateCategory(cat, listIndex: newIndex);
       }
     });
   }

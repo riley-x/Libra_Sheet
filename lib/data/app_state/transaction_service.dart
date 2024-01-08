@@ -14,7 +14,7 @@ class TransactionService extends ChangeNotifier {
   final LibraAppState appState;
   TransactionService(this.appState);
 
-  void _onUpdate() async {
+  void onUpdate() async {
     // This updates the monthsList, which is used downstream
     await appState.reloadAfterTransactions();
     notifyListeners();
@@ -38,7 +38,7 @@ class TransactionService extends ChangeNotifier {
     } else {
       await LibraDatabase.updateTransaction((txn) async => await txn.updateTransaction(old, nu));
     }
-    _onUpdate();
+    onUpdate();
   }
 
   Future<void> addAll(List<Transaction> transactions) async {
@@ -47,14 +47,14 @@ class TransactionService extends ChangeNotifier {
         await txn.insertTransaction(t);
       }
     });
-    _onUpdate();
+    onUpdate();
     LibraDatabase.backup();
   }
 
   Future<void> delete(Transaction t) async {
     debugPrint("TransactionService::delete() $t");
     await LibraDatabase.updateTransaction((txn) async => await txn.deleteTransaction(t));
-    _onUpdate();
+    onUpdate();
   }
 
   Future<void> loadRelations(Transaction t) {

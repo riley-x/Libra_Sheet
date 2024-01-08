@@ -404,6 +404,16 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     }
     return out;
   }
+
+  /// Sets the category to income/expense for all transactions
+  Future<int> unsetCategoryFromAllTransactions(int categoryKey) {
+    return rawUpdate(
+      "UPDATE $transactionsTable "
+      "SET $_category = (CASE WHEN $_value > 0 THEN ${Category.income.key} ELSE ${Category.expense.key}) "
+      "WHERE $_category = ?",
+      [categoryKey],
+    );
+  }
 }
 
 /// Creates the base query to fetch a [Transaction] from the [transactionsTable]. The statement

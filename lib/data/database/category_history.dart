@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -116,6 +117,40 @@ extension CategoryHistoryExtensionT on Transaction {
     );
     await _insertCategoryHistory(data);
     return await _updateCategoryHistory(data);
+  }
+
+  /// Sums the history from [cat] into the respective super category, then deletes the history from
+  /// [cat].
+  Future<void> mergeAndDeleteCategoryHistory(Category cat) async {
+    final superKey =
+        cat.type == ExpenseFilterType.income ? Category.income.key : Category.expense.key;
+
+    /// First we make sure that the entries in the super category exist, initialize them to 0
+    await rawInsert('''
+      INSERT OR IGNORE INTO $categoryHistoryTable ($_account, $_category, $_date, $_value)
+      SELECT $_account, $superKey, $_date, 0
+      FROM $categoryHistoryTable
+      WHERE $_category = ${cat.key}
+    ''');
+
+    /// Set the super category entries as the sum
+    await rawUpdate('''
+      UPDATE $categoryHistoryTable
+      SET $_value = o.$_value
+      FROM (
+        SELECT SUM($_value) AS $_value 
+        FROM $categoryHistoryTable
+        WHERE $_category IN ($superKey, ${cat.key})
+        GROUP BY $_account, $_date
+      ) AS o
+      WHERE $_account = o.$_account AND $_date = o.$_date AND $_category = $superKey
+    ''');
+
+    /// Delete the old category entries
+    await delete(
+      categoryHistoryTable,
+      where: "$_category = ${cat.key}",
+    );
   }
 }
 

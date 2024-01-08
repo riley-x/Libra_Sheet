@@ -113,3 +113,12 @@ Future<int> shiftRuleIndicies(
     [delta, type.name, start, end],
   );
 }
+
+extension RuleDatabaseExtension on DatabaseExecutor {
+  Future<int> deleteRulesWithCategory(int categoryId) {
+    return delete(
+      rulesTable,
+      where: "$_category = $categoryId",
+    );
+  }
+}
