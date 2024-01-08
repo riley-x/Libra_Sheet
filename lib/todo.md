@@ -3,7 +3,6 @@
 
 ## High priority features
 - Reorder tags
-- Add warning to back on CSV transactions
 - Start screen, UX
 - Better reimbursement/allocation cards in transaction details
 

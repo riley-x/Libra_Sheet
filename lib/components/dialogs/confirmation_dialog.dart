@@ -41,8 +41,8 @@ Future<bool> showConfirmationDialog({
   required BuildContext context,
   String? title,
   String? msg,
-  Function(bool confirmed)? onClose,
-  Function()? onConfirmed,
+  @Deprecated('Use await') Function(bool confirmed)? onClose,
+  @Deprecated('Use await') Function()? onConfirmed,
   bool showCancel = true,
 }) async {
   final result = await showDialog(

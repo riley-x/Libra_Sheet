@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
+import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
@@ -27,11 +28,15 @@ class PreviewTransactionsScreen extends StatelessWidget {
         onSaveRule: context.read<AddCsvState>().reprocessRule,
       ),
       builder: (context, child) {
-        void onBack() {
+        void onBack() async {
           final csvState = context.read<AddCsvState>();
           final detailsState = context.read<TransactionDetailsState>();
           if (csvState.focusedTransIndex == -1) {
-            csvState.clearTransactions();
+            final confirmed = await showConfirmationDialog(
+                context: context,
+                title: 'Back to CSV Input?',
+                msg: "This will delete any changes you've made here.");
+            if (confirmed) csvState.clearTransactions();
           } else if (detailsState.focus == TransactionDetailActiveFocus.none) {
             csvState.focusTransaction(-1);
           } else {
