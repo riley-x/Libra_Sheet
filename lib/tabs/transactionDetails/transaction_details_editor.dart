@@ -53,210 +53,213 @@ class TransactionDetailsEditor extends StatelessWidget {
     /// This may not be ideal...
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
-      child: SizedBox(
-        width: maxWidth,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: horizontalPadding),
-          child: FocusScope(
-            child: Form(
-              key: state.formKey,
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Details',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+      // This allows the scroll bar to expand to the right side of the screen
+      child: Center(
+        child: SizedBox(
+          width: maxWidth,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: horizontalPadding),
+            child: FocusScope(
+              child: Form(
+                key: state.formKey,
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Details',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    columnWidths: const {
-                      0: IntrinsicColumnWidth(),
-                      1: FixedColumnWidth(275),
-                    },
-                    children: [
-                      labelRow(
-                        context,
-                        'Account',
-                        AccountSelectionFormField(
-                          height: 35,
-                          initial: state.seed?.account ?? state.initialAccount,
-                          onSave: (it) => state.account = it,
-                        ),
-                      ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        'Name',
-                        LibraTextFormField(
-                          initial: state.seed?.name,
-                          minLines: 3,
-                          maxLines: 3,
-                          validator: (it) => null,
-                          onSave: (it) => state.name = it,
-                        ),
-                      ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        'Date',
-                        _DateField(
-                          initial: state.seed?.date,
-                          onSave: (it) => state.date = it,
-                        ),
-                      ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        'Value',
-                        ValueField(
-                          initial: state.seed?.value,
-                          onSave: (it) => state.value = it,
-                          onChanged: state.onValueChanged,
-                        ),
-                      ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        '', // not used
-                        CategorySelectionFormField(
-                          height: 35,
-                          initial: initialCategory(),
-                          categories: categories,
-                          onSave: (it) => state.category = it,
-                        ),
-                        labelCustom: const _CategoryLabel(),
-                      ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        'Tags',
-                        ExcludeFocus(
-                          child: _TagSelector(
-                            tags: state.tags,
-                            onChanged: state.onTagChanged,
+                    Table(
+                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                      columnWidths: const {
+                        0: FixedColumnWidth(150),
+                        1: MinColumnWidth(FixedColumnWidth(410), FlexColumnWidth()),
+                      },
+                      children: [
+                        labelRow(
+                          context,
+                          'Account',
+                          AccountSelectionFormField(
+                            height: 35,
+                            initial: state.seed?.account ?? state.initialAccount,
+                            onSave: (it) => state.account = it,
                           ),
                         ),
-                      ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        'Note',
-                        LibraTextFormField(
-                          initial: state.seed?.note,
-                          validator: (it) => null,
-                          onSave: (it) => state.note = it,
-                          minLines: 2,
-                          maxLines: 2,
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          'Name',
+                          LibraTextFormField(
+                            initial: state.seed?.name,
+                            minLines: 3,
+                            maxLines: 3,
+                            validator: (it) => null,
+                            onSave: (it) => state.name = it,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  /// --------------------------------------------------
-                  /// Allocations
-                  /// --------------------------------------------------
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Allocations',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          'Date',
+                          _DateField(
+                            initial: state.seed?.date,
+                            onSave: (it) => state.date = it,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.info_outline),
-                        onPressed: () => showConfirmationDialog(
-                          context: context,
-                          title: 'Allocations',
-                          msg:
-                              "An allocation lets you split a transaction into multiple categories.",
-                          showCancel: false,
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          'Value',
+                          ValueField(
+                            initial: state.seed?.value,
+                            onSave: (it) => state.value = it,
+                            onChanged: state.onValueChanged,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () => state.focusAllocation(null),
-                      ),
-                    ],
-                  ),
-                  for (final alloc in state.allocations) ...[
-                    const SizedBox(height: 6),
-                    AllocationCard(
-                      alloc,
-                      onTap: (it) => state.focusAllocation(it),
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          '', // not used
+                          CategorySelectionFormField(
+                            height: 35,
+                            initial: initialCategory(),
+                            categories: categories,
+                            onSave: (it) => state.category = it,
+                          ),
+                          labelCustom: const _CategoryLabel(),
+                        ),
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          'Tags',
+                          ExcludeFocus(
+                            child: _TagSelector(
+                              tags: state.tags,
+                              onChanged: state.onTagChanged,
+                            ),
+                          ),
+                        ),
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          'Note',
+                          LibraTextFormField(
+                            initial: state.seed?.note,
+                            validator: (it) => null,
+                            onSave: (it) => state.note = it,
+                            minLines: 2,
+                            maxLines: 2,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
 
-                  /// --------------------------------------------------
-                  /// Reimbursements
-                  /// --------------------------------------------------
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Reimbursements',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    /// --------------------------------------------------
+                    /// Allocations
+                    /// --------------------------------------------------
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Allocations',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.info_outline),
-                        onPressed: () => showConfirmationDialog(
-                          context: context,
-                          title: 'Reimbursements',
-                          msg:
-                              "A reimbursement cancels a specified amount from two opposite transactions.\n\n"
-                              "For example, you pay for dinner with a friend and log a \$60 dining transaction, "
-                              "and then your friend Venmo's you back \$30. "
-                              "But your real expense was only \$30, and the Venmo transaction shouldn't count as income. "
-                              "By reimbursing the two transactions with each other, you get the desired result.",
-                          showCancel: false,
+                        IconButton(
+                          icon: const Icon(Icons.info_outline),
+                          onPressed: () => showConfirmationDialog(
+                            context: context,
+                            title: 'Allocations',
+                            msg:
+                                "An allocation lets you split a transaction into multiple categories.",
+                            showCancel: false,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () => state.focusReimbursement(null),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () => state.focusAllocation(null),
+                        ),
+                      ],
+                    ),
+                    for (final alloc in state.allocations) ...[
+                      const SizedBox(height: 6),
+                      AllocationCard(
+                        alloc,
+                        onTap: (it) => state.focusAllocation(it),
                       ),
                     ],
-                  ),
-                  for (final r in state.reimbursements) ...[
-                    const SizedBox(height: 6),
-                    _ReimbursementRow(r, onTap: (it) => state.focusReimbursement(it)),
-                  ],
 
-                  /// --------------------------------------------------
-                  /// Form Buttons
-                  /// --------------------------------------------------
-                  const SizedBox(height: 20),
-                  FormButtons(
-                    showDelete: (state.seed != null && !state.seedStale),
-                    onCancel: (onCancel != null) ? onCancel : Navigator.of(context).pop,
-                    onDelete: state.delete,
-                    // onReset: state.reset,
-                    // disable save when the allocation/reimb editor is open
-                    onSave: (state.focus == TransactionDetailActiveFocus.none && !state.seedStale)
-                        ? state.save
-                        : null,
-                  ),
-                  const SizedBox(height: 10),
-                  if (state.errorMessage != null)
-                    SizedBox(
-                      width: maxWidth - 100,
-                      child: Text(
-                        state.errorMessage!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
-                      ),
-                    )
-                ],
+                    /// --------------------------------------------------
+                    /// Reimbursements
+                    /// --------------------------------------------------
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Reimbursements',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.info_outline),
+                          onPressed: () => showConfirmationDialog(
+                            context: context,
+                            title: 'Reimbursements',
+                            msg:
+                                "A reimbursement cancels a specified amount from two opposite transactions.\n\n"
+                                "For example, you pay for dinner with a friend and log a \$60 dining transaction, "
+                                "and then your friend Venmo's you back \$30. "
+                                "But your real expense was only \$30, and the Venmo transaction shouldn't count as income. "
+                                "By reimbursing the two transactions with each other, you get the desired result.",
+                            showCancel: false,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () => state.focusReimbursement(null),
+                        ),
+                      ],
+                    ),
+                    for (final r in state.reimbursements) ...[
+                      const SizedBox(height: 6),
+                      _ReimbursementRow(r, onTap: (it) => state.focusReimbursement(it)),
+                    ],
+
+                    /// --------------------------------------------------
+                    /// Form Buttons
+                    /// --------------------------------------------------
+                    const SizedBox(height: 20),
+                    FormButtons(
+                      showDelete: (state.seed != null && !state.seedStale),
+                      onCancel: (onCancel != null) ? onCancel : Navigator.of(context).pop,
+                      onDelete: state.delete,
+                      // onReset: state.reset,
+                      // disable save when the allocation/reimb editor is open
+                      onSave: (state.focus == TransactionDetailActiveFocus.none && !state.seedStale)
+                          ? state.save
+                          : null,
+                    ),
+                    const SizedBox(height: 10),
+                    if (state.errorMessage != null)
+                      SizedBox(
+                        width: maxWidth - 100,
+                        child: Text(
+                          state.errorMessage!,
+                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        ),
+                      )
+                  ],
+                ),
               ),
             ),
           ),
