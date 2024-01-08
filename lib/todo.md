@@ -21,7 +21,7 @@
 
 ## Low priority features
 - Load more transactions on reach end of transaction grid?
-- Reimburse/category multiple transactions?
+- Bulk edit transactions
 - Rethink transaction details UI, especially reimbursements?
 - Animate bar charts?
 - Maybe balance update? Specifically for investments?
