@@ -116,7 +116,7 @@ class _SettingsTabState extends State<SettingsTab> {
             _ => const SizedBox(),
           };
 
-          bool isFullScreen = constraints.maxWidth < 850;
+          bool isFullScreen = constraints.maxWidth < 950;
           Widget auxScreen = SettingsScreenHeader(
             screen: tab,
             isFullScreen: isFullScreen,
@@ -132,7 +132,6 @@ class _SettingsTabState extends State<SettingsTab> {
             }
           } else {
             return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 mainScreen,
                 Container(
@@ -157,7 +156,7 @@ class _SettingsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 400),
+      constraints: const BoxConstraints(maxWidth: 500),
       child: Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(

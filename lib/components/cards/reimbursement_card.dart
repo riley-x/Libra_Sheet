@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/cards/transaction_card.dart';
+import 'package:libra_sheet/components/TwoElementRow.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/reimbursement.dart';
 
@@ -49,7 +51,7 @@ class ReimbursementCard extends StatelessWidget {
 
       final dtFormat = DateFormat("M/d/yy");
       content = LimitedBox(
-        maxWidth: 300,
+        maxWidth: 500,
         child: Row(
           children: [
             Expanded(
@@ -93,6 +95,37 @@ class ReimbursementCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 6),
           child: content,
         ),
+      ),
+    );
+  }
+}
+
+class ReimbursementCard2 extends StatelessWidget {
+  const ReimbursementCard2({super.key, required this.reimbursement, this.onTap});
+
+  final Reimbursement reimbursement;
+  final Function(Reimbursement?)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TwoElementRow(
+      leftWidth: 100,
+      rightWidth: 440,
+      left: Text(reimbursement.value.dollarString()),
+      right: TransactionCard(
+        margin: EdgeInsets.zero,
+        trans: reimbursement.target,
+        onSelect: (onTap == null) ? null : (it) => onTap!.call(reimbursement),
+        // rightContent: Padding(
+        //   padding: const EdgeInsets.only(left: 20),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.end,
+        //     children: [
+        //       const Text('Reimb:'),
+        //       Text(reimbursement.value.dollarString()),
+        //     ],
+        //   ),
+        // ),
       ),
     );
   }

@@ -6,11 +6,13 @@ class ConfirmationDialog extends StatelessWidget {
     this.title,
     this.msg,
     this.showCancel = true,
+    this.maxWidth = 500,
   });
 
   final String? title;
   final String? msg;
   final bool showCancel;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class ConfirmationDialog extends StatelessWidget {
       content: (msg == null)
           ? null
           : ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: BoxConstraints(maxWidth: maxWidth),
               child: Text(msg!),
             ),
       actions: <Widget>[
@@ -44,11 +46,17 @@ Future<bool> showConfirmationDialog({
   @Deprecated('Use await') Function(bool confirmed)? onClose,
   @Deprecated('Use await') Function()? onConfirmed,
   bool showCancel = true,
+  double maxWidth = 500,
 }) async {
   final result = await showDialog(
     context: context,
     builder: (BuildContext context) {
-      return ConfirmationDialog(title: title, msg: msg, showCancel: showCancel);
+      return ConfirmationDialog(
+        title: title,
+        msg: msg,
+        showCancel: showCancel,
+        maxWidth: maxWidth,
+      );
     },
   );
   final confirmed = result == 'Ok';

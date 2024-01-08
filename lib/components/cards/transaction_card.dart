@@ -15,6 +15,7 @@ class TransactionCard extends StatelessWidget {
     this.onSelect,
     this.margin,
     this.showTags = true,
+    this.rightContent,
   });
 
   final Transaction trans;
@@ -22,6 +23,7 @@ class TransactionCard extends StatelessWidget {
   final Function(Transaction)? onSelect;
   final EdgeInsets? margin;
   final bool showTags;
+  final Widget? rightContent;
 
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
@@ -36,67 +38,73 @@ class TransactionCard extends StatelessWidget {
     final signedReimb = (trans.value > 0) ? -trans.totalReimbusrements : trans.totalReimbusrements;
     final valueAfterReimb = trans.value + signedReimb;
 
-    return Card(
-      margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      shape: (isUncategorized && valueAfterReimb != 0)
-          ? RoundedRectangleBorder(
-              side: BorderSide(color: Theme.of(context).colorScheme.error),
-              borderRadius: BorderRadius.circular(8),
-            )
-          : (isInvestment)
-              ? RoundedRectangleBorder(
-                  side: BorderSide(color: Theme.of(context).colorScheme.primary),
-                  borderRadius: BorderRadius.circular(8),
-                )
-              : null,
-      // color: Color.alphaBlend(
-      //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
-      //     Theme.of(context).colorScheme.surface),
-      surfaceTintColor: color,
-      shadowColor: (isUncategorized || isInvestment) ? Colors.transparent : null,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => onSelect?.call(trans),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                width: colorIndicatorWidth,
-                top: 0,
-                bottom: 0,
-                child: Container(color: color),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: colorIndicatorWidth + colorIndicatorOffset),
-                // padding: const EdgeInsets.only(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _TextElements(
-                      trans: trans,
-                      maxRowsForName: maxRowsForName,
-                    ),
-                    if (showTags && trans.tags.isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          for (final tag in trans.tags)
-                            LibraChip(
-                              tag.name,
-                              color: tag.color,
-                              style: Theme.of(context).textTheme.labelMedium,
-                            ),
-                        ],
-                      ),
-                    ]
-                  ],
+    return LimitedBox(
+      maxWidth: 500,
+      child: Card(
+        margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        shape: (isUncategorized && valueAfterReimb != 0)
+            ? RoundedRectangleBorder(
+                side: BorderSide(color: Theme.of(context).colorScheme.error),
+                borderRadius: BorderRadius.circular(8),
+              )
+            : (isInvestment)
+                ? RoundedRectangleBorder(
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                    borderRadius: BorderRadius.circular(8),
+                  )
+                : null,
+        // color: Color.alphaBlend(
+        //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
+        //     Theme.of(context).colorScheme.surface),
+        surfaceTintColor: color,
+        shadowColor: (isUncategorized || isInvestment) ? Colors.transparent : null,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => onSelect?.call(trans),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: Stack(
+              /// We use a stack here to easily make the color indicator bar have the same height as
+              /// the content via [Positioned].
+              children: [
+                Positioned(
+                  left: 0,
+                  width: colorIndicatorWidth,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(color: color),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(left: colorIndicatorWidth + colorIndicatorOffset),
+                  // padding: const EdgeInsets.only(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _TextElements(
+                        trans: trans,
+                        maxRowsForName: maxRowsForName,
+                        rightContent: rightContent,
+                      ),
+                      if (showTags && trans.tags.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            for (final tag in trans.tags)
+                              LibraChip(
+                                tag.name,
+                                color: tag.color,
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                          ],
+                        ),
+                      ]
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -108,20 +116,21 @@ final _dtFormat = DateFormat("M/d/yy");
 
 class _TextElements extends StatelessWidget {
   const _TextElements({
-    super.key,
     required this.trans,
     required this.maxRowsForName,
+    required this.rightContent,
   });
 
   final Transaction trans;
   final int? maxRowsForName;
+  final Widget? rightContent;
 
   @override
   Widget build(BuildContext context) {
     /// TODO think of a cleaner way to not have to remember to watch AccountState every time you
     /// use an account.
-
     context.watch<AccountState>();
+
     final theme = Theme.of(context);
     var subText = '';
     if (trans.account != null) {
@@ -197,13 +206,14 @@ class _TextElements extends StatelessWidget {
             ),
           ],
         ),
+        if (rightContent != null) rightContent!,
       ],
     );
   }
 }
 
 class _NumberIndicator extends StatelessWidget {
-  const _NumberIndicator(this.n, this.isAlloc, {super.key});
+  const _NumberIndicator(this.n, this.isAlloc);
 
   final int n;
   final bool isAlloc;

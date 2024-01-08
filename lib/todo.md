@@ -15,8 +15,7 @@
 
 
 ## Refactor
-- Convert some appState stuff into independent ChangeNotifiers? Be careful with this though...like everything that 
-  watches a transaction actually watches both account state and category state...
+- Undo make AccountState an independent ChangeNotifier; huge hassle, need to watch the state everywhere you use an account.
 
 
 ## Low priority features

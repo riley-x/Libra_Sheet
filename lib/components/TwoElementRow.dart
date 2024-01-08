@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// A row with two children that aligns them right and left, respectively. They must both have
-/// fixed widths.
-class RightLeftRow extends StatelessWidget {
-  const RightLeftRow({
+/// A row with two fixed-width children that aligns them by default towards the center.
+class TwoElementRow extends StatelessWidget {
+  const TwoElementRow({
     super.key,
     required this.left,
     required this.right,
     this.leftWidth = 200,
-    this.rightWidth = 300,
+    this.rightWidth = 280,
     this.spacing = 20,
     this.verticalAlignment = CrossAxisAlignment.center,
+    this.leftAlign = Alignment.centerRight,
+    this.rightAlign = Alignment.centerLeft,
   });
 
   final Widget left;
@@ -19,6 +20,8 @@ class RightLeftRow extends StatelessWidget {
   final double rightWidth;
   final double spacing;
   final CrossAxisAlignment verticalAlignment;
+  final Alignment leftAlign;
+  final Alignment rightAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class RightLeftRow extends StatelessWidget {
         SizedBox(
           width: leftWidth,
           child: Align(
-            alignment: Alignment.centerRight,
+            alignment: leftAlign,
             child: left,
           ),
         ),
@@ -36,7 +39,7 @@ class RightLeftRow extends StatelessWidget {
         SizedBox(
           width: rightWidth,
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: rightAlign,
             child: right,
           ),
         ),
