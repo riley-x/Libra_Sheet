@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/cards/color_indicator_card.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 
 class AllocationCard extends StatelessWidget {
-  final Allocation? allocation;
-  final Function(Allocation?)? onTap;
+  final Allocation allocation;
+  final Function(Allocation)? onTap;
 
   const AllocationCard(
     this.allocation, {
@@ -14,64 +16,46 @@ class AllocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget? content;
-    if (allocation == null) {
-      content = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    final color = (allocation.category?.level == 0) ? null : allocation.category?.color;
+
+    bool isUncategorized =
+        allocation.category == Category.income || allocation.category == Category.expense;
+    bool isInvestment = allocation.category == Category.investment;
+
+    return ColorIndicatorCard(
+      color: color,
+      borderColor: (isUncategorized)
+          ? Theme.of(context).colorScheme.error
+          : (isInvestment)
+              ? Theme.of(context).colorScheme.primary
+              : null,
+      onTap: onTap == null ? null : () => onTap!.call(allocation),
+      child: Row(
         children: [
-          Icon(
-            Icons.add,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          const SizedBox(width: 5, height: 30),
-          Text(
-            'Add an allocation',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-          ),
-        ],
-      );
-    } else {
-      content = LimitedBox(
-        maxWidth: 300,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                allocation!.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 15),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  allocation!.value.dollarString(),
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  allocation.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  allocation!.category?.name ?? '',
+                  allocation.category?.name ?? '',
                   style: Theme.of(context).textTheme.labelLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
-          ],
-        ),
-      );
-    }
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: (onTap == null) ? null : () => onTap!.call(allocation),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: content,
-        ),
+          ),
+          const SizedBox(width: 15),
+          Text(
+            allocation.value.dollarString(),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
       ),
     );
   }

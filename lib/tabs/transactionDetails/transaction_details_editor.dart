@@ -9,7 +9,6 @@ import 'package:libra_sheet/components/menus/account_selection_menu.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/menus/dropdown_checkbox_menu.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
-import 'package:libra_sheet/components/TwoElementRow.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
@@ -58,6 +57,15 @@ class TransactionDetailsEditor extends StatelessWidget {
               key: state.formKey,
               child: Column(
                 children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Details',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   Table(
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     columnWidths: const {
@@ -140,31 +148,50 @@ class TransactionDetailsEditor extends StatelessWidget {
                           maxLines: 2,
                         ),
                       ),
-                      rowSpacing,
-                      labelRow(
-                        context,
-                        'Allocations',
-                        Column(
-                          children: [
-                            for (final alloc in state.allocations) ...[
-                              AllocationCard(
-                                alloc,
-                                onTap: (it) => state.focusAllocation(it),
-                              ),
-                              const SizedBox(height: 6)
-                            ],
-                            AllocationCard(
-                              null,
-                              onTap: (it) => state.focusAllocation(it),
-                            ),
-                          ],
+                    ],
+                  ),
+
+                  /// --------------------------------------------------
+                  /// Allocations
+                  /// --------------------------------------------------
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Allocations',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        labelAlign: TableCellVerticalAlignment.top,
-                        tooltip: "An allocation assigns a portion of the\n"
-                            "transaction's value to a separate category.",
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.info_outline),
+                        onPressed: () => showConfirmationDialog(
+                          context: context,
+                          title: 'Allocations',
+                          msg:
+                              "An allocation lets you split a transaction into multiple categories.",
+                          showCancel: false,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () => state.focusAllocation(null),
                       ),
                     ],
                   ),
+                  for (final alloc in state.allocations) ...[
+                    const SizedBox(height: 6),
+                    AllocationCard(
+                      alloc,
+                      onTap: (it) => state.focusAllocation(it),
+                    ),
+                  ],
+
+                  /// --------------------------------------------------
+                  /// Reimbursements
+                  /// --------------------------------------------------
                   const SizedBox(height: 20),
                   Row(
                     children: [
@@ -203,6 +230,10 @@ class TransactionDetailsEditor extends StatelessWidget {
                       onTap: (it) => state.focusReimbursement(it),
                     ),
                   ],
+
+                  /// --------------------------------------------------
+                  /// Form Buttons
+                  /// --------------------------------------------------
                   const SizedBox(height: 20),
                   FormButtons(
                     showDelete: (state.seed != null && !state.seedStale),
