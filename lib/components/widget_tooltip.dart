@@ -10,12 +10,14 @@ class WidgetTooltip extends StatefulWidget {
     required this.child,
     this.delay = 500,
     this.verticalOffset = 24,
+    this.beforeHover,
   });
 
   final Widget tooltip;
   final Widget child;
   final int delay;
   final double verticalOffset;
+  final Future? Function()? beforeHover;
 
   @override
   State<WidgetTooltip> createState() => _WidgetTooltipState();
@@ -23,6 +25,7 @@ class WidgetTooltip extends StatefulWidget {
 
 class _WidgetTooltipState extends State<WidgetTooltip> {
   final OverlayPortalController _overlayController = OverlayPortalController();
+  Future? _userFuture;
   Timer? _timer;
   bool visible = false;
 
@@ -32,17 +35,24 @@ class _WidgetTooltipState extends State<WidgetTooltip> {
     super.dispose();
   }
 
-  void show() {
-    if (mounted) _overlayController.show();
+  void show() async {
+    if (_userFuture != null) await _userFuture;
+    if (mounted) {
+      _overlayController.show();
+    }
   }
 
   void _handleMouseEnter(PointerEnterEvent event) {
-    if (!visible) _timer ??= Timer(Duration(milliseconds: widget.delay), show);
+    if (!visible) {
+      _userFuture = widget.beforeHover?.call();
+      _timer ??= Timer(Duration(milliseconds: widget.delay), show);
+    }
   }
 
   void _handleMouseExit(PointerExitEvent event) {
     _timer?.cancel();
     _timer = null;
+    _userFuture = null;
     _overlayController.hide();
   }
 

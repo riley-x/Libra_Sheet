@@ -5,6 +5,7 @@ import 'package:libra_sheet/components/cards/libra_chip.dart';
 import 'package:libra_sheet/components/cards/transaction_tooltip.dart';
 import 'package:libra_sheet/components/widget_tooltip.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
+import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -84,6 +85,11 @@ class TransactionCard extends StatelessWidget {
       verticalOffset: 30,
       delay: 1000,
       tooltip: TransactionTooltip(trans),
+      beforeHover: () async {
+        if (!trans.relationsAreLoaded()) {
+          await context.read<TransactionService>().loadRelations(trans);
+        }
+      },
       child: card,
     );
   }

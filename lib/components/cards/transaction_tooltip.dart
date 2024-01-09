@@ -11,7 +11,8 @@ class TransactionTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reimbs = t.totalReimbusrements;
+    final reimbs = t.reimbursements ?? [];
+    final allocs = t.allocations ?? [];
 
     return Container(
       padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
@@ -59,30 +60,56 @@ class TransactionTooltip extends StatelessWidget {
                 right: Text(t.note),
                 verticalAlignment: CrossAxisAlignment.start,
               ),
-            if (t.nAllocations > 0) ...[
+            if (allocs.isNotEmpty) ...[
               const SizedBox(height: 4),
               TwoElementRow(
-                  verticalAlignment: CrossAxisAlignment.start,
-                  left: const Text('Allocations'),
-                  right: Column(
-                    children: [
-                      for (final (i, alloc) in t.softAllocations.indexed) ...[
-                        if (i > 0) const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            if (alloc.category.level > 0) ...[
-                              Container(color: alloc.category.color, width: 4, height: 24),
-                              const SizedBox(width: 6),
-                            ],
-                            Text("${alloc.category.name}: ${alloc.value.dollarString()}"),
+                verticalAlignment: CrossAxisAlignment.start,
+                left: const Text('Allocations'),
+                right: Column(
+                  children: [
+                    for (final (i, alloc) in allocs.indexed) ...[
+                      if (i > 0) const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if ((alloc.category?.level ?? 0) > 0) ...[
+                            Container(color: alloc.category?.color, width: 4, height: 24),
+                            const SizedBox(width: 6),
                           ],
-                        ),
-                      ]
-                    ],
-                  )),
+                          Expanded(
+                            child: Text(
+                                "${alloc.category?.name}: ${alloc.value.dollarString()} (${alloc.name})"),
+                          ),
+                        ],
+                      ),
+                    ]
+                  ],
+                ),
+              ),
             ],
-            if (reimbs > 0)
-              TwoElementRow(left: const Text('Reimbs.'), right: Text(reimbs.dollarString())),
+            if (reimbs.isNotEmpty)
+              TwoElementRow(
+                verticalAlignment: CrossAxisAlignment.start,
+                left: const Text('Reimbs.'),
+                right: Column(
+                  children: [
+                    for (final reimb in reimbs) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "${reimb.value.dollarString()}: ${reimb.target.name}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]
+                  ],
+                ),
+              ),
           ],
         ),
       ),
