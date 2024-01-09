@@ -118,14 +118,14 @@ class LibraDropdownFormField<T> extends StatelessWidget {
             border: Border.all(
                 color: (state.hasError)
                     ? Theme.of(context).colorScheme.error
-                    : Theme.of(context).colorScheme.surface),
+                    : Theme.of(context).colorScheme.outline),
           ),
           child: DropdownSelector<T?>(
             selected: state.value,
             items: items,
             builder: builder,
             selectedBuilder: selectedBuilder,
-            borderRadius: borderRadius,
+            borderRadius: borderRadius ?? BorderRadius.circular(4),
             onSelected: state.didChange,
           ),
         );

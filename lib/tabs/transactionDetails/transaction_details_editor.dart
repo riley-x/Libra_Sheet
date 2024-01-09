@@ -79,8 +79,8 @@ class TransactionDetailsEditor extends StatelessWidget {
                     Table(
                       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                       columnWidths: const {
-                        0: FixedColumnWidth(150),
-                        1: MinColumnWidth(FixedColumnWidth(410), FlexColumnWidth()),
+                        0: FixedColumnWidth(130),
+                        1: MinColumnWidth(FixedColumnWidth(420), FlexColumnWidth()),
                       },
                       children: [
                         labelRow(
@@ -138,17 +138,6 @@ class TransactionDetailsEditor extends StatelessWidget {
                         rowSpacing,
                         labelRow(
                           context,
-                          'Tags',
-                          ExcludeFocus(
-                            child: _TagSelector(
-                              tags: state.tags,
-                              onChanged: state.onTagChanged,
-                            ),
-                          ),
-                        ),
-                        rowSpacing,
-                        labelRow(
-                          context,
                           'Note',
                           LibraTextFormField(
                             initial: state.seed?.note,
@@ -158,6 +147,17 @@ class TransactionDetailsEditor extends StatelessWidget {
                             maxLines: 2,
                           ),
                         ),
+                        rowSpacing,
+                        labelRow(
+                          context,
+                          'Tags',
+                          ExcludeFocus(
+                            child: _TagSelector(
+                              tags: state.tags,
+                              onChanged: state.onTagChanged,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
@@ -165,37 +165,41 @@ class TransactionDetailsEditor extends StatelessWidget {
                     /// Allocations
                     /// --------------------------------------------------
                     const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Allocations',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    ExcludeFocus(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Allocations',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.info_outline),
-                          onPressed: () => showConfirmationDialog(
-                            context: context,
-                            title: 'Allocations',
-                            msg:
-                                "An allocation lets you split a transaction into multiple categories.",
-                            showCancel: false,
+                          IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            onPressed: () => showConfirmationDialog(
+                              context: context,
+                              title: 'Allocations',
+                              msg:
+                                  "An allocation lets you split a transaction into multiple categories.",
+                              showCancel: false,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () => state.focusAllocation(null),
-                        ),
-                      ],
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () => state.focusAllocation(null),
+                          ),
+                        ],
+                      ),
                     ),
                     for (final alloc in state.allocations) ...[
                       const SizedBox(height: 6),
-                      AllocationCard(
-                        alloc,
-                        onTap: (it) => state.focusAllocation(it),
+                      ExcludeFocus(
+                        child: AllocationCard(
+                          alloc,
+                          onTap: (it) => state.focusAllocation(it),
+                        ),
                       ),
                     ],
 
@@ -203,42 +207,46 @@ class TransactionDetailsEditor extends StatelessWidget {
                     /// Reimbursements
                     /// --------------------------------------------------
                     const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Reimbursements',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    ExcludeFocus(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Reimbursements',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.info_outline),
-                          onPressed: () => showConfirmationDialog(
-                            context: context,
-                            title: 'Reimbursements',
-                            msg:
-                                "A reimbursement cancels a specified amount from two opposite transactions.\n\n"
-                                "For example, you pay for dinner with a friend and log a \$60 dining transaction, "
-                                "and then your friend Venmo's you back \$30. "
-                                "But your real expense was only \$30, and the Venmo transaction shouldn't count as income. "
-                                "By reimbursing the two transactions with each other, you get the desired result.",
-                            showCancel: false,
+                          IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            onPressed: () => showConfirmationDialog(
+                              context: context,
+                              title: 'Reimbursements',
+                              msg:
+                                  "A reimbursement cancels a specified amount from two opposite transactions.\n\n"
+                                  "For example, you pay for dinner with a friend and log a \$60 dining transaction, "
+                                  "and then your friend Venmo's you back \$30. "
+                                  "But your real expense was only \$30, and the Venmo transaction shouldn't count as income. "
+                                  "By reimbursing the two transactions with each other, you get the desired result.",
+                              showCancel: false,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () => state.focusReimbursement(null),
-                        ),
-                      ],
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () => state.focusReimbursement(null),
+                          ),
+                        ],
+                      ),
                     ),
                     for (final r in state.reimbursements) ...[
                       const SizedBox(height: 6),
-                      _ReimbursementRow(
-                        r,
-                        onEdit: (it) => state.focusReimbursement(it),
-                        onSelect: (it) => toTransactionDetails(context, it),
+                      ExcludeFocus(
+                        child: _ReimbursementRow(
+                          r,
+                          onEdit: (it) => state.focusReimbursement(it),
+                          onSelect: (it) => toTransactionDetails(context, it),
+                        ),
                       ),
                     ],
 
