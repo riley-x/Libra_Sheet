@@ -42,6 +42,12 @@ class TransactionTooltip extends StatelessWidget {
               right: Text(t.name),
               verticalAlignment: CrossAxisAlignment.start,
             ),
+            if (t.note.isNotEmpty)
+              TwoElementRow(
+                left: const Text('Note'),
+                right: Text(t.note),
+                verticalAlignment: CrossAxisAlignment.start,
+              ),
             TwoElementRow(
               left: const Text('Category'),
               right: Row(
@@ -54,12 +60,6 @@ class TransactionTooltip extends StatelessWidget {
                 ],
               ),
             ),
-            if (t.note.isNotEmpty)
-              TwoElementRow(
-                left: const Text('Note'),
-                right: Text(t.note),
-                verticalAlignment: CrossAxisAlignment.start,
-              ),
             if (allocs.isNotEmpty) ...[
               const SizedBox(height: 4),
               TwoElementRow(
