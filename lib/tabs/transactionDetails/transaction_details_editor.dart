@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/cards/allocation_card.dart';
+import 'package:libra_sheet/components/cards/color_indicator_card.dart';
 import 'package:libra_sheet/components/cards/libra_chip.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
@@ -15,6 +16,8 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/components/table_form_utils.dart';
+import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
@@ -232,7 +235,11 @@ class TransactionDetailsEditor extends StatelessWidget {
                     ),
                     for (final r in state.reimbursements) ...[
                       const SizedBox(height: 6),
-                      _ReimbursementRow(r, onTap: (it) => state.focusReimbursement(it)),
+                      _ReimbursementRow(
+                        r,
+                        onEdit: (it) => state.focusReimbursement(it),
+                        onSelect: (it) => toTransactionDetails(context, it),
+                      ),
                     ],
 
                     /// --------------------------------------------------
@@ -304,7 +311,7 @@ class _CategoryLabel extends StatelessWidget {
               ),
           child: Text(
             'Category',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
       ],
@@ -381,28 +388,45 @@ class _TagSelector extends StatelessWidget {
 }
 
 class _ReimbursementRow extends StatelessWidget {
-  const _ReimbursementRow(this.reimbursement, {this.onTap});
+  const _ReimbursementRow(this.reimbursement, {required this.onSelect, required this.onEdit});
 
   final Reimbursement reimbursement;
-  final Function(Reimbursement?)? onTap;
+  final Function(Transaction) onSelect;
+  final Function(Reimbursement) onEdit;
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 100,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Text(reimbursement.value.dollarString()),
-          ),
-        ),
-        const SizedBox(width: 20),
         Expanded(
           child: TransactionCard(
             margin: EdgeInsets.zero,
             trans: reimbursement.target,
-            onSelect: (onTap == null) ? null : (it) => onTap!.call(reimbursement),
+            onSelect: onSelect,
+          ),
+        ),
+        SizedBox(
+          width: 110,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const SizedBox(height: ColorIndicatorCard.verticalPadding),
+              Text(
+                reimbursement.value.dollarString(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              InkWell(
+                onTap: () => onEdit.call(reimbursement),
+                child: Text(
+                  "Click to edit",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -18,6 +18,8 @@ class ColorIndicatorCard extends StatelessWidget {
 
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
+  static const double verticalPadding = 4;
+  static const padding = EdgeInsets.symmetric(vertical: verticalPadding, horizontal: 8);
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,7 @@ class ColorIndicatorCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            padding: padding,
             child: Stack(
               /// We use a stack here to easily make the color indicator bar have the same height as
               /// the content via [Positioned].

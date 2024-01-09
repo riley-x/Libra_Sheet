@@ -16,7 +16,7 @@ TableRow labelRow(
   if (content == null) {
     content = Text(
       label,
-      style: Theme.of(context).textTheme.titleMedium,
+      style: Theme.of(context).textTheme.titleSmall,
     );
     if (tooltip != null) {
       content = Tooltip(
