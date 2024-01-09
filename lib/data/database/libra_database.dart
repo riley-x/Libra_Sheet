@@ -117,7 +117,6 @@ class LibraDatabase {
     try {
       if (_db == null) throw StateError("Database not initialized");
       await _db!.transaction(callback);
-      sync();
     } catch (e) {
       debugPrint("LibraDatabase::readTransaction() caught $e");
       errorCallback?.call(e);
