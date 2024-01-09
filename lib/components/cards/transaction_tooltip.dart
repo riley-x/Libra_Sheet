@@ -11,6 +11,8 @@ class TransactionTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reimbs = t.totalReimbusrements;
+
     return Container(
       padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
       constraints: const BoxConstraints(maxWidth: 500),
@@ -57,6 +59,30 @@ class TransactionTooltip extends StatelessWidget {
                 right: Text(t.note),
                 verticalAlignment: CrossAxisAlignment.start,
               ),
+            if (t.nAllocations > 0) ...[
+              const SizedBox(height: 4),
+              TwoElementRow(
+                  verticalAlignment: CrossAxisAlignment.start,
+                  left: const Text('Allocations'),
+                  right: Column(
+                    children: [
+                      for (final (i, alloc) in t.softAllocations.indexed) ...[
+                        if (i > 0) const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (alloc.category.level > 0) ...[
+                              Container(color: alloc.category.color, width: 4, height: 24),
+                              const SizedBox(width: 6),
+                            ],
+                            Text("${alloc.category.name}: ${alloc.value.dollarString()}"),
+                          ],
+                        ),
+                      ]
+                    ],
+                  )),
+            ],
+            if (reimbs > 0)
+              TwoElementRow(left: const Text('Reimbs.'), right: Text(reimbs.dollarString())),
           ],
         ),
       ),

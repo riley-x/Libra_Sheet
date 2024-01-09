@@ -355,11 +355,12 @@ class AddCsvState extends ChangeNotifier {
   /// Called when a preview transaction is saved with a new rule. This will set
   /// all matching uncategorized transactions to this category.
   void reprocessRule(CategoryRule rule) {
-    for (final (i, t) in transactions.indexed) {
+    for (final t in transactions) {
       if (t.category.isUncategorized &&
           ExpenseType.from(t.value) == rule.type &&
           t.name.contains(rule.pattern)) {
-        transactions[i] = t.copyWith(category: rule.category);
+        t.category = rule.category ?? Category.empty;
+        // We can edit the transactions in place here because they are uniquely in memory in the CSV state
       }
     }
     notifyListeners();

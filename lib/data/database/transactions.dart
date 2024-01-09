@@ -25,7 +25,8 @@ const _note = "note";
 const _account = "account_id";
 const _category = "category_id";
 
-const _nAlloc = "n_allocs";
+const _allocCategoryKeys = "alloc_categories";
+const _allocValues = "alloc_values";
 const _reimbTotal = "reimb_total";
 
 /// Public alias column names
@@ -36,9 +37,6 @@ const transactionValue = _value;
 const transactionNote = _note;
 const transactionAccount = _account;
 const transactionCategory = _category;
-
-const transactionTotalReimbursements = _reimbTotal;
-const transactionNAllocations = _nAlloc;
 
 const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
@@ -81,6 +79,38 @@ List<Tag> parseTags(String? string, Map<int, Tag>? tags) {
   return tagList;
 }
 
+List<SoftAllocation> parseAllocs(Map<String, dynamic> map, Map<int, Category>? categories) {
+  String? categoryKeysStr = map[_allocCategoryKeys];
+  String? valuesStr = map[_allocValues];
+  if (categoryKeysStr == null || valuesStr == null) return const [];
+
+  final categoryKeys = categoryKeysStr.split(',');
+  final values = valuesStr.split(',');
+
+  if (categoryKeys.length != values.length) {
+    assert(false);
+    return [];
+  }
+
+  final out = <SoftAllocation>[];
+  for (int i = 0; i < values.length; i++) {
+    final key = int.tryParse(categoryKeys[i]);
+    assert(key != null);
+    if (key == null) continue;
+
+    final category = categories?[key];
+    assert(category != null);
+    if (category == null) continue;
+
+    final value = int.tryParse(values[i]);
+    assert(value != null);
+    if (value == null) continue;
+
+    out.add(SoftAllocation(category: category, value: value));
+  }
+  return out;
+}
+
 Transaction transactionFromMap(
   Map<String, dynamic> map, {
   Map<int, Account>? accounts,
@@ -96,7 +126,7 @@ Transaction transactionFromMap(
     account: accounts?[map[_account]],
     category: categories?[map[_category]] ?? Category.empty,
     tags: parseTags(map['tags'], tags),
-    nAllocations: map[_nAlloc] ?? 0,
+    softAllocations: parseAllocs(map, categories),
     totalReimbusrements: map[_reimbTotal] ?? 0,
   );
 }
@@ -325,7 +355,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     }) {
       /// Parse the allocations
       String? allocString = map['allocs'];
-      List<SoftAllocation> allocs = [];
+      List<CsvAllocation> allocs = [];
       if (allocString != null && categories != null) {
         for (final allocEntry in allocString.split(',')) {
           final fields = allocEntry.split(':');
@@ -335,7 +365,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
           }
 
           final categoryKey = int.tryParse(fields[1]) ?? 0;
-          allocs.add(SoftAllocation(
+          allocs.add(CsvAllocation(
             name: fields[0].replaceAll(commaReplacement, ',').replaceAll(colonReplacement, ':'),
             category: categories[categoryKey]?.name ?? 'Unkown',
             value: int.tryParse(fields[2]) ?? 0,
@@ -371,7 +401,6 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
           account: accounts?[map[_account]],
           category: categories?[map[_category]] ?? Category.empty,
           tags: parseTags(map['tags'], tags),
-          nAllocations: 0,
           totalReimbusrements: 0,
         ),
         allocs,
@@ -433,7 +462,8 @@ String createTransactionQuery({
     FROM (
       SELECT 
         t.*,
-        COUNT(a.$allocationsKey) as $_nAlloc
+        GROUP_CONCAT(a.$allocationsCategory) as $_allocCategoryKeys,
+        GROUP_CONCAT(a.$allocationsValue) as $_allocValues
       FROM (
         SELECT 
           t.*,
