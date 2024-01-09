@@ -88,12 +88,13 @@ class GoogleDriveCard extends StatelessWidget {
                                 .bodyLarge
                                 ?.copyWith(color: Colors.amber),
                           ),
-                        GoogleDriveSyncStatus.disabled => Text(
-                            "disabled",
+                        GoogleDriveSyncStatus.noConnection => Text(
+                            "no connection",
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   color: Theme.of(context).colorScheme.error,
                                 ),
                           ),
+                        GoogleDriveSyncStatus.disabled => const Text("off"),
                       },
                     ],
                   ),
@@ -210,8 +211,12 @@ class GoogleDriveTitle extends StatelessWidget {
               title: 'Google Drive Sync',
               msg: 'Automatically backup your data onto Google Drive!\n\n'
                   'On the first sync, a file "libra_sheet.db" will be created in your "My Drive" folder. '
-                  'You can move the file somewhere else though.'
-                  '\n\nWarning: the app can not sync with any file that you upload manually.',
+                  'You can rename and move the file somewhere else though. '
+                  'Libra Sheet will automatically update that file anytime you make a change. '
+                  '\n\nLibra Sheet can not sync with any file that you manually upload to Google Drive.'
+                  '\n\nWarning: If you use Libra Sheet on multiple computers, make sure to not touch the database file until the sync is complete. '
+                  'The app uses the last modified time of the file to check the sync status, '
+                  'so you may accidentally overwrite the cloud file with a stale local file.',
               showCancel: false,
             );
           },

@@ -53,6 +53,8 @@ class LibraNav extends StatelessWidget {
       GoogleDriveSyncStatus.upToDate => const Icon(Icons.cloud_done, color: Colors.green),
       GoogleDriveSyncStatus.driveAhead => const Icon(Icons.cloud_download, color: Colors.amber),
       GoogleDriveSyncStatus.localAhead => const Icon(Icons.cloud_upload, color: Colors.amber),
+      GoogleDriveSyncStatus.noConnection =>
+        Icon(Icons.cloud_off, color: Theme.of(context).colorScheme.error),
       GoogleDriveSyncStatus.disabled => const SizedBox(),
     };
 
@@ -63,6 +65,8 @@ class LibraNav extends StatelessWidget {
         Text("Download pending", style: textTheme.bodyMedium?.copyWith(color: Colors.amber)),
       GoogleDriveSyncStatus.localAhead =>
         Text("Upload pending", style: textTheme.bodyMedium?.copyWith(color: Colors.amber)),
+      GoogleDriveSyncStatus.noConnection => Text("No connection",
+          style: textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.error)),
       GoogleDriveSyncStatus.disabled => const SizedBox(),
     };
 

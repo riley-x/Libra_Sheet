@@ -4,6 +4,7 @@
 ## High priority features
 - Reorder tags
 - Start screen and UX
+- On transaction hover, just load relations before setting the timer! Then display more info
 
 ## Medium priority features
 - Replace Syncfusion line charts

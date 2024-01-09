@@ -11,14 +11,19 @@ import 'package:http/http.dart';
 
 import 'dart:io' as io;
 
-const _gdriveCredentialsPrefKey = 'gdrive_credentials';
+const _gdriveCredentialsReleasePrefKey = 'gdrive_credentials';
+const _gdriveCredentialsDebugPrefKey = 'gdrive_cred_debug';
 const _gdriveSyncActivePrefKey = 'gdrive_sync_active';
+
+const _gdriveCredentialsPrefKey =
+    (kDebugMode) ? _gdriveCredentialsDebugPrefKey : _gdriveCredentialsReleasePrefKey;
 
 // ignore: constant_identifier_names
 const _driveFileProperty_lastModified = 'dbTime';
 
 enum GoogleDriveSyncStatus {
   disabled,
+  noConnection,
   localAhead,
   driveAhead,
   upToDate,
@@ -154,8 +159,10 @@ class GoogleDrive extends ChangeNotifier {
   /// This does not refresh [driveFile], call [fetchDriveFile] if needed.
   GoogleDriveSyncStatus status() {
     final driveTime = getDriveTime();
-    if (_httpClient == null || !active) {
+    if (!active) {
       return GoogleDriveSyncStatus.disabled;
+    } else if (_httpClient == null) {
+      return GoogleDriveSyncStatus.noConnection;
     } else if (driveTime == null || lastLocalUpdateTime.isAfter(driveTime)) {
       return GoogleDriveSyncStatus.localAhead;
     } else if (driveTime.isAfter(lastLocalUpdateTime.add(const Duration(seconds: 30)))) {
