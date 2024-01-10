@@ -11,7 +11,6 @@
 - Choose category/account on CSV column?
 - Delete account
 - Range account screen graphs, net worth graph?
-- Fix navbar animation (maybe just add a delay on the expanded change that matches the animation speed of the navbar)
 
 
 ## Refactor

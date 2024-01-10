@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
@@ -37,6 +39,12 @@ class LibraNav extends StatelessWidget {
   final bool extended;
   final Function(int)? onDestinationSelected;
 
+  static const minExtendedWidth = 220.0;
+  // these empirically determined from testing
+  static const minWidth = 80.0;
+  static const iconWidth = 24.0;
+  static const iconPadding = (minWidth - iconWidth) / 2;
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
@@ -47,29 +55,6 @@ class LibraNav extends StatelessWidget {
     final bkgColor = (isDarkMode) ? colorScheme.background : colorScheme.secondary;
     final textColor = (isDarkMode) ? colorScheme.onBackground : colorScheme.onSecondary;
 
-    final cloudStatus = context.watch<GoogleDrive>().status();
-
-    final cloudIcon = switch (cloudStatus) {
-      GoogleDriveSyncStatus.upToDate => const Icon(Icons.cloud_done, color: Colors.green),
-      GoogleDriveSyncStatus.driveAhead => const Icon(Icons.cloud_download, color: Colors.amber),
-      GoogleDriveSyncStatus.localAhead => const Icon(Icons.cloud_upload, color: Colors.amber),
-      GoogleDriveSyncStatus.noConnection =>
-        Icon(Icons.cloud_off, color: Theme.of(context).colorScheme.error),
-      GoogleDriveSyncStatus.disabled => const SizedBox(),
-    };
-
-    final cloudText = switch (cloudStatus) {
-      GoogleDriveSyncStatus.upToDate =>
-        Text("Up to date", style: textTheme.bodyMedium?.copyWith(color: Colors.green)),
-      GoogleDriveSyncStatus.driveAhead =>
-        Text("Download pending", style: textTheme.bodyMedium?.copyWith(color: Colors.amber)),
-      GoogleDriveSyncStatus.localAhead =>
-        Text("Upload pending", style: textTheme.bodyMedium?.copyWith(color: Colors.amber)),
-      GoogleDriveSyncStatus.noConnection => Text("No connection",
-          style: textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.error)),
-      GoogleDriveSyncStatus.disabled => const SizedBox(),
-    };
-
     return ExcludeFocus(
       child: NavigationRail(
         backgroundColor: bkgColor,
@@ -78,52 +63,112 @@ class LibraNav extends StatelessWidget {
         selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
         unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: textColor),
         extended: extended,
-        minExtendedWidth: 220,
+        minExtendedWidth: minExtendedWidth,
         destinations: libraNavDestinations,
         selectedIndex: selectedIndex,
         onDestinationSelected: onDestinationSelected,
         // TODO this is janky when expanding because the animation starts off narrow but the column
         // expands to the width of the wider content already
-        trailing: Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: extended
-                  ? [
-                      SizedBox(
-                        width: 220,
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 30),
-                            cloudIcon,
-                            const SizedBox(width: 20),
-                            cloudText,
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      Row(
-                        children: [
-                          Icon(Icons.dark_mode_outlined, color: textColor),
-                          const SizedBox(width: 5),
-                          Switch(
-                            value: !isDarkMode,
-                            onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
-                            activeColor: colorScheme.surfaceVariant,
-                          ),
-                          const SizedBox(width: 5),
-                          Icon(Icons.light_mode, color: textColor),
-                        ],
-                      ),
-                    ]
-                  : [
-                      cloudIcon,
-                    ],
-            ),
-          ),
-        ),
+        trailing: _FooterContent(textColor: textColor),
       ),
+    );
+  }
+}
+
+class _FooterContent extends StatelessWidget {
+  const _FooterContent({super.key, required this.textColor});
+
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+
+    final cloudStatus = context.watch<GoogleDrive>().status();
+    final cloudIcon = switch (cloudStatus) {
+      GoogleDriveSyncStatus.upToDate => const Icon(Icons.cloud_done, color: Colors.green),
+      GoogleDriveSyncStatus.driveAhead => const Icon(Icons.cloud_download, color: Colors.amber),
+      GoogleDriveSyncStatus.localAhead => const Icon(Icons.cloud_upload, color: Colors.amber),
+      GoogleDriveSyncStatus.noConnection =>
+        Icon(Icons.cloud_off, color: Theme.of(context).colorScheme.error),
+      GoogleDriveSyncStatus.disabled => const SizedBox(),
+    };
+    final cloudText = switch (cloudStatus) {
+      GoogleDriveSyncStatus.upToDate =>
+        Text("Up to date", style: textStyle?.copyWith(color: Colors.green)),
+      GoogleDriveSyncStatus.driveAhead =>
+        Text("Download pending", style: textStyle?.copyWith(color: Colors.amber)),
+      GoogleDriveSyncStatus.localAhead =>
+        Text("Upload pending", style: textStyle?.copyWith(color: Colors.amber)),
+      GoogleDriveSyncStatus.noConnection => Text("No connection",
+          style: textStyle?.copyWith(color: Theme.of(context).colorScheme.error)),
+      GoogleDriveSyncStatus.disabled => const SizedBox(),
+    };
+
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget? child) {
+              return SizedBox(
+                width: lerpDouble(LibraNav.minWidth, LibraNav.minExtendedWidth, animation.value),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: animation.value == 0
+                      ? [
+                          Center(child: cloudIcon),
+                        ]
+                      : [
+                          ClipRect(
+                            child: Row(
+                              children: [
+                                const SizedBox(width: LibraNav.iconPadding),
+                                cloudIcon,
+                                const SizedBox(width: LibraNav.iconPadding),
+                                Align(
+                                  heightFactor: 1.0,
+                                  widthFactor: animation.value,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: cloudText,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: lerpDouble(0, 30, animation.value)),
+                          if (animation.value == 1) _DarkModeSwitch(textColor: textColor),
+                        ],
+                ),
+              );
+            }),
+      ),
+    );
+  }
+}
+
+class _DarkModeSwitch extends StatelessWidget {
+  const _DarkModeSwitch({super.key, required this.textColor});
+
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.dark_mode_outlined, color: textColor),
+        const SizedBox(width: 5),
+        Switch(
+          value: !isDarkMode,
+          onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
+          activeColor: Theme.of(context).colorScheme.surfaceVariant,
+        ),
+        const SizedBox(width: 5),
+        Icon(Icons.light_mode, color: textColor),
+      ],
     );
   }
 }
