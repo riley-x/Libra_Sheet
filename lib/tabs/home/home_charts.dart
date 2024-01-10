@@ -21,7 +21,7 @@ class HomeCharts extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       const minChartHeight = 400.0;
       final pieChartsAligned = constraints.maxWidth > 2 * minChartHeight + 16;
-      if (pieChartsAligned && constraints.maxHeight > 2 * minChartHeight + 16) {
+      if (pieChartsAligned && constraints.maxHeight > 2 * minChartHeight + 1) {
         return const _ExpandedCharts();
       } else {
         return _ListCharts(
@@ -69,7 +69,6 @@ class _ListCharts extends StatelessWidget {
     return ListView(
       children: [
         _NetWorthGraph(chartHeight),
-        const SizedBox(height: 5),
         Container(
           height: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
@@ -137,7 +136,7 @@ class _NetWorthGraph extends StatelessWidget {
       padding: const EdgeInsets.only(top: 10),
       child: DateTimeGraph([
         AreaSeries<TimeIntValue, DateTime>(
-          animationDuration: 300,
+          animationDuration: 0,
           dataSource: data,
           xValueMapper: (TimeIntValue sales, _) => sales.time,
           yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
