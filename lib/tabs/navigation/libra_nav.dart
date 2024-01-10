@@ -39,11 +39,12 @@ class LibraNav extends StatelessWidget {
   final bool extended;
   final Function(int)? onDestinationSelected;
 
-  static const minExtendedWidth = 220.0;
-  // these empirically determined from testing
+  // these were empirically determined from testing
   static const minWidth = 80.0;
   static const iconWidth = 24.0;
   static const iconPadding = (minWidth - iconWidth) / 2;
+  // this is our choice
+  static const minExtendedWidth = 220.0;
 
   @override
   Widget build(BuildContext context) {
@@ -67,8 +68,6 @@ class LibraNav extends StatelessWidget {
         destinations: libraNavDestinations,
         selectedIndex: selectedIndex,
         onDestinationSelected: onDestinationSelected,
-        // TODO this is janky when expanding because the animation starts off narrow but the column
-        // expands to the width of the wider content already
         trailing: _FooterContent(textColor: textColor),
       ),
     );
@@ -76,7 +75,7 @@ class LibraNav extends StatelessWidget {
 }
 
 class _FooterContent extends StatelessWidget {
-  const _FooterContent({super.key, required this.textColor});
+  const _FooterContent({required this.textColor});
 
   final Color textColor;
 
@@ -117,29 +116,25 @@ class _FooterContent extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: animation.value == 0
-                      ? [
-                          Center(child: cloudIcon),
-                        ]
-                      : [
-                          ClipRect(
-                            child: Row(
-                              children: [
-                                const SizedBox(width: LibraNav.iconPadding),
-                                cloudIcon,
-                                const SizedBox(width: LibraNav.iconPadding),
-                                Align(
-                                  heightFactor: 1.0,
-                                  widthFactor: animation.value,
-                                  alignment: AlignmentDirectional.centerStart,
-                                  child: cloudText,
-                                ),
-                              ],
-                            ),
+                  children: [
+                    ClipRect(
+                      child: Row(
+                        children: [
+                          const SizedBox(width: LibraNav.iconPadding),
+                          cloudIcon,
+                          const SizedBox(width: LibraNav.iconPadding),
+                          Align(
+                            heightFactor: 1.0,
+                            widthFactor: animation.value,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: cloudText,
                           ),
-                          SizedBox(height: lerpDouble(0, 30, animation.value)),
-                          if (animation.value == 1) _DarkModeSwitch(textColor: textColor),
                         ],
+                      ),
+                    ),
+                    SizedBox(height: lerpDouble(0, 30, animation.value)),
+                    if (animation.value == 1) _DarkModeSwitch(textColor: textColor),
+                  ],
                 ),
               );
             }),
@@ -149,7 +144,7 @@ class _FooterContent extends StatelessWidget {
 }
 
 class _DarkModeSwitch extends StatelessWidget {
-  const _DarkModeSwitch({super.key, required this.textColor});
+  const _DarkModeSwitch({required this.textColor});
 
   final Color textColor;
 
