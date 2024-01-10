@@ -132,8 +132,12 @@ class _FooterContent extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: lerpDouble(0, 30, animation.value)),
-                    if (animation.value == 1) _DarkModeSwitch(textColor: textColor),
+                    if (animation.value < 1)
+                      SizedBox(height: lerpDouble(0, 30 + _DarkModeSwitch.height, animation.value)),
+                    if (animation.value == 1) ...[
+                      const SizedBox(height: 30),
+                      _DarkModeSwitch(textColor: textColor),
+                    ],
                   ],
                 ),
               );
@@ -147,6 +151,9 @@ class _DarkModeSwitch extends StatelessWidget {
   const _DarkModeSwitch({required this.textColor});
 
   final Color textColor;
+
+  /// From testing
+  static const height = 40.0;
 
   @override
   Widget build(BuildContext context) {
