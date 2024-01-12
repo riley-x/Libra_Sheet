@@ -127,7 +127,11 @@ class _FooterContent extends StatelessWidget {
                             heightFactor: 1.0,
                             widthFactor: animation.value,
                             alignment: AlignmentDirectional.centerStart,
-                            child: cloudText,
+                            child: FadeTransition(
+                              opacity:
+                                  animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
+                              child: cloudText,
+                            ),
                           ),
                         ],
                       ),
