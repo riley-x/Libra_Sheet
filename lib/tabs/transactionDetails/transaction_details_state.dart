@@ -129,11 +129,22 @@ class TransactionDetailsState extends ChangeNotifier {
 
   /// Reset everything to the original [seed].
   void reset() {
-    formKey.currentState?.reset();
+    /// Reset manual state elements
+    saveAsRule = false;
+    errorMessage = null;
+    reimbursementError = null;
+    reimburseTarget = null;
     tags.clear();
     allocations.clear();
     reimbursements.clear();
+
+    /// Reset form fields
+    formKey.currentState?.reset();
+
+    /// Reset focus
     clearFocus();
+
+    /// Re-init from [seed]
     _init();
     notifyListeners();
   }
