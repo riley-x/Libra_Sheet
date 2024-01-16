@@ -30,7 +30,7 @@ class TransactionDetailsEditor extends StatelessWidget {
 
   final Function()? onCancel;
 
-  static const maxWidth = 600.0;
+  static const maxWidth = 550.0;
   static const horizontalPadding = 20.0;
 
   @override
