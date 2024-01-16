@@ -25,7 +25,7 @@ class GoogleDriveSection extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
                   child: Text(
-                    'Change account',
+                    'Change account / Refresh connection',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(

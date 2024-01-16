@@ -116,7 +116,7 @@ class GoogleDrive extends ChangeNotifier {
 
     final json = prefs.getString(_gdriveCredentialsPrefKey);
     if (json != null) {
-      debugPrint('GoogleDrive::init() saved credentials: $json');
+      debugPrint('GoogleDrive::init() loaded credentials: $json');
       credentials = AccessCredentials.fromJson(jsonDecode(json));
       _baseClient ??= Client(); // this needs to be closed by us
       _httpClient = autoRefreshingClient(clientId, credentials!, _baseClient!);
@@ -175,10 +175,17 @@ class GoogleDrive extends ChangeNotifier {
   /// Queries GoogleDrive to retrieve the file metadata, setting [driveFile].
   Future<void> fetchDriveFile() async {
     if (_api == null) return;
-    driveFile = await _getMostRecentFile(_api!);
-    debugPrint("GoogleDrive::fetchDriveFile()\n"
-        "\tdrive:${driveFile?.id} @ ${getDriveTime()?.toLocal()}\n"
-        "\tlocal:${lastLocalUpdateTime.toLocal()}");
+    try {
+      driveFile = await _getMostRecentFile(_api!);
+      debugPrint("GoogleDrive::fetchDriveFile()\n"
+          "\tdrive:${driveFile?.id} @ ${getDriveTime()?.toLocal()}\n"
+          "\tlocal:${lastLocalUpdateTime.toLocal()}");
+    } on ServerRequestFailedException catch (e) {
+      debugPrint("GoogleDrive::fetchDriveFile() $e");
+      driveFile = null;
+      _httpClient = null;
+      _api = null;
+    }
     notifyListeners();
   }
 
