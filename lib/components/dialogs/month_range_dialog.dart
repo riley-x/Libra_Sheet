@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
 
+/// An [AlertDialog] that allows selecting a range of months. Supports tapping twice and dragging.
 class MonthRangeDialog extends StatefulWidget {
   const MonthRangeDialog({
     super.key,
@@ -27,6 +28,9 @@ class _MonthRangeDialogState extends State<MonthRangeDialog> {
   ///       (b) The mouse moves to a different month. We watch this using each month's [onHover].
   ///           Initiate the drag and cancel the tap logic.
   DateTime? dragStart;
+
+  /// We need this solely so that the drag behavior can select a single month range when the drag
+  /// returns to the starting month.
   bool dragInitiated = false;
 
   DateTime? start;
@@ -73,6 +77,21 @@ class _MonthRangeDialogState extends State<MonthRangeDialog> {
         end = ordered.$2;
       });
     }
+  }
+
+  void selectYear(int year) {
+    setState(() {
+      if (year == widget.minDate.year) {
+        start = DateTime.utc(year, widget.minDate.month);
+      } else {
+        start = DateTime.utc(year, 1);
+      }
+      if (year == widget.maxDate.year) {
+        end = DateTime.utc(year, widget.maxDate.month);
+      } else {
+        end = DateTime.utc(year, 12);
+      }
+    });
   }
 
   @override
@@ -125,8 +144,14 @@ class _YearBlock extends StatelessWidget {
     final months = List.generate(12, (i) => DateTime.utc(year, i + 1));
     return Column(
       children: [
-        Text('$year', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 3),
+        InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => state.selectYear(year),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+            child: Text('$year', style: Theme.of(context).textTheme.headlineSmall),
+          ),
+        ),
         for (int start = 0; start < 12; start += 4)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 3),

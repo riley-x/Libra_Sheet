@@ -181,6 +181,8 @@ class GoogleDrive extends ChangeNotifier {
           "\tdrive:${driveFile?.id} @ ${getDriveTime()?.toLocal()}\n"
           "\tlocal:${lastLocalUpdateTime.toLocal()}");
     } on ServerRequestFailedException catch (e) {
+      /// Refresh tokens can stop working after 7 days if the client ID is not approved is one possible cause.
+      /// https://developers.google.com/nest/device-access/reference/errors/authorization
       debugPrint("GoogleDrive::fetchDriveFile() $e");
       driveFile = null;
       _httpClient = null;
