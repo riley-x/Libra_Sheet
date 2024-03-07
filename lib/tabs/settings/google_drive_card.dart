@@ -21,7 +21,10 @@ class GoogleDriveSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               InkWell(
-                onTap: GoogleDrive().promptUserConsent,
+                onTap: () async {
+                  await GoogleDrive().promptUserConsent();
+                  await GoogleDrive().sync();
+                },
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
                   child: Text(
