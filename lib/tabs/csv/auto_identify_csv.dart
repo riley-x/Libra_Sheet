@@ -4,6 +4,7 @@ List<CsvField>? autoIdentifyCsv(List<List<String>> lines, int nCols) {
   return _tryBofA(lines, nCols) ??
       _tryChaseCreditCard(lines, nCols) ??
       _tryBofACreditCard(lines, nCols) ??
+      _tryCapitalOneCreditCard(lines, nCols) ??
       _tryVenmo(lines, nCols);
 }
 
@@ -58,6 +59,29 @@ List<CsvField>? _tryBofACreditCard(List<List<String>> lines, int nCols) {
   }
 
   return [CsvDate(), CsvNone(), CsvName(), CsvNone(), CsvAmount()];
+}
+
+List<CsvField>? _tryCapitalOneCreditCard(List<List<String>> lines, int nCols) {
+  if (nCols != 7) return null;
+  if (lines.isEmpty) return null;
+
+  final headerLine = lines[0];
+  if (headerLine.length < 7) return null;
+
+  const header = [
+    "Transaction Date",
+    "Posted Date",
+    "Card No.",
+    "Description",
+    "Category",
+    "Debit",
+    "Credit"
+  ];
+  for (int i = 0; i < header.length; i++) {
+    if (headerLine[i] != header[i]) return null;
+  }
+
+  return [CsvDate(), CsvNone(), CsvNone(), CsvName(), CsvNone(), CsvNegAmount(), CsvAmount()];
 }
 
 List<CsvField>? _tryVenmo(List<List<String>> lines, int nCols) {
