@@ -3,10 +3,9 @@
 
 ## High priority features
 - Reorder tags
-- Parse $ spaces and commas in transaction
 - Start screen and UX
 - sort transactions by value
-- CSV debit/credit/invert
+
 
 ## Medium priority features
 - Replace Syncfusion line charts
