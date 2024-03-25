@@ -18,8 +18,10 @@ sealed class CsvField {
         return CsvNote();
       case CsvNone.name:
         return CsvNone();
-      case CsvDebit.name:
-        return CsvDebit();
+      case CsvNegAmount.name:
+        return CsvNegAmount();
+      case CsvDebitCreditSwitch.name:
+        return CsvDebitCreditSwitch();
     }
     if (name.startsWith(CsvMatch.name)) {
       return CsvMatch(name.substring(CsvMatch.name.length));
@@ -31,9 +33,10 @@ sealed class CsvField {
     CsvName.name,
     CsvDate.name,
     CsvAmount.name,
+    CsvNegAmount.name,
     CsvNote.name,
     CsvMatch.name,
-    CsvDebit.name,
+    CsvDebitCreditSwitch.name,
     CsvNone.name,
   ];
 }
@@ -68,6 +71,16 @@ class CsvAmount extends CsvField {
   String get title => "Amount";
 }
 
+class CsvNegAmount extends CsvField {
+  static const String name = "neg_value";
+  @override
+  String get baseName => name;
+  @override
+  String get saveName => name;
+  @override
+  String get title => "Negative Amount";
+}
+
 class CsvNote extends CsvField {
   static const String name = "note";
   @override
@@ -88,7 +101,7 @@ class CsvNone extends CsvField {
   String get title => "None";
 }
 
-class CsvDebit extends CsvField {
+class CsvDebitCreditSwitch extends CsvField {
   static const String name = "debit";
   @override
   String get baseName => name;

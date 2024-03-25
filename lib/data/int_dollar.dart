@@ -44,7 +44,8 @@ extension IntDollarDouble on double {
 
 extension IntDollarString on String {
   int? toIntDollar() {
-    var str = replaceAll(',', '');
+    var str = replaceAll(RegExp(r"\s+|\+|\$|,"), "");
+
     if (str.isEmpty) return null;
 
     final parts = str.split('.');

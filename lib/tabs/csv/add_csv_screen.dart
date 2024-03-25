@@ -23,10 +23,10 @@ class AddCsvScreen extends StatelessWidget {
       ),
       builder: (context, child) {
         final state = context.watch<AddCsvState>();
-        if (state.transactions.isEmpty) {
-          return const _MainScreen();
-        } else {
+        if (state.previewScreen) {
           return const PreviewTransactionsScreen();
+        } else {
+          return const _MainScreen();
         }
       },
     );
@@ -142,6 +142,8 @@ class _InstructionsDialog extends StatelessWidget {
                   "Date: The transaction date. If this isn't working, please change the format of the dates to MM/dd/yyyy in Excel."),
               _BulletRow(
                   "Amount: The value of the transaction. Make sure this has the correct sign (negative for expenses)."),
+              _BulletRow(
+                  "Negative Amount: The inverted value of the transaction. So expenses are positive and credits are negative (credit card statements often are inverted)."),
               SizedBox(height: 20),
               Text("Utility columns:"),
               SizedBox(height: 8),
@@ -150,7 +152,7 @@ class _InstructionsDialog extends StatelessWidget {
               _BulletRow(
                   "Match: Filter for rows where the column matches a specific string, or is empty."),
               _BulletRow(
-                  'Debit/Credit: If your CSV only has positive values and uses a column with "Debit" or "Credit" to distinguish transactions, use this column type on that latter column.')
+                  'Debit/Credit: If your CSV only has positive values and uses a column with "Debit" or "Credit" strings to distinguish transactions, use this column type on that latter column.')
             ],
           ),
         ),
@@ -216,17 +218,17 @@ class _BottomBar extends StatelessWidget {
                   ),
             ),
           ],
-          if (state.errorMsg.isEmpty && state.nRowsOk > 0)
+          if (state.errorMsg.isEmpty && state.transactions.isNotEmpty)
             Expanded(
               child: Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: state.createTransactions,
+                  onPressed: state.previewTransactions,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(width: 5),
-                      Text('Preview(${state.nRowsOk})'),
+                      Text('Preview(${state.transactions.length})'),
                       const Icon(
                         Icons.navigate_next,
                         size: 26,

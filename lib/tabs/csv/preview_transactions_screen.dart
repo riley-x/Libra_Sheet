@@ -36,7 +36,7 @@ class PreviewTransactionsScreen extends StatelessWidget {
                 context: context,
                 title: 'Back to CSV Input?',
                 msg: "This will delete any changes you've made here.");
-            if (confirmed) csvState.clearTransactions();
+            if (confirmed) csvState.cancelPreviewTransactions();
           } else if (detailsState.focus == TransactionDetailActiveFocus.none) {
             csvState.focusTransaction(-1);
           } else {

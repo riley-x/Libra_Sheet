@@ -32,14 +32,17 @@ class AddCsvState extends ChangeNotifier {
   int nCols = 0;
   List<CsvField> columnTypes = [];
 
+  /// This list is parallel to [rawLines], i.e. the rows of the CSV, and is used to
+  /// highlight correctly parsed rows.
   List<bool> rowOk = [];
-  int nRowsOk = 0;
 
   /// List of transactions in the preview screen. This list is populated after
-  /// clicking save on the CSV editor screen, and is displayed in the
+  /// any field is edited and [_validate] is called, and is displayed in the
   /// [PreviewTransactionsScreen] where the transactions can be further edited.
   /// These are not committed to the database until another confirmation.
   List<Transaction> transactions = [];
+
+  bool previewScreen = false;
 
   /// Selected transaction index in the [PreviewTransactionsScreen]. We keep the
   ///  index to easily delete transactions.
@@ -54,7 +57,6 @@ class AddCsvState extends ChangeNotifier {
     nCols = 0;
     columnTypes = [];
     rowOk = [];
-    nRowsOk = 0;
     transactions = [];
     focusedTransIndex = -1;
   }
@@ -86,7 +88,6 @@ class AddCsvState extends ChangeNotifier {
     nCols = rawLines.fold(0, (m, it) => max(m, it.length));
 
     rowOk = List.filled(rawLines.length, false);
-    nRowsOk = 0;
     columnTypes = List.filled(nCols, CsvNone());
     errorMsg = '';
     notifyListeners();
@@ -156,11 +157,12 @@ class AddCsvState extends ChangeNotifier {
   // Validating
   //---------------------------------------------------------------------------
   void _validate() {
+    transactions.clear();
     if (!_validateFields()) {
       rowOk = List.filled(rawLines.length, false);
       notifyListeners();
     } else {
-      _validateRows();
+      _createTransactions();
     }
   }
 
@@ -181,42 +183,28 @@ class AddCsvState extends ChangeNotifier {
           nDate++;
         case CsvAmount():
           nValue++;
+        case CsvNegAmount():
+          nValue++;
         case CsvName():
           nName++;
         default:
       }
     }
     if (nDate != 1) {
-      errorMsg = "Must have exactly one date column";
+      errorMsg = 'Must have exactly one "Date" column';
       return false;
     }
-    if (nValue != 1) {
-      errorMsg = "Must have exactly one value column";
+    if (nValue == 0) {
+      errorMsg = 'Must have at least one "Amount" or "Negative Amount" column';
       return false;
     }
     if (nName == 0) {
-      errorMsg = "Must have at least one name column";
+      errorMsg = 'Must have at least one "Name" column';
       return false;
     }
 
     errorMsg = '';
     return true;
-  }
-
-  void _validateRows() async {
-    nRowsOk = 0;
-    for (int row = 0; row < rowOk.length; row++) {
-      bool ok = true;
-      for (int col = 0; col < columnTypes.length; col++) {
-        if (tryParse(rawLines[row][col], col) == false) {
-          ok = false;
-          break;
-        }
-      }
-      rowOk[row] = ok;
-      if (ok) nRowsOk++;
-    }
-    notifyListeners();
   }
 
   /// Returns true if this cell is parseable, false if there is an error, or null if there is
@@ -227,11 +215,12 @@ class AddCsvState extends ChangeNotifier {
       case CsvDate():
         return _parseDate(text) != null;
       case CsvAmount():
-        text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
+        return text.toIntDollar() != null;
+      case CsvNegAmount():
         return text.toIntDollar() != null;
       case CsvMatch():
         return text.isEmpty || text == type.match;
-      case CsvDebit():
+      case CsvDebitCreditSwitch():
         return _parseDebit(text) != null;
       default:
         return null;
@@ -273,11 +262,9 @@ class AddCsvState extends ChangeNotifier {
   //---------------------------------------------------------------------------
   // Transactions
   //---------------------------------------------------------------------------
-  void createTransactions() {
+  void _createTransactions() {
     transactions.clear();
     for (int row = 0; row < rowOk.length; row++) {
-      if (!rowOk[row]) continue;
-
       String name = '';
       String note = '';
       DateTime? date;
@@ -291,8 +278,13 @@ class AddCsvState extends ChangeNotifier {
           case CsvDate():
             date = _parseDate(text);
           case CsvAmount():
-            text = text.replaceAll(RegExp(r"\s+|\+|\$"), "");
-            value = text.toIntDollar();
+            int? val = text.toIntDollar();
+            if (val == null) continue;
+            value = (value == null) ? val : value + val;
+          case CsvNegAmount():
+            int? val = text.toIntDollar();
+            if (val == null) continue;
+            value = (value == null) ? -val : value - val;
           case CsvName():
             if (name.isNotEmpty) {
               name += ' $text';
@@ -305,14 +297,17 @@ class AddCsvState extends ChangeNotifier {
             } else {
               note = text;
             }
-          case CsvDebit():
+          case CsvDebitCreditSwitch():
             if (_parseDebit(text) == true) negateValue = true;
           case CsvNone():
           case CsvMatch():
         }
       }
 
-      if (date == null || value == null) continue;
+      if (date == null || value == null) {
+        rowOk[row] = false;
+        continue;
+      }
       if (negateValue) value = -value;
       final rule = appState.rules.match(
         name,
@@ -327,7 +322,18 @@ class AddCsvState extends ChangeNotifier {
         note: note,
       );
       transactions.add(t);
+      rowOk[row] = true;
     }
+    if (transactions.isEmpty) {
+      errorMsg = 'No valid rows (check your fields are set correctly)';
+    } else {
+      errorMsg = '';
+    }
+    notifyListeners();
+  }
+
+  void previewTransactions() {
+    previewScreen = true;
     notifyListeners();
     var csvFormat = columnTypes.map((e) => e.saveName).join(',');
     if (csvFormat != account!.csvFormat) {
@@ -336,8 +342,9 @@ class AddCsvState extends ChangeNotifier {
     }
   }
 
-  void clearTransactions() {
-    transactions.clear();
+  void cancelPreviewTransactions() {
+    _createTransactions(); // recreate to reset
+    previewScreen = false;
     notifyListeners();
   }
 
