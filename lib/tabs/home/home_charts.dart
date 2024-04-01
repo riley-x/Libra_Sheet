@@ -16,24 +16,24 @@ class HomeCharts extends StatelessWidget {
     super.key,
   });
 
+  static const minNetWorthHeight = 500.0;
+  static const minPieHeight = 400.0;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      const minChartHeight = 400.0;
-      final pieChartsAligned = constraints.maxWidth > 2 * minChartHeight + 16;
-      if (pieChartsAligned && constraints.maxHeight > 2 * minChartHeight + 1) {
+      final expandedCharts = constraints.maxHeight > minNetWorthHeight + minPieHeight + 1;
+      final pieChartsAligned = constraints.maxWidth > 2 * minPieHeight + 16;
+      if (pieChartsAligned && expandedCharts) {
         return const _ExpandedCharts();
       } else {
-        return _ListCharts(
-          chartHeight: minChartHeight,
-          pieChartsAligned: pieChartsAligned,
-        );
+        return _ListCharts(pieChartsAligned: pieChartsAligned);
       }
     });
   }
 }
 
-/// Expands the line chart and pie charts to equal heights
+/// Expands the line chart to fill the total height of the screen. The pie chart is left fixed.
 class _ExpandedCharts extends StatelessWidget {
   const _ExpandedCharts({super.key});
 
@@ -46,7 +46,7 @@ class _ExpandedCharts extends StatelessWidget {
           height: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
         ),
-        Expanded(child: _alignedPies(null, context)),
+        _alignedPies(HomeCharts.minPieHeight, context),
       ],
     );
   }
@@ -55,12 +55,10 @@ class _ExpandedCharts extends StatelessWidget {
 /// Gives each chart a fixed height inside a list view. Used when the height of the window is not
 /// sufficient to display all of the adequately.
 class _ListCharts extends StatelessWidget {
-  final double chartHeight;
   final bool pieChartsAligned;
 
   const _ListCharts({
     super.key,
-    required this.chartHeight,
     required this.pieChartsAligned,
   });
 
@@ -68,15 +66,15 @@ class _ListCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        _NetWorthGraph(chartHeight),
+        const _NetWorthGraph(HomeCharts.minNetWorthHeight),
         Container(
           height: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
         ),
 
         /// Don't add padding here or else the vertical grid lines won't be tight
-        if (pieChartsAligned) _alignedPies(chartHeight, context),
-        if (!pieChartsAligned) ..._verticalPies(chartHeight, context),
+        if (pieChartsAligned) _alignedPies(HomeCharts.minPieHeight, context),
+        if (!pieChartsAligned) ..._verticalPies(HomeCharts.minPieHeight, context),
       ],
     );
   }
