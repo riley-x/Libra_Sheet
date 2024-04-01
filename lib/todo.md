@@ -3,11 +3,12 @@
 
 ## High priority features
 - Reorder tags
-- Start screen and UX
 - sort transactions by value
+- Bulk edit transactions, copy, multiselect (sum)
 
 
 ## Medium priority features
+- Start screen and UX
 - Replace Syncfusion line charts
 - Rerun category rule
 - Choose category/account on CSV column?
@@ -21,6 +22,5 @@
 
 ## Low priority features
 - Load more transactions on reach end of transaction grid?
-- Bulk edit transactions
 - Animate bar charts?
 - Maybe balance update? Specifically for investments?

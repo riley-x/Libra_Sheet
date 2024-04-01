@@ -428,7 +428,7 @@ class _ReimbursementRow extends StatelessWidget {
               InkWell(
                 onTap: () => onEdit.call(reimbursement),
                 child: Text(
-                  "Click to edit",
+                  "Edit",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
