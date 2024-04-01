@@ -68,8 +68,8 @@ extension IntDollarString on String {
       fracPart = val;
     }
 
-    if (intPart < 0 || (intPart == 0 && isNegative)) {
-      return intPart * 10000 - fracPart;
+    if (isNegative) {
+      return -intPart * 10000 - fracPart;
     } else {
       return intPart * 10000 + fracPart;
     }
