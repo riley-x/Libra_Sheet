@@ -270,6 +270,7 @@ class AddCsvState extends ChangeNotifier {
       DateTime? date;
       int? value;
       bool negateValue = false;
+      bool ok = true;
 
       for (int col = 0; col < columnTypes.length; col++) {
         if (col >= rawLines[row].length) continue;
@@ -298,13 +299,19 @@ class AddCsvState extends ChangeNotifier {
               note = text;
             }
           case CsvDebitCreditSwitch():
-            if (_parseDebit(text) == true) negateValue = true;
-          case CsvNone():
+            final res = _parseDebit(text);
+            if (res == true) {
+              negateValue = true;
+            } else if (res == null) {
+              ok = false;
+            }
           case CsvMatch():
+            if (tryParse(text, col) == false) ok = false;
+          case CsvNone():
         }
       }
 
-      if (date == null || value == null) {
+      if (date == null || value == null || !ok) {
         rowOk[row] = false;
         continue;
       }

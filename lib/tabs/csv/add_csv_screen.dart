@@ -134,7 +134,7 @@ class _InstructionsDialog extends StatelessWidget {
                 " The possible types are:",
               ),
               SizedBox(height: 20),
-              Text("Mandatory columns:"),
+              Text("Basic columns:"),
               SizedBox(height: 8),
               _BulletRow(
                   "Name: The name of the transaction. You can have multiple name columns and they will be joined together."),
