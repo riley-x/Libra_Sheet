@@ -48,10 +48,13 @@ extension IntDollarString on String {
 
     if (str.isEmpty) return null;
 
+    final isNegative = str[0] == '-';
+    if (isNegative) str = str.substring(1);
+
     final parts = str.split('.');
     if (parts.length > 2) return null;
 
-    final intPart = int.tryParse(parts[0]);
+    final intPart = parts[0].isEmpty ? 0 : int.tryParse(parts[0]);
     if (intPart == null) return null;
 
     int fracPart = 0;
@@ -65,7 +68,7 @@ extension IntDollarString on String {
       fracPart = val;
     }
 
-    if (intPart < 0 || (intPart == 0 && str[0] == '-')) {
+    if (intPart < 0 || (intPart == 0 && isNegative)) {
       return intPart * 10000 - fracPart;
     } else {
       return intPart * 10000 + fracPart;
