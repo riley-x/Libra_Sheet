@@ -99,18 +99,18 @@ class LibraAppState extends ChangeNotifier {
 
   Future<void> _loadMonths() async {
     final earliestMonth = await LibraDatabase.read((db) => db.getEarliestMonth());
-    if (earliestMonth == null) {
+    final latestMonth = await LibraDatabase.read((db) => db.getLatestMonth());
+    if (earliestMonth == null || latestMonth == null) {
       monthList = _getDefaultMonths(); // So that the charts don't look too weird
       return;
     }
 
     // no easy way to do this in dart, so do manually
-    final now = DateTime.now();
     var year = earliestMonth.year;
     var month = earliestMonth.month;
 
     monthList = [];
-    while (year < now.year || (year == now.year && month <= now.month)) {
+    while (year < latestMonth.year || (year == latestMonth.year && month <= latestMonth.month)) {
       monthList.add(DateTime.utc(year, month));
       if (month == 12) {
         year++;
@@ -120,7 +120,7 @@ class LibraAppState extends ChangeNotifier {
       }
     }
     debugPrint("LibraAppState::_loadMonths() Loaded ${monthList.length} months "
-        "between $earliestMonth and $now");
+        "between $earliestMonth and $latestMonth");
   }
 
   /// Warning this data contains dates using the local time zone because that's what the syncfusion

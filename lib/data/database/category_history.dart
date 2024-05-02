@@ -170,6 +170,17 @@ extension CategoryHistoryExtension on DatabaseExecutor {
     return DateTime.fromMillisecondsSinceEpoch(out.first[_date] as int, isUtc: true);
   }
 
+  /// Returns the last month in the database with data
+  Future<DateTime?> getLatestMonth() async {
+    final out = await query(
+      categoryHistoryTable,
+      columns: ["MAX($_date) as $_date"],
+      where: "$_value != 0",
+    );
+    if (out.first[_date] == null) return null; // This happens when the database is empty
+    return DateTime.fromMillisecondsSinceEpoch(out.first[_date] as int, isUtc: true);
+  }
+
   /// Returns the monthly net change across all acounts or [accoundId]. Useful for getting an
   /// account's balance history.
   Future<List<TimeIntValue>> getMonthlyNet({int? accountId}) async {
