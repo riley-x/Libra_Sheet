@@ -104,7 +104,7 @@ class EditAccountsScreen extends StatelessWidget {
         ),
         Scaffold(
           body: ReorderableListView(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.only(left: 10, right: 10, bottom: 80),
             onReorder: (oldIndex, newIndex) => accountState.reorder(oldIndex, newIndex),
             children: [
               for (final acc in accountState.list)

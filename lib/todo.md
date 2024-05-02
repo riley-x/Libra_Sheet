@@ -4,7 +4,7 @@
 ## High priority features
 - Reorder tags
 - sort transactions by value
-- Bulk edit transactions, copy, multiselect (sum)
+- Bulk edit transactions, create copy, multiselect (sum)
 
 
 ## Medium priority features
