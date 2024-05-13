@@ -129,6 +129,7 @@ class EditCategoriesScreen extends StatelessWidget {
           initialEntries: [
             OverlayEntry(
               builder: (context) => const SingleChildScrollView(
+                padding: EdgeInsets.only(left: 10, right: 10),
                 child: Column(
                   children: [
                     _CategorySection(false),

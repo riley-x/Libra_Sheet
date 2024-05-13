@@ -6,6 +6,7 @@ import 'package:libra_sheet/components/dialogs/show_color_picker.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/components/table_form_utils.dart';
+import 'package:libra_sheet/tabs/settings/category_card.dart';
 import 'package:provider/provider.dart';
 
 /// State for the tag submenu in the settings tab
@@ -188,27 +189,29 @@ class _TagRow extends StatelessWidget {
       onTap: () => context.read<EditTagsState>().setFocus(tag),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+        height: BaseCategoryCard.height,
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
               color: Theme.of(context).colorScheme.outlineVariant,
+              width: 0,
             ),
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 4,
-              height: 25,
+              width: BaseCategoryCard.colorBoxWidth,
+              height: BaseCategoryCard.colorBoxHeight,
               color: tag.color,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 10),
             Expanded(
-              flex: 10,
               child: Text(
                 tag.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge,
               ),
             ),
           ],
