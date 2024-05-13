@@ -27,18 +27,45 @@ class TagState {
   }
 
   Future<void> add(Tag tag) async {
-    final key = await LibraDatabase.update((db) async => await db.insertTag(tag));
+    final key = await LibraDatabase.update((db) => db.insertTag(tag, listIndex: list.length));
     if (key == null) return;
     tag = tag.copyWith(key: key);
-    list.insert(0, tag);
+    list.add(tag);
     appState.notifyListeners();
   }
 
   Future<void> delete(Tag tag) async {
-    list.removeWhere((it) => it.key == tag.key);
+    final oldLength = list.length;
+    final ind = list.indexWhere((it) => it.key == tag.key);
+    list.removeAt(ind);
     appState.notifyListeners();
+    appState.transactions.notifyListeners();
+
     await LibraDatabase.backup(tag: '.before_delete_tag');
-    await LibraDatabase.updateTransaction((txn) async => await txn.deleteTag(tag));
+    await LibraDatabase.updateTransaction((txn) async {
+      await txn.deleteTag(tag);
+      await txn.shiftTagIndicies(ind + 1, oldLength, -1);
+    });
+  }
+
+  Future<void> reorder(int oldIndex, int newIndex) async {
+    final acc = list.removeAt(oldIndex);
+    if (newIndex > oldIndex) {
+      list.insert(newIndex - 1, acc);
+    } else {
+      list.insert(newIndex, acc);
+    }
+    appState.notifyListeners();
+
+    await LibraDatabase.updateTransaction((txn) async {
+      if (newIndex > oldIndex) {
+        await txn.shiftTagIndicies(oldIndex, newIndex, -1);
+        await txn.updateTag(acc, listIndex: newIndex - 1);
+      } else {
+        await txn.shiftTagIndicies(newIndex, oldIndex, 1);
+        await txn.updateTag(acc, listIndex: newIndex);
+      }
+    });
   }
 
   /// Tags are modified in place already. This function serves to notify listeners, and also update

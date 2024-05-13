@@ -193,7 +193,6 @@ Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async
 }
 
 Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
-  final nTags = await db.countTags();
   await db.execute("ALTER TABLE $tagsTable DROP COLUMN list_index;");
   await db.execute("ALTER TABLE $tagsTable ADD listIndex INTEGER NULL;");
   await db.execute("""
@@ -202,7 +201,7 @@ Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
         id, ROW_NUMBER() OVER(ORDER BY id) AS newIndex 
       FROM $tagsTable
     )
-    UPDATE $tagsTable SET listIndex = cte.newIndex
+    UPDATE $tagsTable SET listIndex = cte.newIndex - 1
     FROM cte
     WHERE $tagsTable.id = cte.id
   """);
