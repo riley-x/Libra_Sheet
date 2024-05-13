@@ -1,3 +1,4 @@
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 
 class Allocation {
@@ -17,6 +18,12 @@ class Allocation {
   String toString() {
     return "Allocation($key, $name: $value ${category?.name})";
   }
+
+  int get signedValue => switch (category?.type) {
+        ExpenseFilterType.income => value,
+        ExpenseFilterType.expense => -value,
+        _ => value,
+      };
 }
 
 class MutableAllocation implements Allocation {
@@ -47,4 +54,11 @@ class MutableAllocation implements Allocation {
   Allocation freeze([int? key]) {
     return Allocation(key: key ?? this.key, name: name, category: category, value: value);
   }
+
+  @override
+  int get signedValue => switch (category?.type) {
+        ExpenseFilterType.income => value,
+        ExpenseFilterType.expense => -value,
+        _ => value,
+      };
 }

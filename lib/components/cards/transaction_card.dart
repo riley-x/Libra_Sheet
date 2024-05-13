@@ -9,6 +9,7 @@ import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
+import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:provider/provider.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -157,24 +158,30 @@ class _TextElements extends StatelessWidget {
           children: [
             Row(
               children: [
-                if (trans.nAllocations > 0) ...[
-                  _NumberIndicator(trans.nAllocations, true),
+                for (final alloc in trans.softAllocations) ...[
+                  _AllocIndicator(alloc),
                   const SizedBox(width: 10),
                 ],
                 if (trans.totalReimbusrements > 0 || trans.nAllocations > 0) ...[
                   Text(
-                    "(${trans.adjustedValue().dollarString()})",
+                    trans.adjustedValue().dollarString(),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: (trans.value < 0) ? Colors.red : Colors.green,
-                      fontStyle: FontStyle.italic,
+                      // fontStyle: FontStyle.italic,
                     ),
                   ),
                   const SizedBox(width: 10),
                 ],
                 Text(
-                  trans.value.dollarString(),
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: (trans.value < 0) ? Colors.red : Colors.green),
+                  (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
+                      ? "(${trans.value.dollarString()})"
+                      : trans.value.dollarString(),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: (trans.value < 0) ? Colors.red : Colors.green,
+                    fontStyle: (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
+                        ? FontStyle.italic
+                        : FontStyle.normal,
+                  ),
                 ),
               ],
             ),
@@ -185,6 +192,34 @@ class _TextElements extends StatelessWidget {
         ),
         if (rightContent != null) rightContent!,
       ],
+    );
+  }
+}
+
+class _AllocIndicator extends StatelessWidget {
+  const _AllocIndicator(this.alloc, {super.key});
+
+  final SoftAllocation alloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        color: alloc.category.color.withAlpha(200),
+      ),
+      child: Center(
+        child: Text(
+          alloc.signedValue.dollarString(),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: adaptiveTextColor(alloc.category.color)),
+        ),
+      ),
     );
   }
 }

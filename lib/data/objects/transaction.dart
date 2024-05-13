@@ -1,3 +1,4 @@
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -9,9 +10,9 @@ import 'package:libra_sheet/data/objects/tag.dart';
 /// should always be retrieved through the database.
 ///
 /// However, we do update the [allocations] and [reimbursements] lists after creation, because
-/// transactions are not initally loaded with them. Instead [softAllocations] and [nReimbursements]
+/// transactions are not initally loaded with them. Instead [softAllocations] and [totalReimbusrements]
 /// are used in the interim. These are shown in the [TransactionCard]s, while the actual allocs/
-/// reimbs are only shown and loaded in the [TransactionDetailsEditor].
+/// reimbs are only shown and loaded in the [TransactionDetailsEditor] or the hover tooltips.
 class Transaction {
   Transaction({
     this.key = 0,
@@ -129,6 +130,12 @@ class SoftAllocation {
   final int value;
 
   SoftAllocation({required this.category, required this.value});
+
+  int get signedValue => switch (category.type) {
+        ExpenseFilterType.income => value,
+        ExpenseFilterType.expense => -value,
+        ExpenseFilterType.all => value,
+      };
 }
 
 final dummyTransaction =

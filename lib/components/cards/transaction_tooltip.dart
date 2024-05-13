@@ -78,7 +78,7 @@ class TransactionTooltip extends StatelessWidget {
                           ],
                           Expanded(
                             child: Text(
-                                "${alloc.category?.name}: ${alloc.value.dollarString()} (${alloc.name})"),
+                                "${alloc.category?.name}: ${alloc.signedValue.dollarString()} (${alloc.name})"),
                           ),
                         ],
                       ),

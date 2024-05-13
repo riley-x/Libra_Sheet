@@ -233,7 +233,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
   ///     tag => null
   ///
   /// Also, the following are always null
-  ///     allocations (but sets nAllocations)
+  ///     allocations (but sets softAllocations)
   ///     reimbursements (but sets totalReimbusrements)
   ///
   /// WARNING! Do not attempt to change this to an isolate using `compute()`. The database can't be
