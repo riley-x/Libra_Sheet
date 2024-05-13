@@ -176,6 +176,9 @@ class TransactionDetailsState extends ChangeNotifier {
     }
     if (_disposed) return;
 
+    /// Remove deleted tags
+    tags.removeWhere((tag) => appState.tags.list.indexWhere((it) => it.key == tag.key) == -1);
+
     /// Collect the target keys
     Set<int> keys = {};
     if (reimburseTarget != null) {
