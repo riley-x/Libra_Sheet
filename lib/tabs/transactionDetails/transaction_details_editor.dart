@@ -182,7 +182,9 @@ class TransactionDetailsEditor extends StatelessWidget {
                               context: context,
                               title: 'Allocations',
                               msg:
-                                  "An allocation lets you split a transaction into multiple categories.",
+                                  "An allocation assigns part of a transaction to another category.\n\n"
+                                  "For example, a \$100 Amazon transaction might consist of \$60 of clothes and \$40 of household supplies. "
+                                  "You should therefore set the main category of the transaction to \"Clothes\", and then create a \$40 allocation for \"Household\".",
                               showCancel: false,
                             ),
                           ),
@@ -225,10 +227,10 @@ class TransactionDetailsEditor extends StatelessWidget {
                               title: 'Reimbursements',
                               msg:
                                   "A reimbursement cancels a specified amount from two opposite transactions.\n\n"
-                                  "For example, you pay for dinner with a friend and log a \$60 dining transaction, "
-                                  "and then your friend Venmo's you back \$30. "
-                                  "But your real expense was only \$30, and the Venmo transaction shouldn't count as income. "
-                                  "By reimbursing the two transactions with each other, you get the desired result.",
+                                  "For example, imagine you get dinner with a group of friends and you put everything on your card, asking them to Venmo you back. "
+                                  "Your real expense is a lot smaller than the total bill, and the Venmo payments shouldn't count as income. "
+                                  "Therefore, you should reimburse the Venmo payments with the restuarant charge to reflect the amount you actually paid for dinner.\n\n"
+                                  "You can similarly use reimbursements for things like returned items or business trips that your employer comps.",
                               showCancel: false,
                             ),
                           ),
