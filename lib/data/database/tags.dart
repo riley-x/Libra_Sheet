@@ -12,13 +12,13 @@ const tagKey = _key;
 const _key = "id";
 const _name = "name";
 const _color = "color";
-const _index = "list_index";
+const _index = "listIndex";
 
 const createTagsTableSql = "CREATE TABLE IF NOT EXISTS $tagsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "$_name TEXT NOT NULL, "
     "$_color INTEGER NOT NULL, "
-    "$_index INTEGER NOT NULL DEFAULT -1)";
+    "$_index INTEGER NOT NULL)";
 
 const tagJoinTag = "tag_id";
 const tagJoinTrans = "transaction_id";
@@ -35,13 +35,18 @@ INSERT INTO $tagsTable ($_key, $_name, $_color, $_index) VALUES
 (3, 'Tagalicious 3', 4291442848, -1);
 ''';
 
-Map<String, dynamic> _toMap(Tag tag) {
+Map<String, dynamic> _toMap(Tag tag, {int? listIndex}) {
   final map = {
     _name: tag.name,
     _color: tag.color.value,
   };
+
+  /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
   if (tag.key != 0) {
     map[_key] = tag.key;
+  }
+  if (listIndex != null) {
+    map[_index] = listIndex;
   }
   return map;
 }
@@ -55,31 +60,48 @@ Tag _fromMap(Map<String, dynamic> map) {
 }
 
 extension TagsDatabaseExtension on DatabaseExecutor {
-  Future<int> insertTag(Tag tag) {
+  Future<int> insertTag(Tag tag, {int? listIndex}) {
     return insert(
       tagsTable,
-      _toMap(tag),
+      _toMap(tag, listIndex: listIndex),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<int> updateTag(Tag tag) {
+  Future<int> updateTag(Tag tag, {int? listIndex}) {
     return update(
       tagsTable,
-      _toMap(tag),
+      _toMap(tag, listIndex: listIndex),
       where: '$_key = ?',
       whereArgs: [tag.key],
     );
   }
 
+  Future<int> countTags() async {
+    final maps = await query(
+      tagsTable,
+      columns: ['COUNT($_key) as count'],
+    );
+    return maps[0]['count'] as int? ?? 0;
+  }
+
   Future<List<Tag>> getAllTags() async {
     final List<Map<String, dynamic>> maps = await query(
       tagsTable,
-      orderBy: "$_key DESC",
+      orderBy: _index,
     );
     return List.generate(
       maps.length,
       (i) => _fromMap(maps[i]),
+    );
+  }
+
+  Future<int> shiftTagIndicies(int start, int end, int delta) {
+    return rawUpdate(
+      "UPDATE $tagsTable "
+      "SET $_index = $_index + ? "
+      "WHERE $_index >= ? AND $_index < ?",
+      [delta, start, end],
     );
   }
 

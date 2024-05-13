@@ -62,8 +62,9 @@ class LibraDatabase {
   static Future<void> open() async {
     _db = await openDatabase(
       databasePath,
+      version: 15,
       onCreate: _createDatabase,
-      version: 14,
+      onUpgrade: _upgradeDatabase,
     );
   }
 
@@ -168,14 +169,7 @@ class LibraDatabase {
   }
 }
 
-FutureOr<void> _createDatabase(Database db, int version) {
-  return switch (version) {
-    14 => _createDatabase14(db),
-    _ => null,
-  };
-}
-
-FutureOr<void> _createDatabase14(Database db) async {
+FutureOr<void> _createDatabase(Database db, int version) async {
   await db.execute(createAccountsTableSql);
   await db.execute(createCategoryTableSql);
   await db.execute(createCategoryHistoryTableSql);
@@ -190,4 +184,26 @@ FutureOr<void> _createDatabase14(Database db) async {
     // await db.execute(createTestAccountsSql);
     // await db.execute(createTestTagsSql);
   }
+}
+
+Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion == 14 && newVersion == 15) {
+    await _upgrade14_15(db, oldVersion, newVersion);
+  }
+}
+
+Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
+  final nTags = await db.countTags();
+  await db.execute("ALTER TABLE $tagsTable DROP COLUMN list_index;");
+  await db.execute("ALTER TABLE $tagsTable ADD listIndex INTEGER NULL;");
+  await db.execute("""
+    WITH cte AS (
+      SELECT 
+        id, ROW_NUMBER() OVER(ORDER BY id) AS newIndex 
+      FROM $tagsTable
+    )
+    UPDATE $tagsTable SET listIndex = cte.newIndex
+    FROM cte
+    WHERE $tagsTable.id = cte.id
+  """);
 }
