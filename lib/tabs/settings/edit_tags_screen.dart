@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
-import 'package:libra_sheet/components/cards/libra_chip.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/dialogs/show_color_picker.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -92,22 +91,12 @@ class EditTagsScreen extends StatelessWidget {
           key: ObjectKey(state.focused),
         ),
         Scaffold(
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  for (final tag in appState.tags.list)
-                    LibraChip(
-                      tag.name,
-                      color: tag.color,
-                      onTap: () => state.setFocus(tag),
-                    ),
-                ],
-              ),
-            ),
+          body: ReorderableListView(
+            padding: const EdgeInsets.only(left: 10, right: 10, bottom: 80),
+            onReorder: (oldIndex, newIndex) => appState.tags.reorder(oldIndex, newIndex),
+            children: [
+              for (final tag in appState.tags.list) _TagRow(tag, key: ObjectKey(tag)),
+            ],
           ),
           floatingActionButton: FloatingActionButton(
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -121,7 +110,6 @@ class EditTagsScreen extends StatelessWidget {
   }
 }
 
-/// Account details form
 class _EditTag extends StatelessWidget {
   const _EditTag({super.key});
 
@@ -185,6 +173,47 @@ class _EditTag extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TagRow extends StatelessWidget {
+  const _TagRow(this.tag, {super.key});
+
+  final Tag tag;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => context.read<EditTagsState>().setFocus(tag),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 4,
+              height: 25,
+              color: tag.color,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              flex: 10,
+              child: Text(
+                tag.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

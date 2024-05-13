@@ -121,7 +121,10 @@ class _SettingsTabState extends State<SettingsTab> {
             screen: tab,
             isFullScreen: isFullScreen,
             onBack: () => onBack(context),
-            child: auxContent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: auxContent,
+            ),
           );
 
           if (isFullScreen) {
