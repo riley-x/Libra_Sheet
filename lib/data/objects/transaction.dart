@@ -51,7 +51,7 @@ class Transaction {
   /// We don't load all the allocations with the transaction in list view, (although maybe we could),
   /// and instead load some soft fields. This field is not used when [allocations] is not null.
   final List<SoftAllocation> _softAllocations;
-  int get nAllocations => allocations?.length ?? _softAllocations.length;
+
   Iterable<SoftAllocation> get softAllocations {
     if (allocations == null) return _softAllocations;
     return [
@@ -63,22 +63,42 @@ class Transaction {
     ];
   }
 
+  int get nAllocations => allocations?.length ?? _softAllocations.length;
+
+  /// Returns the total value of allocations. Remember this is always a positive value, and should
+  /// be less than the value of the transaction itself.
+  int totalAllocations() {
+    int sum = 0;
+    if (allocations == null) {
+      for (final alloc in _softAllocations) {
+        sum += alloc.value;
+      }
+    } else {
+      for (final alloc in allocations!) {
+        sum += alloc.value;
+      }
+    }
+    return sum;
+  }
+
   /// Similarly, we don't load all the reimbursements with the transaction in the list view, but
   /// we do get the total value. This field is not used when [reimbursements] is not null.
   final int _reimbTotal;
 
-  /// Remember that reimbursements are always stored as positive value. See [valueAfterReimbursements]
+  /// Remember that reimbursements are always stored as positive value. See [adjustedValue]
   /// for a signed value.
   int get totalReimbusrements {
     if (reimbursements == null) return _reimbTotal;
     return reimbursements!.fold(0, (cum, e) => cum + e.value);
   }
 
-  int valueAfterReimbursements() {
+  /// Returns the value after adjustments for reimbursements and allocations. Should be the same
+  /// sign but smaller in magnitude than the original value.
+  int adjustedValue() {
     if (value < 0) {
-      return value + totalReimbusrements;
+      return value + totalReimbusrements + totalAllocations();
     } else {
-      return value - totalReimbusrements;
+      return value - totalReimbusrements - totalAllocations();
     }
   }
 
