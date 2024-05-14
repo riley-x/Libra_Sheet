@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
@@ -7,6 +8,7 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
+import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -21,15 +23,134 @@ class HomeCharts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final expandedCharts = constraints.maxHeight > minNetWorthHeight + minPieHeight + 1;
-      final pieChartsAligned = constraints.maxWidth > 2 * minPieHeight + 16;
-      if (pieChartsAligned && expandedCharts) {
-        return const _ExpandedCharts();
-      } else {
-        return _ListCharts(pieChartsAligned: pieChartsAligned);
-      }
-    });
+    final state = context.watch<HomeTabState>();
+    return Column(
+      children: [
+        const _NetWorthTitle(),
+        Expanded(
+          child: switch (state.mode) {
+            HomeChartMode.netWorth => const _NetWorthGraph(),
+            HomeChartMode.stacked => const Placeholder(),
+            HomeChartMode.pies => const Placeholder(),
+          },
+        ),
+        const SizedBox(height: 10),
+        const _HomeChartSelectors(),
+        const SizedBox(height: 10),
+      ],
+    );
+
+    // return LayoutBuilder(builder: (context, constraints) {
+    //   final expandedCharts = constraints.maxHeight > minNetWorthHeight + minPieHeight + 1;
+    //   final pieChartsAligned = constraints.maxWidth > 2 * minPieHeight + 16;
+    //   if (pieChartsAligned && expandedCharts) {
+    //     return const _ExpandedCharts();
+    //   } else {
+    //     return _ListCharts(pieChartsAligned: pieChartsAligned);
+    //   }
+    // });
+  }
+}
+
+class _NetWorthTitle extends StatelessWidget {
+  const _NetWorthTitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    List<TimeIntValue> data = context.watch<HomeTabState>().netWorthData;
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Net Worth',
+              style: Theme.of(context).textTheme.headlineMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            (data.lastOrNull?.value ?? 0).dollarString(),
+            style: Theme.of(context).textTheme.headlineMedium,
+            maxLines: 1,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeChartSelectors extends StatelessWidget {
+  const _HomeChartSelectors({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Column(
+          children: [
+            // Text("Display"),
+            // SizedBox(height: 5),
+            _ModeSelector(),
+          ],
+        ),
+        Column(
+          children: [
+            // Text("Time Frame"),
+            // SizedBox(height: 5),
+            _TimeFrameSelector(),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+/// Segmented button for the chart mode
+class _ModeSelector extends StatelessWidget {
+  const _ModeSelector({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
+    return SegmentedButton<HomeChartMode>(
+      showSelectedIcon: false,
+      segments: const [
+        ButtonSegment(
+          value: HomeChartMode.stacked,
+          icon: Icon(Icons.area_chart),
+        ),
+        ButtonSegment(
+          value: HomeChartMode.netWorth,
+          icon: Icon(Icons.show_chart),
+        ),
+        ButtonSegment(
+          value: HomeChartMode.pies,
+          icon: Icon(Icons.pie_chart),
+        ),
+      ],
+      selected: {state.mode},
+      onSelectionChanged: (newSelection) => state.setMode(newSelection.first),
+    );
+  }
+}
+
+/// Segmented button for the time frame
+class _TimeFrameSelector extends StatelessWidget {
+  const _TimeFrameSelector({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final monthList = context.watch<LibraAppState>().monthList;
+    final state = context.watch<HomeTabState>();
+    return TimeFrameSelector(
+      months: monthList,
+      selected: state.timeFrame,
+      onSelect: state.setTimeFrame,
+      enabled: state.mode != HomeChartMode.pies,
+    );
   }
 }
 
@@ -41,7 +162,7 @@ class _ExpandedCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Expanded(child: _NetWorthGraph(null)),
+        // const Expanded(child: _NetWorthGraph(null)),
         Container(
           height: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
@@ -66,7 +187,7 @@ class _ListCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const _NetWorthGraph(HomeCharts.minNetWorthHeight),
+        // const _NetWorthGraph(HomeCharts.minNetWorthHeight),
         Container(
           height: 1,
           color: Theme.of(context).colorScheme.outlineVariant,
@@ -108,43 +229,34 @@ List<Widget> _verticalPies(double height, BuildContext context) {
 }
 
 class _NetWorthGraph extends StatelessWidget {
-  const _NetWorthGraph(this.height, {super.key});
+  const _NetWorthGraph({super.key});
 
-  final double? height;
+  static final gradientColors = LinearGradient(
+    colors: [
+      Colors.blue.withAlpha(10),
+      Colors.blue.withAlpha(80),
+      Colors.blue.withAlpha(170),
+    ],
+    stops: const [0.0, 0.6, 1],
+    begin: Alignment.bottomCenter,
+    end: Alignment.topCenter,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final gradientColors = LinearGradient(
-      colors: [
-        Colors.blue.withAlpha(10),
-        Colors.blue.withAlpha(80),
-        Colors.blue.withAlpha(170),
-      ],
-      stops: const [0.0, 0.6, 1],
-      begin: Alignment.bottomCenter,
-      end: Alignment.topCenter,
-    );
-
-    List<TimeIntValue> data = context.watch<LibraAppState>().netWorthData;
-    return ChartWithTitle(
-      height: height,
-      textLeft: 'Net Worth',
-      textRight: (data.lastOrNull?.value ?? 0).dollarString(),
-      textStyle: Theme.of(context).textTheme.headlineMedium,
-      padding: const EdgeInsets.only(top: 10),
-      child: DateTimeGraph([
-        AreaSeries<TimeIntValue, DateTime>(
-          animationDuration: 0,
-          dataSource: data,
-          xValueMapper: (TimeIntValue sales, _) => sales.time,
-          yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
-          gradient: gradientColors,
-          borderColor: Colors.blue,
-          borderWidth: 3,
-          borderDrawMode: BorderDrawMode.top,
-        ),
-      ]),
-    );
+    final state = context.watch<HomeTabState>();
+    return DateTimeGraph([
+      AreaSeries<TimeIntValue, DateTime>(
+        animationDuration: 0,
+        dataSource: state.netWorthData.sublist(state.timeFrameRange.$1, state.timeFrameRange.$2),
+        xValueMapper: (TimeIntValue sales, _) => sales.time,
+        yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
+        gradient: gradientColors,
+        borderColor: Colors.blue,
+        borderWidth: 3,
+        borderDrawMode: BorderDrawMode.top,
+      ),
+    ]);
   }
 }
 

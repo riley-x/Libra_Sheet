@@ -13,7 +13,6 @@ import 'package:libra_sheet/data/app_state/tag_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/export/history_csv.dart';
-import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/main.dart';
 import 'package:libra_sheet/tabs/navigation/libra_nav.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
@@ -58,7 +57,6 @@ class LibraAppState extends ChangeNotifier {
     futures.add(_loadMonths());
     await Future.wait(futures);
 
-    _loadNetWorth(); // not needed downstream, but needs months
     rules.load(); // not needed until adding transactions/editing rules
     notifyListeners();
   }
@@ -68,7 +66,6 @@ class LibraAppState extends ChangeNotifier {
   /// probably doesn't await anything.
   Future<void> reloadAfterTransactions() async {
     await _loadMonths();
-    _loadNetWorth(); // not needed downstream, no need to await
     notifyListeners();
   }
 
@@ -121,16 +118,6 @@ class LibraAppState extends ChangeNotifier {
     }
     debugPrint("LibraAppState::_loadMonths() Loaded ${monthList.length} months "
         "between $earliestMonth and $latestMonth");
-  }
-
-  /// Warning this data contains dates using the local time zone because that's what the syncfusion
-  /// charts expect. Don't use to save to database!
-  List<TimeIntValue> netWorthData = [];
-
-  Future<void> _loadNetWorth() async {
-    final newData = await LibraDatabase.read((db) => db.getMonthlyNet()) ?? [];
-    netWorthData = newData.withAlignedTimes(monthList, cumulate: true).fixedForCharts();
-    notifyListeners();
   }
 
   //--------------------------------------------------------------------------------
