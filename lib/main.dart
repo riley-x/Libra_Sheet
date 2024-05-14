@@ -128,7 +128,7 @@ class _NavBuilder extends StatelessWidget {
           children: [
             SafeArea(
               child: LibraNav(
-                extended: constraints.maxWidth >= 900,
+                extended: constraints.maxWidth >= 1100,
                 onDestinationSelected: context.read<LibraAppState>().setTab,
               ),
             ),
