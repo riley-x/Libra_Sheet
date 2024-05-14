@@ -66,9 +66,6 @@ class HomeTabState extends ChangeNotifier {
       final rawValues = accountHistoryRaw[account.key];
       if (rawValues == null) continue;
       final values = rawValues.alignValues(monthList, cumulate: true);
-      // if (list.isNotEmpty) {
-      //   values.addElementwise(list.last.values);
-      // }
       list.add(AccountHistory(account, values));
     }
 

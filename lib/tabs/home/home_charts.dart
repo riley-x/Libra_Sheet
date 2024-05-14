@@ -304,7 +304,7 @@ class _StackedChart extends StatelessWidget {
         dates: state.monthList.looseRange(state.timeFrameRange),
       ),
       data: SeriesCollection([
-        for (final accHistory in state.assetAccounts)
+        for (final accHistory in state.liabAccounts + state.assetAccounts)
           StackColumnSeries<int>(
             name: accHistory.account.name,
             color: accHistory.account.color,
