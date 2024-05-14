@@ -288,6 +288,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                 child: SnapLineHover(
                   mainGraph: painter!,
                   hoverLoc: hoverLocX,
+                  reverse: widget.data.hasStack,
                 ),
               ),
           ],

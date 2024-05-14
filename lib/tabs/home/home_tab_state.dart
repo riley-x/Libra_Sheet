@@ -58,6 +58,8 @@ class HomeTabState extends ChangeNotifier {
 
     monthList = List.from(appState.monthList);
     timeFrameRange = timeFrame.getRange(monthList);
+    assetAccounts = [];
+    liabAccounts = [];
 
     for (final account in appState.accounts.list) {
       final list = (account.type == AccountType.liability) ? liabAccounts : assetAccounts;

@@ -7,7 +7,8 @@ import 'package:libra_sheet/graphing/series/series.dart';
 /// the hover position given by [hoverLoc], and the [tooltip] is drawn next to it and placed to not
 /// fall off the graph.
 ///
-/// If [tooltip] is null, will use a [PooledTooltip] by default.
+/// If [tooltip] is null, will use a [PooledTooltip] by default. [reverse] is exposed and passed to
+/// the [PooledTooltip] for convenience, but is unused by this class.
 ///
 /// This widget should be used in a [Stack] with a [DiscreteCartesianGraphPainter] such that they
 /// have the same size.
@@ -20,7 +21,8 @@ class SnapLineHover extends SingleChildRenderObjectWidget {
     required this.mainGraph,
     this.hoverLoc,
     Widget? tooltip,
-  }) : super(child: tooltip ?? PooledTooltip(mainGraph, hoverLoc));
+    bool reverse = false,
+  }) : super(child: tooltip ?? PooledTooltip(mainGraph, hoverLoc, reverse: reverse));
 
   @override
   RenderSnapLineHover createRenderObject(BuildContext context) {
@@ -84,9 +86,10 @@ class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<Rend
 /// This is a hover tooltip that pools together all the data at a single point in a discrete x-value
 /// graph. It displays a title followed by entries from each series in a column.
 class PooledTooltip extends StatelessWidget {
-  const PooledTooltip(this.mainGraph, this.hoverLoc, {super.key});
+  const PooledTooltip(this.mainGraph, this.hoverLoc, {super.key, this.reverse = false});
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
+  final bool reverse;
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +146,7 @@ class PooledTooltip extends StatelessWidget {
             Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.onBackground),
 
             /// Series items
-            for (final series in mainGraph.data.data)
+            for (final series in (reverse ? mainGraph.data.data.reversed : mainGraph.data.data))
               Align(
                 alignment: Alignment.centerLeft,
                 child: _getSeriesLabel(context, series),

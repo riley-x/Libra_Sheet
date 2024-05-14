@@ -34,7 +34,7 @@ class StackColumnSeries<T> extends ColumnSeries<T> {
   }
 
   @override
-  bool? accumulateStack(Map<int, double> posVals, Map<int, double> negVals) {
+  bool accumulateStack(Map<int, double> posVals, Map<int, double> negVals) {
     stackBase = [];
     for (int i = 0; i < data.length; i++) {
       final val = valueMapper(i);

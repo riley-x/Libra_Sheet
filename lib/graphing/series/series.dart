@@ -102,11 +102,12 @@ abstract class Series<T> {
   ///
   /// The key to the maps is the index of each data point, and the value is the current stack value.
   /// TODO to handle independent stacks, could key by tuple with a stack series index.
-  bool? accumulateStack(Map<int, double> posVals, Map<int, double> negVals) => false;
+  bool accumulateStack(Map<int, double> posVals, Map<int, double> negVals) => false;
 }
 
 class SeriesCollection {
   final List<Series> data;
+  bool hasStack = false;
 
   SeriesCollection(this.data) {
     _accumulateStackSeries();
@@ -116,7 +117,8 @@ class SeriesCollection {
     Map<int, double> posVals = {};
     Map<int, double> negVals = {};
     for (final series in data) {
-      series.accumulateStack(posVals, negVals);
+      final act = series.accumulateStack(posVals, negVals);
+      if (act) hasStack = true;
     }
   }
 
