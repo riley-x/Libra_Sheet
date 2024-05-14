@@ -5,11 +5,14 @@ import 'package:libra_sheet/components/dialogs/month_range_dialog.dart';
 
 enum TimeFrameEnum { oneYear, twoYear, all, custom }
 
+/// Class representing a time frame, used in time range selectors throughout the app. The primary
+/// field is just a [TimeFrameEnum] in [selection], but includes extram emembers for dealing with
+/// custom ranges.
 class TimeFrame {
   final TimeFrameEnum selection;
 
-  /// These are only used if [selection] == [TimeFrameEnum.custom]. Otherwise, a change in the global
-  /// month list might make the below fields stale if i.e. a new month is added.
+  /// These are only used if [selection] == [TimeFrameEnum.custom]. Otherwise, a change in the
+  /// global month list might make the below fields stale if i.e. a new month is added.
   final DateTime? customStart;
   final DateTime? customEndInclusive;
 
@@ -53,6 +56,7 @@ class TimeFrameSelector extends StatelessWidget {
   final TimeFrame selected;
   final Function(TimeFrame)? onSelect;
   final ButtonStyle? style;
+  final bool enabled;
 
   const TimeFrameSelector({
     super.key,
@@ -60,11 +64,12 @@ class TimeFrameSelector extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     this.style,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton(
+    return SegmentedButton<TimeFrameEnum>(
       style: style,
       showSelectedIcon: false,
       segments: const <ButtonSegment<TimeFrameEnum>>[
@@ -75,37 +80,39 @@ class TimeFrameSelector extends StatelessWidget {
       ],
       // this enables clicking on the custom button again, but we need to check empty below
       emptySelectionAllowed: true,
-      selected: <TimeFrameEnum>{selected.selection},
-      onSelectionChanged: (Set<TimeFrameEnum> newSelection) {
-        final TimeFrameEnum it;
-        if (newSelection.isEmpty) {
-          // If custom, launch again
-          if (selected.selection == TimeFrameEnum.custom) {
-            it = TimeFrameEnum.custom;
-          }
-          // Otherwise we're clicking on the same button, do nothing
-          else {
-            return;
-          }
-        } else {
-          // Since multiSelectionAllowed = false, only ever <= 1 elements.
-          it = newSelection.first;
-        }
+      selected: enabled ? {selected.selection} : {},
+      onSelectionChanged: enabled
+          ? (Set<TimeFrameEnum> newSelection) {
+              final TimeFrameEnum it;
+              if (newSelection.isEmpty) {
+                // If custom, launch again
+                if (selected.selection == TimeFrameEnum.custom) {
+                  it = TimeFrameEnum.custom;
+                }
+                // Otherwise we're clicking on the same button, do nothing
+                else {
+                  return;
+                }
+              } else {
+                // Since multiSelectionAllowed = false, only ever <= 1 elements.
+                it = newSelection.first;
+              }
 
-        if (it != TimeFrameEnum.custom) {
-          onSelect?.call(TimeFrame(it));
-        } else {
-          showMonthRangeDialog(
-            context: context,
-            months: months,
-            onSelect: (start, endInclusive) => onSelect?.call(TimeFrame(
-              it,
-              customStart: start,
-              customEndInclusive: endInclusive,
-            )),
-          );
-        }
-      },
+              if (it != TimeFrameEnum.custom) {
+                onSelect?.call(TimeFrame(it));
+              } else {
+                showMonthRangeDialog(
+                  context: context,
+                  months: months,
+                  onSelect: (start, endInclusive) => onSelect?.call(TimeFrame(
+                    it,
+                    customStart: start,
+                    customEndInclusive: endInclusive,
+                  )),
+                );
+              }
+            }
+          : null,
     );
   }
 }

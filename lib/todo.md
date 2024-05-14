@@ -2,7 +2,6 @@
   
 
 ## High priority features
-- Reorder tags
 - sort transactions by value
 - Bulk edit transactions, create copy, multiselect (sum) -- right click menu
 - Range account screen graphs, net worth graph?
