@@ -95,13 +95,29 @@ abstract class Series<T> {
   /// Returns the index of the closest data point to a tap event. [offset] is in pixel coordinates.
   /// Returns null if no hit.
   int? hitTest(Offset offset, CartesianCoordinateSpace coordSpace) => null;
+
+  /// Accumulates stack values into the supplied maps. This is also where relevant storage members
+  /// should be set to draw the stack correctly. Returns true if this series added itself to the
+  /// stacking logic.
+  ///
+  /// The key to the maps is the index of each data point, and the value is the current stack value.
+  /// TODO to handle independent stacks, could key by tuple with a stack series index.
+  bool? accumulateStack(Map<int, double> posVals, Map<int, double> negVals) => false;
 }
 
 class SeriesCollection {
   final List<Series> data;
 
   SeriesCollection(this.data) {
-    accumulateStackColumnSeries(data);
+    _accumulateStackSeries();
+  }
+
+  void _accumulateStackSeries() {
+    Map<int, double> posVals = {};
+    Map<int, double> negVals = {};
+    for (final series in data) {
+      series.accumulateStack(posVals, negVals);
+    }
   }
 
   bool hasData() {

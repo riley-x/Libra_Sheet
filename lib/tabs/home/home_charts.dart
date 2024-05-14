@@ -5,8 +5,13 @@ import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
+import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
@@ -30,7 +35,7 @@ class HomeCharts extends StatelessWidget {
         Expanded(
           child: switch (state.mode) {
             HomeChartMode.netWorth => const _NetWorthGraph(),
-            HomeChartMode.stacked => const Placeholder(),
+            HomeChartMode.stacked => const _StackedChart(),
             HomeChartMode.pies => const _PieCharts(),
           },
         ),
@@ -39,16 +44,6 @@ class HomeCharts extends StatelessWidget {
         const SizedBox(height: 10),
       ],
     );
-
-    // return LayoutBuilder(builder: (context, constraints) {
-    //   final expandedCharts = constraints.maxHeight > minNetWorthHeight + minPieHeight + 1;
-    //   final pieChartsAligned = constraints.maxWidth > 2 * minPieHeight + 16;
-    //   if (pieChartsAligned && expandedCharts) {
-    //     return const _ExpandedCharts();
-    //   } else {
-    //     return _ListCharts(pieChartsAligned: pieChartsAligned);
-    //   }
-    // });
   }
 }
 
@@ -225,7 +220,7 @@ class _NetWorthGraph extends StatelessWidget {
     return DateTimeGraph([
       AreaSeries<TimeIntValue, DateTime>(
         animationDuration: 0,
-        dataSource: state.netWorthData.sublist(state.timeFrameRange.$1, state.timeFrameRange.$2),
+        dataSource: state.netWorthData.looseRange(state.timeFrameRange),
         xValueMapper: (TimeIntValue sales, _) => sales.time,
         yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
         gradient: gradientColors,
@@ -287,6 +282,42 @@ class _LiabilitiesPie extends StatelessWidget {
         onTap: (i, it) => toAccountScreen(context, it),
         defaultLabel: "Liabilities\n${(-total).dollarString()}",
       ),
+    );
+  }
+}
+
+class _StackedChart extends StatelessWidget {
+  const _StackedChart({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
+    return DiscreteCartesianGraph(
+      yAxis: CartesianAxis(
+        theme: Theme.of(context),
+        axisLoc: null,
+        valToString: formatDollar,
+      ),
+      xAxis: MonthAxis(
+        theme: Theme.of(context),
+        axisLoc: 0,
+        dates: state.monthList.looseRange(state.timeFrameRange),
+      ),
+      data: SeriesCollection([
+        for (final accHistory in state.assetAccounts)
+          StackColumnSeries<int>(
+            name: accHistory.account.name,
+            color: accHistory.account.color,
+            data: accHistory.values.looseRange(state.timeFrameRange),
+            valueMapper: (i, item) => item.asDollarDouble(),
+          ),
+      ]),
+      // onTap: (iSeries, series, iData) {
+      //         if (range != null) iData += range!.$1;
+      //         // The -1 because of the dashed horizontal line inflates the series index by 1.
+      //         if (averageColor != null) iSeries--;
+      //         onTap?.call(data.categories[iSeries].category, data.times[iData]);
+      //       },
     );
   }
 }

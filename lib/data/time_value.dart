@@ -115,7 +115,7 @@ extension TimeValueList on List<TimeIntValue> {
 
   /// Assuming [this] uses UTC dates, replaces the times with local timezone dates. This is needed
   /// for Syncfusion datetime charts since they assume dates are in the local timezone.
-  List<TimeIntValue> fixedForCharts({bool absValues = false}) {
+  List<TimeIntValue> fixedForSyncfusion({bool absValues = false}) {
     return [
       for (final tv in this)
         TimeIntValue(

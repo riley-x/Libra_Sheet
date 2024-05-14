@@ -32,6 +32,19 @@ class StackColumnSeries<T> extends ColumnSeries<T> {
       yMax: max(base, base + val),
     );
   }
+
+  @override
+  bool? accumulateStack(Map<int, double> posVals, Map<int, double> negVals) {
+    stackBase = [];
+    for (int i = 0; i < data.length; i++) {
+      final val = valueMapper(i);
+      final agg = (val >= 0) ? posVals : negVals;
+      final currBase = agg.putIfAbsent(i, () => 0);
+      stackBase!.add(currBase);
+      agg[i] = agg[i]! + val;
+    }
+    return true;
+  }
 }
 
 final testStackColumnSeries = [
@@ -48,20 +61,3 @@ final testStackColumnSeries = [
     valueMapper: (i, it) => it,
   ),
 ];
-
-void accumulateStackColumnSeries(List<Series> data) {
-  Map<int, double> stackColumnPosVals = {};
-  Map<int, double> stackColumnNegVals = {};
-  for (final series in data) {
-    if (series is StackColumnSeries) {
-      series.stackBase = [];
-      for (int i = 0; i < series.data.length; i++) {
-        final val = series.valueMapper(i);
-        final agg = (val >= 0) ? stackColumnPosVals : stackColumnNegVals;
-        final currBase = agg.putIfAbsent(i, () => 0);
-        series.stackBase!.add(currBase);
-        agg[i] = agg[i]! + val;
-      }
-    }
-  }
-}
