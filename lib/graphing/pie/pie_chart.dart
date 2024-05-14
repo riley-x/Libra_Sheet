@@ -23,6 +23,7 @@ class PieChartPainter<T> extends CustomPainter {
   final int? hoverLoc;
   final List<Color> colors;
   final List<TextPainter> labels;
+  final TextPainter? defaultLabel;
   final List<double> startAngles; // radians
   final List<double> sweepAngles; // radians
 
@@ -37,6 +38,7 @@ class PieChartPainter<T> extends CustomPainter {
     required this.labels,
     required this.startAngles,
     required this.sweepAngles,
+    this.defaultLabel,
   });
 
   /// Returns the bounding rect and strokeWidth given radius specifications. These should be between
@@ -70,8 +72,14 @@ class PieChartPainter<T> extends CustomPainter {
       );
     }
 
+    /// Center label
+    TextPainter? painter;
     if (hoverLoc != null && hoverLoc! < labels.length) {
-      final painter = labels[hoverLoc!];
+      painter = labels[hoverLoc!];
+    } else {
+      painter = defaultLabel;
+    }
+    if (painter != null) {
       painter.layout(maxWidth: 0.5 * rect.width);
       final pos = Offset(
         totalRect.center.dx - painter.width / 2,
@@ -114,6 +122,7 @@ class PieChart<T> extends StatefulWidget {
   final Color? Function(T)? colorMapper;
   final String? Function(T, double frac)? labelMapper;
   final Function(int i, T it)? onTap;
+  final String? defaultLabel;
 
   const PieChart({
     super.key,
@@ -122,6 +131,7 @@ class PieChart<T> extends StatefulWidget {
     this.colorMapper,
     this.labelMapper,
     this.onTap,
+    this.defaultLabel,
   });
 
   @override
@@ -138,6 +148,7 @@ class _PieChartState<T> extends State<PieChart<T>> {
   List<double> values = [];
   List<Color> colors = [];
   List<TextPainter> labels = [];
+  TextPainter? defaultLabel;
 
   List<double> startAngles = []; // radians
   List<double> sweepAngles = []; // radians
@@ -202,6 +213,21 @@ class _PieChartState<T> extends State<PieChart<T>> {
         textDirection: TextDirection.ltr,
       ));
     }
+
+    /// Default label
+    if (widget.defaultLabel != null) {
+      defaultLabel = TextPainter(
+        text: TextSpan(
+          text: widget.defaultLabel,
+          style: theme.textTheme.bodyLarge,
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+        maxLines: 2,
+      );
+    } else {
+      defaultLabel = null;
+    }
   }
 
   void _createPainter() {
@@ -212,6 +238,7 @@ class _PieChartState<T> extends State<PieChart<T>> {
       labels: labels,
       startAngles: startAngles,
       sweepAngles: sweepAngles,
+      defaultLabel: defaultLabel,
     );
   }
 
@@ -236,6 +263,7 @@ class _PieChartState<T> extends State<PieChart<T>> {
     if (oldWidget.valueMapper != widget.valueMapper ||
         oldWidget.labelMapper != widget.labelMapper ||
         oldWidget.colorMapper != widget.colorMapper ||
+        oldWidget.defaultLabel != widget.defaultLabel ||
         oldWidget.data != widget.data) {
       _initValues();
       _createPainter();

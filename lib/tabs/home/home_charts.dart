@@ -31,7 +31,7 @@ class HomeCharts extends StatelessWidget {
           child: switch (state.mode) {
             HomeChartMode.netWorth => const _NetWorthGraph(),
             HomeChartMode.stacked => const Placeholder(),
-            HomeChartMode.pies => const Placeholder(),
+            HomeChartMode.pies => const _PieCharts(),
           },
         ),
         const SizedBox(height: 10),
@@ -81,6 +81,7 @@ class _NetWorthTitle extends StatelessWidget {
   }
 }
 
+/// Row containing the segmented buttons below the chart
 class _HomeChartSelectors extends StatelessWidget {
   const _HomeChartSelectors({super.key});
 
@@ -154,78 +155,54 @@ class _TimeFrameSelector extends StatelessWidget {
   }
 }
 
-/// Expands the line chart to fill the total height of the screen. The pie chart is left fixed.
-class _ExpandedCharts extends StatelessWidget {
-  const _ExpandedCharts({super.key});
+class _PieCharts extends StatelessWidget {
+  const _PieCharts({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // const Expanded(child: _NetWorthGraph(null)),
-        Container(
-          height: 1,
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-        _alignedPies(HomeCharts.minPieHeight, context),
-      ],
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      final needScroll = constraints.maxHeight < 2 * HomeCharts.minPieHeight;
+      final pieChartsAligned =
+          needScroll && constraints.maxWidth > 2 * HomeCharts.minPieHeight + 16;
+      if (pieChartsAligned) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            const Expanded(child: _AssetsPie(null)),
+            Container(
+              width: 1,
+              height: constraints.maxHeight,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            const SizedBox(height: 10),
+            const Expanded(child: _LiabilitiesPie(null)),
+          ],
+        );
+      } else if (needScroll) {
+        return ListView(
+          children: [
+            const Center(child: _AssetsPie(HomeCharts.minPieHeight)),
+            Container(
+              height: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            const Center(child: _LiabilitiesPie(HomeCharts.minPieHeight)),
+          ],
+        );
+      } else {
+        return Column(
+          children: [
+            const Expanded(child: const _AssetsPie(null)),
+            Container(
+              height: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            const Expanded(child: _LiabilitiesPie(null)),
+          ],
+        );
+      }
+    });
   }
-}
-
-/// Gives each chart a fixed height inside a list view. Used when the height of the window is not
-/// sufficient to display all of the adequately.
-class _ListCharts extends StatelessWidget {
-  final bool pieChartsAligned;
-
-  const _ListCharts({
-    super.key,
-    required this.pieChartsAligned,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        // const _NetWorthGraph(HomeCharts.minNetWorthHeight),
-        Container(
-          height: 1,
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-
-        /// Don't add padding here or else the vertical grid lines won't be tight
-        if (pieChartsAligned) _alignedPies(HomeCharts.minPieHeight, context),
-        if (!pieChartsAligned) ..._verticalPies(HomeCharts.minPieHeight, context),
-      ],
-    );
-  }
-}
-
-Widget _alignedPies(double? height, BuildContext context) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: [
-      Expanded(child: _AssetsPie(height)),
-      Container(
-        width: 1,
-        height: height,
-        color: Theme.of(context).colorScheme.outlineVariant,
-      ),
-      const SizedBox(height: 10),
-      Expanded(child: _LiabilitiesPie(height)),
-    ],
-  );
-}
-
-List<Widget> _verticalPies(double height, BuildContext context) {
-  return [
-    Center(child: _AssetsPie(height)),
-    Container(
-      height: 1,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    ),
-    Center(child: _LiabilitiesPie(height)),
-  ];
 }
 
 class _NetWorthGraph extends StatelessWidget {
@@ -271,9 +248,9 @@ class _AssetsPie extends StatelessWidget {
     final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
-      textLeft: 'Assets',
-      textRight: total.dollarString(),
-      textStyle: Theme.of(context).textTheme.headlineMedium,
+      // textLeft: 'Assets',
+      // textRight: total.dollarString(),
+      textStyle: Theme.of(context).textTheme.titleLarge,
       padding: const EdgeInsets.only(top: 10),
       child: PieChart<Account>(
         data: accounts,
@@ -281,6 +258,7 @@ class _AssetsPie extends StatelessWidget {
         colorMapper: (it) => it.color,
         labelMapper: (it, frac) => "${it.name}\n${formatPercent(frac)}",
         onTap: (i, it) => toAccountScreen(context, it),
+        defaultLabel: "Assets\n${total.dollarString()}",
       ),
     );
   }
@@ -297,8 +275,8 @@ class _LiabilitiesPie extends StatelessWidget {
     final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
-      textLeft: 'Liabilities',
-      textRight: (-total).dollarString(),
+      // textLeft: 'Liabilities',
+      // textRight: (-total).dollarString(),
       textStyle: Theme.of(context).textTheme.headlineMedium,
       padding: const EdgeInsets.only(top: 10),
       child: PieChart<Account>(
@@ -307,6 +285,7 @@ class _LiabilitiesPie extends StatelessWidget {
         colorMapper: (it) => it.color,
         labelMapper: (it, frac) => "${it.name}\n${formatPercent(frac)}",
         onTap: (i, it) => toAccountScreen(context, it),
+        defaultLabel: "Liabilities\n${(-total).dollarString()}",
       ),
     );
   }
