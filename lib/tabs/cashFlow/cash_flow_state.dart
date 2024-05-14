@@ -71,10 +71,10 @@ class CashFlowState extends fnd.ChangeNotifier {
     incomeDataSubCats.addIndividual(appState.categories.income, rawHistory);
     expenseDataSubCats.addIndividual(appState.categories.expense, rawHistory);
 
-    netIncome = rawIncome.withAlignedTimes(appState.monthList).fixedForCharts();
+    netIncome = rawIncome.withAlignedTimes(appState.monthList);
 
     netReturns = rawHistory[Category.investment.key]?.withAlignedTimes(appState.monthList) ??
-        appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList().fixedForCharts();
+        appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList();
 
     notifyListeners();
   }
