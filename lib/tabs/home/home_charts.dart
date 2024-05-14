@@ -12,6 +12,7 @@ import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
+import 'package:libra_sheet/graphing/series/stack_line_series.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
@@ -292,32 +293,36 @@ class _StackedChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
-    return DiscreteCartesianGraph(
-      yAxis: CartesianAxis(
-        theme: Theme.of(context),
-        axisLoc: null,
-        valToString: formatDollar,
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, right: 10),
+      child: DiscreteCartesianGraph(
+        yAxis: CartesianAxis(
+          theme: Theme.of(context),
+          axisLoc: null,
+          valToString: formatDollar,
+        ),
+        xAxis: MonthAxis(
+          theme: Theme.of(context),
+          axisLoc: 0,
+          dates: state.monthList.looseRange(state.timeFrameRange),
+          pad: 0,
+        ),
+        data: SeriesCollection([
+          for (final accHistory in state.liabAccounts + state.assetAccounts)
+            StackLineSeries<int>(
+              name: accHistory.account.name,
+              color: accHistory.account.color,
+              data: accHistory.values.looseRange(state.timeFrameRange),
+              valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
+            ),
+        ]),
+        // onTap: (iSeries, series, iData) {
+        //         if (range != null) iData += range!.$1;
+        //         // The -1 because of the dashed horizontal line inflates the series index by 1.
+        //         if (averageColor != null) iSeries--;
+        //         onTap?.call(data.categories[iSeries].category, data.times[iData]);
+        //       },
       ),
-      xAxis: MonthAxis(
-        theme: Theme.of(context),
-        axisLoc: 0,
-        dates: state.monthList.looseRange(state.timeFrameRange),
-      ),
-      data: SeriesCollection([
-        for (final accHistory in state.liabAccounts + state.assetAccounts)
-          StackColumnSeries<int>(
-            name: accHistory.account.name,
-            color: accHistory.account.color,
-            data: accHistory.values.looseRange(state.timeFrameRange),
-            valueMapper: (i, item) => item.asDollarDouble(),
-          ),
-      ]),
-      // onTap: (iSeries, series, iData) {
-      //         if (range != null) iData += range!.$1;
-      //         // The -1 because of the dashed horizontal line inflates the series index by 1.
-      //         if (averageColor != null) iSeries--;
-      //         onTap?.call(data.categories[iSeries].category, data.times[iData]);
-      //       },
     );
   }
 }

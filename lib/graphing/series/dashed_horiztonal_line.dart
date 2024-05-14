@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
@@ -116,9 +117,4 @@ class DashedHorizontalLine extends Series<double?> {
       ..lineToOffset(backgroundRect.bottomLeft)
       ..close();
   }
-}
-
-extension PathUtilsExtension on Path {
-  void moveToOffset(Offset x) => moveTo(x.dx, x.dy);
-  void lineToOffset(Offset x) => lineTo(x.dx, x.dy);
 }

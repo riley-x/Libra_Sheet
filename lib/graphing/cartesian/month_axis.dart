@@ -17,9 +17,10 @@ class MonthAxis extends CartesianAxis {
     required this.dates,
     this.dateToString,
     super.axisLoc,
+    double pad = 0.5,
   }) : super(
-          min: -0.5,
-          max: dates.length - 0.5,
+          min: -pad,
+          max: dates.length - 1 + pad,
           valToString: (val, [order]) => _toString(dates, dateToString, val, order),
         );
 

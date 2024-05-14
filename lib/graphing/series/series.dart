@@ -47,6 +47,7 @@ class BoundingBox {
 /// Suggested overrides:
 ///     [hoverValue] or also [hoverBuilder]
 ///     [hitTest]
+///     [accumulateStack]
 abstract class Series<T> {
   final String name;
   final List<T> data;
@@ -63,7 +64,8 @@ abstract class Series<T> {
   /// value may still be used, i.e. the [PooledTooltip] which sums entries together.
   double? hoverValue(int i) => null;
 
-  /// The widget to display when hovering. See also [hoverValue] for simple cases.
+  /// The widget to display when hovering. Make sure you still implement [hoverValue] if you
+  /// implement [hoverBuilder].
   Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) =>
       null;
 
@@ -102,11 +104,17 @@ abstract class Series<T> {
   ///
   /// The key to the maps is the index of each data point, and the value is the current stack value.
   /// TODO to handle independent stacks, could key by tuple with a stack series index.
+  /// TODO this assumes all stack series have the same number of data points, in order.
   bool accumulateStack(Map<int, double> posVals, Map<int, double> negVals) => false;
 }
 
 class SeriesCollection {
   final List<Series> data;
+
+  /// We want to keep the original order as supplied by the user in [data], which enables callbacks
+  /// by the series index. This aux list stores the series in the orer they are painted. Notably,
+  /// stack entries are painted in reverse order.
+  final List<Series> paintOrder = [];
   bool hasStack = false;
 
   SeriesCollection(this.data) {
@@ -116,9 +124,22 @@ class SeriesCollection {
   void _accumulateStackSeries() {
     Map<int, double> posVals = {};
     Map<int, double> negVals = {};
-    for (final series in data) {
-      final act = series.accumulateStack(posVals, negVals);
-      if (act) hasStack = true;
+
+    final List<Series> stackEntries = [];
+    int? firstStackIndex;
+    for (final (i, series) in data.indexed) {
+      final stack = series.accumulateStack(posVals, negVals);
+      if (stack) {
+        hasStack = true;
+        stackEntries.add(series);
+        firstStackIndex ??= i;
+      } else {
+        paintOrder.add(series);
+      }
+    }
+
+    if (firstStackIndex != null) {
+      paintOrder.insertAll(firstStackIndex, stackEntries.reversed);
     }
   }
 

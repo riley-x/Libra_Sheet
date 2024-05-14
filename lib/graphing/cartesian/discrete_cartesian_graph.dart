@@ -158,7 +158,7 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
     if (coordSpace == null) return;
     paintGridLines(canvas);
     paintLabels(canvas);
-    for (final series in data.data) {
+    for (final series in data.paintOrder) {
       series.paint(this, canvas, coordSpace!);
     }
     paintAxisLines(canvas);
