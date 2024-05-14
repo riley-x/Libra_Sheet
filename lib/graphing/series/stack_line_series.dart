@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/src/rendering/custom_paint.dart';
+import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
@@ -47,10 +48,6 @@ class StackLineSeries<T> extends LineSeries<T> {
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
     }
 
-    // for (final offset in stackBase.reversed) {
-    //   final pixelPos = coordSpace.userToPixel(offset);
-    //   path.lineTo(pixelPos.dx, pixelPos.dy);
-    // }
     path.lineToOffset(coordSpace.userToPixel(Offset((data.length - 1).toDouble(), 0)));
     path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
     path.close();
@@ -82,5 +79,43 @@ class StackLineSeries<T> extends LineSeries<T> {
       agg[i] = agg[i]! + val.dy;
     }
     return true;
+  }
+
+  @override
+  double? hoverValue(int i) {
+    final val = valueMapper(i, data[i]).dy;
+    if (val == 0) return null;
+    return val;
+  }
+
+  @override
+  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+    final val = valueMapper(i, data[i]).dy;
+    if (val == 0) return null;
+    if (name.isEmpty) {
+      return Text(
+        mainGraph.yAxis.valToString(val),
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10.0,
+          height: 10.0,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          "$name: ${mainGraph.yAxis.valToString(val)}",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
   }
 }

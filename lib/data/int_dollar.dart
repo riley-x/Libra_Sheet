@@ -94,11 +94,16 @@ double getDollarAverage2<T>(Iterable<T> vals, int Function(T) valueMapper) {
   return sum.asDollarDouble() / vals.length;
 }
 
+/// Formats [val] with dollar sign and commas. If [order] is not null, omits the dollar sign.
 String formatDollar(double val, [int? order]) {
+  String out;
   if (order == null) {
-    return NumberFormat('\$#,##0.00').format(val);
+    out = NumberFormat('\$#,##0.00').format(val);
+  } else {
+    out = NumberFormat('#,###').format(val);
   }
-  return NumberFormat('#,###').format(val);
+  if (out == "-0") out = "0";
+  return out;
 }
 
 String formatPercent(double val) {

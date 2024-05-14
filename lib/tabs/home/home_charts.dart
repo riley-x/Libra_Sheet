@@ -11,7 +11,6 @@ import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
-import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:libra_sheet/graphing/series/stack_line_series.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
@@ -294,7 +293,7 @@ class _StackedChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
     return Padding(
-      padding: const EdgeInsets.only(left: 4, right: 10),
+      padding: const EdgeInsets.only(left: 6, right: 10),
       child: DiscreteCartesianGraph(
         yAxis: CartesianAxis(
           theme: Theme.of(context),
