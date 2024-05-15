@@ -109,13 +109,13 @@ class StackLineSeries<T> extends LineSeries<T> {
         const Offset(0, 0),
         const Offset(0, 1),
         [
-          color.withAlpha(50),
           color.withAlpha(200),
-          color,
+          color.withAlpha(220),
+          color.withAlpha(255),
         ],
         [
           0,
-          0.6,
+          0.4,
           1,
         ],
         // TileMode.decal,
@@ -133,7 +133,7 @@ class StackLineSeries<T> extends LineSeries<T> {
     canvas.save();
     canvas.transform(transform.storage);
     // inflate the x values to avoid boundaries
-    canvas.drawRect(const Rect.fromLTRB(-0.01, 0, 1.01, 1), paint);
+    canvas.drawRect(const Rect.fromLTRB(-0.006, 0, 1.006, 1), paint);
     canvas.restore();
   }
 
@@ -151,11 +151,7 @@ class StackLineSeries<T> extends LineSeries<T> {
       curr = _addPoint(coordSpace, i);
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
     }
-
-    for (final pt in stackBase.reversed) {
-      path.lineToOffset(coordSpace.userToPixel(pt));
-    }
-    path.close();
+    // path.close();
 
     /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
     /// Tracing the bottom edge via a path leads to janky pixels, so overlapping is better.
@@ -164,33 +160,16 @@ class StackLineSeries<T> extends LineSeries<T> {
     // path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
     // path.close();
 
-    /// Get the gradient
-    final (minY, maxY) = _getMinMaxUser();
-    final gradientRect = Rect.fromPoints(
-      coordSpace.userToPixel(Offset(0, minY)),
-      coordSpace.userToPixel(Offset(xMaxUser, maxY)),
-    );
-
     final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2
-      // ..isAntiAlias = true
-      ..shader = LinearGradient(
-        colors: [
-          color.withAlpha(50),
-          color.withAlpha(200),
-          color,
-        ],
-        stops: const [0, 0.6, 1],
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-      ).createShader(gradientRect);
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = color;
 
     /// Paint
-    // canvas.drawPath(path, paint);
     for (int i = 0; i < data.length - 1; i++) {
       _paintSegment(canvas, coordSpace, i);
     }
+    canvas.drawPath(path, paint);
   }
 
   @override
