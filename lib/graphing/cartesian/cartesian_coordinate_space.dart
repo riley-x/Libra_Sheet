@@ -89,6 +89,8 @@ class CartesianCoordinateSpace {
     return CartesianCoordinateSpace(xAxis: coordXAxis, yAxis: coordYAxis);
   }
 
+  Rect get canvasSize => Rect.fromLTWH(0, 0, xAxis.canvasSize, yAxis.canvasSize);
+
   Offset userToPixel(Offset offset) {
     return Offset(
       xAxis.userToPixel(offset.dx),

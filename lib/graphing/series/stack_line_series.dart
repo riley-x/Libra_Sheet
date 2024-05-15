@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
@@ -8,22 +9,41 @@ import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
+final _debugGradient = ui.Gradient.linear(
+  const Offset(0, 0),
+  const Offset(0, 1),
+  [
+    Colors.white,
+    Colors.green,
+    Colors.green,
+    Colors.white,
+    Colors.blue,
+    Colors.blue,
+    Colors.white,
+  ],
+  [
+    0,
+    0.1,
+    0.45,
+    0.5,
+    0.55,
+    0.9,
+    1,
+  ],
+  // TileMode.decal,
+);
+
 class StackLineSeries<T> extends LineSeries<T> {
   /// This represents the cumulative base value for other StackColumnSeries supplied to a graph.
   /// It is set post-construction by [SeriesCollection].
   List<Offset> stackBase = [];
-
-  final Paint _painter;
 
   StackLineSeries({
     required super.name,
     required super.data,
     required super.valueMapper,
     super.color,
-  }) : _painter = Paint()
-          ..color = color
-          ..style = PaintingStyle.fill
-          ..strokeWidth = 2;
+  });
 
   LineSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
     final item = data[i];
@@ -35,24 +55,142 @@ class StackLineSeries<T> extends LineSeries<T> {
     return out;
   }
 
+  /// Finds the minimum and maximum y extend of the filled stack area in user coordinates.
+  (double, double) _getMinMaxUser() {
+    if (data.isEmpty || stackBase.isEmpty) return (0, 1);
+
+    double minY = stackBase[0].dy;
+    double maxY = stackBase[0].dy;
+    for (int i = 0; i < data.length; i++) {
+      final val1 = stackBase.elementAtOrNull(i)?.dy ?? 0;
+      final val2 = valueMapper(i, data[i]).dy + val1;
+      minY = min(minY, min(val1, val2));
+      maxY = max(maxY, max(val1, val2));
+    }
+    return (minY, maxY);
+  }
+
+  /// This function paints a single segment of the series, which is the 4-gon between two points.
+  /// [i] is the index of the left edge's data points.
+  ///
+  /// These are painted by first painting a unit square, (0,0) to (1,1), and then transforming it.
+  /// The transform is derived by identifying the matrix that solves (ignoring the z components)
+  ///
+  ///   | a   b   c |     | x |     | x' |
+  ///   | d   e   f |  *  | y |  =  | y' |
+  ///   | g   h   1 |     | 1 |     | 1  |
+  ///
+  /// Where x,y = 0,1 and the new vector matches the desired position. For simplicity, we factor out
+  /// a common translation to the bottom-left corner so (0, 0) -> (0, 0). This results in the 4
+  /// non-zero components below.
+  ///
+  /// See https://en.wikipedia.org/wiki/Transformation_matrix#Perspective_projection
+  void _paintSegment(Canvas canvas, CartesianCoordinateSpace coordSpace, int i) {
+    final bottomLeft = coordSpace.userToPixel(stackBase[i]);
+    final topLeft =
+        coordSpace.userToPixel(valueMapper(i, data[i]) + Offset(0, stackBase[i].dy)) - bottomLeft;
+    final topRight =
+        coordSpace.userToPixel(valueMapper(i + 1, data[i + 1]) + Offset(0, stackBase[i + 1].dy)) -
+            bottomLeft;
+    final bottomRight = coordSpace.userToPixel(stackBase[i + 1]) - bottomLeft;
+
+    final g = topLeft.dy / (topRight.dy - bottomRight.dy) - 1;
+    final e = topLeft.dy;
+    final d = bottomRight.dy * (g + 1);
+    final a = topRight.dx * (g + 1);
+
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2
+      ..shader = ui.Gradient.linear(
+        // these coordinates are the pixel coordiantes that correspond to the
+        // 0/1 stop positions (note since we're plotting a unit square, the pixel coordinates are
+        // also 0..1). The x position doesn't matter since it's a vertical gradient.
+        const Offset(0, 0),
+        const Offset(0, 1),
+        [
+          color.withAlpha(50),
+          color.withAlpha(200),
+          color,
+        ],
+        [
+          0,
+          0.6,
+          1,
+        ],
+        // TileMode.decal,
+      );
+
+    final transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) *
+        (Matrix4.fromList([
+          ...[a, 0, 0, 0],
+          ...[d, e, 0, 0],
+          ...[0, 0, 1, 0],
+          ...[g, 0, 0, 1],
+        ])
+          ..transpose()); // transpose because the constructor expects column-major entries
+
+    canvas.save();
+    canvas.transform(transform.storage);
+    // inflate the x values to avoid boundaries
+    canvas.drawRect(const Rect.fromLTRB(-0.01, 0, 1.01, 1), paint);
+    canvas.restore();
+  }
+
   @override
   void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace) {
     // _renderedPoints.clear();
     if (data.length <= 1) return;
 
     final path = Path();
-    final start = _addPoint(coordSpace, 0);
-    path.moveTo(start.pixelPos.dx, start.pixelPos.dy);
+
+    /// Points along the path
+    var curr = _addPoint(coordSpace, 0);
+    path.moveTo(curr.pixelPos.dx, curr.pixelPos.dy);
     for (int i = 1; i < data.length; i++) {
-      final curr = _addPoint(coordSpace, i);
+      curr = _addPoint(coordSpace, i);
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
     }
 
-    path.lineToOffset(coordSpace.userToPixel(Offset((data.length - 1).toDouble(), 0)));
-    path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
+    for (final pt in stackBase.reversed) {
+      path.lineToOffset(coordSpace.userToPixel(pt));
+    }
     path.close();
 
-    canvas.drawPath(path, _painter);
+    /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
+    /// Tracing the bottom edge via a path leads to janky pixels, so overlapping is better.
+    final xMaxUser = (data.length - 1).toDouble();
+    // path.lineToOffset(coordSpace.userToPixel(Offset(xMaxUser, 0)));
+    // path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
+    // path.close();
+
+    /// Get the gradient
+    final (minY, maxY) = _getMinMaxUser();
+    final gradientRect = Rect.fromPoints(
+      coordSpace.userToPixel(Offset(0, minY)),
+      coordSpace.userToPixel(Offset(xMaxUser, maxY)),
+    );
+
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2
+      // ..isAntiAlias = true
+      ..shader = LinearGradient(
+        colors: [
+          color.withAlpha(50),
+          color.withAlpha(200),
+          color,
+        ],
+        stops: const [0, 0.6, 1],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ).createShader(gradientRect);
+
+    /// Paint
+    // canvas.drawPath(path, paint);
+    for (int i = 0; i < data.length - 1; i++) {
+      _paintSegment(canvas, coordSpace, i);
+    }
   }
 
   @override
