@@ -51,7 +51,6 @@ class StackLineSeries<T> extends LineSeries<T> {
     final baseValue = stackBase.elementAtOrNull(i)?.dy ?? 0;
     final pixelPos = coordSpace.userToPixel(Offset(value.dx, value.dy + baseValue));
     final out = LineSeriesPoint(index: i, item: item, value: value, pixelPos: pixelPos);
-    // _renderedPoints.add(out);
     return out;
   }
 
@@ -139,24 +138,25 @@ class StackLineSeries<T> extends LineSeries<T> {
 
   @override
   void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace) {
-    // _renderedPoints.clear();
     if (data.length <= 1) return;
 
-    final path = Path();
+    /// Paint segments
+    for (int i = 0; i < data.length - 1; i++) {
+      _paintSegment(canvas, coordSpace, i);
+    }
 
-    /// Points along the path
+    /// Paint path to hide boundary effects
+    final path = Path();
     var curr = _addPoint(coordSpace, 0);
     path.moveTo(curr.pixelPos.dx, curr.pixelPos.dy);
     for (int i = 1; i < data.length; i++) {
       curr = _addPoint(coordSpace, i);
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
     }
-    // path.close();
 
     /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
     /// Tracing the bottom edge via a path leads to janky pixels, so overlapping is better.
-    final xMaxUser = (data.length - 1).toDouble();
-    // path.lineToOffset(coordSpace.userToPixel(Offset(xMaxUser, 0)));
+    // path.lineToOffset(coordSpace.userToPixel(Offset((data.length - 1).toDouble(), 0)));
     // path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
     // path.close();
 
@@ -164,11 +164,6 @@ class StackLineSeries<T> extends LineSeries<T> {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = color;
-
-    /// Paint
-    for (int i = 0; i < data.length - 1; i++) {
-      _paintSegment(canvas, coordSpace, i);
-    }
     canvas.drawPath(path, paint);
   }
 
