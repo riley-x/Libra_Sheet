@@ -99,6 +99,8 @@ class StackLineSeries<T> extends LineSeries<T> {
 
     if (val1.dy == 0 && val2.dy == 0) return;
     if (val1.dy == 0.0) {
+      /// Here we draw a triangle (0, 0) -> (1, 0) -> (1, 1) and transform to appropriate position.
+      /// The gradient sweeps from the bottom edge to the hypotenuse.
       final a = topRight.dx;
       final d = bottomRight.dy;
       final e = topRight.dy - bottomRight.dy;
@@ -146,6 +148,9 @@ class StackLineSeries<T> extends LineSeries<T> {
           paint);
       canvas.restore();
     } else if (val2.dy == 0) {
+      /// Here we draw a triangle (0, 0) -> (1, 0) -> (0, 1) and transform to appropriate position.
+      /// The gradient sweeps from the bottom edge to the hypotenuse. But I think the sweep has to
+      /// take a endAngle > startAngle, so invert the gradient.
       final a = bottomRight.dx;
       final d = bottomRight.dy;
       final e = topLeft.dy;
