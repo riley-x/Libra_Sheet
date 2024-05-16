@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
+import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/no_animation_route.dart';
 import 'package:libra_sheet/tabs/settings/settings_tab.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -90,6 +91,7 @@ class LibraApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: state.transactions),
         ChangeNotifierProvider.value(value: state.accounts),
         ChangeNotifierProvider.value(value: GoogleDrive()),
+        ChangeNotifierProvider(create: (_) => HomeTabState(state)),
         ChangeNotifierProvider(create: (_) => CategoryTabState(state)),
         ChangeNotifierProvider(create: (_) => CashFlowState(state)),
         // used by the transaction tab

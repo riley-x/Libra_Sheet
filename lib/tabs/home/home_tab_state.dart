@@ -50,6 +50,7 @@ class HomeTabState extends ChangeNotifier {
 
   List<AccountHistory> assetAccounts = [];
   List<AccountHistory> liabAccounts = [];
+  Map<int, AccountHistory> historyMap = {};
 
   Future<void> load() async {
     final netWorthRaw = await LibraDatabase.read((db) => db.getMonthlyNet()) ?? [];
@@ -60,13 +61,16 @@ class HomeTabState extends ChangeNotifier {
     timeFrameRange = timeFrame.getRange(monthList);
     assetAccounts = [];
     liabAccounts = [];
+    historyMap = {};
 
     for (final account in appState.accounts.list) {
-      final list = (account.type == AccountType.liability) ? liabAccounts : assetAccounts;
       final rawValues = accountHistoryRaw[account.key];
       if (rawValues == null) continue;
       final values = rawValues.alignValues(monthList, cumulate: true);
+
+      final list = (account.type == AccountType.liability) ? liabAccounts : assetAccounts;
       list.add(AccountHistory(account, values));
+      historyMap[account.key] = AccountHistory(account, values);
     }
 
     netWorthData = netWorthRaw.withAlignedTimes(monthList, cumulate: true);

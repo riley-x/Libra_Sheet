@@ -4,12 +4,10 @@
 ## High priority features
 - sort transactions by value
 - Bulk edit transactions, create copy, multiselect (sum) -- right click menu
-- Range account screen graphs
 
 
 ## Medium priority features
 - Start screen and UX
-- Replace Syncfusion line charts
 - Rerun category rule
 - Choose category/account on CSV column?
 - Delete account

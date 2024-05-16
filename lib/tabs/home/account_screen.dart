@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
-import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
@@ -14,10 +14,9 @@ import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
-import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
-import 'package:libra_sheet/tabs/home/chart_with_title.dart';
+import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +34,7 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   List<TimeIntValue> data = [];
   TransactionFilters? initialFilters;
-  TransactionService? service;
+  // TransactionService? service;
 
   Future<void> loadData() async {
     if (!mounted) return;
@@ -57,15 +56,15 @@ class _AccountScreenState extends State<AccountScreen> {
   void initState() {
     super.initState();
     initialFilters = TransactionFilters(accounts: {widget.account});
-    service = context.read<TransactionService>();
-    service!.addListener(loadData);
-    loadData();
+    // service = context.read<TransactionService>();
+    // service!.addListener(loadData);
+    // loadData();
   }
 
   @override
   void dispose() {
     super.dispose();
-    service?.removeListener(loadData);
+    // service?.removeListener(loadData);
   }
 
   @override
@@ -93,82 +92,115 @@ class _AccountScreenState extends State<AccountScreen> {
                 color: Theme.of(context).colorScheme.outlineVariant,
               ),
               Expanded(
-                child: ChartWithTitle(
-                  /// this empircally matches the extra height caused by the icon button in the transaction filter grid
-                  padding: const EdgeInsets.only(top: 7),
-                  textLeft: 'Balance History',
-                  textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8, right: 8, bottom: 4),
-                    child: DiscreteCartesianGraph(
-                      yAxis: CartesianAxis(
-                        theme: Theme.of(context),
-                        axisLoc: null,
-                        valToString: formatDollar,
-                        min: 0,
-                      ),
-                      xAxis: MonthAxis(
-                        theme: Theme.of(context),
-                        axisLoc: 0,
-                        dates: data.map((e) => e.time).toList(),
-                        pad: 0,
-                      ),
-                      data: SeriesCollection([
-                        LineSeries<TimeIntValue>(
-                          name: "",
-                          color: widget.account.color,
-                          data: data,
-                          valueMapper: (i, item) =>
-                              Offset(i.toDouble(), item.value.asDollarDouble()),
-                          gradient: LinearGradient(
-                            colors: [
-                              widget.account.color.withAlpha(10),
-                              widget.account.color.withAlpha(80),
-                              widget.account.color.withAlpha(170),
-                            ],
-                            stops: const [0.0, 0.6, 1],
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                          ),
-                        ),
-                      ]),
-                      hoverTooltip: (painter, loc) => PooledTooltip(
-                        painter,
-                        loc,
-                        labelAlignment: Alignment.center,
-                      ),
-                    ),
-                  ),
-                  // DateTimeGraph([
-                  //   AreaSeries<TimeIntValue, DateTime>(
-                  //     animationDuration: 300,
-                  //     dataSource: data,
-                  //     xValueMapper: (TimeIntValue it, _) => it.time,
-                  //     yValueMapper: (TimeIntValue it, _) =>
-                  //         (widget.account.type == AccountType.liability)
-                  //             ? -it.value.asDollarDouble()
-                  //             : it.value.asDollarDouble(),
-                  //     borderColor: widget.account.color,
-                  //     borderWidth: 3,
-                  //     borderDrawMode: BorderDrawMode.top,
-                  //     gradient: LinearGradient(
-                  //       colors: [
-                  //         widget.account.color.withAlpha(10),
-                  //         widget.account.color.withAlpha(80),
-                  //         widget.account.color.withAlpha(170),
-                  //       ],
-                  //       stops: const [0.0, 0.6, 1],
-                  //       begin: Alignment.bottomCenter,
-                  //       end: Alignment.topCenter,
-                  //     ),
-                  //   ),
-                  // ]),
-                ),
+                child: _GraphWithTitle(widget.account),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _GraphWithTitle extends StatelessWidget {
+  const _GraphWithTitle(this.account, {super.key});
+
+  final Account account;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 10, left: 6, top: 6, bottom: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Balance History',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const _TimeFrameSelector(),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 4, right: 8, bottom: 4),
+            child: _Graph(account),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TimeFrameSelector extends StatelessWidget {
+  const _TimeFrameSelector({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
+    return TimeFrameSelector(
+      months: state.monthList,
+      selected: state.timeFrame,
+      onSelect: state.setTimeFrame,
+      style: const ButtonStyle(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+      ),
+    );
+  }
+}
+
+class _Graph extends StatelessWidget {
+  const _Graph(this.account, {super.key});
+
+  final Account account;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
+    return DiscreteCartesianGraph(
+      yAxis: CartesianAxis(
+        theme: Theme.of(context),
+        axisLoc: null,
+        valToString: formatDollar,
+        min: 0,
+      ),
+      xAxis: MonthAxis(
+        theme: Theme.of(context),
+        axisLoc: 0,
+        dates: state.monthList.looseRange(state.timeFrameRange),
+        pad: 0,
+      ),
+      data: SeriesCollection([
+        LineSeries<int>(
+          name: "",
+          color: account.color,
+          data: state.historyMap[account.key]?.values.looseRange(state.timeFrameRange) ?? [],
+          valueMapper: (i, item) => Offset(i.toDouble(),
+              (account.type == AccountType.liability ? -item : item).asDollarDouble()),
+          gradient: LinearGradient(
+            colors: [
+              account.color.withAlpha(10),
+              account.color.withAlpha(80),
+              account.color.withAlpha(170),
+            ],
+            stops: const [0.0, 0.6, 1],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          ),
+        ),
+      ]),
+      hoverTooltip: (painter, loc) => PooledTooltip(
+        painter,
+        loc,
+        labelAlignment: Alignment.center,
+      ),
     );
   }
 }
