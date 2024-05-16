@@ -8,7 +8,6 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
-import 'package:libra_sheet/graphing/date_time_graph.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_line_series.dart';
@@ -16,7 +15,6 @@ import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomeCharts extends StatelessWidget {
   const HomeCharts({
@@ -203,32 +201,42 @@ class _PieCharts extends StatelessWidget {
 class _NetWorthGraph extends StatelessWidget {
   const _NetWorthGraph({super.key});
 
-  static final gradientColors = LinearGradient(
-    colors: [
-      Colors.blue.withAlpha(10),
-      Colors.blue.withAlpha(80),
-      Colors.blue.withAlpha(170),
-    ],
-    stops: const [0.0, 0.6, 1],
-    begin: Alignment.bottomCenter,
-    end: Alignment.topCenter,
-  );
+  static final gradientColors = [
+    Colors.blue.withAlpha(10),
+    Colors.blue.withAlpha(80),
+    Colors.blue.withAlpha(170),
+  ];
+  static const gradientStops = [0.0, 0.6, 1.0];
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
-    return DateTimeGraph([
-      AreaSeries<TimeIntValue, DateTime>(
-        animationDuration: 0,
-        dataSource: state.netWorthData.looseRange(state.timeFrameRange),
-        xValueMapper: (TimeIntValue sales, _) => sales.time,
-        yValueMapper: (TimeIntValue sales, _) => sales.value.asDollarDouble(),
-        gradient: gradientColors,
-        borderColor: Colors.blue,
-        borderWidth: 3,
-        borderDrawMode: BorderDrawMode.top,
+    return Padding(
+      padding: const EdgeInsets.only(left: 6, right: 10),
+      child: DiscreteCartesianGraph(
+        yAxis: CartesianAxis(
+          theme: Theme.of(context),
+          axisLoc: null,
+          valToString: formatDollar,
+        ),
+        xAxis: MonthAxis(
+          theme: Theme.of(context),
+          axisLoc: 0,
+          dates: state.monthList.looseRange(state.timeFrameRange),
+          pad: 0,
+        ),
+        data: SeriesCollection([
+          StackLineSeries<TimeIntValue>(
+            name: "Net Worth",
+            color: Colors.blue,
+            data: state.netWorthData.looseRange(state.timeFrameRange),
+            valueMapper: (i, item) => Offset(i.toDouble(), item.value.asDollarDouble()),
+            gradientColors: gradientColors,
+            gradientStops: gradientStops,
+          ),
+        ]),
       ),
-    ]);
+    );
   }
 }
 

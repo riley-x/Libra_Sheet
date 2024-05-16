@@ -1,13 +1,13 @@
 import 'dart:math';
 import 'dart:ui' as ui;
-import 'dart:math' as math;
+// import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
-import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
+// import 'package:vector_math/vector_math_64.dart' as vector;
 
 final _debugGradient = ui.Gradient.linear(
   const Offset(0, 0),
@@ -32,6 +32,11 @@ final _debugGradient = ui.Gradient.linear(
   ],
   // TileMode.decal,
 );
+
+double _round(double val, int places) {
+  final mod = pow(10.0, places);
+  return ((val * mod).round().toDouble() / mod);
+}
 
 class StackLineSeries<T> extends LineSeries<T> {
   /// This represents the cumulative base value for other StackColumnSeries supplied to a graph.
@@ -100,8 +105,7 @@ class StackLineSeries<T> extends LineSeries<T> {
   ///
   /// See https://en.wikipedia.org/wiki/Transformation_matrix#Perspective_projection
   ///
-  /// We have special cases when one side of the 4-gon is 0, so it's really a triangle. Here we can
-  /// set g = h = 0 for simplicity, and draw instead a unit right triangle.
+  /// We have special cases when one side of the 4-gon is 0.
   void _paintSegment(Canvas canvas, CartesianCoordinateSpace coordSpace, int i) {
     final val1 = valueMapper(i, data[i]);
     final val2 = valueMapper(i + 1, data[i + 1]);
@@ -115,15 +119,22 @@ class StackLineSeries<T> extends LineSeries<T> {
     double g;
     double e = topLeft.dy;
     if (topRight.dy == bottomRight.dy) {
-      g = 999999999;
+      g = 9999999;
     } else if (topLeft.dy.abs() < 1e-6) {
-      g = -0.9999;
-      e = (g + 1) * (topRight.dy - bottomRight.dy);
+      /// This approximation sometimes causes rounding errors on the rightmost edge. Sometimes 1
+      /// pixel short, sometimes 1 pixel too much. Note that adding too many decimals causes things
+      /// to break. It seems like the canvas transform uses some really low precision float or
+      /// something. Probably the same issue: https://github.com/flutter/flutter/issues/126026
+      g = -0.9995;
+      e = (topRight.dy - bottomRight.dy) * (g + 1);
+
+      // e = -0.001;
+      // g = e / (topRight.dy - bottomRight.dy) - 1;
     } else {
       g = topLeft.dy / (topRight.dy - bottomRight.dy) - 1;
     }
     final d = bottomRight.dy * (g + 1);
-    final a = topRight.dx * (g + 1);
+    final a = (g + 1);
 
     final paint = Paint()
       ..style = PaintingStyle.fill
@@ -140,20 +151,28 @@ class StackLineSeries<T> extends LineSeries<T> {
         // TileMode.decal,
       );
 
-    final transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) *
-        (Matrix4.fromList([
-          ...[a, 0, 0, 0],
-          ...[d, e, 0, 0],
-          ...[0, 0, 1, 0],
-          ...[g, 0, 0, 1],
-        ])
-          ..transpose()); // transpose because the constructor expects column-major entries
+    Matrix4 transform = Matrix4.fromList([
+      ...[a, 0, 0, 0],
+      ...[d, e, 0, 0],
+      ...[0, 0, 1, 0],
+      ...[g, 0, 0, 1],
+    ])
+      ..transpose(); // transpose because the constructor expects column-major entries
+    transform = (Matrix4.identity()..setEntry(0, 0, bottomRight.dx)) *
+        transform; // for some reason the .scale() and .transform() methods don't work
+    transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) * transform;
 
     canvas.save();
     canvas.transform(transform.storage);
     // inflate the x values to avoid boundaries
     canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
     canvas.restore();
+
+    // if (topLeft.dy.abs() < 1e-6 && name == "Alhena") {
+    //   vector.Vector4 xRightTransformVec = transform * vector.Vector4(1, 0, 0, 1);
+    //   var xRightTransform = a / (g + 1);
+    //   print("$name $i $a ${g + 1} $xRightTransform ${bottomRight.dx}");
+    // }
   }
 
   @override

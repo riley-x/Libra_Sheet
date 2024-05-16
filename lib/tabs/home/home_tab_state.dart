@@ -69,7 +69,7 @@ class HomeTabState extends ChangeNotifier {
       list.add(AccountHistory(account, values));
     }
 
-    netWorthData = netWorthRaw.withAlignedTimes(monthList, cumulate: true).fixedForSyncfusion();
+    netWorthData = netWorthRaw.withAlignedTimes(monthList, cumulate: true);
     notifyListeners();
   }
 
