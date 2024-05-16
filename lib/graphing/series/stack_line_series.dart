@@ -54,8 +54,8 @@ class StackLineSeries<T> extends LineSeries<T> {
     this.gradientStops = gradientStops ?? const [0, 0.4, 1];
     this.gradientColors = gradientColors ??
         [
-          color.withAlpha(200),
-          color.withAlpha(220),
+          color.withAlpha(120),
+          color.withAlpha(180),
           color.withAlpha(255),
         ];
   }
@@ -105,134 +105,55 @@ class StackLineSeries<T> extends LineSeries<T> {
   void _paintSegment(Canvas canvas, CartesianCoordinateSpace coordSpace, int i) {
     final val1 = valueMapper(i, data[i]);
     final val2 = valueMapper(i + 1, data[i + 1]);
+    if (val1.dy == 0 && val2.dy == 0) return;
 
     final bottomLeft = coordSpace.userToPixel(stackBase[i]);
     final topLeft = coordSpace.userToPixel(val1 + Offset(0, stackBase[i].dy)) - bottomLeft;
     final topRight = coordSpace.userToPixel(val2 + Offset(0, stackBase[i + 1].dy)) - bottomLeft;
     final bottomRight = coordSpace.userToPixel(stackBase[i + 1]) - bottomLeft;
 
-    if (val1.dy == 0 && val2.dy == 0) return;
-    if (val1.dy == 0.0) {
-      /// Here we draw a triangle (0, 0) -> (1, 0) -> (1, 1) and transform to appropriate position.
-      /// The gradient sweeps from the bottom edge to the hypotenuse.
-      final a = topRight.dx;
-      final d = bottomRight.dy;
-      final e = topRight.dy - bottomRight.dy;
-
-      final paint = Paint()
-        ..style = PaintingStyle.fill
-        ..strokeWidth = 2
-        ..isAntiAlias = false
-        ..shader = ui.Gradient.sweep(
-          // these coordinates are the pixel coordiantes of the sweep center. But since we're
-          // plotting a unit triangle, the pixel coordinates are also 0..1.
-          const Offset(0, 0),
-          gradientColors,
-          gradientStops,
-          TileMode.clamp,
-          0.0,
-          math.pi / 4,
-        );
-
-      final transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) *
-          (Matrix4.fromList([
-            ...[a, 0, 0, 0],
-            ...[d, e, 0, 0],
-            ...[0, 0, 1, 0],
-            ...[0, 0, 0, 1],
-          ])
-            ..transpose()); // transpose because the constructor expects column-major entries
-
-      canvas.save();
-      canvas.transform(transform.storage);
-      // inflate the x values to avoid boundaries
-      canvas.drawPath(
-          Path()
-            ..moveTo(0, 0)
-            ..lineTo(1, 0)
-            ..lineTo(1, 1)
-            ..close(),
-          paint);
-      canvas.restore();
-    } else if (val2.dy == 0) {
-      /// Here we draw a triangle (0, 0) -> (1, 0) -> (0, 1) and transform to appropriate position.
-      /// The gradient sweeps from the bottom edge to the hypotenuse. But I think the sweep has to
-      /// take a endAngle > startAngle, so invert the gradient.
-      final a = bottomRight.dx;
-      final d = bottomRight.dy;
-      final e = topLeft.dy;
-
-      final paint = Paint()
-        ..style = PaintingStyle.fill
-        ..strokeWidth = 2
-        ..isAntiAlias = false
-        ..shader = ui.Gradient.sweep(
-          // these coordinates are the pixel coordiantes of the sweep center. But since we're
-          // plotting a unit triangle, the pixel coordinates are also 0..1.
-          const Offset(1, 0),
-          gradientColors.reversed.toList(),
-          [for (final x in gradientStops.reversed) 1 - x],
-          TileMode.clamp,
-          3 * math.pi / 4,
-          math.pi,
-        );
-
-      final transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) *
-          (Matrix4.fromList([
-            ...[a, 0, 0, 0],
-            ...[d, e, 0, 0],
-            ...[0, 0, 1, 0],
-            ...[0, 0, 0, 1],
-          ])
-            ..transpose()); // transpose because the constructor expects column-major entries
-
-      canvas.save();
-      canvas.transform(transform.storage);
-      // inflate the x values to avoid boundaries
-      canvas.drawPath(
-          Path()
-            ..moveTo(0, 0)
-            ..lineTo(1, 0)
-            ..lineTo(0, 1)
-            ..close(),
-          paint);
-      canvas.restore();
+    double g;
+    double e = topLeft.dy;
+    if (topRight.dy == bottomRight.dy) {
+      g = 999999999;
+    } else if (topLeft.dy.abs() < 1e-6) {
+      g = -0.9999;
+      e = (g + 1) * (topRight.dy - bottomRight.dy);
     } else {
-      final g = topLeft.dy / (topRight.dy - bottomRight.dy) - 1;
-      final e = topLeft.dy;
-      final d = bottomRight.dy * (g + 1);
-      final a = topRight.dx * (g + 1);
-
-      final paint = Paint()
-        ..style = PaintingStyle.fill
-        ..strokeWidth = 2
-        ..isAntiAlias = false
-        ..shader = ui.Gradient.linear(
-          // these coordinates are the pixel coordiantes that correspond to the
-          // 0/1 stop positions (note since we're plotting a unit square, the pixel coordinates are
-          // also 0..1). The x position doesn't matter since it's a vertical gradient.
-          const Offset(0, 0),
-          const Offset(0, 1),
-          gradientColors,
-          gradientStops,
-          // TileMode.decal,
-        );
-
-      final transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) *
-          (Matrix4.fromList([
-            ...[a, 0, 0, 0],
-            ...[d, e, 0, 0],
-            ...[0, 0, 1, 0],
-            ...[g, 0, 0, 1],
-          ])
-            ..transpose()); // transpose because the constructor expects column-major entries
-
-      canvas.save();
-      canvas.transform(transform.storage);
-      // inflate the x values to avoid boundaries
-      canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
-      canvas.restore();
+      g = topLeft.dy / (topRight.dy - bottomRight.dy) - 1;
     }
+    final d = bottomRight.dy * (g + 1);
+    final a = topRight.dx * (g + 1);
+
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2
+      ..isAntiAlias = false
+      ..shader = ui.Gradient.linear(
+        // these coordinates are the pixel coordiantes that correspond to the
+        // 0/1 stop positions (note since we're plotting a unit square, the pixel coordinates are
+        // also 0..1). The x position doesn't matter since it's a vertical gradient.
+        const Offset(0, 0),
+        const Offset(0, 1),
+        gradientColors,
+        gradientStops,
+        // TileMode.decal,
+      );
+
+    final transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) *
+        (Matrix4.fromList([
+          ...[a, 0, 0, 0],
+          ...[d, e, 0, 0],
+          ...[0, 0, 1, 0],
+          ...[g, 0, 0, 1],
+        ])
+          ..transpose()); // transpose because the constructor expects column-major entries
+
+    canvas.save();
+    canvas.transform(transform.storage);
+    // inflate the x values to avoid boundaries
+    canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
+    canvas.restore();
   }
 
   @override
