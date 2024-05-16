@@ -190,6 +190,7 @@ class DiscreteCartesianGraph extends StatefulWidget {
   final CartesianAxis yAxis;
   final SeriesCollection data;
   final Function(int iSeries, Series series, int iData)? onTap;
+  final Widget? Function(DiscreteCartesianGraphPainter, int?)? hoverTooltip;
 
   const DiscreteCartesianGraph({
     super.key,
@@ -197,6 +198,7 @@ class DiscreteCartesianGraph extends StatefulWidget {
     required this.yAxis,
     required this.data,
     this.onTap,
+    this.hoverTooltip,
   });
 
   @override
@@ -235,7 +237,9 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.xAxis != widget.xAxis ||
         oldWidget.yAxis != widget.yAxis ||
-        oldWidget.data != widget.data) {
+        oldWidget.data != widget.data ||
+        oldWidget.onTap != widget.onTap ||
+        oldWidget.hoverTooltip != widget.hoverTooltip) {
       _initPainter();
     }
   }
@@ -289,6 +293,9 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                   mainGraph: painter!,
                   hoverLoc: hoverLocX,
                   reverse: widget.data.hasStack,
+                  tooltip: (widget.hoverTooltip == null)
+                      ? null
+                      : widget.hoverTooltip!(painter!, hoverLocX),
                 ),
               ),
           ],

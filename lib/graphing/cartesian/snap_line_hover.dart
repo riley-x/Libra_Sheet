@@ -86,10 +86,17 @@ class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<Rend
 /// This is a hover tooltip that pools together all the data at a single point in a discrete x-value
 /// graph. It displays a title followed by entries from each series in a column.
 class PooledTooltip extends StatelessWidget {
-  const PooledTooltip(this.mainGraph, this.hoverLoc, {super.key, this.reverse = false});
+  const PooledTooltip(
+    this.mainGraph,
+    this.hoverLoc, {
+    super.key,
+    this.reverse = false,
+    this.labelAlignment = Alignment.centerLeft,
+  });
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
   final bool reverse;
+  final Alignment labelAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +117,9 @@ class PooledTooltip extends StatelessWidget {
       if (val == null || val == 0) return null;
 
       count++;
+      var label = mainGraph.yAxis.valToString(val);
       return Text(
-        "${series.name}: ${mainGraph.yAxis.valToString(val)}",
+        (series.name.isNotEmpty) ? "${series.name}: $label" : label,
         style: Theme.of(context).textTheme.bodyMedium,
       );
     }
@@ -148,7 +156,7 @@ class PooledTooltip extends StatelessWidget {
             /// Series items
             for (final series in (reverse ? mainGraph.data.data.reversed : mainGraph.data.data))
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: labelAlignment,
                 child: _getSeriesLabel(context, series),
               ),
 
@@ -156,7 +164,7 @@ class PooledTooltip extends StatelessWidget {
             if (count > 1) ...[
               Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onBackground),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: labelAlignment,
                 child: Text(
                   "Total: ${getTotal()}",
                   style: Theme.of(context).textTheme.bodyMedium,

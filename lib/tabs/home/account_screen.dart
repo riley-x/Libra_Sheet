@@ -10,11 +10,16 @@ import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
 import 'package:libra_sheet/graphing/date_time_graph.dart';
+import 'package:libra_sheet/graphing/series/line_series.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 /// Main widget for displaying the details of a single account. Navigated to by clicking on an
 /// account in the HomeTab.
@@ -38,9 +43,7 @@ class _AccountScreenState extends State<AccountScreen> {
     var newData = await LibraDatabase.read((db) => db.getMonthlyNet(accountId: widget.account.key));
     if (!mounted || newData == null) return;
 
-    newData = newData
-        .withAlignedTimes(appState.monthList, cumulate: true, trimStart: true)
-        .fixedForSyncfusion();
+    newData = newData.withAlignedTimes(appState.monthList, cumulate: true, trimStart: true);
     if (newData.length == 1) {
       // Duplicate the data point so the plot isn't empty
       newData.add(newData[0].withTime((it) => it.add(const Duration(seconds: 1))));
@@ -95,30 +98,71 @@ class _AccountScreenState extends State<AccountScreen> {
                   padding: const EdgeInsets.only(top: 7),
                   textLeft: 'Balance History',
                   textStyle: Theme.of(context).textTheme.headlineSmall,
-                  child: DateTimeGraph([
-                    AreaSeries<TimeIntValue, DateTime>(
-                      animationDuration: 300,
-                      dataSource: data,
-                      xValueMapper: (TimeIntValue it, _) => it.time,
-                      yValueMapper: (TimeIntValue it, _) =>
-                          (widget.account.type == AccountType.liability)
-                              ? -it.value.asDollarDouble()
-                              : it.value.asDollarDouble(),
-                      borderColor: widget.account.color,
-                      borderWidth: 3,
-                      borderDrawMode: BorderDrawMode.top,
-                      gradient: LinearGradient(
-                        colors: [
-                          widget.account.color.withAlpha(10),
-                          widget.account.color.withAlpha(80),
-                          widget.account.color.withAlpha(170),
-                        ],
-                        stops: const [0.0, 0.6, 1],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8, right: 8, bottom: 4),
+                    child: DiscreteCartesianGraph(
+                      yAxis: CartesianAxis(
+                        theme: Theme.of(context),
+                        axisLoc: null,
+                        valToString: formatDollar,
+                        min: 0,
+                      ),
+                      xAxis: MonthAxis(
+                        theme: Theme.of(context),
+                        axisLoc: 0,
+                        dates: data.map((e) => e.time).toList(),
+                        pad: 0,
+                      ),
+                      data: SeriesCollection([
+                        LineSeries<TimeIntValue>(
+                          name: "",
+                          color: widget.account.color,
+                          data: data,
+                          valueMapper: (i, item) =>
+                              Offset(i.toDouble(), item.value.asDollarDouble()),
+                          gradient: LinearGradient(
+                            colors: [
+                              widget.account.color.withAlpha(10),
+                              widget.account.color.withAlpha(80),
+                              widget.account.color.withAlpha(170),
+                            ],
+                            stops: const [0.0, 0.6, 1],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                          ),
+                        ),
+                      ]),
+                      hoverTooltip: (painter, loc) => PooledTooltip(
+                        painter,
+                        loc,
+                        labelAlignment: Alignment.center,
                       ),
                     ),
-                  ]),
+                  ),
+                  // DateTimeGraph([
+                  //   AreaSeries<TimeIntValue, DateTime>(
+                  //     animationDuration: 300,
+                  //     dataSource: data,
+                  //     xValueMapper: (TimeIntValue it, _) => it.time,
+                  //     yValueMapper: (TimeIntValue it, _) =>
+                  //         (widget.account.type == AccountType.liability)
+                  //             ? -it.value.asDollarDouble()
+                  //             : it.value.asDollarDouble(),
+                  //     borderColor: widget.account.color,
+                  //     borderWidth: 3,
+                  //     borderDrawMode: BorderDrawMode.top,
+                  //     gradient: LinearGradient(
+                  //       colors: [
+                  //         widget.account.color.withAlpha(10),
+                  //         widget.account.color.withAlpha(80),
+                  //         widget.account.color.withAlpha(170),
+                  //       ],
+                  //       stops: const [0.0, 0.6, 1],
+                  //       begin: Alignment.bottomCenter,
+                  //       end: Alignment.topCenter,
+                  //     ),
+                  //   ),
+                  // ]),
                 ),
               ),
             ],
