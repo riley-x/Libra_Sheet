@@ -19,7 +19,8 @@ class LineSeriesPoint<T> {
 class LineSeries<T> extends Series<T> {
   final Color color;
   final Offset Function(int i, T item) valueMapper;
-  final Paint _painter;
+  final Paint linePainter;
+  final double strokeWidth;
 
   /// Cache the points to enable easy hit testing
   final List<LineSeriesPoint<T>> _renderedPoints = [];
@@ -29,10 +30,11 @@ class LineSeries<T> extends Series<T> {
     required super.data,
     required this.valueMapper,
     this.color = Colors.blue,
-  }) : _painter = Paint()
+    this.strokeWidth = 3,
+  }) : linePainter = Paint()
           ..color = color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
+          ..strokeWidth = strokeWidth;
 
   LineSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
     final item = data[i];
@@ -56,7 +58,7 @@ class LineSeries<T> extends Series<T> {
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
     }
 
-    canvas.drawPath(path, _painter);
+    canvas.drawPath(path, linePainter);
   }
 
   @override

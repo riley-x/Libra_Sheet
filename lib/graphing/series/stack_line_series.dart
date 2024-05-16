@@ -46,6 +46,7 @@ class StackLineSeries<T> extends LineSeries<T> {
     required super.data,
     required super.valueMapper,
     super.color,
+    super.strokeWidth,
     List<double>? gradientStops,
     List<Color>? gradientColors,
   }) {
@@ -258,11 +259,7 @@ class StackLineSeries<T> extends LineSeries<T> {
     // path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
     // path.close();
 
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = color;
-    canvas.drawPath(path, paint);
+    canvas.drawPath(path, linePainter);
   }
 
   @override
