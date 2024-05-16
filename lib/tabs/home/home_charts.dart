@@ -9,6 +9,7 @@ import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
+import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_line_series.dart';
 import 'package:libra_sheet/tabs/home/chart_with_title.dart';
@@ -218,6 +219,7 @@ class _NetWorthGraph extends StatelessWidget {
           theme: Theme.of(context),
           axisLoc: null,
           valToString: formatDollar,
+          min: 0,
         ),
         xAxis: MonthAxis(
           theme: Theme.of(context),
@@ -226,13 +228,17 @@ class _NetWorthGraph extends StatelessWidget {
           pad: 0,
         ),
         data: SeriesCollection([
-          StackLineSeries<TimeIntValue>(
+          LineSeries<TimeIntValue>(
             name: "Net Worth",
             color: Colors.blue,
             data: state.netWorthData.looseRange(state.timeFrameRange),
             valueMapper: (i, item) => Offset(i.toDouble(), item.value.asDollarDouble()),
-            gradientColors: gradientColors,
-            gradientStops: gradientStops,
+            gradient: LinearGradient(
+              colors: gradientColors,
+              stops: gradientStops,
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+            ),
           ),
         ]),
       ),

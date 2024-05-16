@@ -118,6 +118,7 @@ class StackLineSeries<T> extends LineSeries<T> {
 
     double g;
     double e = topLeft.dy;
+    double xRight = bottomRight.dx;
     if (topRight.dy == bottomRight.dy) {
       g = 9999999;
     } else if (topLeft.dy.abs() < 1e-6) {
@@ -127,6 +128,9 @@ class StackLineSeries<T> extends LineSeries<T> {
       /// something. Probably the same issue: https://github.com/flutter/flutter/issues/126026
       g = -0.9995;
       e = (topRight.dy - bottomRight.dy) * (g + 1);
+
+      /// This seems to prevent the black gaps from showing, but the overlap still appears
+      xRight += 0.2;
 
       // e = -0.001;
       // g = e / (topRight.dy - bottomRight.dy) - 1;
@@ -158,9 +162,9 @@ class StackLineSeries<T> extends LineSeries<T> {
       ...[g, 0, 0, 1],
     ])
       ..transpose(); // transpose because the constructor expects column-major entries
-    transform = (Matrix4.identity()..setEntry(0, 0, bottomRight.dx)) *
-        transform; // for some reason the .scale() and .transform() methods don't work
+    transform = (Matrix4.identity()..setEntry(0, 0, xRight)) * transform;
     transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) * transform;
+    // for some reason the .scale() and .transform() methods don't work
 
     canvas.save();
     canvas.transform(transform.storage);
@@ -168,6 +172,8 @@ class StackLineSeries<T> extends LineSeries<T> {
     canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
     canvas.restore();
 
+    /// Tried figuring out when a rounding error would occur...but don't really know where the
+    /// rounding happens.
     // if (topLeft.dy.abs() < 1e-6 && name == "Alhena") {
     //   vector.Vector4 xRightTransformVec = transform * vector.Vector4(1, 0, 0, 1);
     //   var xRightTransform = a / (g + 1);

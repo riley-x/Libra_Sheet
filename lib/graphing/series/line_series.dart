@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
 class LineSeriesPoint<T> {
@@ -21,6 +22,7 @@ class LineSeries<T> extends Series<T> {
   final Offset Function(int i, T item) valueMapper;
   final Paint linePainter;
   final double strokeWidth;
+  final Gradient? gradient;
 
   /// Cache the points to enable easy hit testing
   final List<LineSeriesPoint<T>> _renderedPoints = [];
@@ -31,6 +33,7 @@ class LineSeries<T> extends Series<T> {
     required this.valueMapper,
     this.color = Colors.blue,
     this.strokeWidth = 3,
+    this.gradient,
   }) : linePainter = Paint()
           ..color = color
           ..style = PaintingStyle.stroke
@@ -50,6 +53,7 @@ class LineSeries<T> extends Series<T> {
     _renderedPoints.clear();
     if (data.length <= 1) return;
 
+    /// Line
     final path = Path();
     final start = _addPoint(coordSpace, 0);
     path.moveTo(start.pixelPos.dx, start.pixelPos.dy);
@@ -57,8 +61,15 @@ class LineSeries<T> extends Series<T> {
       final curr = _addPoint(coordSpace, i);
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
     }
-
     canvas.drawPath(path, linePainter);
+
+    /// Gradient
+    if (gradient != null) {
+      path.lineToOffset(
+          coordSpace.userToPixel(Offset(valueMapper(data.length - 1, data.last).dx, 0)));
+      path.lineToOffset(coordSpace.userToPixel(Offset(valueMapper(0, data.first).dx, 0)));
+      canvas.drawPath(path, Paint()..shader = gradient!.createShader(coordSpace.canvasSize));
+    }
   }
 
   @override
