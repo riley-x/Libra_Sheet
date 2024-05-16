@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
@@ -39,12 +38,26 @@ class StackLineSeries<T> extends LineSeries<T> {
   /// It is set post-construction by [SeriesCollection].
   List<Offset> stackBase = [];
 
+  List<double> gradientStops = [];
+  List<Color> gradientColors = [];
+
   StackLineSeries({
     required super.name,
     required super.data,
     required super.valueMapper,
     super.color,
-  });
+    List<double>? gradientStops,
+    List<Color>? gradientColors,
+  }) {
+    assert((gradientStops != null) == (gradientColors != null));
+    this.gradientStops = gradientStops ?? const [0, 0.4, 1];
+    this.gradientColors = gradientColors ??
+        [
+          color.withAlpha(200),
+          color.withAlpha(220),
+          color.withAlpha(255),
+        ];
+  }
 
   LineSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
     final item = data[i];
@@ -108,20 +121,13 @@ class StackLineSeries<T> extends LineSeries<T> {
       final paint = Paint()
         ..style = PaintingStyle.fill
         ..strokeWidth = 2
+        ..isAntiAlias = false
         ..shader = ui.Gradient.sweep(
           // these coordinates are the pixel coordiantes of the sweep center. But since we're
           // plotting a unit triangle, the pixel coordinates are also 0..1.
           const Offset(0, 0),
-          [
-            color.withAlpha(200),
-            color.withAlpha(220),
-            color.withAlpha(255),
-          ],
-          [
-            0,
-            0.4,
-            1,
-          ],
+          gradientColors,
+          gradientStops,
           TileMode.clamp,
           0.0,
           math.pi / 4,
@@ -158,20 +164,13 @@ class StackLineSeries<T> extends LineSeries<T> {
       final paint = Paint()
         ..style = PaintingStyle.fill
         ..strokeWidth = 2
+        ..isAntiAlias = false
         ..shader = ui.Gradient.sweep(
           // these coordinates are the pixel coordiantes of the sweep center. But since we're
           // plotting a unit triangle, the pixel coordinates are also 0..1.
           const Offset(1, 0),
-          [
-            color.withAlpha(255),
-            color.withAlpha(220),
-            color.withAlpha(200),
-          ],
-          [
-            0,
-            0.6,
-            1,
-          ],
+          gradientColors.reversed.toList(),
+          [for (final x in gradientStops.reversed) 1 - x],
           TileMode.clamp,
           3 * math.pi / 4,
           math.pi,
@@ -191,9 +190,9 @@ class StackLineSeries<T> extends LineSeries<T> {
       // inflate the x values to avoid boundaries
       canvas.drawPath(
           Path()
-            ..moveTo(-0.006, 0)
+            ..moveTo(0, 0)
             ..lineTo(1, 0)
-            ..lineTo(-0.006, 1)
+            ..lineTo(0, 1)
             ..close(),
           paint);
       canvas.restore();
@@ -206,22 +205,15 @@ class StackLineSeries<T> extends LineSeries<T> {
       final paint = Paint()
         ..style = PaintingStyle.fill
         ..strokeWidth = 2
+        ..isAntiAlias = false
         ..shader = ui.Gradient.linear(
           // these coordinates are the pixel coordiantes that correspond to the
           // 0/1 stop positions (note since we're plotting a unit square, the pixel coordinates are
           // also 0..1). The x position doesn't matter since it's a vertical gradient.
           const Offset(0, 0),
           const Offset(0, 1),
-          [
-            color.withAlpha(200),
-            color.withAlpha(220),
-            color.withAlpha(255),
-          ],
-          [
-            0,
-            0.4,
-            1,
-          ],
+          gradientColors,
+          gradientStops,
           // TileMode.decal,
         );
 
@@ -237,7 +229,7 @@ class StackLineSeries<T> extends LineSeries<T> {
       canvas.save();
       canvas.transform(transform.storage);
       // inflate the x values to avoid boundaries
-      canvas.drawRect(const Rect.fromLTRB(-0.006, 0, 1.006, 1), paint);
+      canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
       canvas.restore();
     }
   }
