@@ -65,9 +65,10 @@ class LineSeries<T> extends Series<T> {
 
     /// Gradient
     if (gradient != null) {
+      path.lineToOffset(coordSpace.userToPixel(
+          Offset(valueMapper(data.length - 1, data.last).dx, coordSpace.yAxis.userMin)));
       path.lineToOffset(
-          coordSpace.userToPixel(Offset(valueMapper(data.length - 1, data.last).dx, 0)));
-      path.lineToOffset(coordSpace.userToPixel(Offset(valueMapper(0, data.first).dx, 0)));
+          coordSpace.userToPixel(Offset(valueMapper(0, data.first).dx, coordSpace.yAxis.userMin)));
       canvas.drawPath(path, Paint()..shader = gradient!.createShader(coordSpace.canvasSize));
     }
   }
@@ -76,6 +77,9 @@ class LineSeries<T> extends Series<T> {
   BoundingBox boundingBox(int i) {
     return BoundingBox.fromPoint(valueMapper(i, data[i]));
   }
+
+  @override
+  double? hoverValue(int i) => _renderedPoints[i].value.dy;
 }
 
 final testSeries = LineSeries(

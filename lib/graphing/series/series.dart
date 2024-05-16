@@ -61,10 +61,14 @@ abstract class Series<T> {
   /// This is the value shown when hovering over a data point. The value is formatted by the
   /// corresponding axis. Note if [hoverBuilder] returns not null, it will take precedence, but this
   /// value may still be used, i.e. the [PooledTooltip] which sums entries together.
+  ///
+  /// TODO this is hardcoded for discrete axes.
   double? hoverValue(int i) => null;
 
   /// The widget to display when hovering. Make sure you still implement [hoverValue] if you
   /// implement [hoverBuilder].
+  ///
+  /// TODO this is hardcoded for discrete axes.
   Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) =>
       null;
 
