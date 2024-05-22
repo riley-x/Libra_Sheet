@@ -24,6 +24,7 @@ class TransactionCard extends StatelessWidget {
     this.showTags = true,
     this.showTooltip = true,
     this.rightContent,
+    this.contextMenu,
   });
 
   final Transaction trans;
@@ -33,6 +34,7 @@ class TransactionCard extends StatelessWidget {
   final bool showTags;
   final Widget? rightContent;
   final bool showTooltip;
+  final Widget? contextMenu;
 
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
@@ -56,6 +58,7 @@ class TransactionCard extends StatelessWidget {
               : null,
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       onTap: () => onSelect?.call(trans),
+      contextMenu: contextMenu,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

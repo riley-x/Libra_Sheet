@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
+import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -212,6 +213,7 @@ class TransactionGrid extends StatelessWidget {
                             trans: transactions[i],
                             maxRowsForName: maxRowsForName,
                             onSelect: (onSelect != null) ? (it) => onSelect!(it, i) : null,
+                            contextMenu: TransactionContextMenu(),
                           ),
                         ),
               ],
