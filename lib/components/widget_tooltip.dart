@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// A wrapper widget that allows creating a tooltip via a Widget. Hovering over [child] shows
+/// [tooltip].
 class WidgetTooltip extends StatefulWidget {
   const WidgetTooltip({
     super.key,

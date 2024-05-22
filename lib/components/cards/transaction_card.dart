@@ -12,6 +12,8 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 import 'package:provider/provider.dart';
 
+/// This is used throughout the app as the main UI graphic for displaying the info from a single
+/// transaction.
 class TransactionCard extends StatelessWidget {
   const TransactionCard({
     super.key,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/menus/context_menu.dart';
 
+/// A rounded card with a colored bar on the left and a shaded background to match. Content is
+/// filled by passing [child].
 class ColorIndicatorCard extends StatelessWidget {
   const ColorIndicatorCard({
     super.key,
@@ -8,6 +11,7 @@ class ColorIndicatorCard extends StatelessWidget {
     this.borderColor,
     this.margin = EdgeInsets.zero,
     this.onTap,
+    this.contextMenu,
   }) : assert(!(color != null && borderColor != null));
 
   final Widget child;
@@ -15,11 +19,23 @@ class ColorIndicatorCard extends StatelessWidget {
   final Color? borderColor;
   final EdgeInsets margin;
   final Function()? onTap;
+  final Widget? contextMenu;
 
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
   static const double verticalPadding = 4;
   static const padding = EdgeInsets.symmetric(vertical: verticalPadding, horizontal: 8);
+
+  Future<void> _onSecondaryTapUp(BuildContext context, TapUpDetails details) async {
+    await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) => CustomSingleChildLayout(
+        delegate: ContextMenuPositionDelegate(target: details.globalPosition),
+        child: contextMenu,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +57,17 @@ class ColorIndicatorCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
+
+          /// Using a dialog for the context menu seems to be the best. ContextMenuController does
+          /// not provide a way to close the menu outside of the region, so would need some
+          /// wrapper listener that sits above everything else, listens everywhere and handles the
+          /// closing. MenuAnchor doesn't prevent the creation of other menus and persists across
+          /// some transitions.
+          ///
+          /// The downside of the dialog is that is blocks all mouse activity; would be nice to
+          /// pass-through the hover effects still. Also, requires two right clicks to open another
+          /// context menu.
+          onSecondaryTapUp: (contextMenu == null) ? null : (it) => _onSecondaryTapUp(context, it),
           child: Padding(
             padding: padding,
             child: Stack(
