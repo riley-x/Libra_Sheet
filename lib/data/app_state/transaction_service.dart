@@ -4,6 +4,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
+import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 /// Helper class for managing transactions. Every widget that monitors transactions should probably
@@ -49,6 +50,40 @@ class TransactionService extends ChangeNotifier {
       for (final t in transactions) {
         await txn.insertTransaction(t);
       }
+    });
+    onUpdate();
+  }
+
+  Future<void> createDuplicate(Transaction old) async {
+    debugPrint("TransactionService::createDuplicate() \n$old");
+    await LibraDatabase.updateTransaction((txn) async {
+      if (!old.relationsAreLoaded()) {
+        await txn.loadTransactionRelations(
+          old,
+          accounts: appState.accounts.createAccountMap(),
+          categories: appState.categories.createKeyMap(),
+          tags: appState.tags.createKeyMap(),
+        );
+      }
+      final nu = Transaction(
+        name: old.name,
+        date: old.date,
+        value: old.value,
+        category: old.category,
+        account: old.account,
+        note: old.note,
+        allocations: old.allocations
+            ?.map((e) => Allocation(
+                  // Need key = 0 to create a new allocation entry in the database
+                  name: e.name,
+                  category: e.category,
+                  value: e.value,
+                ))
+            .toList(),
+        tags: old.tags,
+        // Don't copy reimbursements
+      );
+      await txn.insertTransaction(nu);
     });
     onUpdate();
   }

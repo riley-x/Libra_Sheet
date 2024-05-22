@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 
 class TransactionContextMenu extends StatelessWidget {
-  const TransactionContextMenu({super.key});
+  const TransactionContextMenu({
+    super.key,
+    this.onSelect,
+    this.onDuplicate,
+  });
+
+  final Function()? onSelect;
+  final Function()? onDuplicate;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Theme.of(context).colorScheme.surfaceVariant,
       borderRadius: BorderRadius.circular(10),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ContextMenuItem(text: 'Multi-select', isFirst: true),
-            ContextMenuItem(text: 'Duplicate', isLast: true),
+            ContextMenuItem(text: 'Multi-select', onTap: onSelect, isFirst: true),
+            ContextMenuItem(text: 'Duplicate', onTap: onDuplicate, isLast: true),
           ],
         ),
       ),
