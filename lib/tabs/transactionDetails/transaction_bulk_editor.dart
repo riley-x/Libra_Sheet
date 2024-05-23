@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -124,7 +125,7 @@ class BulkEditorState extends ChangeNotifier {
     // Need to save the form first to get the values. This doesn't do anything other than set the
     // save sink members above.
     formKey.currentState?.save();
-    final date = DateFormat('MM/dd/yy').tryParse(dateController.text);
+    final date = DateFormat('MM/dd/yy').tryParse(dateController.text, true);
     final value = valueController.text.toIntDollar();
 
     /// Error check each individual transaction while being created, easier.
@@ -147,6 +148,7 @@ class BulkEditorState extends ChangeNotifier {
     final out = <(Transaction, Transaction)>[];
     for (final old in parentState.selected.values) {
       final nu = Transaction(
+        key: old.key,
         name: (nameController.text.isNotEmpty) ? nameController.text : old.name,
         date: date ?? old.date,
         value: value ?? old.value,
@@ -194,8 +196,11 @@ class TransactionBulkEditor extends StatelessWidget {
         physics: const ClampingScrollPhysics(),
         child: Padding(
           padding: interiorPadding ?? EdgeInsets.zero,
-          child: const FocusScope(
-            child: _Form(),
+          child: FocusScope(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: const _Form(),
+            ),
           ),
         ),
       ),

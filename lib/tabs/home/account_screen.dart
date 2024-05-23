@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
@@ -18,6 +19,7 @@ import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
+import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
 import 'package:provider/provider.dart';
 
 /// Main widget for displaying the details of a single account. Navigated to by clicking on an
@@ -67,46 +69,63 @@ class _AccountScreenState extends State<AccountScreen> {
     // service?.removeListener(loadData);
   }
 
+  String? _filterDescription(TransactionFilters filters) {
+    if (filters.hasBasicFilters() ||
+        !filters.categories.isEmpty ||
+        filters.tags.isNotEmpty ||
+        filters.accounts.length != 1 ||
+        filters.accounts.first != widget.account) return "Modified";
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CommonBackBar(
-          leftText: widget.account.name,
-          rightText: state.historyMap[widget.account.key]?.values.lastOrNull?.dollarString() ?? '',
-          // Don't use account.balance because that can be stale after adding a transaction
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: TransactionFilterGrid(
-                  initialFilters: initialFilters,
-                  fab: TransactionSpeedDial(initialAccount: widget.account),
-                  onSelect: (t) => toTransactionDetails(context, t),
-                  filterDescription: (filters) {
-                    if (filters.hasBasicFilters() ||
-                        !filters.categories.isEmpty ||
-                        filters.tags.isNotEmpty ||
-                        filters.accounts.length != 1 ||
-                        filters.accounts.first != widget.account) return "Modified";
-                    return null;
-                  },
-                ),
+    return ChangeNotifierProvider(
+      create: (context) => TransactionFilterState(
+        context.read(),
+        initialFilters: initialFilters,
+      ),
+      builder: (context, child) {
+        final transactionState = context.watch<TransactionFilterState>();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CommonBackBar(
+              leftText: widget.account.name,
+              rightText:
+                  state.historyMap[widget.account.key]?.values.lastOrNull?.dollarString() ?? '',
+              // Don't use account.balance because that can be stale after adding a transaction (still true?)
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TransactionFilterGrid(
+                      createProvider: false,
+                      fab: TransactionSpeedDial(initialAccount: widget.account),
+                      onSelect: (t) => toTransactionDetails(context, t),
+                      filterDescription: _filterDescription,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                  Expanded(
+                    child: (transactionState.selected.isEmpty)
+                        ? _GraphWithTitle(widget.account)
+                        : Align(
+                            alignment: Alignment.topCenter,
+                            child: TransactionBulkEditor(),
+                          ),
+                  ),
+                ],
               ),
-              Container(
-                width: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              Expanded(
-                child: _GraphWithTitle(widget.account),
-              ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -21,7 +21,7 @@ import 'transaction_filter_dialog.dart';
 /// transactions and reset the filter.
 ///
 /// Alternatively, if you want to manage the state directly, provide one above this widget and set
-/// [createProvider] to false.
+/// [createProvider] to false. In this case [initialFilters] is unused.
 ///
 /// [filterDescription] will display a tiny message beside the filter icon is not null, and highlight
 /// the icon [Colors.blue].
