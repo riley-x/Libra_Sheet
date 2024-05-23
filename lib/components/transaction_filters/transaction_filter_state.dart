@@ -74,7 +74,7 @@ class TransactionFilterState extends ChangeNotifier {
 
   /// Loaded transactions
   List<Transaction> transactions = [];
-  Set<int> selected = {};
+  Map<int, Transaction> selected = {};
   int? lastSelected;
 
   void loadTransactions() async {
@@ -206,8 +206,8 @@ class TransactionFilterState extends ChangeNotifier {
 
   void multiSelect(Transaction t, int i, bool shift) {
     if (!shift) {
-      if (!selected.remove(i)) {
-        selected.add(i);
+      if (selected.remove(i) == null) {
+        selected[i] = t;
         lastSelected = i;
       } else if (lastSelected == i) {
         lastSelected = null;
@@ -215,12 +215,12 @@ class TransactionFilterState extends ChangeNotifier {
     } else {
       if (lastSelected != null) {
         for (int j = math.min(lastSelected!, i); j <= math.max(lastSelected!, i); j++) {
-          selected.add(j);
+          selected[j] = transactions[j];
         }
       } else {
         /// Find the nearest selected item.
         int? closestBelow, closestAbove;
-        for (final j in selected) {
+        for (final j in selected.keys) {
           if (j == i) continue;
           if (j < i) {
             closestBelow ??= j;
@@ -233,14 +233,14 @@ class TransactionFilterState extends ChangeNotifier {
 
         if ((closestBelow == null && closestAbove == null) ||
             (closestBelow != null && closestAbove != null)) {
-          selected.add(i);
+          selected[i] = t;
         } else if (closestBelow != null) {
           for (int j = closestBelow + 1; j <= i; j++) {
-            selected.add(j);
+            selected[j] = transactions[j];
           }
         } else {
           for (int j = i; j < closestAbove!; j++) {
-            selected.add(j);
+            selected[j] = transactions[j];
           }
         }
       }

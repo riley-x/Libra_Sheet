@@ -179,7 +179,7 @@ class TransactionGrid extends StatelessWidget {
   final List<Transaction> transactions;
   final int? maxRowsForName;
   final int? fixedColumns;
-  final Set<int>? selected;
+  final Map<int, Transaction>? selected;
   final Function(Transaction t, int index)? onTap;
   final Function(Transaction t, int index, bool shift)? onMultiselect;
 
@@ -233,7 +233,7 @@ class TransactionGrid extends StatelessWidget {
                       : Expanded(
                           child: TransactionCard(
                             trans: transactions[i],
-                            selected: selected?.contains(i) ?? false,
+                            selected: selected?.containsKey(i) ?? false,
                             maxRowsForName: maxRowsForName,
                             onTap: (onTap == null && onMultiselect == null)
                                 ? null

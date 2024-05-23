@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filters_c
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
+import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
 import 'package:provider/provider.dart';
 
 class TransactionTab extends StatelessWidget {
@@ -11,16 +12,19 @@ class TransactionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final state = context.watch<TransactionFilterState>();
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _TransactionList()),
-        VerticalDivider(width: 1, thickness: 1),
+        const Expanded(child: _TransactionList()),
+        const VerticalDivider(width: 1, thickness: 1),
         SizedBox(
           width: 300,
-          child: TransactionFiltersColumn(
-            interiorPadding: EdgeInsets.symmetric(horizontal: 10),
-          ),
+          child: (state.selected.isEmpty)
+              ? const TransactionFiltersColumn(
+                  interiorPadding: EdgeInsets.symmetric(horizontal: 10),
+                )
+              : TransactionBulkEditor(state.selected.values.toList()),
         ),
       ],
     );
