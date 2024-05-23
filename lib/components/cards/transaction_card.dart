@@ -43,7 +43,7 @@ class TransactionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = (trans.category.level == 0) ? null : trans.category.color;
 
-    bool isUncategorized = trans.category == Category.income || trans.category == Category.expense;
+    bool isUncategorized = trans.category.isUncategorized;
     bool isInvestment = trans.category == Category.other;
 
     final signedReimb = (trans.value > 0) ? -trans.totalReimbusrements : trans.totalReimbusrements;
@@ -137,6 +137,7 @@ class _TextElements extends StatelessWidget {
     }
 
     final adjValue = trans.adjustedValue();
+    final sign = (trans.value < 0) ? -1 : 1;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,12 +166,16 @@ class _TextElements extends StatelessWidget {
           children: [
             Row(
               children: [
+                if (trans.totalReimbusrements != 0 && adjValue != 0) ...[
+                  _AllocIndicator(trans.totalReimbusrements * sign, Category.ignore),
+                  const SizedBox(width: 10),
+                ],
                 for (final alloc in trans.softAllocations) ...[
-                  _AllocIndicator(alloc.signedValue, alloc.category.color),
+                  _AllocIndicator(alloc.value * sign, alloc.category),
                   const SizedBox(width: 10),
                 ],
                 if (adjValue != trans.value && adjValue != 0) ...[
-                  _AllocIndicator(adjValue, trans.category.color),
+                  _AllocIndicator(adjValue, trans.category),
                   const SizedBox(width: 10),
                 ],
                 Text(
@@ -203,27 +208,66 @@ class _TextElements extends StatelessWidget {
 }
 
 class _AllocIndicator extends StatelessWidget {
-  const _AllocIndicator(this.value, this.color, {super.key});
+  const _AllocIndicator(this.value, this.category, {super.key});
 
   final int value;
-  final Color color;
+  final Category category;
 
   @override
   Widget build(BuildContext context) {
-    final blendColor =
-        Color.alphaBlend(color.withAlpha(200), Theme.of(context).colorScheme.background);
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
+          side: (category.isSpecial)
+              ? BorderSide(
+                  color: (category == Category.other)
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey.shade700)
+              : BorderSide.none,
           borderRadius: BorderRadius.circular(8),
         ),
-        color: blendColor,
+        color: (category.isSpecial)
+            ? null
+            : Color.alphaBlend(
+                category.color.withAlpha(200), Theme.of(context).colorScheme.background),
       ),
       child: Center(
         child: Text(
           value.dollarString(),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: adaptiveTextColor(color)),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: (category == Category.other)
+                    ? Theme.of(context).colorScheme.primary
+                    : (category.isSpecial)
+                        ? Colors.grey.shade700
+                        : adaptiveTextColor(category.color),
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReimbIndicator extends StatelessWidget {
+  const _ReimbIndicator(this.value, {super.key});
+
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Colors.grey.shade700;
+    return Container(
+      padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: color),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Center(
+        child: Text(
+          value.dollarString(),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
         ),
       ),
     );
@@ -241,16 +285,16 @@ class _NumberIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: BoxDecoration(
-        color: (isAlloc)
-            ? const Color.fromARGB(255, 221, 79, 145)
-            : const Color.fromARGB(255, 100, 65, 197),
-        shape: BoxShape.circle,
-        // border: Border.all(
-        //   color: Colors.white,
-        //   width: 5.0,
-        //   style: BorderStyle.solid,
-        // ),
-      ),
+          color: (isAlloc)
+              ? const Color.fromARGB(255, 221, 79, 145)
+              : const Color.fromARGB(255, 100, 65, 197),
+          borderRadius: BorderRadius.circular(4)
+          // border: Border.all(
+          //   color: Colors.white,
+          //   width: 5.0,
+          //   style: BorderStyle.solid,
+          // ),
+          ),
       child: Center(
         child: Text(
           (n < 10)

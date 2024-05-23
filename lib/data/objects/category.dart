@@ -128,6 +128,8 @@ class Category {
 
   bool get isUncategorized =>
       this == Category.empty || this == Category.expense || this == Category.income;
+
+  bool get isSpecial => isUncategorized || this == Category.ignore || this == Category.other;
 }
 
 class CategoryHistoryEntry {

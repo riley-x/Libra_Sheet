@@ -79,17 +79,17 @@ class _CashFlowCharts extends StatelessWidget {
               data: state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range: range,
               onTap: (category, month) => onTap(category, month),
-              averageColor: Category.income.color,
+              averageColor: Colors.green,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           Text("Expenses", style: textStyle),
           Expanded(
             child: CategoryStackChart(
               data: state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range: range,
               onTap: (category, month) => onTap(category, month),
-              averageColor: Category.expense.color,
+              averageColor: Colors.red.shade700,
             ),
           ),
         ],
@@ -114,8 +114,8 @@ class _CashFlowCharts extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 10),
-          Text("Investment Returns", style: textStyle),
+          const SizedBox(height: 16),
+          Text("Other", style: textStyle),
           Expanded(
             child: RedGreenBarChart(
               state.netReturns.sublist(range.$1, range.$2),

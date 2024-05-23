@@ -130,12 +130,6 @@ class SoftAllocation {
   final int value;
 
   SoftAllocation({required this.category, required this.value});
-
-  int get signedValue => switch (category.type) {
-        ExpenseFilterType.income => value,
-        ExpenseFilterType.expense => -value,
-        ExpenseFilterType.all => value,
-      };
 }
 
 final dummyTransaction =
