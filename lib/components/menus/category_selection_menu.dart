@@ -50,7 +50,7 @@ class CategorySelectionFormField extends StatelessWidget {
     this.nullText,
   });
 
-  final List<Category> categories;
+  final List<Category?> categories;
   final Category? initial;
   final Function(Category?)? onSave;
   final String? Function(Category?)? validator;

@@ -16,7 +16,8 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
 import 'package:provider/provider.dart';
 
-/// T
+/// This state handles the form fields of the bulk editor. It assumes that a parent
+/// [TransactionFilterState] exists which handles the list of selected transactions.
 class BulkEditorState extends ChangeNotifier {
   BulkEditorState(this.parentState) {
     parentState.addListener(update);
@@ -118,32 +119,30 @@ class BulkEditorState extends ChangeNotifier {
   Category? category;
   // List<Tag> tags = [];
 
-  String? _validate() {
-    if (formKey.currentState?.validate() != true) return "";
+  (String?, List<(Transaction, Transaction)>) _validate() {
+    if (formKey.currentState?.validate() != true) return ("", []);
     // Need to save the form first to get the values. This doesn't do anything other than set the
     // save sink members above.
     formKey.currentState?.save();
-
-    final value = valueController.text.toIntDollar();
-    if (value != null) {
-      if (ExpenseFilterType.from(value) != expenseType) {
-        return "Can't set common value to transactions with different category types";
-      }
-      if (category != null && expenseType != category!.type) {
-        return "Sign of value does not agree with category";
-      }
-    }
-    return null;
-  }
-
-  void save() {
-    errorMessage = _validate();
-    if (errorMessage != null) {
-      notifyListeners();
-      return;
-    }
     final date = DateFormat('MM/dd/yy').tryParse(dateController.text);
     final value = valueController.text.toIntDollar();
+
+    /// Error check each individual transaction while being created, easier.
+    // if (value != null) {
+    //   if (category == null && ExpenseFilterType.from(value) != expenseType) {
+    //     return "Can't set common value to transactions with different category types";
+    //   }
+    //   if (category != null &&
+    //       category!.type != ExpenseFilterType.all &&
+    //       ExpenseFilterType.from(value) != category!.type) {
+    //     return "Sign of value does not agree with category";
+    //   }
+    // }
+    // if (category != null &&
+    //     category!.type != ExpenseFilterType.all &&
+    //     expenseType != category!.type) {
+    //   return "Category type does not agree with original categories";
+    // }
 
     final out = <(Transaction, Transaction)>[];
     for (final old in parentState.selected.values) {
@@ -156,9 +155,26 @@ class BulkEditorState extends ChangeNotifier {
         note: (noteController.text.isNotEmpty) ? noteController.text : old.note,
         // Don't copy reimbursements/allocations
       );
+      if (nu.category.type != ExpenseFilterType.all &&
+          nu.category.type != ExpenseFilterType.from(nu.value) &&
+          nu.value != 0) {
+        return ("Edits would create a transaction with the wrong category type", []);
+      }
       out.add((old, nu));
     }
-    parentState.service.updateAll(out);
+    return (null, out);
+  }
+
+  void save() {
+    final (msg, out) = _validate();
+    errorMessage = msg;
+    if (errorMessage == null) {
+      parentState.service.updateAll(out);
+    }
+    notifyListeners();
+
+    /// Note this clears the selections anyways since the TransactionService updates.
+    // parentState.clearSelections();
   }
 }
 
@@ -193,8 +209,9 @@ class _Form extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.titleMedium;
+    final state = context.watch<BulkEditorState>();
     return Form(
-      key: context.read<BulkEditorState>().formKey,
+      key: state.formKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -247,7 +264,19 @@ class _Form extends StatelessWidget {
             onReset: () => context.read<TransactionFilterState>().clearSelections(),
             onSave: () => context.read<BulkEditorState>().save(),
             resetName: 'Clear',
-          )
+          ),
+
+          /// Error message
+          const SizedBox(height: 10),
+          if (state.errorMessage != null)
+            SizedBox(
+              width: 250,
+              child: Text(
+                state.errorMessage!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+            )
         ],
       ),
     );
@@ -339,8 +368,13 @@ class _CategoryField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<BulkEditorState>();
-    var categories = [Category.ignore, Category.other] +
-        context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
+    var categories = [
+      null,
+      Category.ignore,
+      Category.other,
+      if (state.expenseType != ExpenseFilterType.all)
+        ...context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType)
+    ];
     return SizedBox(
       width: 250,
       child: CategorySelectionFormField(

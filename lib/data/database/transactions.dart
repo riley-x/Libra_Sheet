@@ -343,7 +343,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
           $reimbursementsTable r ON t.$_key = (CASE WHEN (t.$_value > 0) then r.$reimbIncome else r.$reimbExpense END)
         GROUP BY
           t.$_key
-        ORDER BY date
+        ORDER BY date, $_key
     ''';
     final rows = await rawQuery(q);
 
@@ -490,7 +490,7 @@ String createTransactionQuery({
     GROUP BY
       t.$_key
     $reimbHaving
-    ORDER BY date DESC
+    ORDER BY date DESC, $_key DESC
     $limit
     ''';
 }
