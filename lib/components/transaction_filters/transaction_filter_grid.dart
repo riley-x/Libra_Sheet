@@ -3,7 +3,6 @@ import 'package:libra_sheet/components/cards/transaction_card.dart';
 import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
-import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';

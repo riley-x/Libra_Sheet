@@ -39,6 +39,7 @@ class ColorIndicatorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return LimitedBox(
       maxWidth: 500,
       child: Card(
@@ -52,7 +53,8 @@ class ColorIndicatorCard extends StatelessWidget {
         // color: Color.alphaBlend(
         //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
         //     Theme.of(context).colorScheme.surface),
-        surfaceTintColor: color ?? Theme.of(context).colorScheme.background,
+        surfaceTintColor:
+            color ?? ((cs.brightness == Brightness.dark) ? cs.outline : cs.background),
         shadowColor: (borderColor != null) ? Colors.transparent : null,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),

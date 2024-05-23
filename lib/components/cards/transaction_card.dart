@@ -25,6 +25,7 @@ class TransactionCard extends StatelessWidget {
     this.showTooltip = true,
     this.rightContent,
     this.contextMenu,
+    this.selected = false,
   });
 
   final Transaction trans;
@@ -35,6 +36,7 @@ class TransactionCard extends StatelessWidget {
   final Widget? rightContent;
   final bool showTooltip;
   final Widget? contextMenu;
+  final bool selected;
 
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
