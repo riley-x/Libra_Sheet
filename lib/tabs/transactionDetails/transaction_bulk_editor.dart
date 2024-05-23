@@ -192,17 +192,24 @@ class TransactionBulkEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => BulkEditorState(context.read()),
-      child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Padding(
-          padding: interiorPadding ?? EdgeInsets.zero,
-          child: FocusScope(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              child: const _Form(),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Padding(
+                padding: interiorPadding ?? EdgeInsets.zero,
+                child: FocusScope(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: double.infinity),
+                    child: const _Form(),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+          const _SummaryDescription(),
+        ],
       ),
     );
   }
@@ -407,6 +414,28 @@ class _NoteField extends StatelessWidget {
         controller: state.noteController,
         hint: (state.initialNote == null) ? "Various (keep original)" : null,
         validator: (it) => null,
+      ),
+    );
+  }
+}
+
+/// This is a small description row that appears at the bottom of the bulk eidtor
+class _SummaryDescription extends StatelessWidget {
+  const _SummaryDescription({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<TransactionFilterState>();
+    final total = state.selected.values.fold(0, (x, t) => x + t.value);
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Text('Count: ${state.selected.length}'),
+          Text('Sum: ${total.dollarString()}'),
+          Text('Avg: ${(total.asDollarDouble() / state.selected.length).formatDollar()}'),
+        ],
       ),
     );
   }

@@ -106,6 +106,9 @@ class LibraApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: context.select<LibraAppState, ColorScheme>((it) => it.colorScheme),
             textTheme: (isDarkMode) ? libraDarkTextTheme : libraTextTheme,
+            scrollbarTheme: ScrollbarThemeData(
+              thumbVisibility: WidgetStateProperty.all<bool>(true),
+            ),
           ),
           themeAnimationDuration: Duration.zero,
           // the animation gets really janky when you have case statements on [isDarkMode] because
