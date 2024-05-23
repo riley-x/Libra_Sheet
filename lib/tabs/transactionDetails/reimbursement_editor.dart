@@ -104,7 +104,7 @@ class _Form extends StatelessWidget {
                 // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
                 margin: const EdgeInsets.all(0),
                 showTags: false,
-                onSelect: (t) => toTransactionDetails(context, t),
+                onTap: (t) => toTransactionDetails(context, t),
               ),
             ),
           ),

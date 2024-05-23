@@ -416,7 +416,7 @@ class _ReimbursementRow extends StatelessWidget {
           child: TransactionCard(
             margin: EdgeInsets.zero,
             trans: reimbursement.target,
-            onSelect: onSelect,
+            onTap: onSelect,
           ),
         ),
         SizedBox(

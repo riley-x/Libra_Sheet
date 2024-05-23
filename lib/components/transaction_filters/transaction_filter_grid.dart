@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
 import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
@@ -143,7 +144,7 @@ class _TransactionFilterGrid extends StatelessWidget {
                   EdgeInsets.only(top: 10, left: 10, bottom: fab != null ? 80 : 10, right: 10),
               maxRowsForName: maxRowsForName,
               fixedColumns: fixedColumns,
-              onSelect: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
+              onTap: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
             ),
             floatingActionButton: fab,
           ),
@@ -164,7 +165,8 @@ class TransactionGrid extends StatelessWidget {
     this.transactions, {
     this.maxRowsForName = 1,
     this.fixedColumns,
-    this.onSelect,
+    this.onTap,
+    this.onMultiselect,
     this.padding,
     super.key,
   });
@@ -172,10 +174,15 @@ class TransactionGrid extends StatelessWidget {
   final List<Transaction> transactions;
   final int? maxRowsForName;
   final int? fixedColumns;
-  final Function(Transaction t, int index)? onSelect;
+  final Function(Transaction t, int index)? onTap;
+  final Function(Transaction t, int index)? onMultiselect;
 
   /// Padding needs to be added inside the ListView so that the scrollbar isn't weirdly offset.
   final EdgeInsets? padding;
+
+  void _onSelect(Transaction t, int index) {
+    // if (HardwareKeyboard.instance.isShiftPressed;)
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +220,9 @@ class TransactionGrid extends StatelessWidget {
                           child: TransactionCard(
                             trans: transactions[i],
                             maxRowsForName: maxRowsForName,
-                            onSelect: (onSelect != null) ? (it) => onSelect!(it, i) : null,
+                            onTap: (onTap == null && onMultiselect == null)
+                                ? null
+                                : (it) => _onSelect(it, i),
                             contextMenu: TransactionContextMenu(
                               onDuplicate: () => context
                                   .read<TransactionService>()

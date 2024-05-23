@@ -73,7 +73,7 @@ class _Body extends StatelessWidget {
       csvState.transactions,
       fixedColumns: 1,
       maxRowsForName: 2,
-      onSelect: (t, i) {
+      onTap: (t, i) {
         csvState.focusTransaction(i);
         context.read<TransactionDetailsState>().replaceSeed(t);
       },

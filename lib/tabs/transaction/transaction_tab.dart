@@ -40,7 +40,7 @@ class _TransactionList extends StatelessWidget {
         // extra padding on bottom to not overlap the floating action button
         maxRowsForName: 1,
         fixedColumns: 1,
-        onSelect: (t, i) => toTransactionDetails(context, t),
+        onTap: (t, i) => toTransactionDetails(context, t),
       ),
       floatingActionButton: const TransactionSpeedDial(),
     );

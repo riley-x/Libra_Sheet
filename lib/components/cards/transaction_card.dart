@@ -19,7 +19,7 @@ class TransactionCard extends StatelessWidget {
     super.key,
     required this.trans,
     this.maxRowsForName = 1,
-    this.onSelect,
+    this.onTap,
     this.margin,
     this.showTags = true,
     this.showTooltip = true,
@@ -30,7 +30,7 @@ class TransactionCard extends StatelessWidget {
 
   final Transaction trans;
   final int? maxRowsForName;
-  final Function(Transaction)? onSelect;
+  final Function(Transaction)? onTap;
   final EdgeInsets? margin;
   final bool showTags;
   final Widget? rightContent;
@@ -59,7 +59,7 @@ class TransactionCard extends StatelessWidget {
               ? Theme.of(context).colorScheme.primary
               : null,
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      onTap: () => onSelect?.call(trans),
+      onTap: () => onTap?.call(trans),
       contextMenu: contextMenu,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
