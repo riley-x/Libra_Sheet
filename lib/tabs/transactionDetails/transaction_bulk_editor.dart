@@ -198,7 +198,7 @@ class TransactionBulkEditor extends StatelessWidget {
           padding: interiorPadding ?? EdgeInsets.zero,
           child: FocusScope(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               child: const _Form(),
             ),
           ),
@@ -294,11 +294,12 @@ class _AccountField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<BulkEditorState>();
-    return SizedBox(
-      width: 250, // This is necessary for the popup menu size to be correct
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
       child: AccountSelectionFormField(
         height: 35,
         initial: state.initialAccount,
+        includeNone: true,
         nullText: "Various (keep original)",
         onSave: (it) => state.account = it,
         validator: (it) => null,
@@ -380,8 +381,8 @@ class _CategoryField extends StatelessWidget {
       if (state.expenseType != ExpenseFilterType.all)
         ...context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType)
     ];
-    return SizedBox(
-      width: 250,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
       child: CategorySelectionFormField(
         height: 35,
         initial: state.initialCategory,

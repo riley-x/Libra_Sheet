@@ -5,11 +5,8 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_gr
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
-import 'package:libra_sheet/data/database/category_history.dart';
-import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
-import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
@@ -115,7 +112,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   Expanded(
                     child: (transactionState.selected.isEmpty)
                         ? _GraphWithTitle(widget.account)
-                        : Align(
+                        : const Align(
                             alignment: Alignment.topCenter,
                             child: TransactionBulkEditor(),
                           ),

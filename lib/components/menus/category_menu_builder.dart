@@ -11,6 +11,7 @@ Widget categoryMenuBuilder(
   bool superAsNone = false,
   bool selected = false,
   String? nullText,
+  double? maxWidth,
 }) {
   var style = Theme.of(context).textTheme.labelLarge;
   var text = cat?.name;
@@ -24,23 +25,24 @@ Widget categoryMenuBuilder(
     style = Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor);
   }
 
+  final textWidget = Text(
+    text ?? nullText ?? '',
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: style,
+  );
+
   return LimitedBox(
-    maxWidth: 200,
+    maxWidth: maxWidth ?? double.infinity,
     child: Row(
       children: [
         if ((cat?.level ?? 0) > 1 && !selected) const SizedBox(width: 20),
         Container(color: color, width: 4, height: 24),
         SizedBox(width: (cat == null) ? 0 : 6),
 
-        /// This is necessary to make sure the text clips properly
-        Flexible(
-          child: Text(
-            text ?? nullText ?? '',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: style,
-          ),
-        ),
+        if (maxWidth == null) textWidget,
+        if (maxWidth != null) Flexible(child: textWidget),
+        // The above is necessary to make sure the text clips properly
       ],
     ),
   );

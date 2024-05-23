@@ -47,35 +47,33 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
         (widget.selectedBuilder ?? widget.builder).call(context, widget.selected);
     return LayoutBuilder(
       builder: (context, constraints) {
-        return LimitedBox(
-          maxWidth: 400,
-          child: MenuAnchor(
-            controller: _menuController,
-            menuChildren: [
-              for (final (i, x) in widget.items.indexed)
-                ConstrainedBox(
-                  constraints: constraints.widthConstraints(),
-                  child: MenuItemButton(
-                    focusNode: (i == 0) ? _firstFocus : null,
-                    onPressed: () => widget.onSelected?.call(x),
-                    child: widget.builder(context, x),
-                  ),
+        return MenuAnchor(
+          controller: _menuController,
+          crossAxisUnconstrained: false,
+          menuChildren: [
+            for (final (i, x) in widget.items.indexed)
+              ConstrainedBox(
+                constraints: constraints.widthConstraints(),
+                child: MenuItemButton(
+                  focusNode: (i == 0) ? _firstFocus : null,
+                  onPressed: () => widget.onSelected?.call(x),
+                  child: widget.builder(context, x),
                 ),
-            ],
-            // crossAxisUnconstrained: false, // this doesn't seem to do anything?
-            child: ClipRRect(
+              ),
+          ],
+          // crossAxisUnconstrained: false, // this doesn't seem to do anything?
+          child: ClipRRect(
+            borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
+            child: InkWell(
               borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
-              child: InkWell(
-                borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
-                onTap: () => _menuController.isOpen ? _menuController.close() : _open(),
-                child: Padding(
-                  padding: widget.padding,
-                  child: Row(
-                    children: [
-                      Expanded(child: selectedWidget),
-                      const Icon(Icons.arrow_drop_down),
-                    ],
-                  ),
+              onTap: () => _menuController.isOpen ? _menuController.close() : _open(),
+              child: Padding(
+                padding: widget.padding,
+                child: Row(
+                  children: [
+                    Expanded(child: selectedWidget),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
                 ),
               ),
             ),

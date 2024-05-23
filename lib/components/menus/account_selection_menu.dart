@@ -65,7 +65,7 @@ class AccountSelectionFormField extends StatelessWidget {
       child: LibraDropdownFormField<Account?>(
         initial: initial,
         items: items,
-        builder: (context, acc) => accountMenuBuilder(context, acc, nullText),
+        builder: (context, acc) => accountMenuBuilder(context, acc, nullText: nullText),
         borderRadius: borderRadius,
         onSave: onSave,
         validator: validator,
