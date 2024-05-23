@@ -181,7 +181,11 @@ class TransactionGrid extends StatelessWidget {
   final EdgeInsets? padding;
 
   void _onSelect(Transaction t, int index) {
-    // if (HardwareKeyboard.instance.isShiftPressed;)
+    if (HardwareKeyboard.instance.isShiftPressed) {
+    } else if (HardwareKeyboard.instance.isControlPressed) {
+    } else {
+      onTap?.call(t, index);
+    }
   }
 
   @override

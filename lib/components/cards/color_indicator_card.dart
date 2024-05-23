@@ -53,8 +53,8 @@ class ColorIndicatorCard extends StatelessWidget {
         // color: Color.alphaBlend(
         //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
         //     Theme.of(context).colorScheme.surface),
-        surfaceTintColor:
-            color ?? ((cs.brightness == Brightness.dark) ? cs.outline : cs.background),
+        color: (cs.brightness == Brightness.dark) ? cs.surfaceContainerLow : cs.surface,
+        surfaceTintColor: color,
         shadowColor: (borderColor != null) ? Colors.transparent : null,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
