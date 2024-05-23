@@ -136,6 +136,8 @@ class _TextElements extends StatelessWidget {
       subText += trans.note;
     }
 
+    final adjValue = trans.adjustedValue();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -164,25 +166,24 @@ class _TextElements extends StatelessWidget {
             Row(
               children: [
                 for (final alloc in trans.softAllocations) ...[
-                  _AllocIndicator(alloc),
+                  _AllocIndicator(alloc.signedValue, alloc.category.color),
                   const SizedBox(width: 10),
                 ],
-                if (trans.totalReimbusrements > 0 || trans.nAllocations > 0) ...[
-                  Text(
-                    trans.adjustedValue().dollarString(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: (trans.value < 0) ? Colors.red : Colors.green,
-                      // fontStyle: FontStyle.italic,
-                    ),
-                  ),
+                if (adjValue != trans.value && adjValue != 0) ...[
+                  _AllocIndicator(adjValue, trans.category.color),
                   const SizedBox(width: 10),
                 ],
                 Text(
-                  (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
-                      ? "(${trans.value.dollarString()})"
-                      : trans.value.dollarString(),
+                  trans.value.dollarString(),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: (trans.value < 0) ? Colors.red : Colors.green,
+                    // decoration: (adjValue == 0) ? TextDecoration.lineThrough : null,
+                    color: (trans.value == 0)
+                        ? null
+                        : (adjValue == 0)
+                            ? Theme.of(context).colorScheme.outline
+                            : (trans.value < 0)
+                                ? Colors.red
+                                : Colors.green,
                     fontStyle: (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
                         ? FontStyle.italic
                         : FontStyle.normal,
@@ -202,27 +203,27 @@ class _TextElements extends StatelessWidget {
 }
 
 class _AllocIndicator extends StatelessWidget {
-  const _AllocIndicator(this.alloc, {super.key});
+  const _AllocIndicator(this.value, this.color, {super.key});
 
-  final SoftAllocation alloc;
+  final int value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final blendColor =
+        Color.alphaBlend(color.withAlpha(200), Theme.of(context).colorScheme.background);
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        color: alloc.category.color.withAlpha(200),
+        color: blendColor,
       ),
       child: Center(
         child: Text(
-          alloc.signedValue.dollarString(),
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: adaptiveTextColor(alloc.category.color)),
+          value.dollarString(),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: adaptiveTextColor(color)),
         ),
       ),
     );
