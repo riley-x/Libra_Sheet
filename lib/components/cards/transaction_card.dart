@@ -44,6 +44,7 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = (trans.category.level == 0) ? null : trans.category.color;
+    final cs = Theme.of(context).colorScheme;
 
     bool isUncategorized = trans.category.isUncategorized;
     bool isInvestment = trans.category == Category.other;
@@ -58,6 +59,9 @@ class TransactionCard extends StatelessWidget {
           : (isInvestment)
               ? Theme.of(context).colorScheme.primary
               : null,
+      fillColor: (selected)
+          ? ((cs.brightness == Brightness.dark) ? cs.surfaceBright : cs.primaryContainer)
+          : null,
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       onTap: () => onTap?.call(trans),
       contextMenu: contextMenu,

@@ -9,6 +9,7 @@ class ColorIndicatorCard extends StatelessWidget {
     required this.child,
     this.color,
     this.borderColor,
+    this.fillColor,
     this.margin = EdgeInsets.zero,
     this.onTap,
     this.contextMenu,
@@ -17,6 +18,7 @@ class ColorIndicatorCard extends StatelessWidget {
   final Widget child;
   final Color? color;
   final Color? borderColor;
+  final Color? fillColor;
   final EdgeInsets margin;
   final Function()? onTap;
   final Widget? contextMenu;
@@ -53,8 +55,9 @@ class ColorIndicatorCard extends StatelessWidget {
         // color: Color.alphaBlend(
         //     trans.account?.color?.withAlpha(30) ?? Theme.of(context).colorScheme.primaryContainer,
         //     Theme.of(context).colorScheme.surface),
-        color: (cs.brightness == Brightness.dark) ? cs.surfaceContainerLow : cs.surface,
-        surfaceTintColor: color,
+        color:
+            fillColor ?? ((cs.brightness == Brightness.dark) ? cs.surfaceContainerLow : cs.surface),
+        surfaceTintColor: (fillColor != null) ? null : color,
         shadowColor: (borderColor != null) ? Colors.transparent : null,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
