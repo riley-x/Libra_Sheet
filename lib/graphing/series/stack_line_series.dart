@@ -89,6 +89,12 @@ class StackLineSeries<T> extends LineSeries<T> {
     return (minY, maxY);
   }
 
+  bool _sameSign(double v1, double v2) {
+    if (v1 > 0) return v2 >= 0;
+    if (v1 == 0) return true;
+    return v2 <= 0;
+  }
+
   /// This function paints a single segment of the series, which is the 4-gon between two points.
   /// [i] is the index of the left edge's data points.
   ///
@@ -110,6 +116,9 @@ class StackLineSeries<T> extends LineSeries<T> {
     final val1 = valueMapper(i, data[i]);
     final val2 = valueMapper(i + 1, data[i + 1]);
     if (val1.dy == 0 && val2.dy == 0) return;
+    if (!_sameSign(val1.dy, stackBase[i].dy)) return;
+    if (!_sameSign(val2.dy, stackBase[i + 1].dy)) return;
+    if (!_sameSign(val1.dy, val2.dy)) return;
 
     final bottomLeft = coordSpace.userToPixel(stackBase[i]);
     final topLeft = coordSpace.userToPixel(val1 + Offset(0, stackBase[i].dy)) - bottomLeft;
