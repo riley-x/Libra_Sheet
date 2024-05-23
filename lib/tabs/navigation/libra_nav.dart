@@ -53,13 +53,13 @@ class LibraNav extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bkgColor = (isDarkMode) ? colorScheme.background : colorScheme.secondary;
-    final textColor = (isDarkMode) ? colorScheme.onBackground : colorScheme.onSecondary;
+    final bkgColor = (isDarkMode) ? colorScheme.surface : colorScheme.secondary;
+    final textColor = (isDarkMode) ? colorScheme.onSurface : colorScheme.onSecondary;
 
     return ExcludeFocus(
       child: NavigationRail(
         backgroundColor: bkgColor,
-        indicatorColor: colorScheme.surfaceVariant,
+        indicatorColor: colorScheme.surfaceContainerHighest,
         unselectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
         selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
         unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: textColor),
@@ -82,15 +82,18 @@ class _FooterContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
     final Animation<double> animation = NavigationRail.extendedAnimation(context);
+
+    final errorColor =
+        (isDark) ? Theme.of(context).colorScheme.error : const Color.fromARGB(255, 255, 200, 200);
 
     final cloudStatus = context.watch<GoogleDrive>().status();
     final cloudIcon = switch (cloudStatus) {
       GoogleDriveSyncStatus.upToDate => const Icon(Icons.cloud_done, color: Colors.green),
       GoogleDriveSyncStatus.driveAhead => const Icon(Icons.cloud_download, color: Colors.amber),
       GoogleDriveSyncStatus.localAhead => const Icon(Icons.cloud_upload, color: Colors.amber),
-      GoogleDriveSyncStatus.noConnection =>
-        Icon(Icons.cloud_off, color: Theme.of(context).colorScheme.error),
+      GoogleDriveSyncStatus.noConnection => Icon(Icons.cloud_off, color: errorColor),
       GoogleDriveSyncStatus.disabled => const SizedBox(),
     };
     final cloudText = switch (cloudStatus) {
@@ -100,8 +103,8 @@ class _FooterContent extends StatelessWidget {
         Text("Download pending", style: textStyle?.copyWith(color: Colors.amber)),
       GoogleDriveSyncStatus.localAhead =>
         Text("Upload pending", style: textStyle?.copyWith(color: Colors.amber)),
-      GoogleDriveSyncStatus.noConnection => Text("No connection",
-          style: textStyle?.copyWith(color: Theme.of(context).colorScheme.error)),
+      GoogleDriveSyncStatus.noConnection =>
+        Text("No connection", style: textStyle?.copyWith(color: errorColor)),
       GoogleDriveSyncStatus.disabled => const SizedBox(),
     };
 
@@ -170,7 +173,7 @@ class _DarkModeSwitch extends StatelessWidget {
         Switch(
           value: !isDarkMode,
           onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
-          activeColor: Theme.of(context).colorScheme.surfaceVariant,
+          activeColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
         const SizedBox(width: 5),
         Icon(Icons.light_mode, color: textColor),

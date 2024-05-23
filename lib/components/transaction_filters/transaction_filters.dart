@@ -46,4 +46,14 @@ class TransactionFilters {
       hasReimbursement: hasReimbursement,
     );
   }
+
+  bool hasBasicFilters() {
+    return name != null ||
+        minValue != null ||
+        maxValue != null ||
+        startTime != null ||
+        endTime != null ||
+        hasReimbursement != null ||
+        hasAllocation != null;
+  }
 }

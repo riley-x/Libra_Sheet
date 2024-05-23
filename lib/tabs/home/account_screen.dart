@@ -86,6 +86,14 @@ class _AccountScreenState extends State<AccountScreen> {
                   initialFilters: initialFilters,
                   fab: TransactionSpeedDial(initialAccount: widget.account),
                   onSelect: (t) => toTransactionDetails(context, t),
+                  filterDescription: (filters) {
+                    if (filters.hasBasicFilters() ||
+                        !filters.categories.isEmpty ||
+                        filters.tags.isNotEmpty ||
+                        filters.accounts.length != 1 ||
+                        filters.accounts.first != widget.account) return "Modified";
+                    return null;
+                  },
                 ),
               ),
               Container(
