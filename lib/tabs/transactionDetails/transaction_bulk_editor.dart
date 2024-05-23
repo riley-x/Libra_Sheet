@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/account_selection_menu.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
@@ -94,6 +95,9 @@ class BulkEditorState extends ChangeNotifier {
   /// is updated.
   final TransactionFilterState parentState;
 
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  String? errorMessage;
+
   Account? initialAccount;
   String? initialName;
   DateTime? initialDate;
@@ -113,6 +117,49 @@ class BulkEditorState extends ChangeNotifier {
   final TextEditingController noteController = TextEditingController();
   Category? category;
   // List<Tag> tags = [];
+
+  String? _validate() {
+    if (formKey.currentState?.validate() != true) return "";
+    // Need to save the form first to get the values. This doesn't do anything other than set the
+    // save sink members above.
+    formKey.currentState?.save();
+
+    final value = valueController.text.toIntDollar();
+    if (value != null) {
+      if (ExpenseFilterType.from(value) != expenseType) {
+        return "Can't set common value to transactions with different category types";
+      }
+      if (category != null && expenseType != category!.type) {
+        return "Sign of value does not agree with category";
+      }
+    }
+    return null;
+  }
+
+  void save() {
+    errorMessage = _validate();
+    if (errorMessage != null) {
+      notifyListeners();
+      return;
+    }
+    final date = DateFormat('MM/dd/yy').tryParse(dateController.text);
+    final value = valueController.text.toIntDollar();
+
+    final out = <(Transaction, Transaction)>[];
+    for (final old in parentState.selected.values) {
+      final nu = Transaction(
+        name: (nameController.text.isNotEmpty) ? nameController.text : old.name,
+        date: date ?? old.date,
+        value: value ?? old.value,
+        category: category ?? old.category,
+        account: account ?? old.account,
+        note: (noteController.text.isNotEmpty) ? noteController.text : old.note,
+        // Don't copy reimbursements/allocations
+      );
+      out.add((old, nu));
+    }
+    parentState.service.updateAll(out);
+  }
 }
 
 /// This is the form that appears when multi-selecting transactions.
@@ -125,64 +172,83 @@ class TransactionBulkEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.titleMedium;
-
     return ChangeNotifierProvider(
       create: (context) => BulkEditorState(context.read()),
       child: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
         child: Padding(
           padding: interiorPadding ?? EdgeInsets.zero,
-          child: FocusScope(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                /// Title
-                const SizedBox(height: 10),
-                Text(
-                  "Bulk Edit",
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-
-                /// Account
-                const SizedBox(height: 15),
-                Text("Account", style: textStyle),
-                const SizedBox(height: 5),
-                const _AccountField(),
-
-                /// Name
-                const SizedBox(height: 15),
-                Text("Name", style: textStyle),
-                const SizedBox(height: 5),
-                const _NameField(),
-
-                /// Date
-                const SizedBox(height: 15),
-                Text("Date", style: textStyle),
-                const SizedBox(height: 5),
-                const _DateField(),
-
-                /// Value
-                const SizedBox(height: 15),
-                Text("Value", style: textStyle),
-                const SizedBox(height: 5),
-                const _ValueField(),
-
-                /// Category
-                const SizedBox(height: 15),
-                Text("Category", style: textStyle),
-                const SizedBox(height: 5),
-                const _CategoryField(),
-
-                /// Note
-                const SizedBox(height: 15),
-                Text("Note", style: textStyle),
-                const SizedBox(height: 5),
-                const _NoteField(),
-              ],
-            ),
+          child: const FocusScope(
+            child: _Form(),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Form extends StatelessWidget {
+  const _Form({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.titleMedium;
+    return Form(
+      key: context.read<BulkEditorState>().formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          /// Title
+          const SizedBox(height: 10),
+          Text(
+            "Bulk Edit",
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+
+          /// Account
+          const SizedBox(height: 15),
+          Text("Account", style: textStyle),
+          const SizedBox(height: 5),
+          const _AccountField(),
+
+          /// Name
+          const SizedBox(height: 15),
+          Text("Name", style: textStyle),
+          const SizedBox(height: 5),
+          const _NameField(),
+
+          /// Date
+          const SizedBox(height: 15),
+          Text("Date", style: textStyle),
+          const SizedBox(height: 5),
+          const _DateField(),
+
+          /// Value
+          const SizedBox(height: 15),
+          Text("Value", style: textStyle),
+          const SizedBox(height: 5),
+          const _ValueField(),
+
+          /// Category
+          const SizedBox(height: 15),
+          Text("Category", style: textStyle),
+          const SizedBox(height: 5),
+          const _CategoryField(),
+
+          /// Note
+          const SizedBox(height: 15),
+          Text("Note", style: textStyle),
+          const SizedBox(height: 5),
+          const _NoteField(),
+
+          /// Buttons
+          const SizedBox(height: 30),
+          FormButtons(
+            onReset: () => context.read<TransactionFilterState>().clearSelections(),
+            onSave: () => context.read<BulkEditorState>().save(),
+            resetName: 'Clear',
+          )
+        ],
       ),
     );
   }
@@ -201,6 +267,7 @@ class _AccountField extends StatelessWidget {
         initial: state.initialAccount,
         nullText: "Various (keep original)",
         onSave: (it) => state.account = it,
+        validator: (it) => null,
       ),
     );
   }
@@ -235,13 +302,9 @@ class _DateField extends StatelessWidget {
         controller: state.dateController,
         hint: (state.initialDate == null) ? "Various (keep original)" : null,
         validator: (String? value) {
-          if (value == null || value.isEmpty) return ''; // No message to not take up sapce
-          try {
-            _dateFormat.parse(value, true);
-            return null;
-          } on FormatException {
-            return '';
-          }
+          if (value == null || value.isEmpty) return null;
+          if (_dateFormat.tryParse(value, true) == null) return '';
+          return null;
         },
       ),
     );
@@ -259,6 +322,12 @@ class _ValueField extends StatelessWidget {
       child: ValueField(
         controller: state.valueController,
         hint: (state.initialValue == null) ? "Various (keep original)" : null,
+        validator: (String? text) {
+          if (text == null || text.isEmpty) return null;
+          final val = text.toIntDollar();
+          if (val == null) return ''; // No message to not take up space
+          return null;
+        },
       ),
     );
   }
@@ -280,6 +349,7 @@ class _CategoryField extends StatelessWidget {
         categories: categories,
         nullText: "Various (keep original)",
         onSave: (it) => state.category = it,
+        validator: (it) => null,
       ),
     );
   }
@@ -296,6 +366,7 @@ class _NoteField extends StatelessWidget {
       child: LibraTextFormField(
         controller: state.noteController,
         hint: (state.initialNote == null) ? "Various (keep original)" : null,
+        validator: (it) => null,
       ),
     );
   }

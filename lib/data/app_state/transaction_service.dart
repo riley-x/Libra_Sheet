@@ -54,6 +54,16 @@ class TransactionService extends ChangeNotifier {
     onUpdate();
   }
 
+  Future<void> updateAll(List<(Transaction, Transaction)> items) async {
+    await LibraDatabase.backup(tag: '.before_add_csv');
+    await LibraDatabase.updateTransaction((txn) async {
+      for (final (old, nu) in items) {
+        await txn.updateTransaction(old, nu);
+      }
+    });
+    onUpdate();
+  }
+
   Future<void> createDuplicate(Transaction old) async {
     debugPrint("TransactionService::createDuplicate() \n$old");
     await LibraDatabase.updateTransaction((txn) async {

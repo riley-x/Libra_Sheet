@@ -13,6 +13,7 @@ class ValueField extends StatelessWidget {
     this.positiveOnly = false,
     this.controller,
     this.hint,
+    this.validator,
   });
 
   final int? initial;
@@ -22,6 +23,7 @@ class ValueField extends StatelessWidget {
   final bool positiveOnly;
   final TextEditingController? controller;
   final String? hint;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +32,14 @@ class ValueField extends StatelessWidget {
       controller: controller,
       hint: hint,
       initial: initial?.dollarString(dollarSign: false),
-      validator: (String? text) {
-        if (text == null || text.isEmpty) return ''; // No message to not take up space
-        final val = text.toIntDollar();
-        if (val == null) return ''; // No message to not take up space
-        if (positiveOnly && val < 0) return '';
-        return null;
-      },
+      validator: validator ??
+          (String? text) {
+            if (text == null || text.isEmpty) return ''; // No message to not take up space
+            final val = text.toIntDollar();
+            if (val == null) return ''; // No message to not take up space
+            if (positiveOnly && val < 0) return '';
+            return null;
+          },
       onChanged: (onChanged == null) ? null : (it) => onChanged!.call(it?.toIntDollar()),
       onSave: (it) => onSave?.call(it?.toIntDollar() ?? 0),
     );

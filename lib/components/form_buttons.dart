@@ -9,6 +9,7 @@ class FormButtons extends StatelessWidget {
     this.onReset,
     this.onCancel,
     this.onSave,
+    this.resetName = 'Reset',
   });
 
   final bool showDelete;
@@ -16,6 +17,7 @@ class FormButtons extends StatelessWidget {
   final Function()? onReset;
   final Function()? onCancel;
   final Function()? onSave;
+  final String resetName;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class FormButtons extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.errorContainer,
               foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
             ),
-            child: const Text('Reset'),
+            child: Text(resetName),
           ),
           const SizedBox(width: 20),
         ],

@@ -251,4 +251,9 @@ class TransactionFilterState extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void clearSelections() {
+    selected.clear();
+    notifyListeners();
+  }
 }

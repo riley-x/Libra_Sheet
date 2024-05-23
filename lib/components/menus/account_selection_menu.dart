@@ -45,6 +45,7 @@ class AccountSelectionFormField extends StatelessWidget {
     this.height = 30,
     this.onSave,
     this.nullText,
+    this.validator,
   });
 
   final Account? initial;
@@ -53,6 +54,7 @@ class AccountSelectionFormField extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double height;
   final String? nullText;
+  final String? Function(Account?)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +68,7 @@ class AccountSelectionFormField extends StatelessWidget {
         builder: (context, acc) => accountMenuBuilder(context, acc, nullText),
         borderRadius: borderRadius,
         onSave: onSave,
+        validator: validator,
       ),
     );
   }
