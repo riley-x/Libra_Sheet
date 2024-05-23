@@ -28,6 +28,9 @@ class TransactionFilterState extends ChangeNotifier {
   final TransactionService service;
   final bool doLoads;
 
+  //----------------------------------------------------------------------
+  // Handles
+  //----------------------------------------------------------------------
   final TextEditingController nameController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
@@ -74,7 +77,7 @@ class TransactionFilterState extends ChangeNotifier {
 
   /// Loaded transactions
   List<Transaction> transactions = [];
-  Map<int, Transaction> selected = {};
+  final Map<int, Transaction> selected = {};
   int? lastSelected;
 
   void loadTransactions() async {

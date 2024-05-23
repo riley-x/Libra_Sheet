@@ -24,7 +24,7 @@ class TransactionTab extends StatelessWidget {
               ? const TransactionFiltersColumn(
                   interiorPadding: EdgeInsets.symmetric(horizontal: 10),
                 )
-              : TransactionBulkEditor(state.selected.values.toList()),
+              : const TransactionBulkEditor(),
         ),
       ],
     );
