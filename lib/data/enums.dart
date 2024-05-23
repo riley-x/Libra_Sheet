@@ -24,6 +24,16 @@ enum ExpenseFilterType {
   expense,
   all;
 
+  factory ExpenseFilterType.from(int value) {
+    if (value > 0) {
+      return ExpenseFilterType.income;
+    } else if (value < 0) {
+      return ExpenseFilterType.expense;
+    } else {
+      return ExpenseFilterType.all;
+    }
+  }
+
   bool inclusiveEqual(ExpenseFilterType other) {
     if (other == ExpenseFilterType.all || this == ExpenseFilterType.all) return true;
     return other == this;

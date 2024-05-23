@@ -47,6 +47,7 @@ class CategorySelectionFormField extends StatelessWidget {
     this.onSave,
     this.validator,
     this.superAsNone = false,
+    this.nullText,
   });
 
   final List<Category> categories;
@@ -56,6 +57,7 @@ class CategorySelectionFormField extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double? height;
   final bool superAsNone;
+  final String? nullText;
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +66,19 @@ class CategorySelectionFormField extends StatelessWidget {
       child: LibraDropdownFormField<Category?>(
         initial: initial,
         items: categories,
-        builder: (context, cat) => categoryMenuBuilder(context, cat, superAsNone: superAsNone),
-        selectedBuilder: (context, cat) =>
-            categoryMenuBuilder(context, cat, superAsNone: superAsNone, selected: true),
+        builder: (context, cat) => categoryMenuBuilder(
+          context,
+          cat,
+          superAsNone: superAsNone,
+          nullText: nullText,
+        ),
+        selectedBuilder: (context, cat) => categoryMenuBuilder(
+          context,
+          cat,
+          superAsNone: superAsNone,
+          selected: true,
+          nullText: nullText,
+        ),
         borderRadius: borderRadius,
         onSave: onSave,
         validator: validator,

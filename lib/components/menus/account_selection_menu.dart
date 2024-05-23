@@ -44,6 +44,7 @@ class AccountSelectionFormField extends StatelessWidget {
     this.borderRadius,
     this.height = 30,
     this.onSave,
+    this.nullText,
   });
 
   final Account? initial;
@@ -51,6 +52,7 @@ class AccountSelectionFormField extends StatelessWidget {
   final Function(Account?)? onSave;
   final BorderRadius? borderRadius;
   final double height;
+  final String? nullText;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +63,7 @@ class AccountSelectionFormField extends StatelessWidget {
       child: LibraDropdownFormField<Account?>(
         initial: initial,
         items: items,
-        builder: accountMenuBuilder,
+        builder: (context, acc) => accountMenuBuilder(context, acc, nullText),
         borderRadius: borderRadius,
         onSave: onSave,
       ),

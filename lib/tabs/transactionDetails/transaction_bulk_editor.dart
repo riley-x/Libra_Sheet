@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
+import 'package:libra_sheet/components/menus/account_selection_menu.dart';
+import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -40,6 +44,7 @@ class BulkEditorState extends ChangeNotifier {
     Category? category = first.category;
     String? note = first.note;
     List<Tag> tags = first.tags.toList();
+    expenseType = ExpenseFilterType.from(value);
 
     for (final t in parentState.selected.values.toList().sublist(1)) {
       if (t.account != account) account = null;
@@ -49,6 +54,7 @@ class BulkEditorState extends ChangeNotifier {
       if (t.category != category) category = null;
       if (t.note != note) note = null;
       tags.removeWhere((tag) => !t.tags.contains(tag));
+      if (ExpenseFilterType.from(t.value) != expenseType) expenseType = ExpenseFilterType.all;
     }
 
     /// Update if changed and no user inputs yet
@@ -95,6 +101,7 @@ class BulkEditorState extends ChangeNotifier {
   Category? initialCategory;
   String? initialNote;
   List<Tag> initialTags = [];
+  ExpenseFilterType expenseType = ExpenseFilterType.all;
 
   //----------------------------------------------------------------------
   // Form values
@@ -141,6 +148,7 @@ class TransactionBulkEditor extends StatelessWidget {
                 const SizedBox(height: 15),
                 Text("Account", style: textStyle),
                 const SizedBox(height: 5),
+                const _AccountField(),
 
                 /// Name
                 const SizedBox(height: 15),
@@ -164,6 +172,7 @@ class TransactionBulkEditor extends StatelessWidget {
                 const SizedBox(height: 15),
                 Text("Category", style: textStyle),
                 const SizedBox(height: 5),
+                const _CategoryField(),
 
                 /// Note
                 const SizedBox(height: 15),
@@ -174,6 +183,24 @@ class TransactionBulkEditor extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AccountField extends StatelessWidget {
+  const _AccountField({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<BulkEditorState>();
+    return SizedBox(
+      width: 250, // This is necessary for the popup menu size to be correct
+      child: AccountSelectionFormField(
+        height: 35,
+        initial: state.initialAccount,
+        nullText: "Various (keep original)",
+        onSave: (it) => state.account = it,
       ),
     );
   }
@@ -232,6 +259,27 @@ class _ValueField extends StatelessWidget {
       child: ValueField(
         controller: state.valueController,
         hint: (state.initialValue == null) ? "Various (keep original)" : null,
+      ),
+    );
+  }
+}
+
+class _CategoryField extends StatelessWidget {
+  const _CategoryField({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<BulkEditorState>();
+    var categories = [Category.ignore, Category.other] +
+        context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
+    return SizedBox(
+      width: 250,
+      child: CategorySelectionFormField(
+        height: 35,
+        initial: state.initialCategory,
+        categories: categories,
+        nullText: "Various (keep original)",
+        onSave: (it) => state.category = it,
       ),
     );
   }
