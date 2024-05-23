@@ -53,7 +53,10 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
           menuChildren: [
             for (final (i, x) in widget.items.indexed)
               ConstrainedBox(
-                constraints: constraints.widthConstraints(),
+                /// This expands the constraints to the maximum width, aka the assumed width of the
+                /// Anchor child, since otherwise the menu will size to intrinsic width of the
+                /// MenuItemButtons.
+                constraints: constraints.tighten(width: double.infinity).widthConstraints(),
                 child: MenuItemButton(
                   focusNode: (i == 0) ? _firstFocus : null,
                   onPressed: () => widget.onSelected?.call(x),
@@ -61,7 +64,6 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
                 ),
               ),
           ],
-          // crossAxisUnconstrained: false, // this doesn't seem to do anything?
           child: ClipRRect(
             borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
             child: InkWell(
