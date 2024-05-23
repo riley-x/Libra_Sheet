@@ -32,25 +32,25 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  List<TimeIntValue> data = [];
+  // List<TimeIntValue> data = [];
   TransactionFilters? initialFilters;
   // TransactionService? service;
 
-  Future<void> loadData() async {
-    if (!mounted) return;
-    final appState = context.read<LibraAppState>();
-    var newData = await LibraDatabase.read((db) => db.getMonthlyNet(accountId: widget.account.key));
-    if (!mounted || newData == null) return;
+  // Future<void> loadData() async {
+  //   if (!mounted) return;
+  //   final appState = context.read<LibraAppState>();
+  //   var newData = await LibraDatabase.read((db) => db.getMonthlyNet(accountId: widget.account.key));
+  //   if (!mounted || newData == null) return;
 
-    newData = newData.withAlignedTimes(appState.monthList, cumulate: true, trimStart: true);
-    if (newData.length == 1) {
-      // Duplicate the data point so the plot isn't empty
-      newData.add(newData[0].withTime((it) => it.add(const Duration(seconds: 1))));
-    }
-    setState(() {
-      data = newData!;
-    });
-  }
+  //   newData = newData.withAlignedTimes(appState.monthList, cumulate: true, trimStart: true);
+  //   if (newData.length == 1) {
+  //     // Duplicate the data point so the plot isn't empty
+  //     newData.add(newData[0].withTime((it) => it.add(const Duration(seconds: 1))));
+  //   }
+  //   setState(() {
+  //     data = newData!;
+  //   });
+  // }
 
   @override
   void initState() {
@@ -69,12 +69,13 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CommonBackBar(
           leftText: widget.account.name,
-          rightText: data.lastOrNull?.value.dollarString() ?? '',
+          rightText: state.historyMap[widget.account.key]?.values.lastOrNull?.dollarString() ?? '',
           // Don't use account.balance because that can be stale after adding a transaction
         ),
         Expanded(
