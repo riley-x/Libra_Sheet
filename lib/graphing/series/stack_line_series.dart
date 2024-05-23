@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 // import 'package:vector_math/vector_math_64.dart' as vector;
@@ -205,7 +206,7 @@ class StackLineSeries<T> extends LineSeries<T> {
     path.moveTo(curr.pixelPos.dx, curr.pixelPos.dy);
     for (int i = 1; i < data.length; i++) {
       curr = _addPoint(coordSpace, i);
-      path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
+      path.lineToOffset(curr.pixelPos);
     }
 
     /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
@@ -233,9 +234,29 @@ class StackLineSeries<T> extends LineSeries<T> {
   @override
   bool accumulateStack(Map<int, double> posVals, Map<int, double> negVals) {
     stackBase = [];
+
+    bool isPositiveBase(int i) {
+      final val = valueMapper(i, data[i]);
+      if (val.dy > 0) return true;
+      if (val.dy < 0) return false;
+
+      /// Special case for y == 0, match the base used by the previous/next point. This will still
+      /// not work for entries that cross the y=0 axis, but those should be avoided anyways.
+      for (int j = stackBase.length - 1; j >= 0; j--) {
+        if (stackBase[j].dy > 0) return true;
+        if (stackBase[j].dy < 0) return false;
+      }
+      for (int j = i + 1; j < data.length; j++) {
+        final val2 = valueMapper(j, data[j]);
+        if (val2.dy > 0) return true;
+        if (val2.dy < 0) return false;
+      }
+      return true;
+    }
+
     for (int i = 0; i < data.length; i++) {
       final val = valueMapper(i, data[i]);
-      final agg = (val.dy >= 0) ? posVals : negVals;
+      final agg = (isPositiveBase(i)) ? posVals : negVals;
       final currBase = agg.putIfAbsent(i, () => 0);
       stackBase.add(Offset(i.toDouble(), currBase));
       agg[i] = agg[i]! + val.dy;

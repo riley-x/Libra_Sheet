@@ -3,7 +3,7 @@
 
 ## High priority features
 - sort transactions by value
-- Bulk edit transactions, create copy, multiselect (sum) -- right click menu
+- Bulk edit transactions, multiselect (sum)
 
 
 ## Medium priority features

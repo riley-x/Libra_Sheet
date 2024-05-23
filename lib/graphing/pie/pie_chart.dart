@@ -162,7 +162,22 @@ class _PieChartState<T> extends State<PieChart<T>> {
   void _initValues() {
     final theme = Theme.of(context);
 
-    /// Reset lists. Make sure to create new ones, not clear.
+    /// Default label
+    if (widget.defaultLabel != null) {
+      defaultLabel = TextPainter(
+        text: TextSpan(
+          text: widget.defaultLabel,
+          style: theme.textTheme.bodyLarge,
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+        maxLines: 2,
+      );
+    } else {
+      defaultLabel = null;
+    }
+
+    /// Reset. Make sure to create new lists, not clear.
     total = 0.0;
     dataIndex = [];
     filteredItems = [];
@@ -212,21 +227,6 @@ class _PieChartState<T> extends State<PieChart<T>> {
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
       ));
-    }
-
-    /// Default label
-    if (widget.defaultLabel != null) {
-      defaultLabel = TextPainter(
-        text: TextSpan(
-          text: widget.defaultLabel,
-          style: theme.textTheme.bodyLarge,
-        ),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-        maxLines: 2,
-      );
-    } else {
-      defaultLabel = null;
     }
   }
 
