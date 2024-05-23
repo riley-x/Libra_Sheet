@@ -41,6 +41,8 @@ class _TransactionList extends StatelessWidget {
         maxRowsForName: 1,
         fixedColumns: 1,
         onTap: (t, i) => toTransactionDetails(context, t),
+        onMultiselect: state.multiSelect,
+        selected: state.selected,
       ),
       floatingActionButton: const TransactionSpeedDial(),
     );

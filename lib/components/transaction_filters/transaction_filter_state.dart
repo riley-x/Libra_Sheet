@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
@@ -72,11 +74,15 @@ class TransactionFilterState extends ChangeNotifier {
 
   /// Loaded transactions
   List<Transaction> transactions = [];
+  Set<int> selected = {};
+  int? lastSelected;
 
   void loadTransactions() async {
     notifyListeners(); // for the UI form state
     if (!doLoads) return;
     transactions = await service.load(filters);
+    selected.clear();
+    lastSelected = null;
     notifyListeners();
   }
 
@@ -196,5 +202,50 @@ class TransactionFilterState extends ChangeNotifier {
   //----------------------------------------------------------------------
   bool hasError() {
     return startTimeError || endTimeError || minValueError || maxValueError;
+  }
+
+  void multiSelect(Transaction t, int i, bool shift) {
+    if (!shift) {
+      if (!selected.remove(i)) {
+        selected.add(i);
+        lastSelected = i;
+      } else if (lastSelected == i) {
+        lastSelected = null;
+      }
+    } else {
+      if (lastSelected != null) {
+        for (int j = math.min(lastSelected!, i); j <= math.max(lastSelected!, i); j++) {
+          selected.add(j);
+        }
+      } else {
+        /// Find the nearest selected item.
+        int? closestBelow, closestAbove;
+        for (final j in selected) {
+          if (j == i) continue;
+          if (j < i) {
+            closestBelow ??= j;
+            closestBelow = math.max(closestBelow, j);
+          } else {
+            closestAbove ??= j;
+            closestAbove = math.min(closestAbove, j);
+          }
+        }
+
+        if ((closestBelow == null && closestAbove == null) ||
+            (closestBelow != null && closestAbove != null)) {
+          selected.add(i);
+        } else if (closestBelow != null) {
+          for (int j = closestBelow + 1; j <= i; j++) {
+            selected.add(j);
+          }
+        } else {
+          for (int j = i; j < closestAbove!; j++) {
+            selected.add(j);
+          }
+        }
+      }
+      lastSelected = i;
+    }
+    notifyListeners();
   }
 }
