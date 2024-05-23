@@ -11,7 +11,6 @@ Widget categoryMenuBuilder(
   bool superAsNone = false,
   bool selected = false,
   String? nullText,
-  double? maxWidth,
 }) {
   var style = Theme.of(context).textTheme.labelLarge;
   var text = cat?.name;
@@ -33,16 +32,13 @@ Widget categoryMenuBuilder(
   );
 
   return LimitedBox(
-    maxWidth: maxWidth ?? double.infinity,
+    maxWidth: 400, // prevent errors from [Flexible] below
     child: Row(
       children: [
         if ((cat?.level ?? 0) > 1 && !selected) const SizedBox(width: 20),
         Container(color: color, width: 4, height: 24),
         SizedBox(width: (cat == null) ? 0 : 6),
-
-        if (maxWidth == null) textWidget,
-        if (maxWidth != null) Flexible(child: textWidget),
-        // The above is necessary to make sure the text clips properly
+        Flexible(child: textWidget), // Necessary to make sure the text clips properly
       ],
     ),
   );

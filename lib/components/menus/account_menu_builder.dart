@@ -6,7 +6,6 @@ Widget accountMenuBuilder(
   BuildContext context,
   Account? account, {
   String? nullText,
-  double? maxWidth,
 }) {
   final text = Text(
     account?.name ?? nullText ?? '',
@@ -17,7 +16,7 @@ Widget accountMenuBuilder(
         : Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
   );
   return LimitedBox(
-    maxWidth: maxWidth ?? double.infinity,
+    maxWidth: 400, // prevent errors from [Flexible] below
     child: Row(
       children: [
         Container(
@@ -26,9 +25,7 @@ Widget accountMenuBuilder(
           color: account?.color,
         ),
         SizedBox(width: (account == null) ? 0 : 7),
-        if (maxWidth == null) text,
-        if (maxWidth != null) Flexible(child: text),
-        // The above is necessary to make sure the text clips properly
+        Flexible(child: text), // Necessary to make sure the text clips properly
       ],
     ),
   );

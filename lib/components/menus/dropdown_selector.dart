@@ -55,12 +55,20 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
               ConstrainedBox(
                 /// This expands the constraints to the maximum width, aka the assumed width of the
                 /// Anchor child, since otherwise the menu will size to intrinsic width of the
-                /// MenuItemButtons.
+                /// MenuItemButtons. For some reason though, the child of the [MenuItemButton] receives
+                /// an unconstrained width still. So we pass another constrained box. But this needs
+                /// to be deflated by the width used for the scroll bar, 16 pixels.
                 constraints: constraints.tighten(width: double.infinity).widthConstraints(),
                 child: MenuItemButton(
                   focusNode: (i == 0) ? _firstFocus : null,
                   onPressed: () => widget.onSelected?.call(x),
-                  child: widget.builder(context, x),
+                  child: ConstrainedBox(
+                    constraints: constraints
+                        .deflate(const EdgeInsets.only(right: 16))
+                        .tighten(width: double.infinity)
+                        .widthConstraints(),
+                    child: widget.builder(context, x),
+                  ),
                 ),
               ),
           ],
