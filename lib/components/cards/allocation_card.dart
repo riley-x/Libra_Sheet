@@ -20,7 +20,7 @@ class AllocationCard extends StatelessWidget {
 
     bool isUncategorized =
         allocation.category == Category.income || allocation.category == Category.expense;
-    bool isInvestment = allocation.category == Category.investment;
+    bool isInvestment = allocation.category == Category.other;
 
     return ColorIndicatorCard(
       color: color,

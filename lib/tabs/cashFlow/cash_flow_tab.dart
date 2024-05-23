@@ -119,7 +119,7 @@ class _CashFlowCharts extends StatelessWidget {
           Expanded(
             child: RedGreenBarChart(
               state.netReturns.sublist(range.$1, range.$2),
-              onSelect: (_, point) => onTap(Category.investment, point.time),
+              onSelect: (_, point) => onTap(Category.other, point.time),
             ),
           ),
         ],

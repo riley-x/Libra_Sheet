@@ -227,7 +227,7 @@ extension CategoryHistoryExtension on DatabaseExecutor {
   }) async {
     // the value != 0 helps filter away deleted months i.e.
     var where = "$_value != 0 AND $_category != ? AND $_category != ?";
-    List whereArgs = [Category.ignore.key, Category.investment.key];
+    List whereArgs = [Category.ignore.key, Category.other.key];
     where = _addAccountsFilter(accounts, where, whereArgs);
 
     final List<Map<String, dynamic>> maps = await query(

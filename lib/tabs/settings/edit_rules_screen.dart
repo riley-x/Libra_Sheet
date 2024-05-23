@@ -243,7 +243,7 @@ class _EditRule extends StatelessWidget {
     final state = context.watch<EditRulesState>();
     var categories =
         context.watch<LibraAppState>().categories.flattenedCategories(type.toFilterType());
-    categories = [Category.ignore, Category.investment] + categories;
+    categories = [Category.ignore, Category.other] + categories;
     return Column(
       children: [
         const SizedBox(height: 10),

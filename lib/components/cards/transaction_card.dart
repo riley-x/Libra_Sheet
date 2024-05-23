@@ -44,7 +44,7 @@ class TransactionCard extends StatelessWidget {
     final color = (trans.category.level == 0) ? null : trans.category.color;
 
     bool isUncategorized = trans.category == Category.income || trans.category == Category.expense;
-    bool isInvestment = trans.category == Category.investment;
+    bool isInvestment = trans.category == Category.other;
 
     final signedReimb = (trans.value > 0) ? -trans.totalReimbusrements : trans.totalReimbusrements;
     final valueAfterReimb = trans.value + signedReimb;

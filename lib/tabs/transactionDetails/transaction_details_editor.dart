@@ -38,7 +38,7 @@ class TransactionDetailsEditor extends StatelessWidget {
     final state = context.watch<TransactionDetailsState>();
     var categories =
         context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
-    categories = [Category.empty, Category.ignore, Category.investment] + categories + [];
+    categories = [Category.empty, Category.ignore, Category.other] + categories + [];
     // the transaction constructor will convert Category.empty into the correct super category
     // however we must manually convert the initial category to [Category.empty] so that there isn't
     // a duplicate.
@@ -296,7 +296,7 @@ class _CategoryLabel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
-          message: "Create a rule matching this transaction.",
+          message: "Create a rule matching this transaction upon saving.",
           textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onInverseSurface,
                 fontSize: 14,
@@ -311,10 +311,13 @@ class _CategoryLabel extends StatelessWidget {
           ),
         ),
         Tooltip(
-          message: "Choose the 'Ignore' category to not count this\n"
-              "transaction in your income or expenses. The\n"
-              "'Investment Returns' category is similar, but\n"
-              "has its own dedicated cash flow graph.",
+          message: "There are two special categories, which can have both positive\n"
+              "and negative transactions:\n\n"
+              "    Ignore: don't count this transaction in your income or expenses.\n"
+              "            Useful for things like transfers between accounts.\n\n"
+              "    Other: for things that aren't really either income or expenses.\n"
+              "            For example, you can use this for monthly returns from\n"
+              "            stocks in your investment accounts.",
           textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onInverseSurface,
                 fontSize: 14,

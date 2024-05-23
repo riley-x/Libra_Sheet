@@ -205,7 +205,7 @@ class _CategoryChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<TransactionFilterState>();
     var categories = context.watch<LibraAppState>().categories.flattenedCategories();
-    categories = [Category.empty, Category.ignore, Category.investment] + categories;
+    categories = [Category.empty, Category.ignore, Category.other] + categories;
     return Column(
       children: [
         TitleRow(

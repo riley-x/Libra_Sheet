@@ -95,9 +95,9 @@ class Category {
 
   /// This is a special category like [ignore] but the values here are separated in the category
   /// history table for plotting.
-  static final investment = Category._manual(
+  static final other = Category._manual(
     key: -4,
-    name: 'Investment Returns',
+    name: 'Other',
     color: Colors.transparent,
     type: ExpenseFilterType.all,
     level: 0,

@@ -18,7 +18,7 @@ class AllocationEditor extends StatelessWidget {
     final state = context.watch<TransactionDetailsState>();
     var categories =
         context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
-    categories = [Category.ignore, Category.investment] + categories;
+    categories = [Category.ignore, Category.other] + categories;
     return Column(
       children: [
         const SizedBox(height: 10),

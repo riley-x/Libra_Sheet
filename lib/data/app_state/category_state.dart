@@ -157,7 +157,7 @@ class CategoryState {
     final out = <int, Category>{
       Category.empty.key: Category.empty,
       Category.ignore.key: Category.ignore,
-      Category.investment.key: Category.investment,
+      Category.other.key: Category.other,
     };
     _updateKeyMap(out, income);
     _updateKeyMap(out, expense);
