@@ -122,12 +122,25 @@ class _FooterContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (kDebugMode) ...[
-                      const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(width: LibraNav.iconPadding),
-                          Icon(Icons.bug_report, color: Colors.yellow),
-                        ],
+                      ClipRect(
+                        child: Row(
+                          children: [
+                            const SizedBox(width: LibraNav.iconPadding),
+                            const Icon(Icons.bug_report, color: Colors.yellow),
+                            const SizedBox(width: LibraNav.iconPadding),
+                            Align(
+                              heightFactor: 1.0,
+                              widthFactor: animation.value,
+                              alignment: AlignmentDirectional.centerStart,
+                              child: FadeTransition(
+                                opacity:
+                                    animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
+                                child: Text("Debug mode",
+                                    style: textStyle?.copyWith(color: Colors.yellow)),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 20),
                     ],
