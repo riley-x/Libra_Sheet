@@ -90,6 +90,7 @@ class PooledTooltip extends StatelessWidget {
     this.mainGraph,
     this.hoverLoc, {
     super.key,
+    this.series,
     this.reverse = false,
     this.labelAlignment = Alignment.centerLeft,
   });
@@ -97,6 +98,10 @@ class PooledTooltip extends StatelessWidget {
   final int? hoverLoc;
   final bool reverse;
   final Alignment labelAlignment;
+
+  /// A list of entries to show in the tooltip, from top to bottom (unless [reverse]). If null, will
+  /// use the series items from [mainGraph] by default.
+  final List<Series>? series;
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +137,9 @@ class PooledTooltip extends StatelessWidget {
       return mainGraph.yAxis.valToString(total);
     }
 
+    var seriesList = series ?? mainGraph.data.data;
+    if (reverse) seriesList = seriesList.reversed.toList();
+
     return IntrinsicWidth(
       child: Container(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
@@ -154,10 +162,10 @@ class PooledTooltip extends StatelessWidget {
             Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.onBackground),
 
             /// Series items
-            for (final series in (reverse ? mainGraph.data.data.reversed : mainGraph.data.data))
+            for (final s in seriesList)
               Align(
                 alignment: labelAlignment,
-                child: _getSeriesLabel(context, series),
+                child: _getSeriesLabel(context, s),
               ),
 
             /// Total

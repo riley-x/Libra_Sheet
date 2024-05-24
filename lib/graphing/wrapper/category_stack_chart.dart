@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
 import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
@@ -32,6 +34,23 @@ class CategoryStackChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final incomeList = <Series>[];
+    final expenseList = <Series>[];
+    for (final categoryHistory in data.categories) {
+      final series = StackColumnSeries<int>(
+        name: categoryHistory.category.name,
+        color: categoryHistory.category.color,
+        data: categoryHistory.values.looseRange(range),
+        valueMapper: (i, item) => item.asDollarDouble(),
+      );
+
+      if (!data.invertExpenses && categoryHistory.category.type == ExpenseFilterType.expense) {
+        expenseList.add(series);
+      } else {
+        incomeList.add(series);
+      }
+    }
+
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
         theme: Theme.of(context),
@@ -52,14 +71,17 @@ class CategoryStackChart extends StatelessWidget {
             color: averageColor!,
             lineWidth: 1.5,
           ),
-        for (final categoryHistory in data.categories)
-          StackColumnSeries<int>(
-            name: categoryHistory.category.name,
-            color: categoryHistory.category.color,
-            data: categoryHistory.values.looseRange(range),
-            valueMapper: (i, item) => item.asDollarDouble(),
-          ),
+        ...incomeList,
+        ...expenseList,
       ]),
+      hoverTooltip: (painter, loc) => PooledTooltip(
+        painter,
+        loc,
+
+        /// Positive expenses => inverted (first entry is bottom of stack)
+        /// Negative expenses => normal
+        series: incomeList.reversed.toList() + expenseList,
+      ),
       onTap: (onTap == null)
           ? null
           : (iSeries, series, iData) {
