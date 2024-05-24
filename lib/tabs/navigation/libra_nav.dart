@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
@@ -120,6 +121,16 @@ class _FooterContent extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (kDebugMode) ...[
+                      const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(width: LibraNav.iconPadding),
+                          Icon(Icons.bug_report, color: Colors.yellow),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     ClipRect(
                       child: Row(
                         children: [
