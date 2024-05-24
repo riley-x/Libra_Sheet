@@ -5,8 +5,13 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_gr
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
+import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
@@ -14,6 +19,7 @@ import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
+import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
@@ -31,39 +37,47 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  // List<TimeIntValue> data = [];
+  CategoryHistory categoryHistory = CategoryHistory.empty;
   TransactionFilters? initialFilters;
-  // TransactionService? service;
+  late TransactionService service;
 
-  // Future<void> loadData() async {
-  //   if (!mounted) return;
-  //   final appState = context.read<LibraAppState>();
-  //   var newData = await LibraDatabase.read((db) => db.getMonthlyNet(accountId: widget.account.key));
-  //   if (!mounted || newData == null) return;
+  Future<void> loadData() async {
+    if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
 
-  //   newData = newData.withAlignedTimes(appState.monthList, cumulate: true, trimStart: true);
-  //   if (newData.length == 1) {
-  //     // Duplicate the data point so the plot isn't empty
-  //     newData.add(newData[0].withTime((it) => it.add(const Duration(seconds: 1))));
-  //   }
-  //   setState(() {
-  //     data = newData!;
-  //   });
-  // }
+    /// Load all category histories
+    final appState = context.read<LibraAppState>();
+    final categories = appState.categories.createKeyMap();
+    final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
+          accounts: [widget.account.key],
+        ));
+    if (!mounted || rawHistory == null) return; // across async await
+
+    /// Output list
+    final newData = CategoryHistory(appState.monthList, invertExpenses: false);
+    for (final key in rawHistory.keys) {
+      final cat = categories[key];
+      if (cat == null || cat == Category.ignore || cat == Category.other) continue;
+      newData.addIndividual(cat, rawHistory, recurseSubcats: false);
+    }
+
+    setState(() {
+      categoryHistory = newData;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     initialFilters = TransactionFilters(accounts: {widget.account});
-    // service = context.read<TransactionService>();
-    // service!.addListener(loadData);
-    // loadData();
+    service = context.read<TransactionService>();
+    service.addListener(loadData);
+    loadData();
   }
 
   @override
   void dispose() {
     super.dispose();
-    // service?.removeListener(loadData);
+    service.removeListener(loadData);
   }
 
   String? _filterDescription(TransactionFilters filters) {
@@ -111,11 +125,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                   Expanded(
                     child: (transactionState.selected.isEmpty)
-                        ? _GraphWithTitle(widget.account)
-                        : const Align(
-                            alignment: Alignment.topCenter,
-                            child: TransactionBulkEditor(),
-                          ),
+                        ? _Graphs(widget.account, categoryHistory)
+                        : const TransactionBulkEditor(),
                   ),
                 ],
               ),
@@ -127,13 +138,15 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 }
 
-class _GraphWithTitle extends StatelessWidget {
-  const _GraphWithTitle(this.account, {super.key});
+class _Graphs extends StatelessWidget {
+  const _Graphs(this.account, this.categoryHistory, {super.key});
 
   final Account account;
+  final CategoryHistory categoryHistory;
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
     return Column(
       children: [
         Padding(
@@ -158,6 +171,48 @@ class _GraphWithTitle extends StatelessWidget {
             child: _Graph(account),
           ),
         ),
+        const Divider(height: 1, thickness: 1),
+        Padding(
+          padding: const EdgeInsets.only(right: 10, left: 6, top: 6, bottom: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Category History',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 4, right: 8, bottom: 4),
+            child: CategoryStackChart(
+              data: categoryHistory,
+              range: state.timeFrameRange,
+              onTap: (category, month) {
+                // if (category == this.category) {
+                //   setFilterMonth(month);
+                // } else {
+                //   toCategoryScreen(
+                //     context,
+                //     category,
+                //     initialHistoryTimeFrame: historyTimeFrame,
+                //     initialFilters: TransactionFilters(
+                //       startTime: month,
+                //       endTime: month.monthEnd(),
+                //       categories: CategoryTristateMap({category}),
+                //       accounts: initialFilters?.accounts,
+                //     ),
+                //   );
+                // }
+              },
+            ),
+          ),
+        )
       ],
     );
   }

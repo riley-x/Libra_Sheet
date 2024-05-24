@@ -179,10 +179,12 @@ class CategoryHistory {
     return vals;
   }
 
-  /// Assuming [data] is raw monthly data from the database, pads the values to align with [times],
-  /// and adds it without cumulating values from sub categories.
+  /// Adds a single [category] from [data] to the stored collection in [categories], with values
+  /// padded to align with [times].
   ///
-  /// If [recurseSubcats], will recurse to add all subcats of [category] too (still no cumulate).
+  /// This function does not cumulate values from sub categories (and so just contains the amounts
+  /// in the parent category). But if [recurseSubcats], will recurse to add all subcats of
+  /// [category] too (still no cumulate).
   void addIndividual(
     Category category,
     Map<int, List<TimeIntValue>> data, {
