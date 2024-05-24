@@ -60,7 +60,9 @@ class TransactionCard extends StatelessWidget {
               ? Theme.of(context).colorScheme.primary
               : null,
       fillColor: (selected)
-          ? ((cs.brightness == Brightness.dark) ? cs.surfaceBright : cs.primaryContainer)
+          ? ((cs.brightness == Brightness.dark)
+              ? const Color.fromARGB(255, 95, 102, 109) // brighter than surfaceBright
+              : cs.primaryContainer)
           : null,
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       onTap: () => onTap?.call(trans),

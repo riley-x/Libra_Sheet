@@ -56,6 +56,7 @@ class AccountList extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(width: 4),
           ],
         ),
         ...accs,

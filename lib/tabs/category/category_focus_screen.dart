@@ -15,6 +15,7 @@ import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
 import 'package:libra_sheet/graphing/wrapper/red_green_bar_chart.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
+import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
 import 'package:provider/provider.dart';
 
 /// Full-screen Widget that shows the details for a single category. On the left column is a list
@@ -167,6 +168,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final range = historyTimeFrame.getRange(data.times);
+    final transactionState = context.watch<TransactionFilterState>();
     return Row(
       children: [
         Expanded(
@@ -188,14 +190,16 @@ class _Body extends StatelessWidget {
         ),
         const SizedBox(width: 2),
         Expanded(
-          child: _HistoryChart(
-            category: category,
-            data: data,
-            range: range,
-            initialFilters: initialFilters,
-            historyTimeFrame: historyTimeFrame,
-            onSetTimeFrame: onSetTimeFrame,
-          ),
+          child: (transactionState.selected.isEmpty)
+              ? _HistoryChart(
+                  category: category,
+                  data: data,
+                  range: range,
+                  initialFilters: initialFilters,
+                  historyTimeFrame: historyTimeFrame,
+                  onSetTimeFrame: onSetTimeFrame,
+                )
+              : const TransactionBulkEditor(),
         ),
         const SizedBox(width: 2),
       ],
