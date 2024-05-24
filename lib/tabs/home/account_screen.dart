@@ -9,6 +9,7 @@ import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -46,7 +47,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
     /// Load all category histories
     final appState = context.read<LibraAppState>();
-    final categories = appState.categories.createKeyMap();
     final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
           accounts: [widget.account.key],
         ));
@@ -54,10 +54,10 @@ class _AccountScreenState extends State<AccountScreen> {
 
     /// Output list
     final newData = CategoryHistory(appState.monthList, invertExpenses: false);
-    for (final key in rawHistory.keys) {
-      final cat = categories[key];
-      if (cat == null || cat == Category.ignore || cat == Category.other) continue;
-      newData.addIndividual(cat, rawHistory, recurseSubcats: false);
+    newData.addIndividual(appState.categories.income, rawHistory, recurseSubcats: false);
+    newData.addIndividual(appState.categories.expense, rawHistory, recurseSubcats: false);
+    for (final cat in appState.categories.income.subCats + appState.categories.expense.subCats) {
+      newData.addCumulative(cat, rawHistory);
     }
 
     setState(() {
@@ -146,7 +146,6 @@ class _Graphs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<HomeTabState>();
     return Column(
       children: [
         Padding(
@@ -190,27 +189,7 @@ class _Graphs extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(left: 4, right: 8, bottom: 4),
-            child: CategoryStackChart(
-              data: categoryHistory,
-              range: state.timeFrameRange,
-              onTap: (category, month) {
-                // if (category == this.category) {
-                //   setFilterMonth(month);
-                // } else {
-                //   toCategoryScreen(
-                //     context,
-                //     category,
-                //     initialHistoryTimeFrame: historyTimeFrame,
-                //     initialFilters: TransactionFilters(
-                //       startTime: month,
-                //       endTime: month.monthEnd(),
-                //       categories: CategoryTristateMap({category}),
-                //       accounts: initialFilters?.accounts,
-                //     ),
-                //   );
-                // }
-              },
-            ),
+            child: _CategoryChart(account, categoryHistory),
           ),
         )
       ],
@@ -255,7 +234,7 @@ class _Graph extends StatelessWidget {
         theme: Theme.of(context),
         axisLoc: 0,
         dates: state.monthList.looseRange(state.timeFrameRange),
-        pad: 0,
+        // pad: 0, // keep 0.5 to align with the category history chart (modulo shifting from the yaxis labels)
       ),
       data: SeriesCollection([
         LineSeries<int>(
@@ -281,6 +260,35 @@ class _Graph extends StatelessWidget {
         loc,
         labelAlignment: Alignment.center,
       ),
+    );
+  }
+}
+
+class _CategoryChart extends StatelessWidget {
+  const _CategoryChart(this.account, this.categoryHistory, {super.key});
+
+  final Account account;
+  final CategoryHistory categoryHistory;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<HomeTabState>();
+    return CategoryStackChart(
+      data: categoryHistory,
+      range: state.timeFrameRange,
+      onTap: (category, month) {
+        toCategoryScreen(
+          context,
+          category,
+          initialHistoryTimeFrame: state.timeFrame,
+          initialFilters: TransactionFilters(
+            startTime: month,
+            endTime: month.monthEnd(),
+            categories: CategoryTristateMap({category}),
+            accounts: {account},
+          ),
+        );
+      },
     );
   }
 }
