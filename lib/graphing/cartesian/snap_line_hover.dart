@@ -135,7 +135,7 @@ class PooledTooltip extends StatelessWidget {
     return IntrinsicWidth(
       child: Container(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
-        constraints: const BoxConstraints(maxWidth: 300),
+        constraints: const BoxConstraints(maxWidth: 400), // Catch to prevent ultra long lines
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.onInverseSurface.withAlpha(210),
           borderRadius: BorderRadius.circular(6),
