@@ -79,7 +79,7 @@ class LineSeries<T> extends Series<T> {
   }
 
   @override
-  double? hoverValue(int i) => _renderedPoints[i].value.dy;
+  double? hoverValue(int i) => _renderedPoints.elementAtOrNull(i)?.value.dy;
 }
 
 final testSeries = LineSeries(
