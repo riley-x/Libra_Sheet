@@ -72,7 +72,7 @@ class RenderSnapLineHover extends RenderBox with RenderObjectWithChildMixin<Rend
       Offset(pixelLoc, painter!.coordSpace!.yAxis.pixelMin),
       Offset(pixelLoc, painter!.coordSpace!.yAxis.pixelMax),
       Paint()
-        ..color = painter!.theme.colorScheme.onBackground
+        ..color = painter!.theme.colorScheme.onSurface
         ..isAntiAlias = false,
     );
 

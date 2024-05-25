@@ -6,6 +6,7 @@ import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
+import 'package:libra_sheet/graphing/cartesian/x_range_selection_overlay.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
 /// This is the painter class for cartesian graphs. It contains the axes which define the mapping
@@ -188,7 +189,7 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
 }
 
 /// This widget paints a cartesian graph with a discrete (month-based) x-axis. It also handles
-/// gestures and hovering behavior.
+/// gestures and hovering behavior, with ownership of the corresponding overlay widgets.
 class DiscreteCartesianGraph extends StatefulWidget {
   final MonthAxis xAxis;
   final CartesianAxis yAxis;
@@ -299,7 +300,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     setState(() {
       hoverLocX = null;
       panStart = userX;
-      panEnd = null;
+      panEnd = userX;
     });
   }
 
@@ -350,7 +351,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                 size: Size.infinite,
               ),
             ),
-            if (painter != null) ...[
+            if (painter != null && painter!.coordSpace != null) ...[
               RepaintBoundary(
                 child: SnapLineHover(
                   mainGraph: painter!,
@@ -361,9 +362,14 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                       : widget.hoverTooltip!(painter!, hoverLocX),
                 ),
               ),
-              // RepaintBoundary(
-              //   child: ,
-              // )
+              if (panStart != null && panEnd != null)
+                RepaintBoundary(
+                  child: XRangeSelectionOverlay(
+                    xStart: panStart!.toDouble(),
+                    xEnd: panEnd!.toDouble(),
+                    coords: painter!.coordSpace!,
+                  ),
+                )
             ],
           ],
         ),
