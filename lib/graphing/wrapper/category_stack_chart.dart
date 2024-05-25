@@ -11,6 +11,8 @@ import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 
+import '../cartesian/pooled_tooltip.dart';
+
 /// Displays a stacked bar chart for category data. [data] should contain unstacked values in order
 /// from bottom to top.
 ///

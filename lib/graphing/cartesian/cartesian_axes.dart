@@ -19,6 +19,10 @@ TextPainter layoutText(String text, TextStyle? style) {
   return textPainter;
 }
 
+/// This class represents the user configuration of a cartesian axis (i.e. x or y axis). See
+/// [CartesianCoordinateAxis] for the graphing class that contains i.e. user-to-pixel conversions.
+/// This class is used at Widget-level interfaces, while the latter is recreated by painter classes
+/// on each sizing change.
 class CartesianAxis {
   /// Theme used to style the axis. Styles can be fine tuned with some of the below variables.
   final ThemeData theme;
@@ -65,7 +69,7 @@ class CartesianAxis {
   /// Style of the main axis line.
   final Paint? _axisPainter;
   Paint get axisPainter => _axisPainter ?? Paint()
-    ..color = theme.colorScheme.onBackground
+    ..color = theme.colorScheme.onSurface
     ..style = PaintingStyle.stroke
     ..isAntiAlias = false;
 

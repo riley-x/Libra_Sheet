@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
+/// This class handles the user-to-pixel conversions. It is recreated by painter classes on each
+/// sizing change. See [CartesianAxis] instead for the user-level interface class.
 class CartesianCoordinateAxis {
   /// These are the user coordiantes that define the axis limits.
   double userMin;

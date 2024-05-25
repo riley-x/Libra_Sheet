@@ -26,6 +26,8 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
 import 'package:provider/provider.dart';
 
+import '../../graphing/cartesian/pooled_tooltip.dart';
+
 /// Main widget for displaying the details of a single account. Navigated to by clicking on an
 /// account in the HomeTab.
 class AccountScreen extends StatefulWidget {

@@ -8,6 +8,8 @@ import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
+/// This is the painter class for cartesian graphs. It contains the axes which define the mapping
+/// between pixel and user coordinates, and manages the painting of the axes, labels, and data.
 class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   final CartesianAxis xAxis;
   final CartesianAxis yAxis;
@@ -185,9 +187,14 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   }
 }
 
+/// This widget paints a cartesian graph with a discrete (month-based) x-axis. It also handles
+/// gestures and hovering behavior.
 class DiscreteCartesianGraph extends StatefulWidget {
   final MonthAxis xAxis;
   final CartesianAxis yAxis;
+
+  /// Because this class uses a [MonthAxis] on the xAxis, which has x values as just the index, [0,
+  /// nMonths-1], every series should have the same number of elements in the respective order.
   final SeriesCollection data;
   final Function(int iSeries, Series series, int iData)? onTap;
   final Widget? Function(DiscreteCartesianGraphPainter, int?)? hoverTooltip;
@@ -207,6 +214,8 @@ class DiscreteCartesianGraph extends StatefulWidget {
 
 class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   int? hoverLocX;
+  int? panStart;
+  int? panEnd;
   DiscreteCartesianGraphPainter? painter;
 
   void _initPainter() {
@@ -244,15 +253,28 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     }
   }
 
+  /// Returns the nearest index into [widget.xAxis] of the event at [localPosition], or null if
+  /// out-of-bounds.
+  ///
+  /// If [clamp], instead of returning null for out-of-bounds events, will return either 0 or N-1.
+  int? _getXLoc(Offset localPosition, [bool clamp = false]) {
+    if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) {
+      return null;
+    }
+    final userX = painter!.coordSpace!.xAxis.pixelToUser(localPosition.dx).round();
+    if (userX < 0) {
+      return (clamp) ? 0 : null;
+    } else if (userX >= widget.xAxis.dates.length) {
+      return (clamp) ? widget.xAxis.dates.length - 1 : null;
+    }
+    return userX;
+  }
+
   void onHover(PointerHoverEvent event) {
     if (painter == null || painter!.currentSize == Size.zero || painter!.coordSpace == null) return;
-    final userX = painter!.coordSpace!.xAxis.pixelToUser(event.localPosition.dx).round();
+    final userX = _getXLoc(event.localPosition);
     setState(() {
-      if (userX < 0 || userX >= widget.xAxis.dates.length) {
-        hoverLocX = null;
-      } else {
-        hoverLocX = userX;
-      }
+      hoverLocX = userX;
     });
   }
 
@@ -263,11 +285,48 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onTapUp(TapUpDetails details) {
+    // print("Tap up! ${details.localPosition}");
     if (widget.onTap == null) return;
     final result = painter?.onTap(details.localPosition);
     if (result != null) {
       widget.onTap!(result.$1, result.$2, result.$3);
     }
+  }
+
+  void onPanStart(DragStartDetails details) {
+    // print("Pan start! ${details.localPosition}");
+    final userX = _getXLoc(details.localPosition, true);
+    setState(() {
+      hoverLocX = null;
+      panStart = userX;
+      panEnd = null;
+    });
+  }
+
+  void onPanUpdate(DragUpdateDetails details) {
+    // print("Pan update! ${details.localPosition}");
+    final userX = _getXLoc(details.localPosition, true);
+    setState(() {
+      panEnd = userX;
+    });
+  }
+
+  void onPanEnd(DragEndDetails details) {
+    final userX = _getXLoc(details.localPosition, true);
+    print("Pan end! $panStart -> $userX");
+    setState(() {
+      panStart = null;
+      panEnd = null;
+      // TODO zoom
+    });
+  }
+
+  void onPanCancel() {
+    // print("Pan cancel!");
+    setState(() {
+      panStart = null;
+      panEnd = null;
+    });
   }
 
   @override
@@ -278,6 +337,10 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       onExit: onExit,
       child: GestureDetector(
         onTapUp: onTapUp,
+        onPanStart: onPanStart,
+        onPanUpdate: onPanUpdate,
+        onPanEnd: onPanEnd,
+        onPanCancel: onPanCancel,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -287,7 +350,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                 size: Size.infinite,
               ),
             ),
-            if (painter != null)
+            if (painter != null) ...[
               RepaintBoundary(
                 child: SnapLineHover(
                   mainGraph: painter!,
@@ -298,6 +361,10 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                       : widget.hoverTooltip!(painter!, hoverLocX),
                 ),
               ),
+              // RepaintBoundary(
+              //   child: ,
+              // )
+            ],
           ],
         ),
       ),
