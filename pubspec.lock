@@ -541,23 +541,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  syncfusion_flutter_charts:
-    dependency: "direct main"
-    description:
-      path: "packages/syncfusion_flutter_charts"
-      ref: master
-      resolved-ref: "583e12d5acfe249cf1e4f5e87ad065fb868dcd04"
-      url: "https://github.com/riley-x/syncfusion-flutter-widgets.git"
-    source: git
-    version: "23.1.36"
-  syncfusion_flutter_core:
-    dependency: transitive
-    description:
-      name: syncfusion_flutter_core
-      sha256: a2427697bfad5b611db78ea4c4daef82d3350b83c729a8dc37959662a31547f9
-      url: "https://pub.dev"
-    source: hosted
-    version: "23.2.7"
   synchronized:
     dependency: transitive
     description:
