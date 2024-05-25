@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
@@ -121,30 +120,14 @@ class BulkEditorState extends ChangeNotifier {
   // List<Tag> tags = [];
 
   (String?, List<(Transaction, Transaction)>) _validate() {
-    if (formKey.currentState?.validate() != true) return ("", []);
+    if (formKey.currentState?.validate() != true) return ("Error in fields", []);
     // Need to save the form first to get the values. This doesn't do anything other than set the
     // save sink members above.
     formKey.currentState?.save();
+
+    /// Create new transactions ///
     final date = DateFormat('MM/dd/yy').tryParse(dateController.text, true);
     final value = valueController.text.toIntDollar();
-
-    /// Error check each individual transaction while being created, easier.
-    // if (value != null) {
-    //   if (category == null && ExpenseFilterType.from(value) != expenseType) {
-    //     return "Can't set common value to transactions with different category types";
-    //   }
-    //   if (category != null &&
-    //       category!.type != ExpenseFilterType.all &&
-    //       ExpenseFilterType.from(value) != category!.type) {
-    //     return "Sign of value does not agree with category";
-    //   }
-    // }
-    // if (category != null &&
-    //     category!.type != ExpenseFilterType.all &&
-    //     expenseType != category!.type) {
-    //   return "Category type does not agree with original categories";
-    // }
-
     final out = <(Transaction, Transaction)>[];
     for (final old in parentState.selected.values) {
       final nu = Transaction(
@@ -154,8 +137,12 @@ class BulkEditorState extends ChangeNotifier {
         value: value ?? old.value,
         category: category ?? old.category,
         account: account ?? old.account,
-        note: (noteController.text.isNotEmpty) ? noteController.text : old.note,
-        // Don't copy reimbursements/allocations
+        note: (noteController.text.isNotEmpty || initialNote != null)
+            ? noteController.text
+            : old.note,
+        tags: old.tags.toList(),
+        allocations: old.allocations?.toList(),
+        reimbursements: old.reimbursements?.toList(),
       );
       if (nu.category.type != ExpenseFilterType.all &&
           nu.category.type != ExpenseFilterType.from(nu.value) &&
