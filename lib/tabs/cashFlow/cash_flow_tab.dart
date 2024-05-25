@@ -78,8 +78,9 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               data: state.showSubCategories ? state.incomeDataSubCats : state.incomeData,
               range: range,
-              onTap: (category, month) => onTap(category, month),
               averageColor: Colors.green,
+              onTap: (category, month) => onTap(category, month),
+              onRange: state.setTimeFrame,
             ),
           ),
           const SizedBox(height: 16),
@@ -88,8 +89,9 @@ class _CashFlowCharts extends StatelessWidget {
             child: CategoryStackChart(
               data: state.showSubCategories ? state.expenseDataSubCats : state.expenseData,
               range: range,
-              onTap: (category, month) => onTap(category, month),
               averageColor: Colors.red.shade700,
+              onTap: (category, month) => onTap(category, month),
+              onRange: state.setTimeFrame,
             ),
           ),
         ],
@@ -112,6 +114,7 @@ class _CashFlowCharts extends StatelessWidget {
                 ));
                 context.read<LibraAppState>().setTab(LibraNavDestination.transactions.index);
               },
+              onRange: state.setTimeFrame,
             ),
           ),
           const SizedBox(height: 16),
@@ -120,6 +123,7 @@ class _CashFlowCharts extends StatelessWidget {
             child: RedGreenBarChart(
               state.netReturns.sublist(range.$1, range.$2),
               onSelect: (_, point) => onTap(Category.other, point.time),
+              onRange: state.setTimeFrame,
             ),
           ),
         ],

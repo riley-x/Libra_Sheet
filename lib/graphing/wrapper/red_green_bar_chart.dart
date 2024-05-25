@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
@@ -19,13 +20,16 @@ class RedGreenBarChart extends StatelessWidget {
     this.data, {
     super.key,
     this.onSelect,
+    this.onRange,
   });
 
   final Function(int i, TimeIntValue)? onSelect;
+  final Function(TimeFrame)? onRange;
 
   @override
   Widget build(BuildContext context) {
     final average = getDollarAverage2(data, (it) => it.value);
+    final months = data.map((e) => e.time).toList();
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
         theme: Theme.of(context),
@@ -35,7 +39,7 @@ class RedGreenBarChart extends StatelessWidget {
       xAxis: MonthAxis(
         theme: Theme.of(context),
         axisLoc: 0,
-        dates: data.map((e) => e.time).toList(),
+        dates: months,
       ),
       data: SeriesCollection([
         DashedHorizontalLine(
@@ -51,6 +55,13 @@ class RedGreenBarChart extends StatelessWidget {
         ),
       ]),
       onTap: (onSelect == null) ? null : (_, __, i) => onSelect!(i, data[i]),
+      onRange: (onRange == null)
+          ? null
+          : (xStart, xEnd) => onRange!(TimeFrame(
+                TimeFrameEnum.custom,
+                customStart: months[xStart],
+                customEndInclusive: months[xEnd],
+              )),
     );
   }
 }

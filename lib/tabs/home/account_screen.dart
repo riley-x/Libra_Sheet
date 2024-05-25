@@ -17,7 +17,6 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
-import 'package:libra_sheet/graphing/cartesian/snap_line_hover.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
@@ -297,7 +296,7 @@ class _CategoryChart extends StatelessWidget {
           ),
         );
       },
-      onRange: (it) => state.setTimeFrame(it),
+      onRange: state.setTimeFrame,
     );
   }
 }
