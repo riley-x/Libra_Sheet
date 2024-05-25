@@ -225,6 +225,7 @@ class _Graph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
+    final months = state.monthList.looseRange(state.timeFrameRange);
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
         theme: Theme.of(context),
@@ -235,8 +236,8 @@ class _Graph extends StatelessWidget {
       xAxis: MonthAxis(
         theme: Theme.of(context),
         axisLoc: 0,
-        dates: state.monthList.looseRange(state.timeFrameRange),
-        // pad: 0, // keep 0.5 to align with the category history chart (modulo shifting from the yaxis labels)
+        dates: months,
+        // keep pad=0.5 to align with the category history chart (modulo shifting from the yaxis labels)
       ),
       data: SeriesCollection([
         LineSeries<int>(
@@ -262,6 +263,11 @@ class _Graph extends StatelessWidget {
         loc,
         labelAlignment: Alignment.center,
       ),
+      onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
+        TimeFrameEnum.custom,
+        customStart: months[xStart],
+        customEndInclusive: months[xEnd],
+      )),
     );
   }
 }
@@ -291,6 +297,7 @@ class _CategoryChart extends StatelessWidget {
           ),
         );
       },
+      onRange: (it) => state.setTimeFrame(it),
     );
   }
 }

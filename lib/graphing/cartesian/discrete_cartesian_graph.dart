@@ -11,6 +11,8 @@ import 'package:libra_sheet/graphing/series/series.dart';
 
 /// This is the painter class for cartesian graphs. It contains the axes which define the mapping
 /// between pixel and user coordinates, and manages the painting of the axes, labels, and data.
+///
+/// TODO I think this class is general enough for non-discrete x axes too.
 class DiscreteCartesianGraphPainter<T> extends CustomPainter {
   final CartesianAxis xAxis;
   final CartesianAxis yAxis;
@@ -198,6 +200,7 @@ class DiscreteCartesianGraph extends StatefulWidget {
   /// nMonths-1], every series should have the same number of elements in the respective order.
   final SeriesCollection data;
   final Function(int iSeries, Series series, int iData)? onTap;
+  final Function(int xStart, int xEnd)? onRange;
   final Widget? Function(DiscreteCartesianGraphPainter, int?)? hoverTooltip;
 
   const DiscreteCartesianGraph({
@@ -206,6 +209,7 @@ class DiscreteCartesianGraph extends StatefulWidget {
     required this.yAxis,
     required this.data,
     this.onTap,
+    this.onRange,
     this.hoverTooltip,
   });
 
@@ -286,7 +290,6 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onTapUp(TapUpDetails details) {
-    // print("Tap up! ${details.localPosition}");
     if (widget.onTap == null) return;
     final result = painter?.onTap(details.localPosition);
     if (result != null) {
@@ -295,7 +298,6 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onPanStart(DragStartDetails details) {
-    // print("Pan start! ${details.localPosition}");
     final userX = _getXLoc(details.localPosition, true);
     setState(() {
       hoverLocX = null;
@@ -305,7 +307,6 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    // print("Pan update! ${details.localPosition}");
     final userX = _getXLoc(details.localPosition, true);
     setState(() {
       panEnd = userX;
@@ -313,17 +314,18 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onPanEnd(DragEndDetails details) {
-    final userX = _getXLoc(details.localPosition, true);
-    print("Pan end! $panStart -> $userX");
+    final start = panStart;
+    final end = _getXLoc(details.localPosition, true);
     setState(() {
       panStart = null;
       panEnd = null;
-      // TODO zoom
     });
+    if (start != null && end != null && start != end) {
+      widget.onRange?.call(min(start, end), max(start, end));
+    }
   }
 
   void onPanCancel() {
-    // print("Pan cancel!");
     setState(() {
       panStart = null;
       panEnd = null;

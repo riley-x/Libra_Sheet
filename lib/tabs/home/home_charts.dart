@@ -212,6 +212,7 @@ class _NetWorthGraph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
+    final months = state.monthList.looseRange(state.timeFrameRange);
     return Padding(
       padding: const EdgeInsets.only(left: 6, right: 10),
       child: DiscreteCartesianGraph(
@@ -224,7 +225,7 @@ class _NetWorthGraph extends StatelessWidget {
         xAxis: MonthAxis(
           theme: Theme.of(context),
           axisLoc: 0,
-          dates: state.monthList.looseRange(state.timeFrameRange),
+          dates: months,
           pad: 0,
         ),
         data: SeriesCollection([
@@ -241,6 +242,11 @@ class _NetWorthGraph extends StatelessWidget {
             ),
           ),
         ]),
+        onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
+          TimeFrameEnum.custom,
+          customStart: months[xStart],
+          customEndInclusive: months[xEnd],
+        )),
       ),
     );
   }
@@ -306,6 +312,7 @@ class _StackedChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
+    final months = state.monthList.looseRange(state.timeFrameRange);
     return Padding(
       padding: const EdgeInsets.only(left: 6, right: 10),
       child: DiscreteCartesianGraph(
@@ -317,7 +324,7 @@ class _StackedChart extends StatelessWidget {
         xAxis: MonthAxis(
           theme: Theme.of(context),
           axisLoc: 0,
-          dates: state.monthList.looseRange(state.timeFrameRange),
+          dates: months,
           pad: 0,
         ),
         data: SeriesCollection([
@@ -329,12 +336,11 @@ class _StackedChart extends StatelessWidget {
               valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
             ),
         ]),
-        // onTap: (iSeries, series, iData) {
-        //         if (range != null) iData += range!.$1;
-        //         // The -1 because of the dashed horizontal line inflates the series index by 1.
-        //         if (averageColor != null) iSeries--;
-        //         onTap?.call(data.categories[iSeries].category, data.times[iData]);
-        //       },
+        onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
+          TimeFrameEnum.custom,
+          customStart: months[xStart],
+          customEndInclusive: months[xEnd],
+        )),
       ),
     );
   }

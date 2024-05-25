@@ -6,7 +6,7 @@ import 'package:libra_sheet/components/dialogs/month_range_dialog.dart';
 enum TimeFrameEnum { oneYear, twoYear, all, custom }
 
 /// Class representing a time frame, used in time range selectors throughout the app. The primary
-/// field is just a [TimeFrameEnum] in [selection], but includes extram emembers for dealing with
+/// field is just a [TimeFrameEnum] in [selection], but includes extra memembers for dealing with
 /// custom ranges.
 class TimeFrame {
   final TimeFrameEnum selection;
@@ -33,7 +33,7 @@ class TimeFrame {
         TimeFrameEnum.oneYear => (max(0, times.length - 12), times.length),
         TimeFrameEnum.twoYear => (max(0, times.length - 24), times.length),
         TimeFrameEnum.all => (0, times.length),
-        TimeFrameEnum.custom => (0, 0),
+        TimeFrameEnum.custom => (0, 0), // not entered but compiler dumb
       };
     } else {
       // These form the default values when we can't find the start and end dates.

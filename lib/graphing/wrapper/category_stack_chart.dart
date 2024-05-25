@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -22,6 +23,7 @@ class CategoryStackChart extends StatelessWidget {
   final CategoryHistory data;
   final (int, int)? range;
   final Function(Category, DateTime)? onTap;
+  final Function(TimeFrame)? onRange;
 
   /// If not null, will draw a dashed line behind the bars to indicate the average.
   final Color? averageColor;
@@ -31,6 +33,7 @@ class CategoryStackChart extends StatelessWidget {
     required this.data,
     this.range,
     this.onTap,
+    this.onRange,
     this.averageColor,
   });
 
@@ -53,6 +56,9 @@ class CategoryStackChart extends StatelessWidget {
       }
     }
 
+    // Using [looseRange] here is pretty important because if [range] is calculated in a Widget
+    // build and [data] is calculated in a notifier callback or async, they can be out of sync.
+    final months = data.times.looseRange(range);
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
         theme: Theme.of(context),
@@ -62,9 +68,7 @@ class CategoryStackChart extends StatelessWidget {
       xAxis: MonthAxis(
         theme: Theme.of(context),
         axisLoc: 0,
-        dates: data.times.looseRange(range),
-        // Using [looseRange] here is pretty important because if [range] is calculated in a Widget
-        // build and [data] is calculated in a notifier callback or async, they can be out of sync.
+        dates: months,
       ),
       data: SeriesCollection([
         if (averageColor != null)
@@ -92,6 +96,13 @@ class CategoryStackChart extends StatelessWidget {
               if (averageColor != null) iSeries--;
               onTap?.call(data.categories[iSeries].category, data.times[iData]);
             },
+      onRange: (onRange == null)
+          ? null
+          : (xStart, xEnd) => onRange!(TimeFrame(
+                TimeFrameEnum.custom,
+                customStart: months[xStart],
+                customEndInclusive: months[xEnd],
+              )),
     );
   }
 }
