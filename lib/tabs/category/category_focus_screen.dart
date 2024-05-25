@@ -298,6 +298,7 @@ class _HistoryChart extends StatelessWidget {
                           ),
                       ],
                       onSelect: (_, point) => setFilterMonth(point.time),
+                      onRange: onSetTimeFrame,
                     )
                   // Otherwise, just a normal category, and show the stack chart.
                   : CategoryStackChart(
@@ -320,6 +321,7 @@ class _HistoryChart extends StatelessWidget {
                           );
                         }
                       },
+                      onRange: onSetTimeFrame,
                     ),
         ),
         // Which values to show? Should match transaction filters? But the category history
