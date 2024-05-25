@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' as fnd;
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
@@ -137,7 +138,18 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   }
 }
 
-String? dateRangeFilterDescription(TransactionFilters filters) {
+String? dateRangeFilterDescription(TransactionFilters filters, TransactionFilters initialFilters) {
+  if (filters.name != null ||
+      filters.minValue != null ||
+      filters.maxValue != null ||
+      filters.hasReimbursement != null ||
+      filters.hasAllocation != null ||
+      filters.tags.isNotEmpty ||
+      !fnd.setEquals(filters.accounts, initialFilters.accounts) ||
+      !fnd.setEquals(filters.categories.activeKeys().toSet(),
+          initialFilters.categories.activeKeys().toSet())) {
+    return "Modified";
+  }
   if (filters.startTime != null && filters.endTime != null) {
     return "${filters.startTime!.MMddyy()}\n- ${filters.endTime!.MMddyy()}";
   } else if (filters.startTime != null) {
@@ -152,7 +164,7 @@ String? dateRangeFilterDescription(TransactionFilters filters) {
 class _Body extends StatelessWidget {
   const _Body({
     super.key,
-    this.initialFilters,
+    required this.initialFilters,
     required this.category,
     required this.data,
     required this.historyTimeFrame,
@@ -160,7 +172,7 @@ class _Body extends StatelessWidget {
   });
 
   final Category category;
-  final TransactionFilters? initialFilters;
+  final TransactionFilters initialFilters;
   final CategoryHistory data;
   final TimeFrame historyTimeFrame;
   final Function(TimeFrame) onSetTimeFrame;
@@ -180,7 +192,7 @@ class _Body extends StatelessWidget {
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
-              filterDescription: dateRangeFilterDescription,
+              filterDescription: (it) => dateRangeFilterDescription(it, initialFilters),
             ),
           ),
         ),
