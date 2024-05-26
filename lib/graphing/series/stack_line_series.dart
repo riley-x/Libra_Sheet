@@ -10,34 +10,24 @@ import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 // import 'package:vector_math/vector_math_64.dart' as vector;
 
-final _debugGradient = ui.Gradient.linear(
-  const Offset(0, 0),
-  const Offset(0, 1),
-  [
-    Colors.white,
-    Colors.green,
-    Colors.green,
-    Colors.white,
-    Colors.blue,
-    Colors.blue,
-    Colors.white,
-  ],
-  [
-    0,
-    0.1,
-    0.45,
-    0.5,
-    0.55,
-    0.9,
-    1,
-  ],
-  // TileMode.decal,
-);
-
-double _round(double val, int places) {
-  final mod = pow(10.0, places);
-  return ((val * mod).round().toDouble() / mod);
-}
+final _debugGradientColors = [
+  Colors.white,
+  Colors.green,
+  Colors.green,
+  Colors.white,
+  Colors.blue,
+  Colors.blue,
+  Colors.white,
+];
+final _debugGradientStops = [
+  0.0,
+  0.1,
+  0.45,
+  0.5,
+  0.55,
+  0.9,
+  1.0,
+];
 
 class StackLineSeries<T> extends LineSeries<T> {
   /// This represents the cumulative base value for other StackColumnSeries supplied to a graph.
@@ -112,14 +102,21 @@ class StackLineSeries<T> extends LineSeries<T> {
   ///
   /// See https://en.wikipedia.org/wiki/Transformation_matrix#Perspective_projection
   ///
-  /// We have special cases when one side of the 4-gon is 0.
+  /// We have special cases when one side of the 4-gon is 0. Here the solution sends the
+  /// parameters to 0 or infinity, so we approximate with a very small or large value. This
+  /// approximation sometimes causes rounding errors on the edges though, and adding too many
+  /// decimals causes things to break. It seems like the canvas transform uses some really low
+  /// precision float or something. Probably the same issue:
+  ///       https://github.com/flutter/flutter/issues/126026
+  /// However, if we transform only the gradient and not the canvas itself, the rounding issue
+  /// is basically not noticeable.
   void _paintSegment(Canvas canvas, CartesianCoordinateSpace coordSpace, int i) {
     final val1 = valueMapper(i, data[i]);
     final val2 = valueMapper(i + 1, data[i + 1]);
     if (val1.dy == 0 && val2.dy == 0) return;
-    if (!_sameSign(val1.dy, stackBase[i].dy)) return;
-    if (!_sameSign(val2.dy, stackBase[i + 1].dy)) return;
-    if (!_sameSign(val1.dy, val2.dy)) return;
+    // if (!_sameSign(val1.dy, stackBase[i].dy)) return;
+    // if (!_sameSign(val2.dy, stackBase[i + 1].dy)) return;
+    // if (!_sameSign(val1.dy, val2.dy)) return;
 
     final bottomLeft = coordSpace.userToPixel(stackBase[i]);
     final topLeft = coordSpace.userToPixel(val1 + Offset(0, stackBase[i].dy)) - bottomLeft;
@@ -132,16 +129,8 @@ class StackLineSeries<T> extends LineSeries<T> {
     if (topRight.dy == bottomRight.dy) {
       g = 9999999;
     } else if (topLeft.dy.abs() < 1e-6) {
-      /// This approximation sometimes causes rounding errors on the rightmost edge. Sometimes 1
-      /// pixel short, sometimes 1 pixel too much. Note that adding too many decimals causes things
-      /// to break. It seems like the canvas transform uses some really low precision float or
-      /// something. Probably the same issue: https://github.com/flutter/flutter/issues/126026
-      g = -0.9995;
+      g = -0.995;
       e = (topRight.dy - bottomRight.dy) * (g + 1);
-
-      /// This seems to prevent the black gaps from showing, but the overlap still appears
-      xRight += 0.2;
-
       // e = -0.001;
       // g = e / (topRight.dy - bottomRight.dy) - 1;
     } else {
@@ -149,21 +138,6 @@ class StackLineSeries<T> extends LineSeries<T> {
     }
     final d = bottomRight.dy * (g + 1);
     final a = (g + 1);
-
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2
-      ..isAntiAlias = false
-      ..shader = ui.Gradient.linear(
-        // these coordinates are the pixel coordiantes that correspond to the
-        // 0/1 stop positions (note since we're plotting a unit square, the pixel coordinates are
-        // also 0..1). The x position doesn't matter since it's a vertical gradient.
-        const Offset(0, 0),
-        const Offset(0, 1),
-        gradientColors,
-        gradientStops,
-        // TileMode.decal,
-      );
 
     Matrix4 transform = Matrix4.fromList([
       ...[a, 0, 0, 0],
@@ -174,21 +148,40 @@ class StackLineSeries<T> extends LineSeries<T> {
       ..transpose(); // transpose because the constructor expects column-major entries
     transform = (Matrix4.identity()..setEntry(0, 0, xRight)) * transform;
     transform = Matrix4.translationValues(bottomLeft.dx, bottomLeft.dy, 0) * transform;
-    // for some reason the .scale() and .transform() methods don't work
+    // for some reason the .scale() and .transform() methods don't work?
 
-    canvas.save();
-    canvas.transform(transform.storage);
-    // inflate the x values to avoid boundaries
-    canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
-    canvas.restore();
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2
+      ..isAntiAlias = false // prevents boundary effects, will snap to nearest pixel.
+      ..shader = ui.Gradient.linear(
+        // these coordinates are the pixel coordiantes that correspond to the
+        // 0/1 stop positions (note since we're plotting a unit square, the pixel coordinates are
+        // also 0..1). The x position doesn't matter since it's a vertical gradient.
+        const Offset(0, 0),
+        const Offset(0, 1),
+        gradientColors,
+        gradientStops,
+        TileMode.clamp,
+        transform.storage,
+      );
 
-    /// Tried figuring out when a rounding error would occur...but don't really know where the
-    /// rounding happens.
-    // if (topLeft.dy.abs() < 1e-6 && name == "Alhena") {
-    //   vector.Vector4 xRightTransformVec = transform * vector.Vector4(1, 0, 0, 1);
-    //   var xRightTransform = a / (g + 1);
-    //   print("$name $i $a ${g + 1} $xRightTransform ${bottomRight.dx}");
-    // }
+    /// Don't transform the canvas and draw unit square, just transform the gradient instead. Avoids
+    /// boundary effects and rounding errors.
+    // canvas.save();
+    // canvas.transform(transform.storage);
+    // canvas.drawRect(const Rect.fromLTRB(0, 0, 1, 1), paint);
+    // canvas.restore();
+
+    canvas.drawPath(
+      Path()
+        ..moveToOffset(bottomLeft)
+        ..lineToOffset(topLeft + bottomLeft)
+        ..lineToOffset(topRight + bottomLeft)
+        ..lineToOffset(bottomRight + bottomLeft)
+        ..close(),
+      paint,
+    );
   }
 
   @override
@@ -208,14 +201,13 @@ class StackLineSeries<T> extends LineSeries<T> {
       curr = _addPoint(coordSpace, i);
       path.lineToOffset(curr.pixelPos);
     }
+    canvas.drawPath(path, linePainter);
 
     /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
     /// Tracing the bottom edge via a path leads to janky pixels, so overlapping is better.
     // path.lineToOffset(coordSpace.userToPixel(Offset((data.length - 1).toDouble(), 0)));
     // path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
     // path.close();
-
-    canvas.drawPath(path, linePainter);
   }
 
   @override

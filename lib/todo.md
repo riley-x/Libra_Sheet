@@ -2,13 +2,15 @@
   
 
 ## High priority features
-- sort transactions by value
+- Allow reimb/allocs to be negative in UI, just abs them.
 
 
 ## Medium priority features
 - Start screen and UX
 - Choose category/account on CSV column?
 - Delete account
+- Include allocation names in filter search
+- sort transactions by value?
 
 
 ## Refactor
@@ -18,6 +20,4 @@
 ## Low priority features
 - Load more transactions on reach end of transaction grid?
 - Animate bar charts?
-- Allow reimb/allocs to be negative in UI, just abs them.
 - Day-by-day charts?
-- Include allocation names in filter search
