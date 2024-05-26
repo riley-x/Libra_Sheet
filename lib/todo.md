@@ -11,10 +11,12 @@
 - Delete account
 - Include allocation names in filter search
 - sort transactions by value?
+- Loading scrim across full app?
 
 
 ## Refactor
 - Undo make AccountState an independent ChangeNotifier; huge hassle, need to watch the state everywhere you use an account.
+- Remove MutableAllocation
 
 
 ## Low priority features

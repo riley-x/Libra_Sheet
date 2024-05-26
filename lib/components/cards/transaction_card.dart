@@ -41,6 +41,9 @@ class TransactionCard extends StatelessWidget {
   static const double colorIndicatorWidth = 4;
   static const double colorIndicatorOffset = 10;
 
+  /// Height of a normal card with two rows of text (empirical text height = 21)
+  static const double normalHeight = ColorIndicatorCard.verticalPadding * 2 + 21 * 2;
+
   @override
   Widget build(BuildContext context) {
     final color = (trans.category.level == 0) ? null : trans.category.color;

@@ -85,28 +85,23 @@ class _Form extends StatelessWidget {
             'Value',
             ValueField(
               controller: state.reimbursementValueController,
-              onSave: (it) => state.reimbursementValue = it,
-              positiveOnly: true,
+              onSave: (it) => state.reimbursementValue = it.abs(),
+              // positiveOnly: true,
             ),
-            tooltip: "Value should always be positive, even for expenses.",
+            // tooltip: "Value should always be positive, even for expenses.",
           ),
           rowSpacing,
           labelRow(
             context,
             'Transaction',
-            Visibility(
-              visible: state.reimburseTarget != null,
-              maintainSize: true,
-              maintainAnimation: true,
-              maintainState: true,
-              child: TransactionCard(
-                trans: state.reimburseTarget ?? dummyTransaction,
-                // The dummy is neccessary I think because even when not visible, the transaction card will dereference the pointer
-                margin: const EdgeInsets.all(0),
-                showTags: false,
-                onTap: (t) => toTransactionDetails(context, t),
-              ),
-            ),
+            (state.reimburseTarget == null)
+                ? const SizedBox(height: TransactionCard.normalHeight)
+                : TransactionCard(
+                    trans: state.reimburseTarget!,
+                    margin: const EdgeInsets.all(0),
+                    showTags: false,
+                    onTap: (t) => toTransactionDetails(context, t),
+                  ),
           ),
         ],
       ),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 TableRow labelRow(
   BuildContext context,
   String label,
-  Widget? right, {
+  Widget right, {
   TableCellVerticalAlignment? labelAlign,
   String? tooltip,
   InlineSpan? richTooltip,
@@ -44,7 +44,7 @@ TableRow labelRow(
           ),
         ),
       ),
-      if (right != null) right,
+      right,
     ],
   );
 }

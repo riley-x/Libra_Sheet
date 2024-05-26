@@ -339,11 +339,12 @@ class TransactionDetailsState extends ChangeNotifier {
   String? validateReimbursement() {
     if (reimbursementFormKey.currentState?.validate() != true) {
       // Value is the only thing in the form
-      return 'Value should always be positive, even for expenses.';
+      return 'Error in value field.';
     }
 
     /// Need to save the form first to get the values. This doesn't do anything other than set the
-    /// save sink members above.
+    /// save sink members above. Remember reimbursements are stored in DB as positive values always,
+    /// and the editor saves the abs() value already.
     reimbursementFormKey.currentState?.save();
 
     if (reimburseTarget == null) {

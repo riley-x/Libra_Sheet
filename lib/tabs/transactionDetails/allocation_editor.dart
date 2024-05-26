@@ -51,10 +51,10 @@ class AllocationEditor extends StatelessWidget {
                 'Value',
                 ValueField(
                   initial: state.focusedAllocation?.value,
-                  onSave: (it) => state.updatedAllocation.value = it,
-                  positiveOnly: true,
+                  onSave: (it) => state.updatedAllocation.value = it.abs(),
+                  // positiveOnly: true,
                 ),
-                tooltip: "Value should always be positive.",
+                // tooltip: "Value should always be positive.",
               ),
               rowSpacing,
               labelRow(
