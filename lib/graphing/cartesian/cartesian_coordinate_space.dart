@@ -93,6 +93,13 @@ class CartesianCoordinateSpace {
 
   Rect get canvasSize => Rect.fromLTWH(0, 0, xAxis.canvasSize, yAxis.canvasSize);
 
+  /// Bounding Rect of the data elements (i.e. excluding space for labels), useful for clipping
+  /// graphs.
+  Rect get dataRect => Rect.fromPoints(
+        Offset(xAxis.pixelMin, yAxis.pixelMin),
+        Offset(xAxis.pixelMax, yAxis.pixelMax),
+      );
+
   Offset userToPixel(Offset offset) {
     return Offset(
       xAxis.userToPixel(offset.dx),

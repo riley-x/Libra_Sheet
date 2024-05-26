@@ -188,6 +188,9 @@ class StackLineSeries<T> extends LineSeries<T> {
   void paint(CustomPainter painter, Canvas canvas, CartesianCoordinateSpace coordSpace) {
     if (data.length <= 1) return;
 
+    canvas.save();
+    canvas.clipRect(coordSpace.dataRect);
+
     /// Paint segments
     for (int i = 0; i < data.length - 1; i++) {
       _paintSegment(canvas, coordSpace, i);
@@ -201,7 +204,9 @@ class StackLineSeries<T> extends LineSeries<T> {
       curr = _addPoint(coordSpace, i);
       path.lineToOffset(curr.pixelPos);
     }
+
     canvas.drawPath(path, linePainter);
+    canvas.restore();
 
     /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
     /// Tracing the bottom edge via a path leads to janky pixels, so overlapping is better.
