@@ -51,7 +51,6 @@ void toTransactionDetails(BuildContext context, Transaction? t, {Account? initia
         t,
         initialAccount: initialAccount,
       ),
-      begin: const Offset(-1.0, 0.0),
     ),
   );
 }

@@ -24,8 +24,8 @@ class NoAnimationRoute<T> extends PageRouteBuilder<T> {
         );
 }
 
-/// This route slides from one side to the other. By default, will slide up from the bottom on
-/// entry, and slide down on exit. Specify [begin] to change the starting position.
+/// This route slides from one side to the other. By default, will slide in from the left. Specify
+/// [begin] to change the starting position.
 ///
 /// See https://docs.flutter.dev/cookbook/animation/page-route-animation
 class SlideRoute<T> extends PageRouteBuilder<T> {
@@ -35,7 +35,7 @@ class SlideRoute<T> extends PageRouteBuilder<T> {
   }) : super(
           pageBuilder: (context, animation, secondaryAnimation) => builder(context),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            begin ??= const Offset(0.0, 1.0);
+            begin ??= const Offset(-1.0, 0.0);
             const end = Offset.zero;
             const curve = Curves.ease;
             final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
