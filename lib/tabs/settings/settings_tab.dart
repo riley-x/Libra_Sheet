@@ -116,7 +116,9 @@ class _SettingsTabState extends State<SettingsTab> {
             _ => const SizedBox(),
           };
 
-          bool isFullScreen = constraints.maxWidth < 950;
+          /// Careful, this needs to be at least large enough so that There's no jank with the
+          /// expanding sidebar.
+          bool isFullScreen = constraints.maxWidth < 1050;
           Widget auxScreen = SettingsScreenHeader(
             screen: tab,
             isFullScreen: isFullScreen,

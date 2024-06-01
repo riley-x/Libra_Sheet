@@ -8,15 +8,15 @@ import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/tabs/category/category_focus_screen.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_screen.dart';
 import 'package:libra_sheet/tabs/home/account_screen.dart';
-import 'package:libra_sheet/tabs/navigation/no_animation_route.dart';
+import 'package:libra_sheet/tabs/navigation/route_builders.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_screen.dart';
 import 'package:provider/provider.dart';
 
 void toAccountScreen(BuildContext context, Account account) {
   Navigator.push(
     context,
-    NoAnimationRoute(
-      (context) => AccountScreen(account: account),
+    SlideRoute(
+      builder: (context) => AccountScreen(account: account),
     ),
   );
 }
@@ -29,8 +29,8 @@ void toCategoryScreen(
 }) {
   Navigator.push(
     context,
-    NoAnimationRoute(
-      (context) => CategoryFocusScreen(
+    SlideRoute(
+      builder: (context) => CategoryFocusScreen(
         category: category,
         initialFilters: initialFilters,
         initialHistoryTimeFrame: initialHistoryTimeFrame,
@@ -46,11 +46,12 @@ void toTransactionDetails(BuildContext context, Transaction? t, {Account? initia
   if (!context.mounted) return;
   Navigator.push(
     context,
-    NoAnimationRoute(
-      (context) => TransactionDetailsScreen(
+    SlideRoute(
+      builder: (context) => TransactionDetailsScreen(
         t,
         initialAccount: initialAccount,
       ),
+      begin: const Offset(-1.0, 0.0),
     ),
   );
 }
@@ -58,6 +59,8 @@ void toTransactionDetails(BuildContext context, Transaction? t, {Account? initia
 void toCsvScreen(BuildContext context, {Account? initialAccount}) {
   Navigator.push(
     context,
-    NoAnimationRoute((context) => AddCsvScreen(initialAccount: initialAccount)),
+    SlideRoute(
+      builder: (context) => AddCsvScreen(initialAccount: initialAccount),
+    ),
   );
 }
