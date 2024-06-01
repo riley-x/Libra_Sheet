@@ -42,7 +42,10 @@ class SlideRoute<T> extends PageRouteBuilder<T> {
 
             return SlideTransition(
               position: animation.drive(tween),
-              child: Material(child: child),
+              child: FadeTransition(
+                opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                child: Material(child: child),
+              ),
             );
           },
           reverseTransitionDuration: const Duration(milliseconds: 150),
