@@ -52,6 +52,9 @@ extension IntDollarDouble on double {
     if (out == "-0") out = "0";
     return out;
   }
+
+  String formatPercent([bool scale = true]) =>
+      '${NumberFormat('0.00').format(this * (scale ? 100 : 1))}%';
 }
 
 extension IntDollarString on String {
@@ -112,5 +115,5 @@ String formatDollar(double val, [int? order]) {
 }
 
 String formatPercent(double val) {
-  return '${NumberFormat('0.00').format(val * 100)}%';
+  return val.formatPercent();
 }
