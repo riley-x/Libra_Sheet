@@ -19,6 +19,7 @@ class LineSeriesPoint<T> {
 
 class LineSeries<T> extends Series<T> {
   final Color color;
+  final Color? fillColor;
   final Offset Function(int i, T item) valueMapper;
   final Paint linePainter;
   final double strokeWidth;
@@ -32,6 +33,7 @@ class LineSeries<T> extends Series<T> {
     required super.data,
     required this.valueMapper,
     this.color = Colors.blue,
+    this.fillColor,
     this.strokeWidth = 3,
     this.gradient,
   }) : linePainter = Paint()

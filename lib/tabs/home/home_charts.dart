@@ -334,6 +334,7 @@ class _StackedChart extends StatelessWidget {
               color: accHistory.account.color,
               data: accHistory.values.looseRange(state.timeFrameRange),
               valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
+              fillColor: accHistory.account.color.withAlpha(128),
             ),
         ]),
         onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(

@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 // import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
@@ -31,24 +33,27 @@ final _debugGradientStops = [
 
 class StackLineSeries<T> extends LineSeries<T> {
   /// This represents the cumulative base value for other StackColumnSeries supplied to a graph.
-  /// It is set post-construction by [SeriesCollection].
+  /// It is set post-construction by [SeriesCollection]. These are in user coordinates.
   List<Offset> stackBase = [];
 
-  List<double> gradientStops = [];
-  List<Color> gradientColors = [];
+  /// Gradient for the segmented mode, see [_paintSegment] (deprecated).
+  List<Color> segmentedGradientColors = [];
+  List<double> segmentedGradientStops = [];
 
   StackLineSeries({
     required super.name,
     required super.data,
     required super.valueMapper,
     super.color,
+    super.fillColor,
     super.strokeWidth,
-    List<double>? gradientStops,
-    List<Color>? gradientColors,
+    super.gradient,
+    List<double>? segmentedGradientStops,
+    List<Color>? segmentedGradientColors,
   }) {
-    assert((gradientStops != null) == (gradientColors != null));
-    this.gradientStops = gradientStops ?? const [0, 0.4, 1];
-    this.gradientColors = gradientColors ??
+    assert((segmentedGradientStops != null) == (segmentedGradientColors != null));
+    this.segmentedGradientStops = segmentedGradientStops ?? const [0, 0.4, 1];
+    this.segmentedGradientColors = segmentedGradientColors ??
         [
           color.withAlpha(120),
           color.withAlpha(180),
@@ -87,7 +92,8 @@ class StackLineSeries<T> extends LineSeries<T> {
   }
 
   /// This function paints a single segment of the series, which is the 4-gon between two points.
-  /// [i] is the index of the left edge's data points.
+  /// [i] is the index of the left edge's data points. A gradient goes from near-transparent at the
+  /// bottom of the series, and shifts linearly (but skewed) to solid at the top of the series.
   ///
   /// These are painted by first painting a unit square, (0,0) to (1,1), and then transforming it.
   /// The transform is derived by identifying the matrix that solves (ignoring the z components)
@@ -110,6 +116,10 @@ class StackLineSeries<T> extends LineSeries<T> {
   ///       https://github.com/flutter/flutter/issues/126026
   /// However, if we transform only the gradient and not the canvas itself, the rounding issue
   /// is basically not noticeable.
+  ///
+  /// This still looks a little bad. Peaks in the data cause the gradient to look streaky instead
+  /// of smooth. Verified that the gradient is transformed correctly, just a visual artifact of
+  /// transparency I think.
   void _paintSegment(Canvas canvas, CartesianCoordinateSpace coordSpace, int i) {
     final val1 = valueMapper(i, data[i]);
     final val2 = valueMapper(i + 1, data[i + 1]);
@@ -160,8 +170,10 @@ class StackLineSeries<T> extends LineSeries<T> {
         // also 0..1). The x position doesn't matter since it's a vertical gradient.
         const Offset(0, 0),
         const Offset(0, 1),
-        gradientColors,
-        gradientStops,
+        segmentedGradientColors,
+        segmentedGradientStops,
+        // _debugGradientColors,
+        // _debugGradientStops,
         TileMode.clamp,
         transform.storage,
       );
@@ -192,11 +204,11 @@ class StackLineSeries<T> extends LineSeries<T> {
     canvas.clipRect(coordSpace.dataRect);
 
     /// Paint segments
-    for (int i = 0; i < data.length - 1; i++) {
-      _paintSegment(canvas, coordSpace, i);
-    }
+    // for (int i = 0; i < data.length - 1; i++) {
+    //   _paintSegment(canvas, coordSpace, i);
+    // }
 
-    /// Paint path to hide boundary effects
+    /// Top path
     final path = Path();
     var curr = _addPoint(coordSpace, 0);
     path.moveTo(curr.pixelPos.dx, curr.pixelPos.dy);
@@ -204,15 +216,40 @@ class StackLineSeries<T> extends LineSeries<T> {
       curr = _addPoint(coordSpace, i);
       path.lineToOffset(curr.pixelPos);
     }
+    final topPath = Path.from(path);
 
-    canvas.drawPath(path, linePainter);
-    canvas.restore();
+    /// Bottom path
+    for (int i = data.length - 1; i >= 0; i--) {
+      path.lineToOffset(coordSpace.userToPixel(stackBase[i]));
+    }
+    path.close();
 
-    /// Close along y=0. The [DiscreteCartesianGraph] will paint stacked items in reverse order.
-    /// Tracing the bottom edge via a path leads to janky pixels, so overlapping is better.
-    // path.lineToOffset(coordSpace.userToPixel(Offset((data.length - 1).toDouble(), 0)));
-    // path.lineToOffset(coordSpace.userToPixel(const Offset(0, 0)));
-    // path.close();
+    /// Fill
+    if (gradient != null) {
+      // TODO what is the correct rectangle for the gradient...?
+      var (minY, maxY) = _getMinMaxUser();
+      minY = coordSpace.yAxis.userToPixel(minY);
+      maxY = coordSpace.yAxis.userToPixel(maxY);
+      final seriesRect = Rect.fromLTRB(
+        coordSpace.canvasSize.left,
+        maxY,
+        coordSpace.canvasSize.right,
+        minY,
+      );
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = color
+          ..shader = gradient!.createShader(seriesRect),
+      );
+    } else if (fillColor != null) {
+      canvas.drawPath(path, Paint()..color = fillColor!);
+    }
+
+    /// Trace top line to hide jank at boundaries, visual effect
+    canvas.drawPath(topPath, linePainter);
+
+    canvas.restore(); // undo clipRect
   }
 
   @override
