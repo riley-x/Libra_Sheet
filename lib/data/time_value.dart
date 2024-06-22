@@ -132,9 +132,12 @@ extension ListUtils<T> on List<T> {
     return looseSublist(range.$1, range.$2);
   }
 
-  List<T> looseSublist(int start, int end) {
+  /// Like [List.sublist] but will never throw an exception, instead clamping [start] and [end] to
+  /// their limiting values.
+  List<T> looseSublist(int start, [int? end]) {
     if (start < 0) start = 0;
     if (start > length) start = length;
+    end ??= length;
     if (end < start) end = start;
     if (end > length) end = length;
     return sublist(start, end);
