@@ -167,6 +167,16 @@ class LibraDatabase {
     await File(databasePath).copy(newPath);
     debugPrint("LibraDatabase::backup() Backed up to $newPath");
   }
+
+  //-------------------------------------------------------------------------------------
+  // Create
+  //-------------------------------------------------------------------------------------
+  static Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
+    await backup(tag: '_upgrade$oldVersion-$newVersion');
+    if (oldVersion == 14 && newVersion == 15) {
+      await _upgrade14_15(db, oldVersion, newVersion);
+    }
+  }
 }
 
 FutureOr<void> _createDatabase(Database db, int version) async {
@@ -183,12 +193,6 @@ FutureOr<void> _createDatabase(Database db, int version) async {
   if (kDebugMode) {
     // await db.execute(createTestAccountsSql);
     // await db.execute(createTestTagsSql);
-  }
-}
-
-Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
-  if (oldVersion == 14 && newVersion == 15) {
-    await _upgrade14_15(db, oldVersion, newVersion);
   }
 }
 

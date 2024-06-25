@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -298,6 +299,10 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onPanStart(DragStartDetails details) {
+    /// A two-finger drag also triggers the pan, but this is a little unintuitive, since it is
+    /// usually related to scrolling. The localPosition is the position of your fingers on the
+    /// trackpad, not the mouse.
+    if (details.kind == PointerDeviceKind.trackpad) return;
     final userX = _getXLoc(details.localPosition, true);
     setState(() {
       hoverLocX = null;
@@ -307,6 +312,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onPanUpdate(DragUpdateDetails details) {
+    if (panStart == null) return;
     final userX = _getXLoc(details.localPosition, true);
     setState(() {
       panEnd = userX;
@@ -314,6 +320,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   }
 
   void onPanEnd(DragEndDetails details) {
+    if (panStart == null) return;
     final start = panStart;
     final end = _getXLoc(details.localPosition, true);
     setState(() {
