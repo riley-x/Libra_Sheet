@@ -219,7 +219,13 @@ class DiscreteCartesianGraph extends StatefulWidget {
 }
 
 class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
+  /// Hover positions in user coordinates
   int? hoverLocX;
+  double? hoverLocY;
+
+  /// Hover positions in pixel coordinates
+  Offset? hoverPixLoc;
+
   int? panStart;
   int? panEnd;
   DiscreteCartesianGraphPainter? painter;
@@ -252,9 +258,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.xAxis != widget.xAxis ||
         oldWidget.yAxis != widget.yAxis ||
-        oldWidget.data != widget.data ||
-        oldWidget.onTap != widget.onTap ||
-        oldWidget.hoverTooltip != widget.hoverTooltip) {
+        oldWidget.data != widget.data) {
       _initPainter();
     }
   }
@@ -281,12 +285,19 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     final userX = _getXLoc(event.localPosition);
     setState(() {
       hoverLocX = userX;
+      hoverLocY = (event.localPosition.dy > painter!.coordSpace!.yAxis.pixelMin ||
+              event.localPosition.dy < painter!.coordSpace!.yAxis.pixelMax)
+          ? null
+          : painter!.coordSpace!.yAxis.pixelToUser(event.localPosition.dy);
+      hoverPixLoc = event.localPosition;
     });
   }
 
   void onExit(PointerExitEvent event) {
     setState(() {
       hoverLocX = null;
+      hoverLocY = null;
+      hoverPixLoc = null;
     });
   }
 
@@ -306,6 +317,8 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     final userX = _getXLoc(details.localPosition, true);
     setState(() {
       hoverLocX = null;
+      hoverLocY = null;
+      hoverPixLoc = null;
       panStart = userX;
       panEnd = userX;
     });
