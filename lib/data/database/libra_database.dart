@@ -62,7 +62,7 @@ class LibraDatabase {
   static Future<void> open() async {
     _db = await openDatabase(
       databasePath,
-      version: 15,
+      version: 16,
       onCreate: _createDatabase,
       onUpgrade: _upgradeDatabase,
     );
@@ -173,14 +173,19 @@ class LibraDatabase {
   //-------------------------------------------------------------------------------------
   static Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
     await backup(tag: '_upgrade$oldVersion-$newVersion');
-    if (oldVersion == 14 && newVersion == 15) {
+    if (oldVersion <= 14 && newVersion >= 15) {
       await _upgrade14_15(db, oldVersion, newVersion);
+    }
+
+    if (oldVersion <= 15 && newVersion >= 16) {
+      await _upgrade15_16(db);
     }
   }
 }
 
 FutureOr<void> _createDatabase(Database db, int version) async {
   await db.execute(createAccountsTableSql);
+  await db.execute(upgradeAccountsTableSql_15_16);
   await db.execute(createCategoryTableSql);
   await db.execute(createCategoryHistoryTableSql);
   await db.execute(createRulesTableSql);
@@ -209,4 +214,8 @@ Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
     FROM cte
     WHERE $tagsTable.id = cte.id
   """);
+}
+
+Future<void> _upgrade15_16(Database db) async {
+  await db.execute(upgradeAccountsTableSql_15_16);
 }

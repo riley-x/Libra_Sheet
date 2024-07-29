@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:libra_sheet/data/database/category_history.dart';
@@ -12,6 +13,11 @@ const _key = "id";
 const _balance = "current_balance";
 const _index = "listIndex";
 
+/// See [Account.lastUserUpdate]
+const _lastUserUpdate = "last_user_update";
+
+const _lastTransaction = "last_transaction";
+
 const createAccountsTableSql = "CREATE TABLE IF NOT EXISTS `accounts` ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "`name` TEXT NOT NULL, "
@@ -21,6 +27,9 @@ const createAccountsTableSql = "CREATE TABLE IF NOT EXISTS `accounts` ("
     "`screenReaderAlias` TEXT NOT NULL DEFAULT '', "
     "`colorLong` INTEGER NOT NULL, "
     "$_index INTEGER NOT NULL)";
+
+const upgradeAccountsTableSql_15_16 =
+    "ALTER TABLE $accountsTable ADD COLUMN $_lastUserUpdate INTEGER;";
 
 const createTestAccountsSql = '''
 INSERT INTO $accountsTable ($_key, "name", "description", "type", "csvPattern", "screenReaderAlias", "colorLong", "listIndex") VALUES
@@ -36,6 +45,7 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
     'type': acc.type.label,
     'csvPattern': acc.csvFormat,
     'colorLong': acc.color.value,
+    _lastUserUpdate: acc.lastUserUpdate,
   };
 
   /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
@@ -49,7 +59,13 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
 }
 
 Account _fromMap(Map<String, dynamic> map) {
-  int? lastUpdated = map['last_updated'];
+  int? lastTransaction = map[_lastTransaction];
+  int? lastUserUpdate = map[_lastUserUpdate];
+  int? lastUpdated = (lastTransaction == null)
+      ? lastUserUpdate
+      : (lastUserUpdate == null)
+          ? lastTransaction
+          : max(lastTransaction, lastUserUpdate);
   return Account(
     type: AccountType.fromString(map['type']),
     key: map[_key],
@@ -58,6 +74,9 @@ Account _fromMap(Map<String, dynamic> map) {
     description: map['description'],
     color: Color(map['colorLong']),
     csvFormat: map['csvPattern'],
+    lastUserUpdate: (lastUserUpdate == null)
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(lastUserUpdate, isUtc: true),
     lastUpdated: (lastUpdated == null)
         ? null
         : DateTime.fromMillisecondsSinceEpoch(lastUpdated, isUtc: true),
@@ -77,12 +96,12 @@ extension AccountDatabaseExtension on DatabaseExecutor {
     final List<Map<String, dynamic>> maps = await rawQuery("""
       SELECT
         a.*,
-        t.last_updated,
+        t.$_lastTransaction,
         h.$_balance
       FROM
         $accountsTable a
       LEFT OUTER JOIN
-        (SELECT $transactionAccount, MAX($transactionDate) as last_updated
+        (SELECT $transactionAccount, MAX($transactionDate) as $_lastTransaction
           FROM $transactionsTable
           GROUP BY $transactionAccount) t
         ON t.$transactionAccount = a.$_key

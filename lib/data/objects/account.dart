@@ -31,6 +31,10 @@ class Account {
   Color color;
   String csvFormat;
 
+  /// This field stores the last time that a user manually marks an account as up-to-date. We also
+  /// fetch the latest transaction date, and set [lastUpdated] to the max of these two.
+  DateTime? lastUserUpdate;
+
   /// Calculated fields
   DateTime? lastUpdated;
   int balance;
@@ -40,6 +44,7 @@ class Account {
     this.name = '',
     this.balance = 0,
     this.description = '',
+    this.lastUserUpdate,
     this.lastUpdated,
     required this.color,
     this.key = 0,
