@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/dialogs/text_field_dialog.dart';
+import 'package:libra_sheet/components/menus/context_menu.dart';
+import 'package:libra_sheet/data/app_state/account_state.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
+import 'package:provider/provider.dart';
 
 class AccountCard extends StatelessWidget {
   const AccountCard({
@@ -15,6 +20,55 @@ class AccountCard extends StatelessWidget {
   final Account account;
   final Function(Account)? onTap;
   final EdgeInsets? padding;
+
+  /// Context menu
+  Future<void> _onSecondaryTapUp(BuildContext context, TapUpDetails details) async {
+    final accountState = context.read<AccountState>();
+    await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) => CustomSingleChildLayout(
+        delegate: ContextMenuPositionDelegate(target: details.globalPosition),
+        child: Material(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ContextMenuItem(
+                  text: 'Mark Up-to-date',
+                  isFirst: true,
+                  onTap: () async {
+                    final res = await showTextFieldDialog(
+                      context: context,
+                      title: "Last Updated:",
+                      initial: DateFormat('M/d/yy').format(DateTime.now()),
+                      validator: (text) {
+                        if (text?.isEmpty == true) return true;
+                        final date = text?.parseDate();
+                        return date != null;
+                      },
+                    );
+                    if (res != null) {
+                      if (res.isEmpty) {
+                        account.lastUserUpdate = null;
+                      } else {
+                        account.lastUserUpdate = res.parseDate();
+                      }
+                      await accountState.notifyUpdate(account);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +92,7 @@ class AccountCard extends StatelessWidget {
             toAccountScreen(context, account);
           }
         },
+        onSecondaryTapUp: (it) => _onSecondaryTapUp(context, it),
         child: Padding(
           padding: padding ?? const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: Row(

@@ -39,3 +39,26 @@ DateTime min(DateTime x, DateTime y) {
   if (x.compareTo(y) <= 0) return (x, y);
   return (y, x);
 }
+
+final List<DateFormat> _dateFormats = [
+  /// Make sure the MM/ are before the yyyy/ because the latter WILL parse 12 as year 0012. But
+  /// the former will fail because we use parseStrict. Also, make sure the intl package is 0.19.0
+  /// or above due to this bug https://github.com/dart-lang/i18n/issues/483 with yy parsing.
+  DateFormat('MM/dd/yy'),
+  DateFormat('MM-dd-yy'),
+  DateFormat('yyyy/MM/dd'),
+  DateFormat('yyyy-MM-dd'),
+  DateFormat("yyyy-MM-ddTHH:mm:ss"),
+  DateFormat(),
+];
+
+extension DateTimeStringExtension on String {
+  DateTime? parseDate({bool utc = true}) {
+    for (final format in _dateFormats) {
+      final dt = format.tryParseStrict(this, utc);
+      if (dt != null) return dt;
+    }
+    final dt = DateFormat('MMM dd, yy').tryParseLoose(this, utc);
+    return dt;
+  }
+}

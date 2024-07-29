@@ -82,3 +82,44 @@ class ContextMenuPositionDelegate extends SingleChildLayoutDelegate {
     return target != oldDelegate.target;
   }
 }
+
+/// This contains a single menu item for dialog menus. It should only be used inside the build of a
+/// [showDialog] because the buttons will pop the menu from the Navigator.
+class ContextMenuItem extends StatelessWidget {
+  const ContextMenuItem({
+    super.key,
+    required this.text,
+    this.onTap,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  final String text;
+  final bool isFirst;
+  final bool isLast;
+  final Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 150,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context, text);
+          onTap?.call();
+        },
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular((isFirst) ? 10 : 0),
+          bottom: Radius.circular((isLast) ? 10 : 0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Text(
+            text,
+            maxLines: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}

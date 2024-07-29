@@ -38,7 +38,7 @@ class AccountState extends ChangeNotifier {
     for (final newAcc in tempList) {
       final oldAcc = map[newAcc.key];
       oldAcc?.balance = newAcc.balance;
-      oldAcc?.lastUpdated = newAcc.lastUpdated;
+      oldAcc?.lastTransaction = newAcc.lastTransaction;
     }
     notifyListeners();
   }

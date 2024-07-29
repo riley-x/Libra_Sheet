@@ -45,7 +45,7 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
     'type': acc.type.label,
     'csvPattern': acc.csvFormat,
     'colorLong': acc.color.value,
-    _lastUserUpdate: acc.lastUserUpdate,
+    _lastUserUpdate: acc.lastUserUpdate?.millisecondsSinceEpoch,
   };
 
   /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
@@ -61,11 +61,6 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
 Account _fromMap(Map<String, dynamic> map) {
   int? lastTransaction = map[_lastTransaction];
   int? lastUserUpdate = map[_lastUserUpdate];
-  int? lastUpdated = (lastTransaction == null)
-      ? lastUserUpdate
-      : (lastUserUpdate == null)
-          ? lastTransaction
-          : max(lastTransaction, lastUserUpdate);
   return Account(
     type: AccountType.fromString(map['type']),
     key: map[_key],
@@ -77,9 +72,9 @@ Account _fromMap(Map<String, dynamic> map) {
     lastUserUpdate: (lastUserUpdate == null)
         ? null
         : DateTime.fromMillisecondsSinceEpoch(lastUserUpdate, isUtc: true),
-    lastUpdated: (lastUpdated == null)
+    lastTransaction: (lastTransaction == null)
         ? null
-        : DateTime.fromMillisecondsSinceEpoch(lastUpdated, isUtc: true),
+        : DateTime.fromMillisecondsSinceEpoch(lastTransaction, isUtc: true),
   );
 }
 

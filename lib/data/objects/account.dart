@@ -32,12 +32,21 @@ class Account {
   String csvFormat;
 
   /// This field stores the last time that a user manually marks an account as up-to-date. We also
-  /// fetch the latest transaction date, and set [lastUpdated] to the max of these two.
+  /// fetch [lastTransaction], and set [lastUpdated] to the max of these two.
   DateTime? lastUserUpdate;
 
   /// Calculated fields
-  DateTime? lastUpdated;
+  DateTime? lastTransaction;
   int balance;
+
+  DateTime? get lastUpdated {
+    if (lastUserUpdate == null) return lastTransaction;
+    if (lastTransaction == null) return lastUserUpdate;
+    if (lastTransaction!.millisecondsSinceEpoch > lastUserUpdate!.millisecondsSinceEpoch) {
+      return lastTransaction;
+    }
+    return lastUserUpdate;
+  }
 
   Account({
     this.type = AccountType.bank,
@@ -45,7 +54,7 @@ class Account {
     this.balance = 0,
     this.description = '',
     this.lastUserUpdate,
-    this.lastUpdated,
+    this.lastTransaction,
     required this.color,
     this.key = 0,
     this.csvFormat = '',
@@ -59,6 +68,6 @@ class Account {
   String dump() {
     return "Account($key: $name $description $type\n"
         "\t$color $csvFormat\n"
-        "\t$lastUpdated $balance)";
+        "\t$lastUserUpdate $lastUpdated $balance)";
   }
 }
