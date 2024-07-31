@@ -123,3 +123,22 @@ class ContextMenuItem extends StatelessWidget {
     );
   }
 }
+
+Future<T?> showContextMenu<T>({
+  required BuildContext context,
+  required TapUpDetails details,
+  Widget? child,
+}) {
+  return showDialog(
+    context: context,
+    barrierColor: Colors.transparent,
+    builder: (context) => CustomSingleChildLayout(
+      delegate: ContextMenuPositionDelegate(target: details.globalPosition),
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(10),
+        child: child,
+      ),
+    ),
+  );
+}
