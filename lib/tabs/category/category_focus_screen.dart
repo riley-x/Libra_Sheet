@@ -12,6 +12,7 @@ import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/wrapper/category_heat_map.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
 import 'package:libra_sheet/graphing/wrapper/red_green_bar_chart.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
@@ -43,10 +44,12 @@ class CategoryFocusScreen extends StatefulWidget {
 }
 
 class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
-  CategoryHistory data = CategoryHistory.empty;
-  TimeFrame historyTimeFrame = const TimeFrame(TimeFrameEnum.all);
   late TransactionService service;
   late TransactionFilters initialFilters;
+
+  TimeFrame historyTimeFrame = const TimeFrame(TimeFrameEnum.all);
+  CategoryHistory data = CategoryHistory.empty;
+  Map<int, int> subcatValues = {};
 
   Future<void> loadData() async {
     if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
@@ -66,9 +69,28 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     setState(() {
       data = newData;
     });
+
+    /// Category totals
+    _loadCategoryTotals();
   }
 
-  void onSetTimeFrame(TimeFrame it) {
+  Future<void> _loadCategoryTotals() async {
+    final appState = context.read<LibraAppState>();
+    final (start, end) = historyTimeFrame.getDateRange(appState.monthList);
+    final vals = await LibraDatabase.read((db) => db.getCategoryTotals(
+          start: start,
+          end: end?.add(const Duration(days: -1)),
+          accounts: initialFilters.accounts.map((e) => e.key),
+        ));
+    if (mounted && vals != null) {
+      setState(() {
+        subcatValues = vals;
+      });
+    }
+  }
+
+  void onSetTimeFrame(TimeFrame it) async {
+    _loadCategoryTotals();
     setState(() {
       historyTimeFrame = it;
     });
@@ -126,10 +148,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
           Expanded(
             child: _Body(
               category: widget.category,
-              initialFilters: initialFilters,
-              data: data,
-              historyTimeFrame: historyTimeFrame,
-              onSetTimeFrame: onSetTimeFrame,
+              state: this,
             ),
           ),
         ],
@@ -164,22 +183,16 @@ String? dateRangeFilterDescription(TransactionFilters filters, TransactionFilter
 class _Body extends StatelessWidget {
   const _Body({
     super.key,
-    required this.initialFilters,
     required this.category,
-    required this.data,
-    required this.historyTimeFrame,
-    required this.onSetTimeFrame,
+    required this.state,
   });
 
   final Category category;
-  final TransactionFilters initialFilters;
-  final CategoryHistory data;
-  final TimeFrame historyTimeFrame;
-  final Function(TimeFrame) onSetTimeFrame;
+  final _CategoryFocusScreenState state;
 
   @override
   Widget build(BuildContext context) {
-    final range = historyTimeFrame.getRange(data.times);
+    final range = state.historyTimeFrame.getRange(state.data.times);
     final transactionState = context.watch<TransactionFilterState>();
     return Row(
       children: [
@@ -192,7 +205,7 @@ class _Body extends StatelessWidget {
               fixedColumns: 1,
               maxRowsForName: 3,
               onSelect: (t) => toTransactionDetails(context, t),
-              filterDescription: (it) => dateRangeFilterDescription(it, initialFilters),
+              filterDescription: (it) => dateRangeFilterDescription(it, state.initialFilters),
             ),
           ),
         ),
@@ -205,11 +218,8 @@ class _Body extends StatelessWidget {
           child: (transactionState.selected.isEmpty)
               ? _HistoryChart(
                   category: category,
-                  data: data,
                   range: range,
-                  initialFilters: initialFilters,
-                  historyTimeFrame: historyTimeFrame,
-                  onSetTimeFrame: onSetTimeFrame,
+                  state: state,
                 )
               : const TransactionBulkEditor(),
         ),
@@ -222,20 +232,14 @@ class _Body extends StatelessWidget {
 class _HistoryChart extends StatelessWidget {
   const _HistoryChart({
     super.key,
-    required this.data,
-    required this.historyTimeFrame,
-    required this.onSetTimeFrame,
     required this.category,
     required this.range,
-    required this.initialFilters,
+    required this.state,
   });
 
-  final CategoryHistory data;
-  final TimeFrame historyTimeFrame;
-  final Function(TimeFrame p1) onSetTimeFrame;
+  final _CategoryFocusScreenState state;
   final Category category;
   final (int, int) range;
-  final TransactionFilters? initialFilters;
 
   @override
   Widget build(BuildContext context) {
@@ -244,8 +248,8 @@ class _HistoryChart extends StatelessWidget {
     void setFilterMonth(DateTime month) {
       final filterState = context.read<TransactionFilterState>();
       filterState.setFilters(TransactionFilters(
-        accounts: Set.from(initialFilters?.accounts ?? {}),
-        categories: CategoryTristateMap({category}, false),
+        accounts: Set.from(state.initialFilters.accounts),
+        categories: CategoryTristateMap({category}),
         startTime: month,
         endTime: month.monthEnd(),
       ));
@@ -273,16 +277,16 @@ class _HistoryChart extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                 ),
-                months: data.times,
-                selected: historyTimeFrame,
-                onSelect: onSetTimeFrame,
+                months: state.data.times,
+                selected: state.historyTimeFrame,
+                onSelect: state.onSetTimeFrame,
               ),
               const SizedBox(width: 10),
             ],
           ),
         ),
         Expanded(
-          child: (data.categories.isEmpty)
+          child: (state.data.categories.isEmpty)
               ? const SizedBox() // this prevents a flicker from the default [0, 100] empty chart
               : (category.type == ExpenseFilterType.all)
                   // This screen is also used for Investment Returns and possibly Ignore
@@ -293,64 +297,78 @@ class _HistoryChart extends StatelessWidget {
                       [
                         for (int i = range.$1; i < range.$2; i++)
                           TimeIntValue(
-                            time: data.times[i],
-                            value: data.categories.first.values[i],
+                            time: state.data.times[i],
+                            value: state.data.categories.first.values[i],
                           ),
                       ],
                       onSelect: (_, point) => setFilterMonth(point.time),
-                      onRange: onSetTimeFrame,
+                      onRange: state.onSetTimeFrame,
                     )
                   // Otherwise, just a normal category, and show the stack chart.
                   : CategoryStackChart(
-                      data: data,
+                      data: state.data,
                       range: range,
                       onTap: (category, month) {
-                        if (category == this.category) {
-                          setFilterMonth(month);
-                        } else {
-                          toCategoryScreen(
-                            context,
-                            category,
-                            initialHistoryTimeFrame: historyTimeFrame,
-                            initialFilters: TransactionFilters(
-                              startTime: month,
-                              endTime: month.monthEnd(),
-                              categories: CategoryTristateMap({category}),
-                              accounts: initialFilters?.accounts,
-                            ),
-                          );
-                        }
+                        setFilterMonth(month);
+                        // if (category == this.category) {
+                        //   setFilterMonth(month);
+                        // } else {
+                        //   toCategoryScreen(
+                        //     context,
+                        //     category,
+                        //     initialHistoryTimeFrame: state.historyTimeFrame,
+                        //     initialFilters: TransactionFilters(
+                        //       startTime: month,
+                        //       endTime: month.monthEnd(),
+                        //       categories: CategoryTristateMap({category}),
+                        //       accounts: state.initialFilters.accounts,
+                        //     ),
+                        //   );
+                        // }
                       },
-                      onRange: onSetTimeFrame,
+                      onRange: state.onSetTimeFrame,
                     ),
         ),
-        // Which values to show? Should match transaction filters? But the category history
-        // is all...and it's unintuitive what is being displayed. For example, if focusing on
-        // one month, don't want to display just one month history but do want to in heatmap.
-        // Also, it's more consistent without this because subcats, supercats, and cats without
-        // children don't have the heatmap anyways.
 
-        // if (state.aggregateValues[category.key] != state.individualValues[category.key]) ...[
-        //   const SizedBox(height: 5),
-        //   Container(
-        //     height: 1,
-        //     color: Theme.of(context).colorScheme.outlineVariant,
-        //   ),
-        //   Expanded(
-        //     child: Padding(
-        //       padding: const EdgeInsets.all(8.0),
-        //       child: CategoryHeatMap(
-        //         categories: category.subCats + [category],
-        //         individualValues: state.individualValues,
-        //         aggregateValues: state.individualValues,
-        //         // individual here because the focus screen is always nested categories
-        //         onSelect: (it) {
-        //           if (it != category) context.read<CategoryTabState>().focusCategory(it);
-        //         },
-        //       ),
-        //     ),
-        //   ),
-        // ],
+        /// Show category heat map, but only for not special categories
+        if (category.type != ExpenseFilterType.all && category.subCats.isNotEmpty)
+          // Which values to show? Should match transaction filters? But the category history
+          // is all...and it's unintuitive what is being displayed. For example, if focusing on
+          // one month, don't want to display just one month history but do want to in heatmap.
+          // Also, it's more consistent without this because subcats, supercats, and cats without
+          // children don't have the heatmap anyways.
+          ...[
+          const SizedBox(height: 5),
+          const Divider(height: 1),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CategoryHeatMap(
+                categories: category.subCats + [category],
+                individualValues: state.subcatValues,
+                aggregateValues: state.subcatValues,
+                // the focus screen is always nested categories
+                onSelect: (it) {
+                  if (it != category) {
+                    final appState = context.read<LibraAppState>();
+                    final (start, end) = state.historyTimeFrame.getDateRange(appState.monthList);
+                    toCategoryScreen(
+                      context,
+                      it,
+                      initialHistoryTimeFrame: state.historyTimeFrame,
+                      initialFilters: TransactionFilters(
+                        startTime: start,
+                        endTime: end?.add(const Duration(days: -1)),
+                        categories: CategoryTristateMap({it}),
+                        accounts: state.initialFilters.accounts,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

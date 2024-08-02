@@ -47,6 +47,21 @@ class TimeFrame {
       return (start, end);
     }
   }
+
+  /// See [getRange], but returns the dates.
+  (DateTime?, DateTime?) getDateRange(List<DateTime> times) {
+    if (selection == TimeFrameEnum.custom) {
+      final (start, end) = getRange(times);
+      if (end == times.length) return (times[start], null);
+      return (times[start], times[end]);
+    }
+    return switch (selection) {
+      TimeFrameEnum.oneYear => (times[max(0, times.length - 12)], null),
+      TimeFrameEnum.twoYear => (times[max(0, times.length - 24)], null),
+      TimeFrameEnum.all => (null, null),
+      TimeFrameEnum.custom => (null, null)
+    };
+  }
 }
 
 /// Segmented button for a monthly time frame. Includes a "custom" option that upon clicking will
