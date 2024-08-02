@@ -22,7 +22,7 @@ final List<Account> testAccounts = [
     name: 'Cash',
     description: '',
     balance: 200000,
-    lastUpdated: now.subtract(const Duration(days: 5)),
+    lastTransaction: now.subtract(const Duration(days: 5)),
     color: const Color(0xffb2d9c4),
   ),
   Account(
@@ -31,7 +31,7 @@ final List<Account> testAccounts = [
     name: 'Venmo',
     description: '',
     balance: 232600,
-    lastUpdated: now.subtract(const Duration(days: 5)),
+    lastTransaction: now.subtract(const Duration(days: 5)),
     color: const Color(0xff80b9c8),
   ),
   Account(
@@ -40,7 +40,7 @@ final List<Account> testAccounts = [
     name: 'Checkings',
     description: 'xxx-1234',
     balance: 4341200,
-    lastUpdated: now.subtract(const Duration(days: 15)),
+    lastTransaction: now.subtract(const Duration(days: 15)),
     color: const Color(0xffc29470),
   ),
   Account(
@@ -49,7 +49,7 @@ final List<Account> testAccounts = [
     name: 'Savings',
     description: 'xxx-1234',
     balance: 14221100,
-    lastUpdated: now.subtract(const Duration(days: 15)),
+    lastTransaction: now.subtract(const Duration(days: 15)),
     color: const Color(0xff247d7f),
   ),
   Account(
@@ -58,7 +58,7 @@ final List<Account> testAccounts = [
     name: 'IRA',
     description: 'xxxx-1234',
     balance: 18238900,
-    lastUpdated: now.subtract(const Duration(days: 32)),
+    lastTransaction: now.subtract(const Duration(days: 32)),
     color: const Color(0xff44916f),
   ),
   Account(
@@ -67,7 +67,7 @@ final List<Account> testAccounts = [
     name: 'Credit Card',
     description: 'xxxx-1234',
     balance: -1264900,
-    lastUpdated: now.subtract(const Duration(days: 15)),
+    lastTransaction: now.subtract(const Duration(days: 15)),
     color: Colors.pink.shade800,
   )
 ];

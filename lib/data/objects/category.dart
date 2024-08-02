@@ -19,7 +19,7 @@ class Category {
   final ExpenseFilterType type;
 
   /// Level of category. Should be [parent.level] + 1.
-  ///   0: fixed categories (income/expense/ignore)
+  ///   0: fixed categories defined below (income/expense/ignore/other)
   ///   1: top-level user categories
   ///   2: user subCategories
   ///   3+: not implemented
@@ -129,7 +129,11 @@ class Category {
   bool get isUncategorized =>
       this == Category.empty || this == Category.expense || this == Category.income;
 
-  bool get isSpecial => isUncategorized || this == Category.ignore || this == Category.other;
+  bool get isSpecial =>
+      isUncategorized ||
+      this == Category.ignore ||
+      this == Category.other ||
+      (parent?.isSpecial ?? false);
 }
 
 class CategoryHistoryEntry {
