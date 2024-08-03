@@ -27,6 +27,7 @@ const _category = "category_id";
 
 const _allocCategoryKeys = "alloc_categories";
 const _allocValues = "alloc_values";
+const _allocNames = "alloc_names";
 const _reimbTotal = "reimb_total";
 
 /// Public alias column names
@@ -436,7 +437,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
 /// Creates the base query to fetch a [Transaction] from the [transactionsTable]. The statement
 /// consists of three nested select statements, from innermost to outermost:
 ///   1. [transactionsTable] joined with [tagsTable]; tag keys grouped into "tags" with GROUP_CONCAT
-///   2. Above joined with [allocationsTable]; allocations counted into [_nAlloc]
+///   2. Above joined with [allocationsTable]; a few fields like [_allocValues] GROUP_CONCAT together.
 ///   3. Above joined with [reimbursementsTable]; total reimbursements summed into [_reimbTotal]
 ///
 /// The optional parameters can add extra filters. Ensure that you add the SQL keywords though; they
@@ -463,7 +464,8 @@ String createTransactionQuery({
       SELECT 
         t.*,
         GROUP_CONCAT(a.$allocationsCategory) as $_allocCategoryKeys,
-        GROUP_CONCAT(a.$allocationsValue) as $_allocValues
+        GROUP_CONCAT(a.$allocationsValue) as $_allocValues,
+        GROUP_CONCAT(a.$allocationsName, 0x1E) as $_allocNames
       FROM (
         SELECT 
           t.*,
@@ -501,7 +503,7 @@ String createTransactionQuery({
 
   /// Basic filters (innermost where clause) ///
   String tagWhere = '';
-  void add(String query) {
+  void addTagWhere(String query) {
     if (tagWhere.isEmpty) {
       tagWhere = "WHERE $query";
     } else {
@@ -509,30 +511,24 @@ String createTransactionQuery({
     }
   }
 
-  if (filters.name != null && filters.name!.isNotEmpty) {
-    add("(UPPER(t.$_name) LIKE UPPER(?) OR UPPER(t.$_note) LIKE UPPER(?))");
-    final wc = "%${filters.name}%";
-    args.add(wc);
-    args.add(wc);
-  }
   if (filters.minValue != null) {
-    add("t.$_value >= ?");
+    addTagWhere("t.$_value >= ?");
     args.add(filters.minValue);
   }
   if (filters.maxValue != null) {
-    add("t.$_value <= ?");
+    addTagWhere("t.$_value <= ?");
     args.add(filters.maxValue);
   }
   if (filters.startTime != null) {
-    add("t.$_date >= ?");
+    addTagWhere("t.$_date >= ?");
     args.add(filters.startTime!.millisecondsSinceEpoch);
   }
   if (filters.endTime != null) {
-    add("t.$_date <= ?");
+    addTagWhere("t.$_date <= ?");
     args.add(filters.endTime!.millisecondsSinceEpoch);
   }
   if (filters.accounts.isNotEmpty) {
-    add("t.$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
+    addTagWhere("t.$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
     args.addAll(filters.accounts.map((e) => e.key));
   }
 
@@ -551,8 +547,16 @@ String createTransactionQuery({
 
   /// Categories ///
   /// These must be done together during the allocation group-by HAVING clause.
-  var categories = filters.categories.activeKeys();
   var allocHaving = '';
+  void addAllocHaving(String query) {
+    if (allocHaving.isEmpty) {
+      allocHaving = "HAVING $query";
+    } else {
+      allocHaving += " AND $query";
+    }
+  }
+
+  var categories = filters.categories.activeKeys();
   if (categories.isNotEmpty) {
     /// Include [Category.income] and [Category.expense] if the filter calls for [Category.empty].
     if (categories.contains(Category.empty.key)) {
@@ -560,26 +564,32 @@ String createTransactionQuery({
     }
 
     /// When transaction category is in the list
-    allocHaving = "HAVING (t.$_category in (${List.filled(categories.length, '?').join(',')})";
+    var q = "(t.$_category in (${List.filled(categories.length, '?').join(',')})";
     args.addAll(categories);
 
     /// When transaction has an allocation category in the list
-    allocHaving += " OR max(CASE a.$allocationsCategory";
+    q += " OR max(CASE a.$allocationsCategory";
     for (final cat in categories) {
-      allocHaving += " WHEN ? THEN 1";
+      q += " WHEN ? THEN 1";
       args.add(cat);
     }
-    allocHaving += " ELSE 0 END) = 1)";
+    q += " ELSE 0 END) = 1)";
+
+    addAllocHaving(q);
   }
 
   /// Allocations ///
   if (filters.hasAllocation == true) {
-    if (allocHaving.isNotEmpty) {
-      allocHaving += " AND ";
-    } else {
-      allocHaving = "HAVING ";
-    }
-    allocHaving += "COUNT(a.$allocationsKey) > 0";
+    addAllocHaving("COUNT(a.$allocationsKey) > 0");
+  }
+
+  /// Text search ///
+  if (filters.name != null && filters.name!.isNotEmpty) {
+    addAllocHaving("(t.$_name LIKE ? OR t.$_note LIKE ? OR $_allocNames LIKE ?)");
+    final wc = "%${filters.name}%";
+    args.add(wc);
+    args.add(wc);
+    args.add(wc);
   }
 
   /// Reimbursements ///

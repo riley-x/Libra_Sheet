@@ -66,8 +66,9 @@ extension ReimbursementsTransactionExtension on Transaction {
     assert(r.value >= 0);
     if (parent.account == null) throw StateError("addReimbursement() parent account is null");
     if (r.target.account == null) throw StateError("addReimbursement() target account is null");
-    if (parent.value * r.target.value > 0)
+    if (parent.value * r.target.value > 0) {
       throw StateError("addReimbursement() transactions have same sign");
+    }
 
     await _insert(r, parent: parent);
     r.commitedValue = r.value;
@@ -112,8 +113,9 @@ extension ReimbursementsTransactionExtension on Transaction {
     assert(r.value >= 0);
     if (parent.account == null) throw StateError("deleteReimbursement() parent account is null");
     if (r.target.account == null) throw StateError("deleteReimbursement() target account is null");
-    if (parent.value * r.target.value > 0)
+    if (parent.value * r.target.value > 0) {
       throw StateError("deleteReimbursement() transactions have same sign");
+    }
 
     await _delete(r, parent: parent);
     final income = (parent.value > 0) ? parent : r.target;

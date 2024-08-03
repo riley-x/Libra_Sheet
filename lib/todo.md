@@ -2,7 +2,6 @@
   
 
 ## High priority features
-- Include allocation names in filter search
 
 
 ## Medium priority features
