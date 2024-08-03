@@ -48,7 +48,7 @@ class TransactionFiltersColumn extends StatelessWidget {
 
                 /// Text
                 const SizedBox(height: 15),
-                Text("Name", style: textStyle),
+                Text("Description", style: textStyle),
                 const SizedBox(height: 5),
                 const _NameFilter(),
 

@@ -21,8 +21,24 @@ class TransactionTab extends StatelessWidget {
         SizedBox(
           width: 300,
           child: (state.selected.isEmpty)
-              ? const TransactionFiltersColumn(
-                  interiorPadding: EdgeInsets.symmetric(horizontal: 10),
+              ? Column(
+                  children: [
+                    const Expanded(
+                      child: TransactionFiltersColumn(
+                        interiorPadding: EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ElevatedButton(
+                      onPressed: () => state.resetFilters(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+                        foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                      ),
+                      child: const Text('Reset'),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 )
               : const TransactionBulkEditor(),
         ),
