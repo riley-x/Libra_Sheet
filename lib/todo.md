@@ -2,13 +2,13 @@
   
 
 ## High priority features
+- Include allocation names in filter search
 
 
 ## Medium priority features
 - Start screen and UX
 - Choose category/account on CSV column?
 - Delete account
-- Include allocation names in filter search
 - sort transactions by value?
 - Loading scrim across full app?
 - Load more transactions on reach end of transaction grid?

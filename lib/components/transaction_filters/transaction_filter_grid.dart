@@ -200,6 +200,17 @@ class TransactionGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (transactions.isEmpty) {
+      return Center(
+        child: Text(
+          "No transactions",
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
+        ),
+      );
+    }
+
     // Don't use GridLayout here because it has to fix the aspect ratio on the items instead
     // of using the instrinsic height.
     return LayoutBuilder(
