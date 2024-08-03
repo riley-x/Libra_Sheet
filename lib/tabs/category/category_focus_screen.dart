@@ -79,7 +79,7 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
     final (start, end) = historyTimeFrame.getDateRange(appState.monthList);
     final vals = await LibraDatabase.read((db) => db.getCategoryTotals(
           start: start,
-          end: end?.add(const Duration(days: -1)),
+          end: end?.monthEnd(),
           accounts: initialFilters.accounts.map((e) => e.key),
         ));
     if (mounted && vals != null) {
@@ -90,10 +90,10 @@ class _CategoryFocusScreenState extends State<CategoryFocusScreen> {
   }
 
   void onSetTimeFrame(TimeFrame it) async {
-    _loadCategoryTotals();
     setState(() {
       historyTimeFrame = it;
     });
+    _loadCategoryTotals();
   }
 
   @override

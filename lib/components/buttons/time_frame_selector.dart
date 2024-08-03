@@ -48,7 +48,7 @@ class TimeFrame {
     }
   }
 
-  /// See [getRange], but returns the dates.
+  /// See [getRange], but returns the dates. End is inclusive!!!
   (DateTime?, DateTime?) getDateRange(List<DateTime> times) {
     return switch (selection) {
       TimeFrameEnum.oneYear => (times[max(0, times.length - 12)], null),
