@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:provider/provider.dart';
 
@@ -55,6 +56,10 @@ class CashFlowTabFilters extends StatelessWidget {
         //   headerStyle: Theme.of(context).textTheme.bodyMedium,
         //   whenChanged: (_, __) => state.loadValues(),
         // ),
+
+        /// Details
+        const Spacer(),
+        const _Details(),
       ],
     );
   }
@@ -112,6 +117,52 @@ class _SubCategorySwitch extends StatelessWidget {
       onChanged: state.shouldShowSubCategories,
       activeColor: Theme.of(context).colorScheme.surfaceTint,
       activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
+    );
+  }
+}
+
+class _Details extends StatelessWidget {
+  const _Details({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<CashFlowState>();
+    final style = Theme.of(context).textTheme.bodySmall;
+    return DefaultTextStyle(
+      style: style!,
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: switch (state.type) {
+              CashFlowType.categories => [
+                  const Text('Total Income:'),
+                  const Text('Total Expense:'),
+                ],
+              CashFlowType.net => [
+                  const Text('Net Income:'),
+                  const Text('Net Other:'),
+                ]
+            },
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: switch (state.type) {
+              CashFlowType.categories => [
+                  Text(state.incomeTotal.dollarString()),
+                  Text(state.expenseTotal.abs().dollarString()),
+                ],
+              CashFlowType.net => [
+                  Text((state.incomeTotal + state.expenseTotal).dollarString()),
+                  Text(state.otherTotal.abs().dollarString()),
+                ],
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -129,12 +129,9 @@ class Category {
   bool get isUncategorized =>
       this == Category.empty || this == Category.expense || this == Category.income;
 
-  bool get predefined =>
-      isUncategorized ||
-      this == Category.ignore ||
-      this == Category.other ||
-      parent == Category.ignore ||
-      parent == Category.other;
+  bool get isOther => this == Category.other || parent == Category.other;
+
+  bool get predefined => isUncategorized || this == Category.ignore || this == Category.other;
 }
 
 class CategoryHistoryEntry {

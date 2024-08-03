@@ -3,6 +3,8 @@ import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -42,7 +44,14 @@ class CashFlowState extends fnd.ChangeNotifier {
   List<TimeIntValue> netIncome = [];
   List<TimeIntValue> netReturns = [];
 
+  /// Totals
+  int incomeTotal = 0;
+  int expenseTotal = 0;
+  int otherTotal = 0;
+
   Future<void> load() async {
+    _loadTotals();
+
     final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
           accounts: accounts.map((e) => e.key),
         ));
@@ -79,6 +88,39 @@ class CashFlowState extends fnd.ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _loadTotals() async {
+    /// Get months
+    final range = timeFrame.getDateRange(appState.monthList);
+    final startMonth = range.$1 ?? appState.monthList.first;
+    final endMonth = range.$2 ?? appState.monthList.last;
+
+    /// Load
+    final vals = await LibraDatabase.read((db) => db.getCategoryTotals(
+          start: startMonth,
+          end: endMonth.monthEnd(),
+          accounts: accounts.map((e) => e.key),
+        ));
+    if (_disposed) return; // can happen due to async gap
+    if (vals == null) return;
+
+    /// Sum
+    incomeTotal = 0;
+    expenseTotal = 0;
+    otherTotal = 0;
+    final categories = appState.categories.createKeyMap();
+    for (final x in vals.entries) {
+      final cat = categories[x.key];
+      if (cat?.type == ExpenseFilterType.income) {
+        incomeTotal += x.value;
+      } else if (cat?.type == ExpenseFilterType.expense) {
+        expenseTotal += x.value;
+      } else if (cat?.isOther == true) {
+        otherTotal += x.value;
+      }
+    }
+    notifyListeners();
+  }
+
   //------------------------------------------------------------------------------
   // Filter field callbacks
   //------------------------------------------------------------------------------
@@ -90,6 +132,7 @@ class CashFlowState extends fnd.ChangeNotifier {
   void setTimeFrame(TimeFrame t) {
     timeFrame = t;
     notifyListeners();
+    _loadTotals();
   }
 
   void shouldShowSubCategories(bool x) {
