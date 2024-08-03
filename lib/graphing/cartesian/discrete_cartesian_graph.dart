@@ -391,7 +391,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                     xEnd: panEnd!.toDouble(),
                     coords: painter!.coordSpace!,
                   ),
-                )
+                ),
             ],
           ],
         ),

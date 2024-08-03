@@ -4,6 +4,12 @@ import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
+import 'package:libra_sheet/graphing/series/rectangle_series.dart';
+import 'package:libra_sheet/graphing/series/line_series.dart';
+import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 
@@ -74,6 +80,10 @@ class CategoryTabFilters extends StatelessWidget {
             _AveragesSwitch(),
           ],
         ),
+
+        // Mini barchart
+        const Spacer(),
+        const _MiniChart(),
       ],
     );
   }
@@ -143,6 +153,56 @@ class _AveragesSwitch extends StatelessWidget {
         onChanged: categoryTabState.shouldShowAverages,
         activeColor: Theme.of(context).colorScheme.surfaceTint,
         activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
+      ),
+    );
+  }
+}
+
+class _MiniChart extends StatelessWidget {
+  const _MiniChart({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<CategoryTabState>();
+    (int, int)? highlightRange = state.timeFrame.getRange(state.categoryHistory.times);
+    if (highlightRange == (0, state.categoryHistory.times.length)) {
+      highlightRange = null;
+    } else {
+      highlightRange = (highlightRange.$1, highlightRange.$2 - 1);
+    }
+    return SizedBox(
+      height: 120,
+      child: CategoryStackChart(
+        yAxis: CartesianAxis(
+          theme: Theme.of(context),
+          axisLoc: null,
+          labels: [],
+        ),
+        // xAxis: MonthAxis(
+        //   theme: Theme.of(context),
+        //   axisLoc: 0,
+        //   dates: state.categoryHistory.times,
+        // ),
+        data: state.categoryHistory,
+        // averageColor: Colors.green,
+        // onTap: (category, month) => onTap(category, month),
+        onRange: state.setTimeFrame,
+        hoverTooltip: (painter, i) => PooledTooltip(painter, i, series: const []), // just show date
+        extraSeries: [
+          if (highlightRange != null)
+            RectangleSeries(
+              name: 'Current Range',
+              color: Colors.blue.withAlpha(80),
+              data: [
+                Rect.fromLTRB(
+                  highlightRange.$1.toDouble(),
+                  double.infinity,
+                  highlightRange.$2.toDouble(),
+                  double.infinity,
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

@@ -85,6 +85,9 @@ class CategoryTabState extends ChangeNotifier {
   /// aggregation of subcat values, useful for finding the "unsubcategorized" amount.
   Map<int, int> individualValues = {};
 
+  /// We also get the full month-by-month history for the mini barchart. Only need aggregated here.
+  CategoryHistory categoryHistory = CategoryHistory.empty;
+
   /// Aggregate subcat values into parent categories. No recurse because max level = 2.
   void _aggregateSubCatVals(Category parent) {
     var val = aggregateValues[parent.key] ?? 0;
@@ -97,18 +100,12 @@ class CategoryTabState extends ChangeNotifier {
   void loadValues() async {
     timeFrameMonths = null;
     if (appState.monthList.isEmpty) return;
+    _loadHistory();
 
     /// Get months
-    final startMonth = switch (timeFrame.selection) {
-      TimeFrameEnum.all => appState.monthList.first,
-      TimeFrameEnum.oneYear => appState.monthList[max(0, appState.monthList.length - 12)],
-      TimeFrameEnum.twoYear => appState.monthList[max(0, appState.monthList.length - 24)],
-      TimeFrameEnum.custom => timeFrame.customStart!,
-    };
-    final endMonth = switch (timeFrame.selection) {
-      TimeFrameEnum.custom => timeFrame.customEndInclusive!,
-      _ => appState.monthList.last,
-    };
+    final range = timeFrame.getDateRange(appState.monthList);
+    final startMonth = range.$1 ?? appState.monthList.first;
+    final endMonth = range.$2 ?? appState.monthList.last;
     timeFrameMonths = (startMonth, endMonth);
 
     /// Load
@@ -127,6 +124,25 @@ class CategoryTabState extends ChangeNotifier {
     }
     for (final cat in appState.categories.expense.subCats) {
       _aggregateSubCatVals(cat);
+    }
+    notifyListeners();
+  }
+
+  Future<void> _loadHistory() async {
+    final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
+          accounts: accounts.map((e) => e.key),
+        ));
+    if (_disposed || rawHistory == null) return;
+
+    /// Accumulate to level = 1 categories
+    categoryHistory = CategoryHistory(appState.monthList, invertExpenses: false);
+    categoryHistory.addIndividual(appState.categories.income, rawHistory, recurseSubcats: false);
+    categoryHistory.addIndividual(appState.categories.expense, rawHistory, recurseSubcats: false);
+    for (final cat in appState.categories.income.subCats) {
+      categoryHistory.addCumulative(cat, rawHistory);
+    }
+    for (final cat in appState.categories.expense.subCats) {
+      categoryHistory.addCumulative(cat, rawHistory);
     }
     notifyListeners();
   }

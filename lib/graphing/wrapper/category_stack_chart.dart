@@ -23,6 +23,10 @@ class CategoryStackChart extends StatelessWidget {
   final (int, int)? range;
   final Function(Category, DateTime)? onTap;
   final Function(TimeFrame)? onRange;
+  final Widget? Function(DiscreteCartesianGraphPainter, int?)? hoverTooltip;
+  final MonthAxis? xAxis;
+  final CartesianAxis? yAxis;
+  final List<Series> extraSeries;
 
   /// If not null, will draw a dashed line behind the bars to indicate the average.
   final Color? averageColor;
@@ -34,6 +38,10 @@ class CategoryStackChart extends StatelessWidget {
     this.onTap,
     this.onRange,
     this.averageColor,
+    this.hoverTooltip,
+    this.xAxis,
+    this.yAxis,
+    this.extraSeries = const [],
   });
 
   @override
@@ -59,16 +67,18 @@ class CategoryStackChart extends StatelessWidget {
     // build and [data] is calculated in a notifier callback or async, they can be out of sync.
     final months = data.times.looseRange(range);
     return DiscreteCartesianGraph(
-      yAxis: CartesianAxis(
-        theme: Theme.of(context),
-        axisLoc: null,
-        valToString: formatDollar,
-      ),
-      xAxis: MonthAxis(
-        theme: Theme.of(context),
-        axisLoc: 0,
-        dates: months,
-      ),
+      yAxis: yAxis ??
+          CartesianAxis(
+            theme: Theme.of(context),
+            axisLoc: null,
+            valToString: formatDollar,
+          ),
+      xAxis: xAxis ??
+          MonthAxis(
+            theme: Theme.of(context),
+            axisLoc: 0,
+            dates: months,
+          ),
       data: SeriesCollection([
         if (averageColor != null)
           DashedHorizontalLine(
@@ -78,15 +88,17 @@ class CategoryStackChart extends StatelessWidget {
           ),
         ...incomeList,
         ...expenseList,
+        ...extraSeries,
       ]),
-      hoverTooltip: (painter, loc) => PooledTooltip(
-        painter,
-        loc,
+      hoverTooltip: hoverTooltip ??
+          (painter, loc) => PooledTooltip(
+                painter,
+                loc,
 
-        /// Positive expenses => inverted (first entry is bottom of stack)
-        /// Negative expenses => normal
-        series: incomeList.reversed.toList() + expenseList,
-      ),
+                /// Positive expenses => inverted (first entry is bottom of stack)
+                /// Negative expenses => normal
+                series: incomeList.reversed.toList() + expenseList,
+              ),
       onTap: (onTap == null)
           ? null
           : (iSeries, series, iData) {
