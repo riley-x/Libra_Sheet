@@ -230,7 +230,7 @@ class _AllocIndicator extends StatelessWidget {
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: (category.isSpecial)
+          side: (category.predefined)
               ? BorderSide(
                   color: (category == Category.other)
                       ? Theme.of(context).colorScheme.primary
@@ -238,10 +238,10 @@ class _AllocIndicator extends StatelessWidget {
               : BorderSide.none,
           borderRadius: BorderRadius.circular(8),
         ),
-        color: (category.isSpecial)
+        color: (category.predefined)
             ? null
             : Color.alphaBlend(
-                category.color.withAlpha(200), Theme.of(context).colorScheme.background),
+                category.color.withAlpha(200), Theme.of(context).colorScheme.surface),
       ),
       child: Center(
         child: Text(
@@ -249,7 +249,7 @@ class _AllocIndicator extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: (category == Category.other)
                     ? Theme.of(context).colorScheme.primary
-                    : (category.isSpecial)
+                    : (category.predefined)
                         ? Colors.grey.shade700
                         : adaptiveTextColor(category.color),
               ),
