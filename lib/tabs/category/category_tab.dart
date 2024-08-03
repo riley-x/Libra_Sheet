@@ -68,6 +68,7 @@ class _HeatMap extends StatelessWidget {
               : state.timeFrameMonths?.$2.monthEnd(),
           accounts: state.accounts,
         ),
+        initialHistoryTimeFrame: state.timeFrame,
       ),
       showSubCategories: state.showSubCategories,
       averageDenominator: state.averageDenominator(),
