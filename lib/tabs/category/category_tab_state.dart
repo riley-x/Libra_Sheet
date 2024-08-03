@@ -73,6 +73,15 @@ class CategoryTabState extends ChangeNotifier {
     notifyListeners(); // no need to reload values
   }
 
+  int months() {
+    return 1 + timeFrameMonths!.$2.monthDiff(timeFrameMonths!.$1);
+  }
+
+  int averageDenominator() {
+    if (!showAverages || timeFrameMonths == null) return 1;
+    return 1 + timeFrameMonths!.$2.monthDiff(timeFrameMonths!.$1);
+  }
+
   //--------------------------------------------------------------------------
   // Values
   //--------------------------------------------------------------------------
@@ -87,6 +96,10 @@ class CategoryTabState extends ChangeNotifier {
 
   /// We also get the full month-by-month history for the mini barchart. Only need aggregated here.
   CategoryHistory categoryHistory = CategoryHistory.empty;
+
+  /// Totals
+  int incomeTotal = 0;
+  int expenseTotal = 0;
 
   /// Aggregate subcat values into parent categories. No recurse because max level = 2.
   void _aggregateSubCatVals(Category parent) {
@@ -125,6 +138,20 @@ class CategoryTabState extends ChangeNotifier {
     for (final cat in appState.categories.expense.subCats) {
       _aggregateSubCatVals(cat);
     }
+
+    /// Totals
+    incomeTotal = 0;
+    expenseTotal = 0;
+    final categories = appState.categories.createKeyMap();
+    for (final x in vals.entries) {
+      final type = categories[x.key]?.type;
+      if (type == ExpenseFilterType.income) {
+        incomeTotal += x.value;
+      } else if (type == ExpenseFilterType.expense) {
+        expenseTotal += x.value;
+      }
+    }
+
     notifyListeners();
   }
 

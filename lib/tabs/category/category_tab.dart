@@ -70,9 +70,7 @@ class _HeatMap extends StatelessWidget {
         ),
       ),
       showSubCategories: state.showSubCategories,
-      averageDenominator: state.showAverages && state.timeFrameMonths != null
-          ? 1 + state.timeFrameMonths!.$2.monthDiff(state.timeFrameMonths!.$1)
-          : null,
+      averageDenominator: state.averageDenominator(),
     );
   }
 }

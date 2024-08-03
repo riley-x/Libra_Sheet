@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/expense_type_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
@@ -83,6 +84,7 @@ class CategoryTabFilters extends StatelessWidget {
 
         // Mini barchart
         const Spacer(),
+        const _Totals(),
         const _MiniChart(),
       ],
     );
@@ -158,18 +160,61 @@ class _AveragesSwitch extends StatelessWidget {
   }
 }
 
+class _Totals extends StatelessWidget {
+  const _Totals({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<CategoryTabState>();
+    final style = Theme.of(context).textTheme.bodySmall;
+    return DefaultTextStyle(
+      style: style!,
+      child: Row(
+        children: [
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Months:'),
+              Text('Income:'),
+              Text('Expense:'),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${state.months()}'),
+              Text(state.showAverages
+                  ? (state.incomeTotal.asDollarDouble() / state.months()).formatDollar()
+                  : state.incomeTotal.dollarString()),
+              Text(state.showAverages
+                  ? (state.expenseTotal.abs().asDollarDouble() / state.months()).formatDollar()
+                  : state.expenseTotal.abs().dollarString()),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MiniChart extends StatelessWidget {
   const _MiniChart({super.key});
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<CategoryTabState>();
+
+    /// Show a highlight of the currently selected range
     (int, int)? highlightRange = state.timeFrame.getRange(state.categoryHistory.times);
     if (highlightRange == (0, state.categoryHistory.times.length)) {
       highlightRange = null;
     } else {
       highlightRange = (highlightRange.$1, highlightRange.$2 - 1);
     }
+
     return SizedBox(
       height: 120,
       child: CategoryStackChart(
@@ -178,14 +223,7 @@ class _MiniChart extends StatelessWidget {
           axisLoc: null,
           labels: [],
         ),
-        // xAxis: MonthAxis(
-        //   theme: Theme.of(context),
-        //   axisLoc: 0,
-        //   dates: state.categoryHistory.times,
-        // ),
         data: state.categoryHistory,
-        // averageColor: Colors.green,
-        // onTap: (category, month) => onTap(category, month),
         onRange: state.setTimeFrame,
         hoverTooltip: (painter, i) => PooledTooltip(painter, i, series: const []), // just show date
         extraSeries: [
