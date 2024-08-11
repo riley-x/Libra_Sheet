@@ -155,10 +155,9 @@ class _PieCharts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final needScroll = constraints.maxHeight < 2 * HomeCharts.minPieHeight;
-      final pieChartsAligned =
-          needScroll && constraints.maxWidth > 2 * HomeCharts.minPieHeight + 16;
-      if (pieChartsAligned) {
+      /// Left/right split
+      if (constraints.maxWidth > 2 * HomeCharts.minPieHeight + 16 &&
+          constraints.maxWidth > constraints.maxHeight) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -172,7 +171,24 @@ class _PieCharts extends StatelessWidget {
             const Expanded(child: _LiabilitiesPie(null)),
           ],
         );
-      } else if (needScroll) {
+      }
+
+      /// Top/bottom split
+      else if (constraints.maxHeight > 2 * HomeCharts.minPieHeight) {
+        return Column(
+          children: [
+            const Expanded(child: _AssetsPie(null)),
+            Container(
+              height: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            const Expanded(child: _LiabilitiesPie(null)),
+          ],
+        );
+      }
+
+      /// Top/bottom fixed height with scroll
+      else {
         return ListView(
           children: [
             const Center(child: _AssetsPie(HomeCharts.minPieHeight)),
@@ -181,17 +197,6 @@ class _PieCharts extends StatelessWidget {
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
             const Center(child: _LiabilitiesPie(HomeCharts.minPieHeight)),
-          ],
-        );
-      } else {
-        return Column(
-          children: [
-            const Expanded(child: const _AssetsPie(null)),
-            Container(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const Expanded(child: _LiabilitiesPie(null)),
           ],
         );
       }
