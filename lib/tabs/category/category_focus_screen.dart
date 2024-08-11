@@ -289,10 +289,9 @@ class _HistoryChart extends StatelessWidget {
           child: (state.data.categories.isEmpty)
               ? const SizedBox() // this prevents a flicker from the default [0, 100] empty chart
               : (category.type == ExpenseFilterType.all)
-                  // This screen is also used for Investment Returns and possibly Ignore
-                  // which both use type [all]. In these cases there's gauranteed only one
-                  // category but we have both positive and negative values. So show RedGreen
-                  // instead.
+                  // This screen is also used for Other and possibly Ignore which both use type
+                  // [all]. In these cases there's gauranteed only one category but we have both
+                  // positive and negative values. So show RedGreen instead.
                   ? RedGreenBarChart(
                       [
                         for (int i = range.$1; i < range.$2; i++)
@@ -308,36 +307,14 @@ class _HistoryChart extends StatelessWidget {
                   : CategoryStackChart(
                       data: state.data,
                       range: range,
-                      onTap: (category, month) {
-                        setFilterMonth(month);
-                        // if (category == this.category) {
-                        //   setFilterMonth(month);
-                        // } else {
-                        //   toCategoryScreen(
-                        //     context,
-                        //     category,
-                        //     initialHistoryTimeFrame: state.historyTimeFrame,
-                        //     initialFilters: TransactionFilters(
-                        //       startTime: month,
-                        //       endTime: month.monthEnd(),
-                        //       categories: CategoryTristateMap({category}),
-                        //       accounts: state.initialFilters.accounts,
-                        //     ),
-                        //   );
-                        // }
-                      },
+                      averageColor: category.color,
+                      onTap: (category, month) => setFilterMonth(month),
                       onRange: state.onSetTimeFrame,
                     ),
         ),
 
         /// Show category heat map, but only for not special categories
-        if (category.type != ExpenseFilterType.all && category.subCats.isNotEmpty)
-          // Which values to show? Should match transaction filters? But the category history
-          // is all...and it's unintuitive what is being displayed. For example, if focusing on
-          // one month, don't want to display just one month history but do want to in heatmap.
-          // Also, it's more consistent without this because subcats, supercats, and cats without
-          // children don't have the heatmap anyways.
-          ...[
+        if (category.type != ExpenseFilterType.all && category.subCats.isNotEmpty) ...[
           const SizedBox(height: 5),
           const Divider(height: 1),
           Expanded(
