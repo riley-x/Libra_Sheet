@@ -45,7 +45,6 @@ Map<String, dynamic> _toMap(Account acc, {int? listIndex}) {
     'csvPattern': acc.csvFormat,
     'colorLong': acc.color.value,
     _lastUserUpdate: acc.lastUserUpdate?.millisecondsSinceEpoch,
-    'balance': 0, // deprecated
   };
 
   /// For auto-incrementing keys, make sure they are NOT in the map supplied to sqflite.
