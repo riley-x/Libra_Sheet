@@ -19,6 +19,8 @@ class CategoryState {
 
   Category income = Category.income;
   Category expense = Category.expense;
+  Category other = Category.other;
+  Category ignore = Category.ignore;
 
   //----------------------------------------------------------------------------
   // Loading

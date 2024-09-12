@@ -14,8 +14,9 @@ class StackColumnSeries<T> extends ColumnSeries<T> {
     required super.data,
     required super.valueMapper,
     super.offset,
-    super.color,
-    super.colorMapper,
+    super.fillColor,
+    super.fillColorMapper,
+    super.strokeColor,
   });
 
   // This is conveniently used to paint too, so no need to update that.
@@ -50,13 +51,13 @@ class StackColumnSeries<T> extends ColumnSeries<T> {
 final testStackColumnSeries = [
   StackColumnSeries(
     name: 'test',
-    color: Colors.blue,
+    fillColor: Colors.blue,
     data: [10000.0, 20000.0, 15000.0, -8000.0, -9000.001, 7123.45],
     valueMapper: (i, it) => it,
   ),
   StackColumnSeries(
     name: 'test',
-    color: Colors.green,
+    fillColor: Colors.green,
     data: [10000.0, 20000.0, 15000.0, 8000.0, -9000.001, 7123.45],
     valueMapper: (i, it) => it,
   ),

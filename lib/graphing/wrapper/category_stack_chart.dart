@@ -46,20 +46,56 @@ class CategoryStackChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final incomeList = <Series>[];
-    final expenseList = <Series>[];
+    final positiveList = <Series>[];
+    final negativeList = <Series>[];
     for (final categoryHistory in data.categories) {
-      final series = StackColumnSeries<int>(
-        name: categoryHistory.category.name,
-        color: categoryHistory.category.color,
-        data: categoryHistory.values.looseRange(range),
-        valueMapper: (i, item) => item.asDollarDouble(),
-      );
-
-      if (!data.invertExpenses && categoryHistory.category.type == ExpenseFilterType.expense) {
-        expenseList.add(series);
+      if (categoryHistory.category.isOther) {
+        final posSeries = StackColumnSeries<int>(
+          name: categoryHistory.category.name,
+          fillColor: Colors.blue.withAlpha(50),
+          strokeColor: Colors.blue,
+          data: categoryHistory.values.looseRange(range),
+          valueMapper: (i, item) => item >= 0 ? item.asDollarDouble() : 0,
+        );
+        final negSeries = StackColumnSeries<int>(
+          name: categoryHistory.category.name,
+          fillColor: Colors.blue.withAlpha(50),
+          strokeColor: Colors.blue,
+          data: categoryHistory.values.looseRange(range),
+          valueMapper: (i, item) => item <= 0 ? item.asDollarDouble() : 0,
+        );
+        positiveList.add(posSeries);
+        negativeList.add(negSeries);
+      } else if (categoryHistory.category == Category.ignore) {
+        final posSeries = StackColumnSeries<int>(
+          name: categoryHistory.category.name,
+          fillColor: Colors.grey.shade500.withAlpha(50),
+          strokeColor: Colors.grey.shade500,
+          data: categoryHistory.values.looseRange(range),
+          valueMapper: (i, item) => item >= 0 ? item.asDollarDouble() : 0,
+        );
+        final negSeries = StackColumnSeries<int>(
+          name: categoryHistory.category.name,
+          fillColor: Colors.grey.shade500.withAlpha(50),
+          strokeColor: Colors.grey.shade500,
+          data: categoryHistory.values.looseRange(range),
+          valueMapper: (i, item) => item <= 0 ? item.asDollarDouble() : 0,
+        );
+        positiveList.add(posSeries);
+        negativeList.add(negSeries);
       } else {
-        incomeList.add(series);
+        final series = StackColumnSeries<int>(
+          name: categoryHistory.category.name,
+          fillColor: categoryHistory.category.color,
+          data: categoryHistory.values.looseRange(range),
+          valueMapper: (i, item) => item.asDollarDouble(),
+        );
+
+        if (!data.invertExpenses && categoryHistory.category.type == ExpenseFilterType.expense) {
+          negativeList.add(series);
+        } else {
+          positiveList.add(series);
+        }
       }
     }
 
@@ -86,8 +122,8 @@ class CategoryStackChart extends StatelessWidget {
             color: averageColor!,
             lineWidth: 1.5,
           ),
-        ...incomeList,
-        ...expenseList,
+        ...positiveList,
+        ...negativeList,
         ...extraSeries,
       ]),
       hoverTooltip: hoverTooltip ??
@@ -97,7 +133,7 @@ class CategoryStackChart extends StatelessWidget {
 
                 /// Positive expenses => inverted (first entry is bottom of stack)
                 /// Negative expenses => normal
-                series: incomeList.reversed.toList() + expenseList,
+                series: positiveList.reversed.toList() + negativeList,
               ),
       onTap: (onTap == null)
           ? null

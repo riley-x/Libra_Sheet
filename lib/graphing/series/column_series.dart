@@ -9,14 +9,16 @@ class ColumnSeriesPoint<T> {
   final int index;
   final T item;
   final double value;
-  final Color color;
+  final Color fillColor;
+  final Color? strokeColor;
   final Rect pixelPos;
 
   ColumnSeriesPoint({
     required this.index,
     required this.item,
     required this.value,
-    required this.color,
+    required this.fillColor,
+    required this.strokeColor,
     required this.pixelPos,
   });
 }
@@ -24,12 +26,13 @@ class ColumnSeriesPoint<T> {
 /// A column series draws each point as a bar extending from y=0 to the value given by [valueMapper].
 /// This series
 class ColumnSeries<T> extends Series<T> {
-  Color? color;
+  Color? fillColor;
+  Color? strokeColor;
   final double Function(int i, T item) _valueMapper;
   double valueMapper(int i) => _valueMapper(i, data[i]);
 
-  /// Supply a custom color for each point. By default the series [color] is used.
-  final Color? Function(int i, T item)? colorMapper;
+  /// Supply a custom color for each point. By default the series [fillColor] is used.
+  final Color? Function(int i, T item)? fillColorMapper;
 
   /// A value betwen [-0.5, 0.5] on where to center each bar. 0 indicates the center of the bin
   /// while 0.5 indicates the midpoint between the next bin.
@@ -49,8 +52,9 @@ class ColumnSeries<T> extends Series<T> {
     required super.data,
     required double Function(int i, T item) valueMapper,
     this.offset,
-    this.color,
-    this.colorMapper,
+    this.fillColor,
+    this.fillColorMapper,
+    this.strokeColor,
   }) : _valueMapper = valueMapper;
 
   ColumnSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
@@ -58,7 +62,8 @@ class ColumnSeries<T> extends Series<T> {
       index: i,
       item: data[i],
       value: valueMapper(i),
-      color: colorMapper?.call(i, data[i]) ?? this.color ?? Colors.blue,
+      fillColor: fillColorMapper?.call(i, data[i]) ?? this.fillColor ?? Colors.blue,
+      strokeColor: this.strokeColor,
       pixelPos: coordSpace.userToPixelRect(boundingBox(i)),
     );
     assert(_renderedPoints.length == i);
@@ -71,10 +76,18 @@ class ColumnSeries<T> extends Series<T> {
     _renderedPoints.clear();
     for (int i = 0; i < data.length; i++) {
       final point = _addPoint(coordSpace, i);
-      final painter = Paint()
-        ..color = point.color
-        ..style = PaintingStyle.fill;
-      canvas.drawRect(point.pixelPos, painter);
+      canvas.drawRect(
+          point.pixelPos,
+          Paint()
+            ..color = point.fillColor
+            ..style = PaintingStyle.fill);
+      if (point.strokeColor != null && point.value != 0) {
+        canvas.drawRect(
+            point.pixelPos,
+            Paint()
+              ..color = point.strokeColor!
+              ..style = PaintingStyle.stroke);
+      }
     }
   }
 
@@ -112,7 +125,8 @@ class ColumnSeries<T> extends Series<T> {
           width: 10.0,
           height: 10.0,
           decoration: BoxDecoration(
-            color: point.color,
+            color: point.fillColor,
+            border: point.strokeColor == null ? null : Border.all(color: point.strokeColor!),
             shape: BoxShape.circle,
           ),
         ),

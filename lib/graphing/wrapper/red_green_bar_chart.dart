@@ -51,7 +51,7 @@ class RedGreenBarChart extends StatelessWidget {
           name: '',
           data: data,
           valueMapper: (i, item) => item.value.asDollarDouble(),
-          colorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
+          fillColorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
         ),
       ]),
       onTap: (onSelect == null) ? null : (_, __, i) => onSelect!(i, data[i]),

@@ -17,6 +17,7 @@ import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
@@ -24,8 +25,6 @@ import 'package:libra_sheet/tabs/home/home_tab_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
 import 'package:provider/provider.dart';
-
-import '../../graphing/cartesian/pooled_tooltip.dart';
 
 /// Main widget for displaying the details of a single account. Navigated to by clicking on an
 /// account in the HomeTab.
@@ -42,6 +41,7 @@ class _AccountScreenState extends State<AccountScreen> {
   CategoryHistory categoryHistory = CategoryHistory.empty;
   TransactionFilters? initialFilters;
   late TransactionService service;
+  bool showIgnored = false;
 
   Future<void> loadData() async {
     if (!mounted) return; // this is needed because we add [loadData] as a callback to a Notifier.
@@ -59,6 +59,10 @@ class _AccountScreenState extends State<AccountScreen> {
     newData.addIndividual(appState.categories.expense, rawHistory, recurseSubcats: false);
     for (final cat in appState.categories.income.subCats + appState.categories.expense.subCats) {
       newData.addCumulative(cat, rawHistory);
+    }
+    if (showIgnored) {
+      newData.addIndividual(appState.categories.other, rawHistory, recurseSubcats: false);
+      newData.addIndividual(appState.categories.ignore, rawHistory, recurseSubcats: false);
     }
 
     setState(() {
@@ -79,6 +83,13 @@ class _AccountScreenState extends State<AccountScreen> {
   void dispose() {
     super.dispose();
     service.removeListener(loadData);
+  }
+
+  void toggleShowIgnored(bool newValue) {
+    setState(() {
+      showIgnored = newValue;
+    });
+    loadData();
   }
 
   String? _filterDescription(TransactionFilters filters) {
@@ -126,7 +137,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                   Expanded(
                     child: (transactionState.selected.isEmpty)
-                        ? _Graphs(widget.account, categoryHistory)
+                        ? _Graphs(widget.account, categoryHistory, this)
                         : const TransactionBulkEditor(),
                   ),
                 ],
@@ -140,10 +151,11 @@ class _AccountScreenState extends State<AccountScreen> {
 }
 
 class _Graphs extends StatelessWidget {
-  const _Graphs(this.account, this.categoryHistory, {super.key});
+  const _Graphs(this.account, this.categoryHistory, this.state, {super.key});
 
   final Account account;
   final CategoryHistory categoryHistory;
+  final _AccountScreenState state;
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +194,21 @@ class _Graphs extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                'Show\nIgnored',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: state.showIgnored,
+                  onChanged: state.toggleShowIgnored,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             ],
