@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/common_back_bar.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
-import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_grid.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/tabs/csv/add_csv_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/allocation_editor.dart';
@@ -10,6 +10,8 @@ import 'package:libra_sheet/tabs/transactionDetails/transaction_details_editor.d
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:provider/provider.dart';
 
+/// Full-screen page used when adding transactions from CSV. This shows a preview of the
+/// transactions about to be added, and allows for quick editing of them in a side bar.
 class PreviewTransactionsScreen extends StatelessWidget {
   const PreviewTransactionsScreen({super.key});
 

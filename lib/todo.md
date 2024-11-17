@@ -1,5 +1,5 @@
 ## Bugs
-  
+
 
 ## High priority features
 
@@ -21,3 +21,4 @@
 ## Low priority features
 - Animate bar charts?
 - Day-by-day charts?
+- Custom other categories

@@ -12,6 +12,11 @@ extension DateTimeUtils2 on DateTime {
     return _dateFormat.format(this);
   }
 
+  // ignore: non_constant_identifier_names
+  String MMMMyyyy() {
+    return DateFormat('MMMM yyyy').format(this);
+  }
+
   DateTime monthEnd() {
     return DateTime.utc(year, month + 1, 0);
   }
@@ -38,6 +43,10 @@ DateTime min(DateTime x, DateTime y) {
 (DateTime, DateTime) order(DateTime x, DateTime y) {
   if (x.compareTo(y) <= 0) return (x, y);
   return (y, x);
+}
+
+bool differentMonth(DateTime x, DateTime y) {
+  return x.month != y.month || x.year != y.year;
 }
 
 final List<DateFormat> _dateFormats = [

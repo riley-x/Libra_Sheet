@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:libra_sheet/components/transaction_filters/transaction_filter_grid.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters_column.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_grid.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_list.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_speed_dial.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_bulk_editor.dart';
@@ -54,12 +55,11 @@ class _TransactionList extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<TransactionFilterState>();
     return Scaffold(
-      body: TransactionGrid(
-        state.transactions,
+      body: TransactionList(
+        transactions: state.transactions,
         padding: const EdgeInsets.only(top: 10, left: 10, bottom: 80, right: 10),
         // extra padding on bottom to not overlap the floating action button
         maxRowsForName: 1,
-        fixedColumns: 1,
         onTap: (t, i) => toTransactionDetails(context, t),
         onMultiselect: state.multiSelect,
         selected: state.selected,
