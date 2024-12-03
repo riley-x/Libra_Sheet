@@ -278,6 +278,7 @@ class AddCsvState extends ChangeNotifier {
         switch (columnTypes[col]) {
           case CsvDate():
             date = _parseDate(text);
+            if (date != null) date = DateTime.utc(date.year, date.month, date.day);
           case CsvAmount():
             int? val = text.toIntDollar();
             if (val == null) continue;
