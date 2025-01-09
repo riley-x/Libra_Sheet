@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
+import 'package:libra_sheet/tabs/analyze/analyze_tab.dart';
+import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
 import 'package:libra_sheet/tabs/cashFlow/cash_flow_state.dart';
 import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:libra_sheet/tabs/home/home_tab_state.dart';
@@ -92,6 +94,7 @@ class LibraApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: state.accounts),
         ChangeNotifierProvider.value(value: GoogleDrive()),
         ChangeNotifierProvider(create: (_) => HomeTabState(state)),
+        ChangeNotifierProvider(create: (_) => AnalyzeTabState(state)),
         ChangeNotifierProvider(create: (_) => CategoryTabState(state)),
         ChangeNotifierProvider(create: (_) => CashFlowState(state)),
         // used by the transaction tab
@@ -155,6 +158,7 @@ class _Home extends StatelessWidget {
 
     var widgets = [
       const HomeTab(),
+      const AnalyzeTab(),
       const CashFlowTab(),
       const CategoryTab(),
       const TransactionTab(),

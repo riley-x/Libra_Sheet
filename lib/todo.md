@@ -5,6 +5,12 @@
 
 
 ## Medium priority features
+- Redo cash flow screen, combine with categories screen. View options (vertical selector with two columns):
+  - Stacked columns (double sided) (subcats as toggle in chart title instead of side bar)
+  - Net income (expense/income totals as lines, with red/green columns for net. Maybe include toggle in chart title for showing lines or not instead of side bar) Maybe show income as another series (parallel bars)
+  - Flows (expense) | Flows (income) (totals as bars at bottom)
+  - Heatmap (expense) | Heatmap (income)
+  - Move spark chart up beneath time frame
 - Start screen and UX
 - Choose category/account on CSV column?
 - Delete account
