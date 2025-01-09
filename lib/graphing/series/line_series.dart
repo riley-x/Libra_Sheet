@@ -55,23 +55,36 @@ class LineSeries<T> extends Series<T> {
     _renderedPoints.clear();
     if (data.length <= 1) return;
 
+    var negative = false;
+
     /// Line
     final path = Path();
+
     final start = _addPoint(coordSpace, 0);
     path.moveTo(start.pixelPos.dx, start.pixelPos.dy);
+    if (start.value.dy < 0) negative = true;
+
     for (int i = 1; i < data.length; i++) {
       final curr = _addPoint(coordSpace, i);
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
+      if (curr.value.dy < 0) negative = true;
     }
     canvas.drawPath(path, linePainter);
 
-    /// Gradient
+    /// Gradient; TODO this assumes all points are on same side of 0
     if (gradient != null) {
-      path.lineToOffset(coordSpace.userToPixel(
-          Offset(valueMapper(data.length - 1, data.last).dx, coordSpace.yAxis.userMin)));
       path.lineToOffset(
-          coordSpace.userToPixel(Offset(valueMapper(0, data.first).dx, coordSpace.yAxis.userMin)));
-      canvas.drawPath(path, Paint()..shader = gradient!.createShader(coordSpace.canvasSize));
+          coordSpace.userToPixel(Offset(valueMapper(data.length - 1, data.last).dx, 0)));
+      path.lineToOffset(coordSpace.userToPixel(Offset(valueMapper(0, data.first).dx, 0)));
+      canvas.drawPath(
+          path,
+          Paint()
+            ..shader = gradient!.createShader(Rect.fromLTRB(
+              0,
+              negative ? coordSpace.yAxis.userToPixel(0) : coordSpace.yAxis.pixelMax,
+              coordSpace.xAxis.canvasSize,
+              negative ? coordSpace.yAxis.pixelMin : coordSpace.yAxis.userToPixel(0),
+            )));
     }
   }
 

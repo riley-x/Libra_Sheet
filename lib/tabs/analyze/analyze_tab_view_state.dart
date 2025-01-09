@@ -1,16 +1,62 @@
-sealed class AnalyzeTabViewState {}
+enum AnalyzeTabView {
+  doubleStack,
+  netIncome,
+  expenseFlow,
+  incomeFlow,
+  expenseHeatmap,
+  incomeHeatmap
+}
 
-class DoubleStackView extends AnalyzeTabViewState with SubcatToggle {}
+sealed class AnalyzeTabViewState {
+  AnalyzeTabView get type;
 
-class NetIncomeView extends AnalyzeTabViewState {}
+  static AnalyzeTabViewState of(AnalyzeTabView view) {
+    switch (view) {
+      case AnalyzeTabView.doubleStack:
+        return DoubleStackView();
+      case AnalyzeTabView.netIncome:
+        return NetIncomeView();
+      case AnalyzeTabView.expenseFlow:
+        return ExpenseFlowsView();
+      case AnalyzeTabView.incomeFlow:
+        return IncomeFlowsView();
+      case AnalyzeTabView.expenseHeatmap:
+        return ExpenseHeatmapView();
+      case AnalyzeTabView.incomeHeatmap:
+        return IncomeHeatmapView();
+    }
+  }
+}
 
-class ExpenseFlowsView extends AnalyzeTabViewState {}
+class DoubleStackView extends AnalyzeTabViewState with SubcatToggle {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.doubleStack;
+}
 
-class IncomeFlowsView extends AnalyzeTabViewState {}
+class NetIncomeView extends AnalyzeTabViewState {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.netIncome;
+}
 
-class ExpenseHeatmapView extends AnalyzeTabViewState {}
+class ExpenseFlowsView extends AnalyzeTabViewState {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.expenseFlow;
+}
 
-class IncomeHeatmapView extends AnalyzeTabViewState {}
+class IncomeFlowsView extends AnalyzeTabViewState {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.incomeFlow;
+}
+
+class ExpenseHeatmapView extends AnalyzeTabViewState {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.expenseHeatmap;
+}
+
+class IncomeHeatmapView extends AnalyzeTabViewState {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.incomeHeatmap;
+}
 
 mixin SubcatToggle {
   bool showSubcats = false;

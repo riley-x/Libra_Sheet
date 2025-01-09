@@ -26,6 +26,7 @@ class CategoryStackChart extends StatelessWidget {
   final Widget? Function(DiscreteCartesianGraphPainter, int?)? hoverTooltip;
   final MonthAxis? xAxis;
   final CartesianAxis? yAxis;
+  final List<Series> extraSeriesBefore;
   final List<Series> extraSeries;
 
   /// If not null, will draw a dashed line behind the bars to indicate the average.
@@ -41,6 +42,7 @@ class CategoryStackChart extends StatelessWidget {
     this.hoverTooltip,
     this.xAxis,
     this.yAxis,
+    this.extraSeriesBefore = const [],
     this.extraSeries = const [],
   });
 
@@ -113,6 +115,7 @@ class CategoryStackChart extends StatelessWidget {
             dates: months,
           ),
       data: SeriesCollection([
+        ...extraSeriesBefore,
         if (averageColor != null)
           DashedHorizontalLine(
             y: data.getDollarAverageMonthlyTotal(range),
@@ -136,8 +139,10 @@ class CategoryStackChart extends StatelessWidget {
           ? null
           : (iSeries, series, iData) {
               if (range != null) iData += range!.$1;
-              // The -1 because of the dashed horizontal line inflates the series index by 1.
+
+              iSeries -= extraSeriesBefore.length;
               if (averageColor != null) iSeries--;
+
               if (iSeries < positiveCategories.length) {
                 onTap?.call(positiveCategories[iSeries], data.times[iData]);
               } else {

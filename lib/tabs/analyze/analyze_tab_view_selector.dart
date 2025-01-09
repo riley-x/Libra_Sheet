@@ -11,13 +11,13 @@ class AnalyzeTabViewSelector extends StatelessWidget {
     return const Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _Button(text: 'Income & Expenses', type: DoubleStackView, width: 240, top: true),
-        _Button(text: 'Net Income', type: NetIncomeView, width: 240),
+        _Button(text: 'Income & Expenses', view: AnalyzeTabView.doubleStack, width: 240, top: true),
+        _Button(text: 'Net Income', view: AnalyzeTabView.netIncome, width: 240),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _Button(text: 'Expense Flow', type: ExpenseFlowsView, width: 120, left: true),
-            _Button(text: 'Income Flow', type: IncomeFlowsView, width: 120),
+            _Button(text: 'Expense Flow', view: AnalyzeTabView.expenseFlow, width: 120, left: true),
+            _Button(text: 'Income Flow', view: AnalyzeTabView.incomeFlow, width: 120),
           ],
         ),
         Row(
@@ -25,12 +25,17 @@ class AnalyzeTabViewSelector extends StatelessWidget {
           children: [
             _Button(
               text: 'Expense Pie',
-              type: ExpenseHeatmapView,
+              view: AnalyzeTabView.expenseHeatmap,
               width: 120,
               left: true,
               bottom: true,
             ),
-            _Button(text: 'Income Pie', type: IncomeHeatmapView, width: 120, bottom: true),
+            _Button(
+              text: 'Income Pie',
+              view: AnalyzeTabView.incomeHeatmap,
+              width: 120,
+              bottom: true,
+            ),
           ],
         ),
       ],
@@ -42,7 +47,7 @@ class _Button extends StatelessWidget {
   const _Button({
     super.key,
     required this.text,
-    required this.type,
+    required this.view,
     required this.width,
     this.top = false,
     this.left = false,
@@ -52,7 +57,7 @@ class _Button extends StatelessWidget {
   static const double height = 30;
 
   final String text;
-  final Type type;
+  final AnalyzeTabView view;
   final double width;
   final bool top;
   final bool left;
@@ -60,8 +65,7 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool selected =
-        context.select<AnalyzeTabState, bool>((state) => state.viewState.runtimeType == type);
+    bool selected = context.select<AnalyzeTabState, bool>((state) => state.viewState.type == view);
 
     const radius = Radius.circular(12);
     var borderRadius = top
@@ -94,7 +98,7 @@ class _Button extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: borderRadius,
-        onTap: () {},
+        onTap: () => context.read<AnalyzeTabState>().setViewState(view),
         child: Center(
           child: Text(
             text,

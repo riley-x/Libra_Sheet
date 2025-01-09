@@ -4,11 +4,16 @@ import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
+import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
+import 'package:libra_sheet/graphing/series/line_series.dart';
+import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_selector.dart';
@@ -51,6 +56,8 @@ class _Charts extends StatelessWidget {
     switch (state.viewState) {
       case DoubleStackView():
         return const _DoubleSidedChart();
+      case NetIncomeView():
+        return const _NetIncomeChart();
       default:
         return const Placeholder();
     }
@@ -94,6 +101,86 @@ class _DoubleSidedChart extends StatelessWidget {
           ..strokeWidth = 2
           ..isAntiAlias = false,
       ),
+      extraSeriesBefore: [
+        DashedHorizontalLine(
+          y: state.incomeData.getDollarAverageMonthlyTotal(range),
+          color: Colors.green,
+          lineWidth: 1.5,
+        ),
+        DashedHorizontalLine(
+          y: state.expenseData.getDollarAverageMonthlyTotal(range),
+          color: Colors.red.shade700,
+          lineWidth: 1.5,
+        ),
+      ],
+    );
+  }
+}
+
+class _NetIncomeChart extends StatelessWidget {
+  const _NetIncomeChart({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AnalyzeTabState>();
+    final range = state.timeFrame.getRange(state.incomeData.times);
+    final dates = state.combinedHistory.times.looseRange(range);
+
+    return DiscreteCartesianGraph(
+      yAxis: CartesianAxis(
+        theme: Theme.of(context),
+        axisLoc: null,
+        valToString: formatDollar,
+      ),
+      xAxis: MonthAxis(
+        theme: Theme.of(context),
+        axisLoc: 0,
+        dates: dates,
+      ),
+      data: SeriesCollection([
+        LineSeries<int>(
+          name: "Total Income",
+          color: Colors.green,
+          data: state.incomeData.getMonthlyTotals(range),
+          valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
+          gradient: LinearGradient(
+            colors: [
+              Colors.green.withAlpha(10),
+              Colors.green.withAlpha(80),
+              Colors.green.withAlpha(170),
+            ],
+            stops: const [0.0, 0.7, 1],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          ),
+        ),
+        LineSeries<int>(
+          name: "Total Expenses",
+          color: Colors.red.shade700,
+          data: state.expenseData.getMonthlyTotals(range).invert(),
+          valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
+          gradient: LinearGradient(
+            colors: [
+              Colors.red.shade700.withAlpha(10),
+              Colors.red.shade700.withAlpha(80),
+              Colors.red.shade700.withAlpha(170),
+            ],
+            stops: const [0.0, 0.7, 1],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      ]),
+      hoverTooltip: (painter, loc) => PooledTooltip(
+        painter,
+        loc,
+        labelAlignment: Alignment.center,
+      ),
+      onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
+        TimeFrameEnum.custom,
+        customStart: dates[xStart],
+        customEndInclusive: dates[xEnd],
+      )),
     );
   }
 }

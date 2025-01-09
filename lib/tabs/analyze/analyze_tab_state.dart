@@ -91,6 +91,11 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
   //------------------------------------------------------------------------------
   // Filter field callbacks
   //------------------------------------------------------------------------------
+  void setViewState(AnalyzeTabView view) {
+    viewState = AnalyzeTabViewState.of(view);
+    notifyListeners();
+  }
+
   void setTimeFrame(TimeFrame t) {
     timeFrame = t;
     notifyListeners();

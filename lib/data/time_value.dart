@@ -151,4 +151,12 @@ extension IntListUtils on List<int> {
       this[i] += other[i];
     }
   }
+
+  List<int> invert() {
+    final out = <int>[];
+    for (var x in this) {
+      out.add(x);
+    }
+    return out;
+  }
 }
