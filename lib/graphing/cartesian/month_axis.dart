@@ -18,6 +18,7 @@ class MonthAxis extends CartesianAxis {
     this.dateToString,
     super.axisLoc,
     double pad = 0.5,
+    super.axisPainter,
   }) : super(
           min: -pad,
           max: dates.length - 1 + pad,

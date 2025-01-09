@@ -86,7 +86,7 @@ class CategoryStackChart extends StatelessWidget {
           valueMapper: (i, item) => item.asDollarDouble(),
         );
 
-        if (!data.invertExpenses && categoryHistory.category.type == ExpenseFilterType.expense) {
+        if (categoryHistory.category.type == ExpenseFilterType.expense) {
           negativeSeries.add(series);
           negativeCategories.add(categoryHistory.category);
         } else {

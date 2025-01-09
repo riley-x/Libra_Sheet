@@ -158,6 +158,7 @@ class CategoryHistory {
   }) : categories = [];
 
   /// This constructor applies no checks on whether [categories] aligns with [times].
+  /// [invertExpenses] and [cumulateTimeValues] are not used.
   const CategoryHistory.fromList(
     this.times,
     this.categories, {
