@@ -244,6 +244,19 @@ class CategoryHistory {
   double getDollarAverageMonthlyTotal([(int, int)? range]) {
     return getDollarAverage(getMonthlyTotals(range));
   }
+
+  Map<int, int> getCategoryTotals([(int, int)? range, bool absolute = false]) {
+    range ??= (0, times.length);
+    final out = <int, int>{};
+    for (final cat in categories) {
+      var total = 0;
+      for (int i = range.$1; i < range.$2; i++) {
+        total += cat.values[i];
+      }
+      out[cat.category.key] = absolute ? total.abs() : total;
+    }
+    return out;
+  }
 }
 
 /// A tristate map for checkboxes. Categories can have three states:
@@ -342,6 +355,15 @@ extension CategoryList on List<Category> {
   Map<int, Category> createKeyMap() {
     final out = <int, Category>{};
     _addToKeyMap(out);
+    return out;
+  }
+
+  List<Category> flattened() {
+    final out = <Category>[];
+    for (final cat in this) {
+      out.addAll(cat.subCats);
+      out.add(cat);
+    }
     return out;
   }
 }

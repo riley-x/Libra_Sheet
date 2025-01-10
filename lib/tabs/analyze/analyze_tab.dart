@@ -6,6 +6,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_selector.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
 import 'package:libra_sheet/tabs/analyze/double_sided_graph.dart';
+import 'package:libra_sheet/tabs/analyze/heatmap_graph.dart';
 import 'package:libra_sheet/tabs/analyze/net_income_graph.dart';
 import 'package:provider/provider.dart';
 
@@ -32,6 +33,7 @@ class _Charts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AnalyzeTabState>();
+    final appState = context.watch<LibraAppState>();
     final currentView = state.currentView;
     final theme = Theme.of(context);
 
@@ -42,6 +44,12 @@ class _Charts extends StatelessWidget {
         (graph, headerElements) = doubleSidedGraph(context, state, theme);
       case AnalyzeTabView.netIncome:
         (graph, headerElements) = netIncomeGraph(state, theme);
+      case AnalyzeTabView.expenseHeatmap:
+        final categories = [appState.categories.expense, ...appState.categories.expense.subCats];
+        (graph, headerElements) = heatmapGraph(context, state, theme, categories);
+      case AnalyzeTabView.incomeHeatmap:
+        final categories = [appState.categories.income, ...appState.categories.income.subCats];
+        (graph, headerElements) = heatmapGraph(context, state, theme, categories);
       default:
         (graph, headerElements) = (const Placeholder(), const []);
     }
