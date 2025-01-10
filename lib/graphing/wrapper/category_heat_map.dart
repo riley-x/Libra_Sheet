@@ -28,6 +28,8 @@ class CategoryHeatMap extends StatefulWidget {
   final List<Category> categories;
   final Map<int, int> aggregateValues;
   final Map<int, int> individualValues;
+  final double paddingMajor;
+  final double paddingMinor;
 
   const CategoryHeatMap({
     required this.categories,
@@ -37,6 +39,8 @@ class CategoryHeatMap extends StatefulWidget {
     this.onSelect,
     this.showSubCategories = false,
     this.averageDenominator,
+    this.paddingMajor = 3,
+    this.paddingMinor = 1,
   });
 
   @override
@@ -97,10 +101,10 @@ class _CategoryHeatMapState extends State<CategoryHeatMap> {
       nestedData: (widget.showSubCategories) ? _getNested : null,
       textStyle: Theme.of(context).textTheme.labelLarge,
       paddingMapper: (depth) => (!widget.showSubCategories)
-          ? (2, 2)
+          ? (widget.paddingMajor, widget.paddingMajor)
           : (depth == 0)
-              ? (2, 2)
-              : (1, 1),
+              ? (widget.paddingMajor, widget.paddingMajor)
+              : (widget.paddingMinor, widget.paddingMinor),
     );
   }
 

@@ -59,7 +59,7 @@ import 'package:libra_sheet/data/date_time_utils.dart';
   ];
 
   final graph = Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12),
+    padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
     child: viewState.showPie
         ? PieChart(
             data: viewState.showSubcats
