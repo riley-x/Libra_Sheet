@@ -65,7 +65,7 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool selected = context.select<AnalyzeTabState, bool>((state) => state.viewState.type == view);
+    bool selected = context.select<AnalyzeTabState, bool>((state) => state.currentView == view);
 
     const radius = Radius.circular(12);
     var borderRadius = top
@@ -98,7 +98,7 @@ class _Button extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: borderRadius,
-        onTap: () => context.read<AnalyzeTabState>().setViewState(view),
+        onTap: () => context.read<AnalyzeTabState>().setView(view),
         child: Center(
           child: Text(
             text,

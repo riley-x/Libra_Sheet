@@ -10,12 +10,14 @@ enum AnalyzeTabView {
 sealed class AnalyzeTabViewState {
   AnalyzeTabView get type;
 
+  const AnalyzeTabViewState();
+
   static AnalyzeTabViewState of(AnalyzeTabView view) {
     switch (view) {
       case AnalyzeTabView.doubleStack:
-        return DoubleStackView();
+        return const DoubleStackView(showSubcats: false);
       case AnalyzeTabView.netIncome:
-        return NetIncomeView();
+        return const NetIncomeView(includeOther: false);
       case AnalyzeTabView.expenseFlow:
         return ExpenseFlowsView();
       case AnalyzeTabView.incomeFlow:
@@ -28,14 +30,30 @@ sealed class AnalyzeTabViewState {
   }
 }
 
-class DoubleStackView extends AnalyzeTabViewState with SubcatToggle {
+class DoubleStackView extends AnalyzeTabViewState {
+  const DoubleStackView({required this.showSubcats});
+
   @override
   AnalyzeTabView get type => AnalyzeTabView.doubleStack;
+
+  final bool showSubcats;
+
+  DoubleStackView withSubcats(bool value) {
+    return DoubleStackView(showSubcats: value);
+  }
 }
 
 class NetIncomeView extends AnalyzeTabViewState {
+  const NetIncomeView({required this.includeOther});
+
   @override
   AnalyzeTabView get type => AnalyzeTabView.netIncome;
+
+  final bool? includeOther;
+
+  NetIncomeView withOther(bool? value) {
+    return NetIncomeView(includeOther: value);
+  }
 }
 
 class ExpenseFlowsView extends AnalyzeTabViewState {
@@ -56,13 +74,4 @@ class ExpenseHeatmapView extends AnalyzeTabViewState {
 class IncomeHeatmapView extends AnalyzeTabViewState {
   @override
   AnalyzeTabView get type => AnalyzeTabView.incomeHeatmap;
-}
-
-mixin SubcatToggle {
-  bool showSubcats = false;
-
-  bool toggle() {
-    showSubcats = !showSubcats;
-    return showSubcats;
-  }
 }

@@ -81,7 +81,11 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
 
   /// Main view state defines which graph we're looking at as well as per-graph
   /// viewing options.
-  AnalyzeTabViewState viewState = DoubleStackView();
+  AnalyzeTabView currentView = AnalyzeTabView.doubleStack;
+  Map<AnalyzeTabView, AnalyzeTabViewState> viewStates = {
+    AnalyzeTabView.doubleStack: const DoubleStackView(showSubcats: false)
+  };
+  AnalyzeTabViewState get currentViewState => viewStates[currentView]!;
 
   /// Load filters
   final Set<Account> accounts = {};
@@ -90,8 +94,19 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
   //------------------------------------------------------------------------------
   // Filter field callbacks
   //------------------------------------------------------------------------------
-  void setViewState(AnalyzeTabView view) {
-    viewState = AnalyzeTabViewState.of(view);
+  void setView(AnalyzeTabView view) {
+    if (currentView != view) {
+      currentView = view;
+      if (!viewStates.containsKey(view)) {
+        viewStates[view] = AnalyzeTabViewState.of(view);
+      }
+      notifyListeners();
+    }
+  }
+
+  void setViewState(AnalyzeTabViewState state) {
+    assert(currentView == state.type);
+    viewStates[state.type] = state;
     notifyListeners();
   }
 

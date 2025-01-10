@@ -1,4 +1,5 @@
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 
 class TimeIntValue {
   final DateTime time;
@@ -123,6 +124,18 @@ extension TimeValueList on List<TimeIntValue> {
           value: (absValues) ? tv.value.abs() : tv.value,
         ),
     ];
+  }
+
+  int sum() {
+    var total = 0;
+    for (final x in this) {
+      total += x.value;
+    }
+    return total;
+  }
+
+  double dollarAverage() {
+    return sum().asDollarDouble() / length;
   }
 }
 

@@ -12,7 +12,6 @@ import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
-import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
@@ -31,15 +30,7 @@ class AnalyzeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Expanded(
-          child: Column(
-            children: [
-              SizedBox(height: 10),
-              Expanded(child: _Charts()),
-              SizedBox(height: 10),
-            ],
-          ),
-        ),
+        Expanded(child: _Charts()),
         VerticalDivider(width: 1, thickness: 1),
         SizedBox(width: 20),
         SizedBox(width: 250, child: _Options()),
@@ -55,92 +46,156 @@ class _Charts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AnalyzeTabState>();
+    final currentView = state.currentView;
+    final theme = Theme.of(context);
 
-    switch (state.viewState) {
-      case DoubleStackView():
-        return const _DoubleSidedChart();
-      case NetIncomeView():
-        return const _NetIncomeChart();
+    final Widget graph;
+    final List<Widget> headerElements;
+    switch (currentView) {
+      case AnalyzeTabView.doubleStack:
+        (graph, headerElements) = _doubleSidedGraph(context, state, theme);
+      case AnalyzeTabView.netIncome:
+        (graph, headerElements) = _netIncomeGraph(state, theme);
       default:
-        return const Placeholder();
-    }
-  }
-}
-
-class _DoubleSidedChart extends StatelessWidget {
-  const _DoubleSidedChart({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AnalyzeTabState>();
-    final range = state.timeFrame.getRange(state.incomeData.times);
-
-    void onTap(Category category, DateTime month) {
-      toCategoryScreen(
-        context,
-        category,
-        initialHistoryTimeFrame: state.timeFrame,
-        initialFilters: TransactionFilters(
-          startTime: month,
-          endTime: month.monthEnd(),
-          categories: CategoryTristateMap({category}),
-          accounts: Set.from(state.accounts),
-        ),
-      );
+        (graph, headerElements) = (const Placeholder(), const []);
     }
 
-    return CategoryStackChart(
-      data: state.combinedHistory,
-      range: range,
-      onTap: (category, month) => onTap(category, month),
-      onRange: state.setTimeFrame,
-      xAxis: MonthAxis(
-        theme: Theme.of(context),
-        axisLoc: 0,
-        dates: state.combinedHistory.times.looseRange(range),
-        axisPainter: Paint()
-          ..color = Theme.of(context).colorScheme.onSurface
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..isAntiAlias = false,
-      ),
-      extraSeriesBefore: [
-        DashedHorizontalLine(
-          y: state.incomeData.getDollarAverageMonthlyTotal(range),
-          color: Colors.green,
-          lineWidth: 1.5,
+    return Column(
+      children: [
+        SizedBox(
+          height: 42, // height of checkbox inkwell
+          child: Row(
+            children: [
+              if (headerElements.isNotEmpty) ...[
+                const SizedBox(width: 10),
+                // Text(
+                //   'View Options',
+                //   style: Theme.of(context)
+                //       .textTheme
+                //       .labelLarge
+                //       ?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                // ),
+                // const SizedBox(width: 20),
+                ...headerElements,
+              ],
+            ],
+          ),
         ),
-        DashedHorizontalLine(
-          y: state.expenseData.getDollarAverageMonthlyTotal(range),
-          color: Colors.red.shade700,
-          lineWidth: 1.5,
-        ),
+        const Divider(height: 1, thickness: 1),
+        Expanded(child: graph),
+        const SizedBox(height: 10),
       ],
     );
   }
 }
 
-class _NetIncomeChart extends StatelessWidget {
-  const _NetIncomeChart({super.key});
+(Widget, List<Widget>) _doubleSidedGraph(
+    BuildContext context, AnalyzeTabState state, ThemeData theme) {
+  final range = state.timeFrame.getRange(state.incomeData.times);
+  final viewState = state.currentViewState as DoubleStackView;
+  final total = state.netIncome.looseRange(range).sum();
 
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AnalyzeTabState>();
-    final range = state.timeFrame.getRange(state.incomeData.times);
-    final dates = state.combinedHistory.times.looseRange(range);
+  void onTap(Category category, DateTime month) {
+    toCategoryScreen(
+      context,
+      category,
+      initialHistoryTimeFrame: state.timeFrame,
+      initialFilters: TransactionFilters(
+        startTime: month,
+        endTime: month.monthEnd(),
+        categories: CategoryTristateMap({category}),
+        accounts: Set.from(state.accounts),
+      ),
+    );
+  }
 
-    return DiscreteCartesianGraph(
-      yAxis: CartesianAxis(
-        theme: Theme.of(context),
-        axisLoc: null,
-        valToString: formatDollar,
+  final headerElements = [
+    Text('Show Subcats', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    Checkbox(
+      value: viewState.showSubcats,
+      onChanged: (bool? value) => state.setViewState(viewState.withSubcats(value == true)),
+    ),
+    const Spacer(),
+    Text('Total: ${total.dollarString()}'),
+    const SizedBox(width: 10),
+  ];
+
+  final graph = CategoryStackChart(
+    data: viewState.showSubcats ? state.combinedHistorySubCats : state.combinedHistory,
+    range: range,
+    onTap: (category, month) => onTap(category, month),
+    onRange: state.setTimeFrame,
+    xAxis: MonthAxis(
+      theme: Theme.of(context),
+      axisLoc: 0,
+      dates: state.combinedHistory.times.looseRange(range),
+      axisPainter: Paint()
+        ..color = Theme.of(context).colorScheme.onSurface
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..isAntiAlias = false,
+    ),
+    extraSeriesBefore: [
+      DashedHorizontalLine(
+        y: state.incomeData.getDollarAverageMonthlyTotal(range),
+        color: Colors.green,
+        lineWidth: 1.5,
       ),
-      xAxis: MonthAxis(
-        theme: Theme.of(context),
-        axisLoc: 0,
-        dates: dates,
+      DashedHorizontalLine(
+        y: state.expenseData.getDollarAverageMonthlyTotal(range),
+        color: Colors.red.shade700,
+        lineWidth: 1.5,
       ),
-      data: SeriesCollection([
+    ],
+  );
+
+  return (graph, headerElements);
+}
+
+(Widget, List<Widget>) _netIncomeGraph(AnalyzeTabState state, ThemeData theme) {
+  final viewState = state.currentViewState as NetIncomeView;
+  final range = state.timeFrame.getRange(state.incomeData.times);
+  final dates = state.combinedHistory.times.looseRange(range);
+
+  final total = viewState.includeOther == true
+      ? state.netIncome.looseRange(range).sum() + state.netOther.looseRange(range).sum()
+      : viewState.includeOther == null
+          ? state.netOther.looseRange(range).sum()
+          : state.netIncome.looseRange(range).sum();
+  final average = total.asDollarDouble() / dates.length;
+
+  final headerElements = [
+    Text('Include Other', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    Checkbox(
+      value: viewState.includeOther,
+      onChanged: (bool? value) => state.setViewState(viewState.withOther(value)),
+      tristate: true,
+    ),
+    const Spacer(),
+    Text('Total: ${total.dollarString()}'),
+    const SizedBox(width: 10),
+  ];
+
+  final graph = DiscreteCartesianGraph(
+    yAxis: CartesianAxis(
+      theme: theme,
+      axisLoc: null,
+      valToString: formatDollar,
+    ),
+    xAxis: MonthAxis(
+      theme: theme,
+      axisLoc: 0,
+      dates: dates,
+    ),
+    data: SeriesCollection([
+      DashedHorizontalLine(
+        color: viewState.includeOther == null ? Colors.blue : theme.colorScheme.onSurface,
+        y: average,
+        lineWidth: 0,
+      ),
+      if (viewState.includeOther != null) ...[
         LineSeries<int>(
           name: "Total Income",
           color: Colors.green,
@@ -184,6 +239,8 @@ class _NetIncomeChart extends StatelessWidget {
           valueMapper: (i, item) => item.value.asDollarDouble(),
           fillColorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
         ),
+      ],
+      if (viewState.includeOther != false)
         StackColumnSeries<TimeIntValue>(
           name: 'Net Other',
           width: 0.6,
@@ -192,19 +249,22 @@ class _NetIncomeChart extends StatelessWidget {
           fillColorMapper: (i, item) => Colors.blue.withAlpha(50), // match CategoryStackChart
           strokeColor: Colors.blue,
         ),
-      ]),
-      hoverTooltip: (painter, loc) => PooledTooltip(
-        painter,
-        loc,
-        includeTotal: false,
-      ),
-      onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
+    ]),
+    hoverTooltip: (painter, loc) => PooledTooltip(
+      painter,
+      loc,
+      includeTotal: false,
+    ),
+    onRange: (xStart, xEnd) => state.setTimeFrame(
+      TimeFrame(
         TimeFrameEnum.custom,
         customStart: dates[xStart],
         customEndInclusive: dates[xEnd],
-      )),
-    );
-  }
+      ),
+    ),
+  );
+
+  return (graph, headerElements);
 }
 
 class _Options extends StatelessWidget {
