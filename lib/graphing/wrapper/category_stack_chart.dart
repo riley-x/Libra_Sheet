@@ -28,6 +28,7 @@ class CategoryStackChart extends StatelessWidget {
   final CartesianAxis? yAxis;
   final List<Series> extraSeriesBefore;
   final List<Series> extraSeries;
+  final double? width;
 
   /// If not null, will draw a dashed line behind the bars to indicate the average.
   final Color? averageColor;
@@ -42,6 +43,7 @@ class CategoryStackChart extends StatelessWidget {
     this.hoverTooltip,
     this.xAxis,
     this.yAxis,
+    this.width,
     this.extraSeriesBefore = const [],
     this.extraSeries = const [],
   });
@@ -57,6 +59,7 @@ class CategoryStackChart extends StatelessWidget {
     void splitDoubleSided(CategoryHistoryEntry categoryHistory, Color color) {
       final posSeries = StackColumnSeries<int>(
         name: categoryHistory.category.name,
+        width: width,
         fillColor: color.withAlpha(50),
         strokeColor: color,
         data: categoryHistory.values.looseRange(range),
@@ -64,6 +67,7 @@ class CategoryStackChart extends StatelessWidget {
       );
       final negSeries = StackColumnSeries<int>(
         name: categoryHistory.category.name,
+        width: width,
         fillColor: color.withAlpha(50),
         strokeColor: color,
         data: categoryHistory.values.looseRange(range),
@@ -83,6 +87,7 @@ class CategoryStackChart extends StatelessWidget {
       } else {
         final series = StackColumnSeries<int>(
           name: categoryHistory.category.name,
+          width: width,
           fillColor: categoryHistory.category.color,
           data: categoryHistory.values.looseRange(range),
           valueMapper: (i, item) => item.asDollarDouble(),

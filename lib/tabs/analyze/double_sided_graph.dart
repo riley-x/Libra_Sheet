@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
+import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
+import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
+import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
+import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
+import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
+
+(Widget, List<Widget>) doubleSidedGraph(
+    BuildContext context, AnalyzeTabState state, ThemeData theme) {
+  final range = state.timeFrame.getRange(state.incomeData.times);
+  final viewState = state.currentViewState as DoubleStackView;
+  final total = state.netIncome.looseRange(range).sum();
+
+  void onTap(Category category, DateTime month) {
+    toCategoryScreen(
+      context,
+      category,
+      initialHistoryTimeFrame: state.timeFrame,
+      initialFilters: TransactionFilters(
+        startTime: month,
+        endTime: month.monthEnd(),
+        categories: CategoryTristateMap({category}),
+        accounts: Set.from(state.accounts),
+      ),
+    );
+  }
+
+  final headerElements = [
+    Text('Show Subcats', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    Checkbox(
+      value: viewState.showSubcats,
+      onChanged: (bool? value) => state.setViewState(viewState.withSubcats(value == true)),
+    ),
+    const Spacer(),
+    Text('Total: ${total.dollarString()}'),
+    const SizedBox(width: 10),
+  ];
+
+  final graph = CategoryStackChart(
+    width: 0.7,
+    data: viewState.showSubcats ? state.combinedHistorySubCats : state.combinedHistory,
+    range: range,
+    onTap: (category, month) => onTap(category, month),
+    onRange: state.setTimeFrame,
+    xAxis: MonthAxis(
+      theme: Theme.of(context),
+      axisLoc: 0,
+      dates: state.combinedHistory.times.looseRange(range),
+      axisPainter: Paint()
+        ..color = Theme.of(context).colorScheme.onSurface
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..isAntiAlias = false,
+    ),
+    extraSeriesBefore: [
+      DashedHorizontalLine(
+        y: state.incomeData.getDollarAverageMonthlyTotal(range),
+        color: Colors.green,
+        lineWidth: 1.5,
+      ),
+      DashedHorizontalLine(
+        y: state.expenseData.getDollarAverageMonthlyTotal(range),
+        color: Colors.red.shade700,
+        lineWidth: 1.5,
+      ),
+    ],
+  );
+
+  return (graph, headerElements);
+}
