@@ -79,8 +79,10 @@ class PooledTooltip extends StatelessWidget {
             ),
 
             /// Divider
-            const SizedBox(height: 2),
-            Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.onBackground),
+            if (seriesList.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.onSurface),
+            ],
 
             /// Series items
             for (final s in seriesList)
@@ -91,7 +93,7 @@ class PooledTooltip extends StatelessWidget {
 
             /// Total
             if (count > 1 && includeTotal) ...[
-              Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onBackground),
+              Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
               Align(
                 alignment: labelAlignment,
                 child: Text(

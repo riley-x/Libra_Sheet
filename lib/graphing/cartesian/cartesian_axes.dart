@@ -68,17 +68,21 @@ class CartesianAxis {
 
   /// Style of the main axis line.
   final Paint? _axisPainter;
-  Paint get axisPainter => _axisPainter ?? Paint()
-    ..color = theme.colorScheme.onSurface
-    ..style = PaintingStyle.stroke
-    ..isAntiAlias = false;
+  Paint get axisPainter =>
+      _axisPainter ??
+      (Paint()
+        ..color = theme.colorScheme.onSurface
+        ..style = PaintingStyle.stroke
+        ..isAntiAlias = false);
 
   /// Style of the grid lines.
   final Paint? _gridLinePainter;
-  Paint get gridLinePainter => _gridLinePainter ?? Paint()
-    ..color = theme.colorScheme.outlineVariant.withAlpha(128)
-    ..style = PaintingStyle.stroke
-    ..isAntiAlias = false;
+  Paint get gridLinePainter =>
+      _gridLinePainter ??
+      (Paint()
+        ..color = theme.colorScheme.outlineVariant.withAlpha(128)
+        ..style = PaintingStyle.stroke
+        ..isAntiAlias = false);
 
   const CartesianAxis({
     required this.theme,
