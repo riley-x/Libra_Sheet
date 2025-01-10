@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
+import 'package:dash_painter/dash_painter.dart';
 
 class LineSeriesPoint<T> {
   final int index;
@@ -24,6 +25,7 @@ class LineSeries<T> extends Series<T> {
   final Paint linePainter;
   final double strokeWidth;
   final Gradient? gradient;
+  final DashPainter? dash;
 
   /// Cache the points to enable easy hit testing
   final List<LineSeriesPoint<T>> _renderedPoints = [];
@@ -36,6 +38,7 @@ class LineSeries<T> extends Series<T> {
     this.fillColor,
     this.strokeWidth = 3,
     this.gradient,
+    this.dash,
   }) : linePainter = Paint()
           ..color = color
           ..style = PaintingStyle.stroke
@@ -69,7 +72,11 @@ class LineSeries<T> extends Series<T> {
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
       if (curr.value.dy < 0) negative = true;
     }
-    canvas.drawPath(path, linePainter);
+    if (dash != null) {
+      dash!.paint(canvas, path, linePainter);
+    } else {
+      canvas.drawPath(path, linePainter);
+    }
 
     /// Gradient; TODO this assumes all points are on same side of 0
     if (gradient != null) {

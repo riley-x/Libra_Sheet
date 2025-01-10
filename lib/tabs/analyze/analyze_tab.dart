@@ -1,3 +1,4 @@
+import 'package:dash_painter/dash_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/menus/account_checkbox_menu.dart';
@@ -11,6 +12,7 @@ import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
+import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
@@ -141,15 +143,17 @@ class _NetIncomeChart extends StatelessWidget {
         LineSeries<int>(
           name: "Total Income",
           color: Colors.green,
+          strokeWidth: 0.5,
+          dash: const DashPainter(step: 2, span: 5),
           data: state.incomeData.getMonthlyTotals(range),
           valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
           gradient: LinearGradient(
             colors: [
-              Colors.green.withAlpha(10),
-              Colors.green.withAlpha(80),
-              Colors.green.withAlpha(170),
+              Colors.green.withAlpha(0),
+              Colors.green.withAlpha(40),
+              Colors.green.withAlpha(100),
             ],
-            stops: const [0.0, 0.7, 1],
+            stops: const [0, 0.6, 1],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
           ),
@@ -157,18 +161,27 @@ class _NetIncomeChart extends StatelessWidget {
         LineSeries<int>(
           name: "Total Expenses",
           color: Colors.red.shade700,
+          strokeWidth: 0.5,
+          dash: const DashPainter(step: 2, span: 5),
           data: state.expenseData.getMonthlyTotals(range).invert(),
           valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
           gradient: LinearGradient(
             colors: [
-              Colors.red.shade700.withAlpha(10),
-              Colors.red.shade700.withAlpha(80),
-              Colors.red.shade700.withAlpha(170),
+              Colors.red.shade700.withAlpha(0),
+              Colors.red.shade700.withAlpha(40),
+              Colors.red.shade700.withAlpha(100),
             ],
-            stops: const [0.0, 0.7, 1],
+            stops: const [0, 0.6, 1],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
+        ),
+        ColumnSeries<TimeIntValue>(
+          name: '',
+          width: 0.5,
+          data: state.netIncome.looseRange(range),
+          valueMapper: (i, item) => item.value.asDollarDouble(),
+          fillColorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
         ),
       ]),
       hoverTooltip: (painter, loc) => PooledTooltip(

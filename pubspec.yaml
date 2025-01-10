@@ -51,6 +51,7 @@ dependencies:
   http: ^1.1.2
   shared_preferences: ^2.2.2
   vector_math: ^2.1.4
+  dash_painter: ^1.0.2
 
 
 dev_dependencies:

@@ -52,6 +52,7 @@ class ColumnSeries<T> extends Series<T> {
     required super.data,
     required double Function(int i, T item) valueMapper,
     this.offset,
+    this.width,
     this.fillColor,
     this.fillColorMapper,
     this.strokeColor,
