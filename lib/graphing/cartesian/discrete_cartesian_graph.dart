@@ -305,7 +305,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   /// The pan start position is not the tap down position, and on fast enough pans,
   /// can be a different xLoc than the tap down position. So we need to store all tap down
   /// positions and use that as the panStart.
-  void onTapDown(TapDownDetails details) {
+  void onPointerDown(PointerDownEvent details) {
     final userX = _getXLoc(details.localPosition, true);
     lastTapDown = userX;
   }
@@ -368,43 +368,45 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     return MouseRegion(
       onHover: onHover,
       onExit: onExit,
-      child: GestureDetector(
-        onTapDown: onTapDown,
-        onTapUp: onTapUp,
-        onPanStart: onPanStart,
-        onPanUpdate: onPanUpdate,
-        onPanEnd: onPanEnd,
-        onPanCancel: onPanCancel,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            RepaintBoundary(
-              child: CustomPaint(
-                painter: painter,
-                size: Size.infinite,
-              ),
-            ),
-            if (painter != null && painter!.coordSpace != null) ...[
+      child: Listener(
+        onPointerDown: onPointerDown,
+        child: GestureDetector(
+          onTapUp: onTapUp,
+          onPanStart: onPanStart,
+          onPanUpdate: onPanUpdate,
+          onPanEnd: onPanEnd,
+          onPanCancel: onPanCancel,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
               RepaintBoundary(
-                child: SnapLineHover(
-                  mainGraph: painter!,
-                  hoverLoc: hoverLocX,
-                  reverse: widget.data.hasStack,
-                  tooltip: (widget.hoverTooltip == null)
-                      ? null
-                      : widget.hoverTooltip!(painter!, hoverLocX),
+                child: CustomPaint(
+                  painter: painter,
+                  size: Size.infinite,
                 ),
               ),
-              if (panStart != null && panEnd != null)
+              if (painter != null && painter!.coordSpace != null) ...[
                 RepaintBoundary(
-                  child: XRangeSelectionOverlay(
-                    xStart: panStart!.toDouble(),
-                    xEnd: panEnd!.toDouble(),
-                    coords: painter!.coordSpace!,
+                  child: SnapLineHover(
+                    mainGraph: painter!,
+                    hoverLoc: hoverLocX,
+                    reverse: widget.data.hasStack,
+                    tooltip: (widget.hoverTooltip == null)
+                        ? null
+                        : widget.hoverTooltip!(painter!, hoverLocX),
                   ),
                 ),
+                if (panStart != null && panEnd != null)
+                  RepaintBoundary(
+                    child: XRangeSelectionOverlay(
+                      xStart: panStart!.toDouble(),
+                      xEnd: panEnd!.toDouble(),
+                      coords: painter!.coordSpace!,
+                    ),
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
