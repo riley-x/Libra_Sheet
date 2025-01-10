@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
+import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:dash_painter/dash_painter.dart';
@@ -102,6 +105,36 @@ class LineSeries<T> extends Series<T> {
 
   @override
   double? hoverValue(int i) => _renderedPoints.elementAtOrNull(i)?.value.dy;
+
+  @override
+  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+    if (i < 0 || i >= _renderedPoints.length) return null;
+
+    final point = _renderedPoints[i];
+    if (point.value.dy == 0) return null;
+    if (name.isEmpty) {
+      return Text(
+        mainGraph.yAxis.valToString(point.value.dy),
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10.0,
+          height: min(strokeWidth * 2, 10.0),
+          color: linePainter.color,
+        ),
+        const SizedBox(width: 5),
+        Text(
+          "$name: ${mainGraph.yAxis.valToString(point.value.dy)}",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
 }
 
 final testSeries = LineSeries(

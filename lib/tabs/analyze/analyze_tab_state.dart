@@ -35,7 +35,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
   CategoryHistory combinedHistorySubCats = CategoryHistory.empty;
 
   List<TimeIntValue> netIncome = [];
-  List<TimeIntValue> netReturns = [];
+  List<TimeIntValue> netOther = [];
 
   Future<void> load() async {
     final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
@@ -73,8 +73,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
 
     /// Net
     netIncome = rawIncome.withAlignedTimes(appState.monthList);
-
-    netReturns = rawHistory[Category.other.key]?.withAlignedTimes(appState.monthList) ??
+    netOther = rawHistory[Category.other.key]?.withAlignedTimes(appState.monthList) ??
         appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList();
 
     notifyListeners();

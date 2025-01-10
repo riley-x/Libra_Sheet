@@ -16,6 +16,7 @@ import 'package:libra_sheet/graphing/series/column_series.dart';
 import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/series/line_series.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
+import 'package:libra_sheet/graphing/series/stack_column_series.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_selector.dart';
@@ -176,18 +177,26 @@ class _NetIncomeChart extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        ColumnSeries<TimeIntValue>(
-          name: '',
-          width: 0.5,
+        StackColumnSeries<TimeIntValue>(
+          name: 'Net Income',
+          width: 0.6,
           data: state.netIncome.looseRange(range),
           valueMapper: (i, item) => item.value.asDollarDouble(),
           fillColorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
+        ),
+        StackColumnSeries<TimeIntValue>(
+          name: 'Net Other',
+          width: 0.6,
+          data: state.netOther.looseRange(range),
+          valueMapper: (i, item) => item.value.asDollarDouble(),
+          fillColorMapper: (i, item) => Colors.blue.withAlpha(50), // match CategoryStackChart
+          strokeColor: Colors.blue,
         ),
       ]),
       hoverTooltip: (painter, loc) => PooledTooltip(
         painter,
         loc,
-        labelAlignment: Alignment.center,
+        includeTotal: false,
       ),
       onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
         TimeFrameEnum.custom,

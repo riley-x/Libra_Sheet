@@ -11,11 +11,13 @@ class PooledTooltip extends StatelessWidget {
     super.key,
     this.series,
     this.reverse = false,
+    this.includeTotal = true,
     this.labelAlignment = Alignment.centerLeft,
   });
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
   final bool reverse;
+  final bool includeTotal;
   final Alignment labelAlignment;
 
   /// A list of entries to show in the tooltip, from top to bottom (unless [reverse]). If null, will
@@ -88,7 +90,7 @@ class PooledTooltip extends StatelessWidget {
               ),
 
             /// Total
-            if (count > 1) ...[
+            if (count > 1 && includeTotal) ...[
               Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onBackground),
               Align(
                 alignment: labelAlignment,

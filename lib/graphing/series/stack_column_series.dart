@@ -14,6 +14,7 @@ class StackColumnSeries<T> extends ColumnSeries<T> {
     required super.data,
     required super.valueMapper,
     super.offset,
+    super.width,
     super.fillColor,
     super.fillColorMapper,
     super.strokeColor,
