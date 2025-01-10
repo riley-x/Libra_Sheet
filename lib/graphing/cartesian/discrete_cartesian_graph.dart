@@ -226,6 +226,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
   /// Hover positions in pixel coordinates
   Offset? hoverPixLoc;
 
+  int? lastTapDown;
   int? panStart;
   int? panEnd;
   DiscreteCartesianGraphPainter? painter;
@@ -301,6 +302,14 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     });
   }
 
+  /// The pan start position is not the tap down position, and on fast enough pans,
+  /// can be a different xLoc than the tap down position. So we need to store all tap down
+  /// positions and use that as the panStart.
+  void onTapDown(TapDownDetails details) {
+    final userX = _getXLoc(details.localPosition, true);
+    lastTapDown = userX;
+  }
+
   void onTapUp(TapUpDetails details) {
     if (widget.onTap == null) return;
     final result = painter?.onTap(details.localPosition);
@@ -314,12 +323,13 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     /// usually related to scrolling. The localPosition is the position of your fingers on the
     /// trackpad, not the mouse.
     if (details.kind == PointerDeviceKind.trackpad) return;
+
     final userX = _getXLoc(details.localPosition, true);
     setState(() {
       hoverLocX = null;
       hoverLocY = null;
       hoverPixLoc = null;
-      panStart = userX;
+      panStart = lastTapDown;
       panEnd = userX;
     });
   }
@@ -359,6 +369,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       onHover: onHover,
       onExit: onExit,
       child: GestureDetector(
+        onTapDown: onTapDown,
         onTapUp: onTapUp,
         onPanStart: onPanStart,
         onPanUpdate: onPanUpdate,
