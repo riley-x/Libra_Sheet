@@ -230,6 +230,10 @@ class CategoryHistory {
   //-----------------------------------------------------------
   // Utils
   //-----------------------------------------------------------
+  int getTotal([(int, int)? range]) {
+    return getMonthlyTotals(range).fold(0, (a, b) => a + b);
+  }
+
   List<int> getMonthlyTotals([(int, int)? range]) {
     range ??= (0, times.length);
     final out = List.filled(range.$2 - range.$1, 0);

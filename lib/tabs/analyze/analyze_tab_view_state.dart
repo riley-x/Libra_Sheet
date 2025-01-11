@@ -1,3 +1,4 @@
+/// A view mode selectable in the [AnalyzeTabViewSelector]
 enum AnalyzeTabView {
   doubleStack,
   netIncome,
@@ -7,6 +8,7 @@ enum AnalyzeTabView {
   incomeHeatmap
 }
 
+/// View-specific state for each [AnalyzeTabView]
 abstract class AnalyzeTabViewState {
   AnalyzeTabView get type;
 
@@ -54,14 +56,48 @@ class NetIncomeView implements AnalyzeTabViewState {
   }
 }
 
-class ExpenseFlowsView implements AnalyzeTabViewState {
-  @override
-  AnalyzeTabView get type => AnalyzeTabView.expenseFlow;
+abstract class FlowsView implements AnalyzeTabViewState {
+  final bool showSubcats;
+  final bool justified;
+
+  const FlowsView({this.showSubcats = false, this.justified = true});
+
+  FlowsView withSubcats(bool value);
+  FlowsView withJustified(bool value);
 }
 
-class IncomeFlowsView implements AnalyzeTabViewState {
+class ExpenseFlowsView extends FlowsView {
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.expenseFlow;
+
+  const ExpenseFlowsView({super.showSubcats, super.justified});
+
+  @override
+  FlowsView withJustified(bool value) {
+    return ExpenseFlowsView(showSubcats: showSubcats, justified: value);
+  }
+
+  @override
+  FlowsView withSubcats(bool value) {
+    return ExpenseFlowsView(showSubcats: value, justified: justified);
+  }
+}
+
+class IncomeFlowsView extends FlowsView {
   @override
   AnalyzeTabView get type => AnalyzeTabView.incomeFlow;
+
+  const IncomeFlowsView({super.showSubcats, super.justified});
+
+  @override
+  FlowsView withJustified(bool value) {
+    return IncomeFlowsView(showSubcats: showSubcats, justified: value);
+  }
+
+  @override
+  FlowsView withSubcats(bool value) {
+    return IncomeFlowsView(showSubcats: value, justified: justified);
+  }
 }
 
 abstract class HeatmapView implements AnalyzeTabViewState {

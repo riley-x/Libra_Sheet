@@ -80,7 +80,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
           color: Colors.red.shade700,
           strokeWidth: 0.5,
           dash: const DashPainter(step: 2, span: 5),
-          data: state.expenseData.getMonthlyTotals(range).invert(),
+          data: state.expenseData.getMonthlyTotals(range),
           valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
           gradient: LinearGradient(
             colors: [

@@ -12,9 +12,9 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_selector.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
 import 'package:libra_sheet/tabs/analyze/double_sided_graph.dart';
+import 'package:libra_sheet/tabs/analyze/flows_graph.dart';
 import 'package:libra_sheet/tabs/analyze/heatmap_graph.dart';
 import 'package:libra_sheet/tabs/analyze/net_income_graph.dart';
-import 'package:libra_sheet/tabs/category/category_tab_state.dart';
 import 'package:provider/provider.dart';
 
 class AnalyzeTab extends StatelessWidget {
@@ -50,14 +50,16 @@ class _Charts extends StatelessWidget {
         (graph, headerElements) = doubleSidedGraph(context, state, theme);
       case AnalyzeTabView.netIncome:
         (graph, headerElements) = netIncomeGraph(state, theme);
+      case AnalyzeTabView.expenseFlow:
+        (graph, headerElements) = flowsGraph(context, state, theme, true);
+      case AnalyzeTabView.incomeFlow:
+        (graph, headerElements) = flowsGraph(context, state, theme, false);
       case AnalyzeTabView.expenseHeatmap:
         final categories = [appState.categories.expense, ...appState.categories.expense.subCats];
         (graph, headerElements) = heatmapGraph(context, state, theme, categories);
       case AnalyzeTabView.incomeHeatmap:
         final categories = [appState.categories.income, ...appState.categories.income.subCats];
         (graph, headerElements) = heatmapGraph(context, state, theme, categories);
-      default:
-        (graph, headerElements) = (const Placeholder(), const []);
     }
 
     return Column(

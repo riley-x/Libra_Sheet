@@ -16,23 +16,24 @@ class AnalyzeTabViewSelector extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _Button(text: 'Expense Flow', view: AnalyzeTabView.expenseFlow, width: 120, left: true),
-            _Button(text: 'Income Flow', view: AnalyzeTabView.incomeFlow, width: 120),
+            _Button(
+                text: 'Expense Pie', view: AnalyzeTabView.expenseHeatmap, width: 120, left: true),
+            _Button(text: 'Income Pie', view: AnalyzeTabView.incomeHeatmap, width: 120),
           ],
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _Button(
-              text: 'Expense Pie',
-              view: AnalyzeTabView.expenseHeatmap,
+              text: 'Expense Flow',
+              view: AnalyzeTabView.expenseFlow,
               width: 120,
               left: true,
               bottom: true,
             ),
             _Button(
-              text: 'Income Pie',
-              view: AnalyzeTabView.incomeHeatmap,
+              text: 'Income Flow',
+              view: AnalyzeTabView.incomeFlow,
               width: 120,
               bottom: true,
             ),

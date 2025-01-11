@@ -168,8 +168,18 @@ extension IntListUtils on List<int> {
   List<int> invert() {
     final out = <int>[];
     for (var x in this) {
-      out.add(x);
+      out.add(-x);
     }
     return out;
+  }
+
+  int max({bool abs = false}) {
+    if (isEmpty) return 0;
+    var current = abs ? first.abs() : first;
+    for (int i = 1; i < length; i++) {
+      final next = abs ? this[i].abs() : this[i];
+      if (next > current) current = next;
+    }
+    return current;
   }
 }
