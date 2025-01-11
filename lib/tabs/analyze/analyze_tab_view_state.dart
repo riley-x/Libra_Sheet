@@ -102,44 +102,57 @@ class IncomeFlowsView extends FlowsView {
 
 abstract class HeatmapView implements AnalyzeTabViewState {
   final bool showSubcats;
+  final bool showAverages;
   final bool showPie;
 
-  const HeatmapView({required this.showSubcats, required this.showPie});
+  const HeatmapView({required this.showSubcats, this.showAverages = false, required this.showPie});
 
   HeatmapView withSubcats(bool value);
+  HeatmapView withAverages(bool value);
   HeatmapView withPie(bool value);
 }
 
 class ExpenseHeatmapView extends HeatmapView {
-  const ExpenseHeatmapView({required super.showSubcats, required super.showPie});
+  const ExpenseHeatmapView(
+      {required super.showSubcats, super.showAverages, required super.showPie});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.expenseHeatmap;
 
   @override
   ExpenseHeatmapView withSubcats(bool value) {
-    return ExpenseHeatmapView(showSubcats: value, showPie: showPie);
+    return ExpenseHeatmapView(showSubcats: value, showAverages: showAverages, showPie: showPie);
   }
 
   @override
   ExpenseHeatmapView withPie(bool value) {
-    return ExpenseHeatmapView(showSubcats: showSubcats, showPie: value);
+    return ExpenseHeatmapView(showSubcats: showSubcats, showAverages: showAverages, showPie: value);
+  }
+
+  @override
+  ExpenseHeatmapView withAverages(bool value) {
+    return ExpenseHeatmapView(showSubcats: showSubcats, showAverages: value, showPie: showPie);
   }
 }
 
 class IncomeHeatmapView extends HeatmapView {
-  const IncomeHeatmapView({required super.showSubcats, required super.showPie});
+  const IncomeHeatmapView({required super.showSubcats, super.showAverages, required super.showPie});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.incomeHeatmap;
 
   @override
   IncomeHeatmapView withSubcats(bool value) {
-    return IncomeHeatmapView(showSubcats: value, showPie: showPie);
+    return IncomeHeatmapView(showSubcats: value, showAverages: showAverages, showPie: showPie);
   }
 
   @override
   IncomeHeatmapView withPie(bool value) {
-    return IncomeHeatmapView(showSubcats: showSubcats, showPie: value);
+    return IncomeHeatmapView(showSubcats: showSubcats, showAverages: showAverages, showPie: value);
+  }
+
+  @override
+  HeatmapView withAverages(bool value) {
+    return IncomeHeatmapView(showSubcats: showSubcats, showAverages: value, showPie: showPie);
   }
 }

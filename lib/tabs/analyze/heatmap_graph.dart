@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
+import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/graphing/wrapper/category_heat_map.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
@@ -14,6 +17,7 @@ import 'package:libra_sheet/data/date_time_utils.dart';
     BuildContext context, AnalyzeTabState state, ThemeData theme, List<Category> categories) {
   final viewState = state.currentViewState as HeatmapView;
   final range = state.timeFrame.getRange(state.incomeData.times);
+  final months = state.combinedHistory.times.looseRange(range).length;
   final individualValues = state.combinedHistorySubCats.getCategoryTotals(range, true);
   final aggregateValues = state.combinedHistory.getCategoryTotals(range, true);
 
@@ -40,7 +44,18 @@ import 'package:libra_sheet/data/date_time_utils.dart';
       value: viewState.showSubcats,
       onChanged: (bool? value) => state.setViewState(viewState.withSubcats(value == true)),
     ),
+
     const VerticalDivider(width: 30, thickness: 3, indent: 4, endIndent: 4),
+
+    Text('Monthly Averages', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    Checkbox(
+      value: viewState.showAverages,
+      onChanged: (bool? value) => state.setViewState(viewState.withAverages(value == true)),
+    ),
+
+    const VerticalDivider(width: 30, thickness: 3, indent: 4, endIndent: 4),
+
     Text('View', style: theme.textTheme.bodyMedium),
     const SizedBox(width: 10),
     IconButton(
@@ -78,7 +93,7 @@ import 'package:libra_sheet/data/date_time_utils.dart';
             aggregateValues: aggregateValues,
             onSelect: onTap,
             showSubCategories: viewState.showSubcats,
-            // averageDenominator: 1,
+            averageDenominator: viewState.showAverages ? max(months, 1) : 1,
           ),
   );
 
