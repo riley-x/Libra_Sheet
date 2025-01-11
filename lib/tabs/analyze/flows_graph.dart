@@ -56,6 +56,7 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
         valueMapper: (i, val) => viewState.justified
             ? val.abs().asDollarDouble() / maxValue
             : val.abs().asDollarDouble(),
+        labelMapper: (i, val) => val.abs().dollarString(),
         height: viewState.justified ? total + 0.5 : total + maxValue / 2,
       ));
       total += viewState.justified ? 1.01 : maxValue + spacing;

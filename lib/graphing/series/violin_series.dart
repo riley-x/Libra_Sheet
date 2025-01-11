@@ -26,6 +26,8 @@ class ViolinSeries<T> extends Series<T> {
   final double Function(int i, T item) _valueMapper;
   double valueMapper(int i) => _valueMapper(i, data[i]);
 
+  final String Function(int i, T item)? labelMapper;
+
   /// A user y value to center the series around
   final double height;
 
@@ -38,6 +40,7 @@ class ViolinSeries<T> extends Series<T> {
     required double Function(int i, T item) valueMapper,
     required this.color,
     required this.height,
+    this.labelMapper,
   }) : _valueMapper = valueMapper;
 
   ViolinSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
@@ -115,6 +118,14 @@ class ViolinSeries<T> extends Series<T> {
     if (i < 0 || i >= _renderedPoints.length) return null;
     final point = _renderedPoints[i];
     if (point.value == 0) return null;
+
+    String label;
+    if (labelMapper != null) {
+      label = labelMapper!.call(i, data[i]);
+    } else {
+      label = mainGraph.yAxis.valToString(point.value);
+    }
+
     if (name.isEmpty) {
       return Text(
         mainGraph.yAxis.valToString(point.value),
@@ -135,7 +146,7 @@ class ViolinSeries<T> extends Series<T> {
         ),
         const SizedBox(width: 5),
         Text(
-          "$name: ${mainGraph.yAxis.valToString(point.value)}",
+          "$name: $label",
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],

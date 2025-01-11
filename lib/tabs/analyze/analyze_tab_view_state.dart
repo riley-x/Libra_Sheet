@@ -12,6 +12,8 @@ enum AnalyzeTabView {
 abstract class AnalyzeTabViewState {
   AnalyzeTabView get type;
 
+  const AnalyzeTabViewState();
+
   static AnalyzeTabViewState of(AnalyzeTabView view) {
     switch (view) {
       case AnalyzeTabView.doubleStack:
@@ -19,9 +21,9 @@ abstract class AnalyzeTabViewState {
       case AnalyzeTabView.netIncome:
         return const NetIncomeView(includeOther: false);
       case AnalyzeTabView.expenseFlow:
-        return ExpenseFlowsView();
+        return const ExpenseFlowsView();
       case AnalyzeTabView.incomeFlow:
-        return IncomeFlowsView();
+        return const IncomeFlowsView();
       case AnalyzeTabView.expenseHeatmap:
         return const ExpenseHeatmapView(showSubcats: false, showPie: false);
       case AnalyzeTabView.incomeHeatmap:
@@ -100,7 +102,7 @@ class IncomeFlowsView extends FlowsView {
   }
 }
 
-abstract class HeatmapView implements AnalyzeTabViewState {
+abstract class HeatmapView extends AnalyzeTabViewState {
   final bool showSubcats;
   final bool showAverages;
   final bool showPie;

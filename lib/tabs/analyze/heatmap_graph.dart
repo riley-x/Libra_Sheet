@@ -20,6 +20,8 @@ import 'package:libra_sheet/data/date_time_utils.dart';
   final months = state.combinedHistory.times.looseRange(range).length;
   final individualValues = state.combinedHistorySubCats.getCategoryTotals(range, true);
   final aggregateValues = state.combinedHistory.getCategoryTotals(range, true);
+  final isExpense = viewState.type == AnalyzeTabView.expenseHeatmap;
+  final total = isExpense ? state.expenseData.getTotal(range) : state.incomeData.getTotal(range);
 
   void onTap(Category category) {
     final dateRange = state.timeFrame.getDateRange(state.combinedHistory.times);
@@ -86,6 +88,9 @@ import 'package:libra_sheet/data/date_time_utils.dart';
             colorMapper: (category) => category.color,
             labelMapper: (category, value) => "${category.name}\n${formatPercent(value)}",
             onTap: (i, cat) => onTap(cat),
+            defaultLabel: viewState.showAverages
+                ? "Average ${isExpense ? 'Expenses' : 'Income'}\n${formatDollar(total.abs().asDollarDouble() / months)}"
+                : "Total ${isExpense ? 'Expenses' : 'Income'}\n${total.abs().dollarString()}",
           )
         : CategoryHeatMap(
             categories: categories,

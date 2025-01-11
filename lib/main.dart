@@ -159,8 +159,8 @@ class _Home extends StatelessWidget {
     var widgets = [
       const HomeTab(),
       const AnalyzeTab(),
-      const CashFlowTab(),
-      const CategoryTab(),
+      // const CashFlowTab(),
+      // const CategoryTab(),
       const TransactionTab(),
       const SettingsTab(),
     ];

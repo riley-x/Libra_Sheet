@@ -9,8 +9,8 @@ import 'package:provider/provider.dart';
 enum LibraNavDestination {
   home(icon: Icons.home, label: 'Home'),
   analyze(icon: Icons.insights, label: 'Analyze'),
-  cashFlows(icon: Icons.swap_horiz, label: 'Cash Flows'),
-  categories(icon: Icons.category, label: 'Categories'),
+  // cashFlows(icon: Icons.swap_horiz, label: 'Cash Flows'),
+  // categories(icon: Icons.category, label: 'Categories'),
   transactions(icon: Icons.request_quote, label: 'Transactions'),
   settings(icon: Icons.settings, label: 'Settings');
 
