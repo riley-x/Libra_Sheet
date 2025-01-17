@@ -23,7 +23,8 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
   final history = isExpense
       ? (viewState.showSubcats ? state.expenseDataSubCats : state.expenseData)
       : (viewState.showSubcats ? state.incomeDataSubCats : state.incomeData);
-  final spacing = history.getTotal(range).asDollarDouble().abs() * 0.001;
+  final total = history.getTotal(range).abs();
+  final spacing = total.asDollarDouble() * 0.001;
 
   final headerElements = <Widget>[
     // Text('Show Subcats', style: theme.textTheme.bodyMedium),
@@ -97,8 +98,10 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     hoverTooltip: (painter, loc) => PooledTooltip(
       painter,
       loc,
-      includeTotal: false,
       reverse: true,
+      total: loc == null
+          ? null
+          : history.getTotal((range.$1 + loc, range.$1 + loc + 1)).abs().dollarString(),
     ),
     onRange: (xStart, xEnd) => state.setTimeFrame(
       TimeFrame(
