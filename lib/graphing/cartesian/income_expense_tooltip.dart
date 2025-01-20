@@ -93,16 +93,16 @@ class IncomeExpenseTooltip extends StatelessWidget {
           entries.addAll([
             Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
             Text(
-              "Total: ${mainGraph.yAxis.valToString(incomeTotal)}",
+              "Income Total: ${mainGraph.yAxis.valToString(incomeTotal)}",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ]);
         }
+      }
 
-        /// Spacing
-        if (expenseLabels.isNotEmpty) {
-          entries.add(const SizedBox(height: 12));
-        }
+      /// Spacing
+      if (incomeLabels.length > 1 || expenseLabels.length > 1) {
+        entries.add(const SizedBox(height: 12));
       }
 
       /// Expense
@@ -112,7 +112,7 @@ class IncomeExpenseTooltip extends StatelessWidget {
           entries.addAll([
             Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
             Text(
-              "Total: ${mainGraph.yAxis.valToString(expenseTotal)}",
+              "Expense Total: ${mainGraph.yAxis.valToString(expenseTotal)}",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ]);
