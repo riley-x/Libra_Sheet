@@ -64,7 +64,21 @@ class IncomeExpenseTooltip extends StatelessWidget {
         ),
       ];
 
-      if (incomeSeries.isEmpty && expenseSeries.isEmpty) return entries;
+      final incomeLabels = <Widget>[];
+      for (final s in incomeSeries) {
+        final label = _getSeriesLabel(context, s);
+        if (label == null) continue;
+        incomeLabels.add(label);
+      }
+
+      final expenseLabels = <Widget>[];
+      for (final s in expenseSeries) {
+        final label = _getSeriesLabel(context, s);
+        if (label == null) continue;
+        expenseLabels.add(label);
+      }
+
+      if (incomeLabels.isEmpty && expenseLabels.isEmpty) return entries;
 
       /// Divider
       entries.addAll([
@@ -73,17 +87,9 @@ class IncomeExpenseTooltip extends StatelessWidget {
       ]);
 
       /// Income
-      if (incomeSeries.isNotEmpty) {
-        var count = 0;
-        for (final s in incomeSeries) {
-          final label = _getSeriesLabel(context, s);
-          if (label == null) continue;
-          count++;
-          entries.add(label);
-        }
-
-        /// Total
-        if (count > 1) {
+      if (incomeLabels.isNotEmpty) {
+        entries.addAll(incomeLabels);
+        if (incomeLabels.length > 1) {
           entries.addAll([
             Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
             Text(
@@ -94,23 +100,15 @@ class IncomeExpenseTooltip extends StatelessWidget {
         }
 
         /// Spacing
-        if (expenseSeries.isNotEmpty) {
+        if (expenseLabels.isNotEmpty) {
           entries.add(const SizedBox(height: 12));
         }
       }
 
       /// Expense
-      if (expenseSeries.isNotEmpty) {
-        var count = 0;
-        for (final s in expenseSeries) {
-          final label = _getSeriesLabel(context, s);
-          if (label == null) continue;
-          count++;
-          entries.add(label);
-        }
-
-        /// Total
-        if (count > 1) {
+      if (expenseLabels.isNotEmpty) {
+        entries.addAll(expenseLabels);
+        if (expenseLabels.length > 1) {
           entries.addAll([
             Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
             Text(
@@ -121,7 +119,7 @@ class IncomeExpenseTooltip extends StatelessWidget {
         }
 
         /// Net total
-        if (incomeSeries.isNotEmpty) {
+        if (incomeLabels.isNotEmpty) {
           entries.addAll([
             Text(
               "Net Total: ${mainGraph.yAxis.valToString(incomeTotal + expenseTotal)}",
