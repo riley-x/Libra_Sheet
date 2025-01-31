@@ -101,7 +101,7 @@ class IncomeExpenseTooltip extends StatelessWidget {
       }
 
       /// Spacing
-      if (incomeLabels.length > 1 || expenseLabels.length > 1) {
+      if (incomeLabels.length > 1 && expenseLabels.length > 1) {
         entries.add(const SizedBox(height: 12));
       }
 
