@@ -79,6 +79,7 @@ class IncomeExpenseTooltip extends StatelessWidget {
       }
 
       if (incomeLabels.isEmpty && expenseLabels.isEmpty) return entries;
+      final showSubtotals = incomeLabels.length > 1 && expenseLabels.length > 1;
 
       /// Divider
       entries.addAll([
@@ -89,7 +90,7 @@ class IncomeExpenseTooltip extends StatelessWidget {
       /// Income
       if (incomeLabels.isNotEmpty) {
         entries.addAll(incomeLabels);
-        if (incomeLabels.length > 1) {
+        if (showSubtotals) {
           entries.addAll([
             Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
             Text(
@@ -101,14 +102,14 @@ class IncomeExpenseTooltip extends StatelessWidget {
       }
 
       /// Spacing
-      if (incomeLabels.isNotEmpty && expenseLabels.isNotEmpty) {
+      if (showSubtotals) {
         entries.add(const SizedBox(height: 12));
       }
 
       /// Expense
       if (expenseLabels.isNotEmpty) {
         entries.addAll(expenseLabels);
-        if (expenseLabels.length > 1) {
+        if (showSubtotals) {
           entries.addAll([
             Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
             Text(
@@ -117,16 +118,16 @@ class IncomeExpenseTooltip extends StatelessWidget {
             ),
           ]);
         }
+      }
 
-        /// Net total
-        if (incomeLabels.isNotEmpty) {
-          entries.addAll([
-            Text(
-              "Net Total: ${mainGraph.yAxis.valToString(incomeTotal + expenseTotal)}",
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-          ]);
-        }
+      /// Net total
+      if (incomeLabels.length + expenseLabels.length > 1) {
+        entries.addAll([
+          Text(
+            "Net Total: ${mainGraph.yAxis.valToString(incomeTotal + expenseTotal)}",
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ]);
       }
 
       return entries;
