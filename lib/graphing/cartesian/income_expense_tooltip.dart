@@ -122,12 +122,17 @@ class IncomeExpenseTooltip extends StatelessWidget {
 
       /// Net total
       if (incomeLabels.length + expenseLabels.length > 1) {
-        entries.addAll([
-          Text(
-            "Net Total: ${mainGraph.yAxis.valToString(incomeTotal + expenseTotal)}",
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-        ]);
+        if (!showSubtotals) {
+          entries.add(Divider(
+            height: 5,
+            thickness: 0.5,
+            color: Theme.of(context).colorScheme.onSurface,
+          ));
+        }
+        entries.add(Text(
+          "Net Total: ${mainGraph.yAxis.valToString(incomeTotal + expenseTotal)}",
+          style: Theme.of(context).textTheme.labelLarge,
+        ));
       }
 
       return entries;
