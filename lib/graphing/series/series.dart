@@ -69,7 +69,12 @@ abstract class Series<T> {
   /// implement [hoverBuilder].
   ///
   /// TODO this is hardcoded for discrete axes.
-  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) =>
+  Widget? hoverBuilder(
+    BuildContext context,
+    int i,
+    DiscreteCartesianGraphPainter mainGraph, {
+    bool labelOnly = false,
+  }) =>
       null;
 
   /// This returns the bounding rectangle of all drawing objects associated with data[i] = x.

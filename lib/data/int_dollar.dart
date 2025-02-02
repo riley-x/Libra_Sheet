@@ -48,7 +48,7 @@ extension IntDollarDouble on double {
     if (order == null) {
       out = NumberFormat('\$#,##0.00').format(this);
     } else {
-      out = NumberFormat('#,###').format(this);
+      out = NumberFormat('#,##0.00').format(this);
     }
     if (out == "-0") out = "0";
     return out;

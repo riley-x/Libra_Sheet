@@ -114,7 +114,12 @@ class ViolinSeries<T> extends Series<T> {
   }
 
   @override
-  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+  Widget? hoverBuilder(
+    BuildContext context,
+    int i,
+    DiscreteCartesianGraphPainter mainGraph, {
+    bool labelOnly = false,
+  }) {
     if (i < 0 || i >= _renderedPoints.length) return null;
     final point = _renderedPoints[i];
     if (point.value == 0) return null;

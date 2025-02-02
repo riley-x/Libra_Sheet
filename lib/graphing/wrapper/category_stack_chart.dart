@@ -110,7 +110,7 @@ class CategoryStackChart extends StatelessWidget {
           CartesianAxis(
             theme: Theme.of(context),
             axisLoc: null,
-            valToString: formatDollar,
+            valToString: (val, [order]) => formatDollar(val, -1),
           ),
       xAxis: xAxis ??
           MonthAxis(

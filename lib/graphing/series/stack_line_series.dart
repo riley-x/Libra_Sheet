@@ -306,7 +306,12 @@ class StackLineSeries<T> extends LineSeries<T> {
   }
 
   @override
-  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+  Widget? hoverBuilder(
+    BuildContext context,
+    int i,
+    DiscreteCartesianGraphPainter mainGraph, {
+    bool labelOnly = false,
+  }) {
     final val = valueMapper(i, data[i]).dy;
     if (val == 0) return null;
     if (name.isEmpty) {

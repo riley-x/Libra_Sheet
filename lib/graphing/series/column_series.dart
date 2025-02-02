@@ -108,7 +108,12 @@ class ColumnSeries<T> extends Series<T> {
   }
 
   @override
-  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+  Widget? hoverBuilder(
+    BuildContext context,
+    int i,
+    DiscreteCartesianGraphPainter mainGraph, {
+    bool labelOnly = false,
+  }) {
     if (i < 0 || i >= _renderedPoints.length) return null;
     final point = _renderedPoints[i];
     if (point.value == 0) return null;
@@ -133,7 +138,7 @@ class ColumnSeries<T> extends Series<T> {
         ),
         const SizedBox(width: 5),
         Text(
-          "$name: ${mainGraph.yAxis.valToString(point.value)}",
+          labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(point.value)}",
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],

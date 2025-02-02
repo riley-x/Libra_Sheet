@@ -107,7 +107,12 @@ class LineSeries<T> extends Series<T> {
   double? hoverValue(int i) => _renderedPoints.elementAtOrNull(i)?.value.dy;
 
   @override
-  Widget? hoverBuilder(BuildContext context, int i, DiscreteCartesianGraphPainter mainGraph) {
+  Widget? hoverBuilder(
+    BuildContext context,
+    int i,
+    DiscreteCartesianGraphPainter mainGraph, {
+    bool labelOnly = false,
+  }) {
     if (i < 0 || i >= _renderedPoints.length) return null;
 
     final point = _renderedPoints[i];
