@@ -82,11 +82,11 @@ class IncomeExpenseTooltip extends StatelessWidget {
       }
       if (showSubtotals) {
         labelEntries.addAll([
-          Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
+          Divider(height: 5, thickness: 1, color: Theme.of(context).colorScheme.outline),
           Text(title, style: Theme.of(context).textTheme.bodyMedium),
         ]);
         valueEntries.addAll([
-          Divider(height: 5, thickness: 0.5, color: Theme.of(context).colorScheme.onSurface),
+          Divider(height: 5, thickness: 1, color: Theme.of(context).colorScheme.outline),
           Text(mainGraph.yAxis.valToString(total), style: Theme.of(context).textTheme.bodyMedium),
         ]);
       }
