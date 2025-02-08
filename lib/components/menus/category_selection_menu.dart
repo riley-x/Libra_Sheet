@@ -86,3 +86,64 @@ class CategorySelectionFormField extends StatelessWidget {
     );
   }
 }
+
+/// Shows subcategories in a nested menu
+class CategorySelectionFormFieldV2 extends StatelessWidget {
+  const CategorySelectionFormFieldV2({
+    super.key,
+    required this.categories,
+    this.initial,
+    this.borderRadius,
+    this.height = 35,
+    this.onSave,
+    this.validator,
+    this.superAsNone = false,
+    this.nullText,
+  });
+
+  final List<Category?> categories;
+  final Category? initial;
+  final Function(Category?)? onSave;
+  final String? Function(Category?)? validator;
+  final BorderRadius? borderRadius;
+  final double? height;
+  final bool superAsNone;
+  final String? nullText;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: LibraDropdownFormField<Category?>(
+        initial: initial,
+        items: categories,
+        builder: (context, cat) => categoryMenuBuilder(
+          context,
+          cat,
+          indentSubcats: false,
+          superAsNone: superAsNone,
+          nullText: nullText,
+        ),
+        selectedBuilder: (context, cat) => categoryMenuBuilder(
+          context,
+          cat,
+          superAsNone: superAsNone,
+          selected: true,
+          nullText: nullText,
+        ),
+        borderRadius: borderRadius,
+        onSave: onSave,
+        validator: validator,
+        subItems: (item) {
+          if (item != null && item.subCats.isNotEmpty) {
+            return [
+              ...item.subCats,
+              item,
+            ];
+          }
+          return null;
+        },
+      ),
+    );
+  }
+}

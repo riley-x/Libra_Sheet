@@ -36,9 +36,8 @@ class TransactionDetailsEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
-    var categories =
-        context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
-    categories = [Category.empty, Category.ignore, Category.other] + categories + [];
+    var categories = context.watch<LibraAppState>().categories.parentCategories(state.expenseType);
+    categories += [Category.ignore, Category.other];
     // the transaction constructor will convert Category.empty into the correct super category
     // however we must manually convert the initial category to [Category.empty] so that there isn't
     // a duplicate.
@@ -127,7 +126,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                         labelRow(
                           context,
                           '', // not used
-                          CategorySelectionFormField(
+                          CategorySelectionFormFieldV2(
                             height: 35,
                             initial: initialCategory(),
                             categories: categories,

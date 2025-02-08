@@ -106,6 +106,18 @@ class CategoryState {
   // List retrieval helpers
   //----------------------------------------------------------------------------
 
+  /// Gets a list of parent categories.
+  List<Category> parentCategories([ExpenseFilterType type = ExpenseFilterType.all]) {
+    switch (type) {
+      case ExpenseFilterType.all:
+        return income.subCats + expense.subCats;
+      case ExpenseFilterType.income:
+        return income.subCats;
+      case ExpenseFilterType.expense:
+        return expense.subCats;
+    }
+  }
+
   /// Gets a flattened list of all categories and their subcategories for the given expense type.
   /// Useful for selection menus for picking out any category.
   List<Category> flattenedCategories([ExpenseFilterType type = ExpenseFilterType.all]) {

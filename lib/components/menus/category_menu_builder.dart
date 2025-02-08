@@ -10,6 +10,7 @@ Widget categoryMenuBuilder(
   Category? cat, {
   bool superAsNone = false,
   bool selected = false,
+  bool indentSubcats = true,
   String? nullText,
 }) {
   var style = Theme.of(context).textTheme.labelLarge;
@@ -35,7 +36,7 @@ Widget categoryMenuBuilder(
     maxWidth: 400, // prevent errors from [Flexible] below
     child: Row(
       children: [
-        if ((cat?.level ?? 0) > 1 && !selected) const SizedBox(width: 20),
+        if (indentSubcats && (cat?.level ?? 0) > 1 && !selected) const SizedBox(width: 20),
         Container(color: color, width: 4, height: 24),
         SizedBox(width: (cat == null) ? 0 : 6),
         Flexible(child: textWidget), // Necessary to make sure the text clips properly

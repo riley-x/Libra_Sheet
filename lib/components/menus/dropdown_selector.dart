@@ -7,6 +7,7 @@ class DropdownSelector<T> extends StatefulWidget {
   final Function(T)? onSelected;
   final Widget Function(BuildContext context, T item) builder;
   final Widget Function(BuildContext context, T item)? selectedBuilder;
+  final Iterable<T>? Function(T item)? subItems;
 
   final BorderRadius? borderRadius;
   final EdgeInsets padding;
@@ -19,6 +20,7 @@ class DropdownSelector<T> extends StatefulWidget {
     required this.onSelected,
     this.selectedBuilder,
     this.borderRadius,
+    this.subItems,
     this.padding = const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
   });
 
@@ -45,33 +47,60 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
   Widget build(BuildContext context) {
     final selectedWidget =
         (widget.selectedBuilder ?? widget.builder).call(context, widget.selected);
+
     return LayoutBuilder(
       builder: (context, constraints) {
+        Widget build(T item, {double rightMargin = 0}) {
+          /// For some reason, the child of the [MenuItemButton] receives an unconstrained width. So
+          /// we pass another constrained box. But this needs to be deflated by the width used for
+          /// the scroll bar, 16 pixels.
+          return ConstrainedBox(
+            constraints: constraints
+                .deflate(EdgeInsets.only(right: 16 + rightMargin))
+                .tighten(width: double.infinity)
+                .widthConstraints(),
+            child: widget.builder(context, item),
+          );
+        }
+
+        final menuChildren = <Widget>[];
+        for (final (i, x) in widget.items.indexed) {
+          final subItems = widget.subItems?.call(x);
+          Widget button;
+          if (subItems != null && subItems.isNotEmpty) {
+            button = SubmenuButton(
+              menuChildren: [
+                for (final child in subItems)
+                  MenuItemButton(
+                    onPressed: () => widget.onSelected?.call(child),
+                    child: build(child),
+                  ),
+              ],
+              child: build(x, rightMargin: 32), // for right arrow icon
+            );
+          } else {
+            button = MenuItemButton(
+              focusNode: (i == 0) ? _firstFocus : null,
+              onPressed: () => widget.onSelected?.call(x),
+              child: build(x),
+            );
+          }
+
+          menuChildren.add(
+            ConstrainedBox(
+              /// This expands the constraints to the maximum width, aka the assumed width of the
+              /// Anchor child, since otherwise the menu will size to intrinsic width of the
+              /// MenuItemButtons.
+              constraints: constraints.tighten(width: double.infinity).widthConstraints(),
+              child: button,
+            ),
+          );
+        }
+
         return MenuAnchor(
           controller: _menuController,
           crossAxisUnconstrained: false,
-          menuChildren: [
-            for (final (i, x) in widget.items.indexed)
-              ConstrainedBox(
-                /// This expands the constraints to the maximum width, aka the assumed width of the
-                /// Anchor child, since otherwise the menu will size to intrinsic width of the
-                /// MenuItemButtons. For some reason though, the child of the [MenuItemButton] receives
-                /// an unconstrained width still. So we pass another constrained box. But this needs
-                /// to be deflated by the width used for the scroll bar, 16 pixels.
-                constraints: constraints.tighten(width: double.infinity).widthConstraints(),
-                child: MenuItemButton(
-                  focusNode: (i == 0) ? _firstFocus : null,
-                  onPressed: () => widget.onSelected?.call(x),
-                  child: ConstrainedBox(
-                    constraints: constraints
-                        .deflate(const EdgeInsets.only(right: 16))
-                        .tighten(width: double.infinity)
-                        .widthConstraints(),
-                    child: widget.builder(context, x),
-                  ),
-                ),
-              ),
-          ],
+          menuChildren: menuChildren,
           child: ClipRRect(
             borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
             child: InkWell(
@@ -100,6 +129,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
     this.initial,
     required this.items,
     required this.builder,
+    this.subItems,
     this.selectedBuilder,
     this.borderRadius,
     this.onSave,
@@ -108,6 +138,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
 
   final T? initial;
   final List<T?> items; // this should be nullable because FormField uses T? too
+  final Iterable<T?>? Function(T? item)? subItems;
   final Function(T?)? onSave;
   final String? Function(T?)? validator;
   final BorderRadius? borderRadius;
@@ -131,6 +162,7 @@ class LibraDropdownFormField<T> extends StatelessWidget {
           child: DropdownSelector<T?>(
             selected: state.value,
             items: items,
+            subItems: subItems,
             builder: builder,
             selectedBuilder: selectedBuilder,
             borderRadius: borderRadius ?? BorderRadius.circular(4),
