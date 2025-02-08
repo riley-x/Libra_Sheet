@@ -34,7 +34,7 @@ class RedGreenBarChart extends StatelessWidget {
       yAxis: CartesianAxis(
         theme: Theme.of(context),
         axisLoc: null,
-        valToString: formatDollar,
+        valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
       ),
       xAxis: MonthAxis(
         theme: Theme.of(context),
@@ -43,7 +43,8 @@ class RedGreenBarChart extends StatelessWidget {
       ),
       data: SeriesCollection([
         DashedHorizontalLine(
-          color: average > 0 ? Colors.green : Colors.red,
+          color: Theme.of(context).colorScheme.onSurface,
+          // color: average > 0 ? Colors.green : Colors.red,
           y: average,
           lineWidth: 1.5,
         ),

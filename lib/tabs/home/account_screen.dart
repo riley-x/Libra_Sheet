@@ -256,7 +256,7 @@ class _Graph extends StatelessWidget {
       yAxis: CartesianAxis(
         theme: Theme.of(context),
         axisLoc: null,
-        valToString: formatDollar,
+        valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
         min: 0,
       ),
       xAxis: MonthAxis(

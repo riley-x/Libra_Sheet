@@ -16,7 +16,8 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 
 (Widget, List<Widget>) flowsGraph(
-    BuildContext context, AnalyzeTabState state, ThemeData theme, bool isExpense) {
+    BuildContext context, AnalyzeTabState state, ThemeData theme, bool isExpense,
+    {bool alignCenter = false}) {
   final viewState = state.currentViewState as FlowsView;
   final range = state.timeFrame.getRange(state.incomeData.times);
   final dates = state.combinedHistory.times.looseRange(range);
@@ -37,8 +38,8 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     Text('Proportional', style: theme.textTheme.bodyMedium),
     const SizedBox(width: 10),
     Checkbox(
-      value: !viewState.justified,
-      onChanged: (bool? value) => state.setViewState(viewState.withJustified(value == false)),
+      value: viewState.justified,
+      onChanged: (bool? value) => state.setViewState(viewState.withJustified(value == true)),
     ),
   ];
 
@@ -51,6 +52,7 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
       if (maxValue == 0) continue;
 
       out.add(ViolinSeries<int>(
+        alignCenter: alignCenter,
         name: categoryHistory.category.name,
         color: categoryHistory.category.color,
         data: values,
@@ -58,9 +60,9 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
             ? val.abs().asDollarDouble() / maxValue
             : val.abs().asDollarDouble(),
         labelMapper: (i, val) => val.abs().dollarString(),
-        height: viewState.justified ? total + 0.5 : total + maxValue / 2,
+        height: alignCenter ? (viewState.justified ? total + 0.5 : total + maxValue / 2) : total,
       ));
-      total += viewState.justified ? 1.01 : maxValue + spacing;
+      total += viewState.justified ? 1.05 : maxValue + spacing;
     }
     return out;
   }
@@ -83,7 +85,6 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     yAxis: CartesianAxis(
       theme: theme,
       axisLoc: null,
-      valToString: formatDollar,
       labels: [],
       dataPadFrac: 0.01,
     ),

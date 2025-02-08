@@ -43,14 +43,19 @@ extension IntDollarDouble on double {
   }
 
   /// Formats [val] with dollar sign and commas. If [order] is not null, omits the dollar sign.
-  String formatDollar([int? order]) {
-    String out;
+  String formatDollar({bool dollarSign = true, int? order}) {
+    String formatString;
     if (order == null) {
-      out = NumberFormat('\$#,##0.00').format(this);
+      formatString = "#,##0.00";
     } else {
-      out = NumberFormat('#,##0.00').format(this);
+      // TODO k/M maybe?
+      formatString = "#,###";
     }
-    if (out == "-0") out = "0";
+    if (dollarSign) formatString = "\$$formatString";
+
+    String out = NumberFormat(formatString).format(this);
+    if (out == "-0") return "0";
+    if (out == "-0.00") return "0.00";
     return out;
   }
 
@@ -111,8 +116,8 @@ double getDollarAverage2<T>(Iterable<T> vals, int Function(T) valueMapper) {
 }
 
 /// Formats [val] with dollar sign and commas. If [order] is not null, omits the dollar sign.
-String formatDollar(double val, [int? order]) {
-  return val.formatDollar(order);
+String formatDollar(double val, {bool dollarSign = true, int? order}) {
+  return val.formatDollar(dollarSign: dollarSign, order: order);
 }
 
 String formatPercent(double val) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_coordinate_space.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
-import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 
 class ViolinSeriesPoint<T> {
@@ -34,6 +33,9 @@ class ViolinSeries<T> extends Series<T> {
   /// Cache the points to enable easy hit testing
   final List<ViolinSeriesPoint<T>> _renderedPoints = [];
 
+  /// If false, will align bars to bottom instead of center
+  final bool alignCenter;
+
   ViolinSeries({
     required super.name,
     required super.data,
@@ -41,6 +43,7 @@ class ViolinSeries<T> extends Series<T> {
     required this.color,
     required this.height,
     this.labelMapper,
+    this.alignCenter = true,
   }) : _valueMapper = valueMapper;
 
   ViolinSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
@@ -102,8 +105,12 @@ class ViolinSeries<T> extends Series<T> {
     final y = valueMapper(i);
     final x = i.toDouble();
     const width = 1.0;
-    return BoundingBox(
-        xMin: x - width / 2, xMax: x + width / 2, yMin: height - y / 2, yMax: height + y / 2);
+    if (alignCenter) {
+      return BoundingBox(
+          xMin: x - width / 2, xMax: x + width / 2, yMin: height - y / 2, yMax: height + y / 2);
+    } else {
+      return BoundingBox(xMin: x - width / 2, xMax: x + width / 2, yMin: height, yMax: height + y);
+    }
   }
 
   @override

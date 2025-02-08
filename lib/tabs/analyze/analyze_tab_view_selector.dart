@@ -12,7 +12,13 @@ class AnalyzeTabViewSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _Button(text: 'Income & Expenses', view: AnalyzeTabView.doubleStack, width: 240, top: true),
-        _Button(text: 'Net Income', view: AnalyzeTabView.netIncome, width: 240),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _Button(text: 'Net Totals', view: AnalyzeTabView.netIncome, width: 120, left: true),
+            _Button(text: 'Other', view: AnalyzeTabView.other, width: 120),
+          ],
+        ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [

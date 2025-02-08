@@ -27,13 +27,13 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
   final average = total.asDollarDouble() / dates.length;
 
   final headerElements = [
-    Text('Include Other', style: theme.textTheme.bodyMedium),
-    const SizedBox(width: 10),
-    Checkbox(
-      value: viewState.includeOther,
-      onChanged: (bool? value) => state.setViewState(viewState.withOther(value)),
-      tristate: true,
-    ),
+    // Text('Include Other', style: theme.textTheme.bodyMedium),
+    // const SizedBox(width: 10),
+    // Checkbox(
+    //   value: viewState.includeOther,
+    //   onChanged: (bool? value) => state.setViewState(viewState.withOther(value)),
+    //   tristate: true,
+    // ),
     const Spacer(),
     Text('Total: ${total.dollarString()}'),
     const SizedBox(width: 10),
@@ -43,7 +43,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
     yAxis: CartesianAxis(
       theme: theme,
       axisLoc: null,
-      valToString: formatDollar,
+      valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
     ),
     xAxis: MonthAxis(
       theme: theme,

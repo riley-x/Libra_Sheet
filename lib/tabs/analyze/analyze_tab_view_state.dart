@@ -2,6 +2,7 @@
 enum AnalyzeTabView {
   doubleStack,
   netIncome,
+  other,
   expenseFlow,
   incomeFlow,
   expenseHeatmap,
@@ -20,6 +21,8 @@ abstract class AnalyzeTabViewState {
         return const DoubleStackView(showSubcats: false);
       case AnalyzeTabView.netIncome:
         return const NetIncomeView(includeOther: false);
+      case AnalyzeTabView.other:
+        return const OtherView();
       case AnalyzeTabView.expenseFlow:
         return const ExpenseFlowsView();
       case AnalyzeTabView.incomeFlow:
@@ -46,7 +49,7 @@ class DoubleStackView implements AnalyzeTabViewState {
 }
 
 class NetIncomeView implements AnalyzeTabViewState {
-  const NetIncomeView({required this.includeOther});
+  const NetIncomeView({this.includeOther = false});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.netIncome;
@@ -58,11 +61,18 @@ class NetIncomeView implements AnalyzeTabViewState {
   }
 }
 
+class OtherView implements AnalyzeTabViewState {
+  const OtherView();
+
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.other;
+}
+
 abstract class FlowsView implements AnalyzeTabViewState {
   final bool showSubcats;
   final bool justified;
 
-  const FlowsView({this.showSubcats = false, this.justified = true});
+  const FlowsView({this.showSubcats = false, this.justified = false});
 
   FlowsView withSubcats(bool value);
   FlowsView withJustified(bool value);

@@ -224,7 +224,7 @@ class _NetWorthGraph extends StatelessWidget {
         yAxis: CartesianAxis(
           theme: Theme.of(context),
           axisLoc: null,
-          valToString: formatDollar,
+          valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
           min: 0,
         ),
         xAxis: MonthAxis(
@@ -324,7 +324,7 @@ class _StackedChart extends StatelessWidget {
         yAxis: CartesianAxis(
           theme: Theme.of(context),
           axisLoc: null,
-          valToString: formatDollar,
+          valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
         ),
         xAxis: MonthAxis(
           theme: Theme.of(context),

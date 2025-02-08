@@ -4,7 +4,6 @@ import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
-import 'package:libra_sheet/graphing/cartesian/income_expense_tooltip.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/series/dashed_horiztonal_line.dart';
 import 'package:libra_sheet/graphing/wrapper/category_stack_chart.dart';

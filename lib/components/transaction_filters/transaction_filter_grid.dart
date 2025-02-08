@@ -1,13 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:libra_sheet/components/cards/transaction_card.dart';
-import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
-import 'package:libra_sheet/components/transaction_filters/transaction_grid.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_list.dart';
-import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
@@ -119,7 +112,7 @@ class _TransactionFilterGrid extends StatelessWidget {
               Text(
                 filterMessage,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.blue,
+                      color: Colors.orange,
                       // fontStyle: FontStyle.italic,
                     ),
                 textAlign: TextAlign.right,
@@ -134,7 +127,7 @@ class _TransactionFilterGrid extends StatelessWidget {
               icon: Icon(
                 Icons.filter_list,
                 color: (filterMessage != null)
-                    ? Colors.blue
+                    ? Colors.orange
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),

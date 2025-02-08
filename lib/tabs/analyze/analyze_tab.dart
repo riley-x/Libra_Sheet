@@ -15,6 +15,7 @@ import 'package:libra_sheet/tabs/analyze/double_sided_graph.dart';
 import 'package:libra_sheet/tabs/analyze/flows_graph.dart';
 import 'package:libra_sheet/tabs/analyze/heatmap_graph.dart';
 import 'package:libra_sheet/tabs/analyze/net_income_graph.dart';
+import 'package:libra_sheet/tabs/analyze/other_graph.dart';
 import 'package:provider/provider.dart';
 
 class AnalyzeTab extends StatelessWidget {
@@ -50,6 +51,8 @@ class _Charts extends StatelessWidget {
         (graph, headerElements) = doubleSidedGraph(context, state, theme);
       case AnalyzeTabView.netIncome:
         (graph, headerElements) = netIncomeGraph(state, theme);
+      case AnalyzeTabView.other:
+        (graph, headerElements) = otherGraph(context, state, theme);
       case AnalyzeTabView.expenseFlow:
         (graph, headerElements) = flowsGraph(context, state, theme, true);
       case AnalyzeTabView.incomeFlow:
