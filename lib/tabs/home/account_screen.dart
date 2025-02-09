@@ -260,7 +260,7 @@ class _Graph extends StatelessWidget {
         axisLoc: null,
         valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
         min: ((account.type == AccountType.liability && data.hasPositive()) ||
-                (account.type == AccountType.liability && data.hasNegative()))
+                (account.type != AccountType.liability && data.hasNegative()))
             ? null
             : 0,
       ),
