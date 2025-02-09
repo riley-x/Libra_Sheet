@@ -252,12 +252,17 @@ class _Graph extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
     final months = state.monthList.looseRange(state.timeFrameRange);
+    final data = state.historyMap[account.key]?.values.looseRange(state.timeFrameRange) ?? [];
+
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
         theme: Theme.of(context),
         axisLoc: null,
         valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
-        min: 0,
+        min: ((account.type == AccountType.liability && data.hasPositive()) ||
+                (account.type == AccountType.liability && data.hasNegative()))
+            ? null
+            : 0,
       ),
       xAxis: MonthAxis(
         theme: Theme.of(context),
@@ -269,7 +274,7 @@ class _Graph extends StatelessWidget {
         LineSeries<int>(
           name: "",
           color: account.color,
-          data: state.historyMap[account.key]?.values.looseRange(state.timeFrameRange) ?? [],
+          data: data,
           valueMapper: (i, item) => Offset(i.toDouble(),
               (account.type == AccountType.liability ? -item : item).asDollarDouble()),
           gradient: LinearGradient(
@@ -281,6 +286,7 @@ class _Graph extends StatelessWidget {
             stops: const [0.0, 0.6, 1],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
+            tileMode: TileMode.mirror,
           ),
         ),
       ]),

@@ -27,6 +27,12 @@ class LineSeries<T> extends Series<T> {
   final Offset Function(int i, T item) valueMapper;
   final Paint linePainter;
   final double strokeWidth;
+
+  /// The gradient's y-Rect is defined such that stop 0.0 = the x-axis loc and stop 1.0 = the
+  /// further of the y-axis min/max. This aligns with the fill, which extends to the x-axis.
+  ///
+  /// Note that when the line alternates around the axis, you can achieve a nice symmetric fill by
+  /// using [TileMode.mirror] in the gradient.
   final Gradient? gradient;
   final DashPainter? dash;
 
@@ -61,39 +67,44 @@ class LineSeries<T> extends Series<T> {
     _renderedPoints.clear();
     if (data.length <= 1) return;
 
-    var negative = false;
-
-    /// Line
+    /// Render and path
     final path = Path();
 
     final start = _addPoint(coordSpace, 0);
-    path.moveTo(start.pixelPos.dx, start.pixelPos.dy);
-    if (start.value.dy < 0) negative = true;
+    path.moveToOffset(start.pixelPos);
 
     for (int i = 1; i < data.length; i++) {
       final curr = _addPoint(coordSpace, i);
       path.lineTo(curr.pixelPos.dx, curr.pixelPos.dy);
-      if (curr.value.dy < 0) negative = true;
     }
+
+    /// Main line
     if (dash != null) {
       dash!.paint(canvas, path, linePainter);
     } else {
       canvas.drawPath(path, linePainter);
     }
 
-    /// Gradient; TODO this assumes all points are on same side of 0
-    if (gradient != null) {
-      path.lineToOffset(
-          coordSpace.userToPixel(Offset(valueMapper(data.length - 1, data.last).dx, 0)));
-      path.lineToOffset(coordSpace.userToPixel(Offset(valueMapper(0, data.first).dx, 0)));
+    /// Gradient
+    if (fillColor != null || gradient != null) {
+      final axisPixelY = coordSpace.yAxis.userToPixel(0);
+      path.lineTo(_renderedPoints.last.pixelPos.dx, axisPixelY);
+      path.lineTo(_renderedPoints.first.pixelPos.dx, axisPixelY);
+      path.close();
+
+      final maxDiff = max(
+        (coordSpace.yAxis.pixelMax - axisPixelY).abs(),
+        (coordSpace.yAxis.pixelMin - axisPixelY).abs(),
+      );
       canvas.drawPath(
           path,
           Paint()
+            ..color = fillColor ?? Colors.black // black is default which lets shader override
             ..shader = gradient!.createShader(Rect.fromLTRB(
               0,
-              negative ? coordSpace.yAxis.userToPixel(0) : coordSpace.yAxis.pixelMax,
+              axisPixelY - maxDiff,
               coordSpace.xAxis.canvasSize,
-              negative ? coordSpace.yAxis.pixelMin : coordSpace.yAxis.userToPixel(0),
+              axisPixelY,
             )));
     }
   }

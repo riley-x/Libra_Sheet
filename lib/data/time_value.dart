@@ -182,4 +182,18 @@ extension IntListUtils on List<int> {
     }
     return current;
   }
+
+  bool hasNegative() {
+    for (final x in this) {
+      if (x < 0) return true;
+    }
+    return false;
+  }
+
+  bool hasPositive() {
+    for (final x in this) {
+      if (x > 0) return true;
+    }
+    return false;
+  }
 }
