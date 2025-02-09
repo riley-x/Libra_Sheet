@@ -174,8 +174,8 @@ class _EditAccount extends StatelessWidget {
                       onSave: (it) => state.type = it!,
                     ),
                   ),
-                  tooltip: "This is used mostly for organizing similar accounts together."
-                      "\nLiability accounts should only have negative values though.",
+                  // tooltip: "This is used mostly for organizing similar accounts together."
+                  //     "\nLiability accounts should only have negative values though.",
                 ),
                 rowSpacing,
                 labelRow(
