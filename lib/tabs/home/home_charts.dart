@@ -244,6 +244,7 @@ class _NetWorthGraph extends StatelessWidget {
               stops: gradientStops,
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
+              tileMode: TileMode.mirror,
             ),
           ),
         ]),

@@ -73,6 +73,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
             stops: const [0, 0.6, 1],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
+            tileMode: TileMode.mirror,
           ),
         ),
         LineSeries<int>(
@@ -89,8 +90,9 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
               Colors.red.shade700.withAlpha(100),
             ],
             stops: const [0, 0.6, 1],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            tileMode: TileMode.mirror,
           ),
         ),
         StackColumnSeries<TimeIntValue>(

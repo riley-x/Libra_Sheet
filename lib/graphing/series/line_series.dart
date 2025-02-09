@@ -28,8 +28,9 @@ class LineSeries<T> extends Series<T> {
   final Paint linePainter;
   final double strokeWidth;
 
-  /// The gradient's y-Rect is defined such that stop 0.0 = the x-axis loc and stop 1.0 = the
-  /// further of the y-axis min/max. This aligns with the fill, which extends to the x-axis.
+  /// The gradient's y-rect is defined such that stop 0.0 = the x-axis loc and stop 1.0 = towards
+  /// y_max, but with offset equal to the max of (x_axis - y_min) and (y_max - x_axis). This aligns
+  /// with the fill, which extends to the x-axis.
   ///
   /// Note that when the line alternates around the axis, you can achieve a nice symmetric fill by
   /// using [TileMode.mirror] in the gradient.
