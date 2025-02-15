@@ -7,9 +7,7 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
-import 'package:libra_sheet/graphing/cartesian/left_right_tooltip.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
-import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/violin_series.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
@@ -96,14 +94,6 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     data: SeriesCollection([
       ...createSeries(),
     ]),
-    hoverTooltip: (painter, loc) => LeftRightTooltip(
-      painter,
-      loc,
-      reverse: true,
-      // total: loc == null
-      //     ? null
-      //     : history.getTotal((range.$1 + loc, range.$1 + loc + 1)).abs().dollarString(),
-    ),
     onRange: (xStart, xEnd) => state.setTimeFrame(
       TimeFrame(
         TimeFrameEnum.custom,
