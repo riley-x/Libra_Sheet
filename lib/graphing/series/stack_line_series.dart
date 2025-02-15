@@ -315,6 +315,7 @@ class StackLineSeries<T> extends LineSeries<T> {
     final val = valueMapper(i, data[i]).dy;
     if (val == 0) return null;
     if (name.isEmpty) {
+      if (labelOnly) return null;
       return Text(
         mainGraph.yAxis.valToString(val),
         style: Theme.of(context).textTheme.bodyMedium,
@@ -334,7 +335,7 @@ class StackLineSeries<T> extends LineSeries<T> {
         ),
         const SizedBox(width: 5),
         Text(
-          "$name: ${mainGraph.yAxis.valToString(val)}",
+          labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(val)}",
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],

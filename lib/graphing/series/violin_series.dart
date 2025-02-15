@@ -30,11 +30,14 @@ class ViolinSeries<T> extends Series<T> {
   /// A user y value to center the series around
   final double height;
 
-  /// Cache the points to enable easy hit testing
-  final List<ViolinSeriesPoint<T>> _renderedPoints = [];
+  /// A user y value to divide the all values by. Make sure to adjust height accordingly.
+  final double normalize;
 
   /// If false, will align bars to bottom instead of center
   final bool alignCenter;
+
+  /// Cache the points to enable easy hit testing
+  final List<ViolinSeriesPoint<T>> _renderedPoints = [];
 
   ViolinSeries({
     required super.name,
@@ -44,6 +47,7 @@ class ViolinSeries<T> extends Series<T> {
     required this.height,
     this.labelMapper,
     this.alignCenter = true,
+    this.normalize = 1.0,
   }) : _valueMapper = valueMapper;
 
   ViolinSeriesPoint<T> _addPoint(CartesianCoordinateSpace coordSpace, int i) {
@@ -67,7 +71,7 @@ class ViolinSeries<T> extends Series<T> {
       _addPoint(coordSpace, i);
     }
 
-    if (_renderedPoints.length < 2) return;
+    if (_renderedPoints.isEmpty) return;
 
     // /// Top
     // final path = Path();
@@ -102,7 +106,7 @@ class ViolinSeries<T> extends Series<T> {
 
   @override
   BoundingBox boundingBox(int i) {
-    final y = valueMapper(i);
+    final y = valueMapper(i) / normalize;
     final x = i.toDouble();
     const width = 1.0;
     if (alignCenter) {
@@ -158,7 +162,7 @@ class ViolinSeries<T> extends Series<T> {
         ),
         const SizedBox(width: 5),
         Text(
-          "$name: $label",
+          labelOnly ? name : "$name: $label",
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],

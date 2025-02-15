@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
-
-import 'pooled_tooltip.dart';
+import 'package:libra_sheet/graphing/cartesian/left_right_tooltip.dart';
 
 /// This widget controls the hover for a discrete x-axis graph. A solid vertical line is drawn at
 /// the hover position given by [hoverLoc], and the [tooltip] is drawn next to it and placed to not
 /// fall off the graph.
 ///
-/// If [tooltip] is null, will use a [PooledTooltip] by default. [reverse] is exposed and passed to
-/// the [PooledTooltip] for convenience, but is unused by this class.
+/// If [tooltip] is null, will use a [LeftRightTooltip] by default. [reverse] is exposed and passed to
+/// the [LeftRightTooltip] for convenience, but is unused by this class.
 ///
 /// This widget should be used in a [Stack] with a [DiscreteCartesianGraphPainter] such that they
 /// have the same size.
@@ -23,7 +22,7 @@ class SnapLineHover extends SingleChildRenderObjectWidget {
     this.hoverLoc,
     Widget? tooltip,
     bool reverse = false,
-  }) : super(child: tooltip ?? PooledTooltip(mainGraph, hoverLoc, reverse: reverse));
+  }) : super(child: tooltip ?? LeftRightTooltip(mainGraph, hoverLoc, reverse: reverse));
 
   @override
   RenderSnapLineHover createRenderObject(BuildContext context) {

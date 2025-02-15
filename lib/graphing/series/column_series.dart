@@ -118,6 +118,7 @@ class ColumnSeries<T> extends Series<T> {
     final point = _renderedPoints[i];
     if (point.value == 0) return null;
     if (name.isEmpty) {
+      if (labelOnly) return null;
       return Text(
         mainGraph.yAxis.valToString(point.value),
         style: Theme.of(context).textTheme.bodyMedium,

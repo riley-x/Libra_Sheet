@@ -7,6 +7,7 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/cartesian/left_right_tooltip.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/cartesian/pooled_tooltip.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
@@ -56,11 +57,10 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
         name: categoryHistory.category.name,
         color: categoryHistory.category.color,
         data: values,
-        valueMapper: (i, val) => viewState.justified
-            ? val.abs().asDollarDouble() / maxValue
-            : val.abs().asDollarDouble(),
+        valueMapper: (i, val) => val.abs().asDollarDouble(),
         labelMapper: (i, val) => val.abs().dollarString(),
         height: alignCenter ? (viewState.justified ? total + 0.5 : total + maxValue / 2) : total,
+        normalize: viewState.justified ? maxValue : 1,
       ));
       total += viewState.justified ? 1.05 : maxValue + spacing;
     }
@@ -83,11 +83,11 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 
   final graph = DiscreteCartesianGraph(
     yAxis: CartesianAxis(
-      theme: theme,
-      axisLoc: null,
-      labels: [],
-      dataPadFrac: 0.01,
-    ),
+        theme: theme,
+        axisLoc: null,
+        labels: [],
+        dataPadFrac: 0.01,
+        valToString: (val, [order]) => formatDollar(val, dollarSign: true, order: order)),
     xAxis: MonthAxis(
       theme: theme,
       axisLoc: null,
@@ -96,13 +96,13 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     data: SeriesCollection([
       ...createSeries(),
     ]),
-    hoverTooltip: (painter, loc) => PooledTooltip(
+    hoverTooltip: (painter, loc) => LeftRightTooltip(
       painter,
       loc,
       reverse: true,
-      total: loc == null
-          ? null
-          : history.getTotal((range.$1 + loc, range.$1 + loc + 1)).abs().dollarString(),
+      // total: loc == null
+      //     ? null
+      //     : history.getTotal((range.$1 + loc, range.$1 + loc + 1)).abs().dollarString(),
     ),
     onRange: (xStart, xEnd) => state.setTimeFrame(
       TimeFrame(

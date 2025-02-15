@@ -130,6 +130,7 @@ class LineSeries<T> extends Series<T> {
     final point = _renderedPoints[i];
     if (point.value.dy == 0) return null;
     if (name.isEmpty) {
+      if (labelOnly) return null;
       return Text(
         mainGraph.yAxis.valToString(point.value.dy),
         style: Theme.of(context).textTheme.bodyMedium,
@@ -146,7 +147,7 @@ class LineSeries<T> extends Series<T> {
         ),
         const SizedBox(width: 5),
         Text(
-          "$name: ${mainGraph.yAxis.valToString(point.value.dy)}",
+          labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(point.value.dy)}",
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],
