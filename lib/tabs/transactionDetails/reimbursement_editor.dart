@@ -121,6 +121,7 @@ class _TransactionsList extends StatelessWidget {
         ExpenseFilterType.income => TransactionFilters(maxValue: 0),
         ExpenseFilterType.all => null
       },
+      quickFilter: true,
       title: Text(
         'Select target transaction',
         style: Theme.of(context).textTheme.titleMedium,

@@ -32,6 +32,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.fab,
     this.createProvider = true,
     this.filterDescription,
+    this.quickFilter = false,
   });
 
   final Widget? title;
@@ -43,6 +44,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final Widget? fab;
   final bool createProvider;
   final String? Function(TransactionFilters)? filterDescription;
+  final bool quickFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class TransactionFilterGrid extends StatelessWidget {
       onSelect: onSelect,
       fab: fab,
       filterDescription: filterDescription,
+      quickFilter: quickFilter,
     );
     if (!createProvider) return grid;
     return ChangeNotifierProvider(
@@ -79,6 +82,7 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.padding,
     this.fab,
     this.filterDescription,
+    this.quickFilter = false,
   });
 
   final Widget? title;
@@ -88,6 +92,7 @@ class _TransactionFilterGrid extends StatelessWidget {
   final EdgeInsets? padding;
   final Widget? fab;
   final String? Function(TransactionFilters)? filterDescription;
+  final bool quickFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +138,29 @@ class _TransactionFilterGrid extends StatelessWidget {
             ),
           ],
         ),
+        if (quickFilter)
+          Row(
+            children: [
+              const SizedBox(width: 10),
+              const Text("Quick search:"),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: state.nameController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    isDense: true,
+                  ),
+                  onChanged: state.setName,
+                  maxLines: 1,
+                  // style: widget.style,
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+          ),
+        const SizedBox(height: 10),
         Expanded(
           child: Scaffold(
             body: TransactionList(
