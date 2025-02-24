@@ -31,22 +31,35 @@ final libraNavDestinations = [
     )
 ];
 
-class LibraNav extends StatelessWidget {
+class LibraNav extends StatefulWidget {
   const LibraNav({
     super.key,
-    required this.extended,
     this.onDestinationSelected,
   });
 
-  final bool extended;
   final Function(int)? onDestinationSelected;
 
   // these were empirically determined from testing
   static const minWidth = 80.0;
   static const iconWidth = 24.0;
   static const iconPadding = (minWidth - iconWidth) / 2;
+  static const iconButtonPadding = 8;
+  static const iconManualPadding = iconPadding - iconButtonPadding;
   // this is our choice
-  static const minExtendedWidth = 220.0;
+  static const expandedWidth = 220.0;
+
+  @override
+  State<LibraNav> createState() => _LibraNavState();
+}
+
+class _LibraNavState extends State<LibraNav> {
+  bool extended = true;
+
+  void toggleExtended() {
+    setState(() {
+      extended = !extended;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +79,66 @@ class LibraNav extends StatelessWidget {
         selectedLabelTextStyle: textTheme.labelLarge?.copyWith(color: textColor),
         unselectedIconTheme: Theme.of(context).iconTheme.copyWith(color: textColor),
         extended: extended,
-        minExtendedWidth: minExtendedWidth,
+        minExtendedWidth: LibraNav.expandedWidth,
         destinations: libraNavDestinations,
         selectedIndex: selectedIndex,
-        onDestinationSelected: onDestinationSelected,
+        onDestinationSelected: widget.onDestinationSelected,
+        leading: _LeadingContent(textColor: textColor, toggleExtended: toggleExtended),
         trailing: _FooterContent(textColor: textColor),
       ),
     );
+  }
+}
+
+class _LeadingContent extends StatelessWidget {
+  const _LeadingContent({required this.textColor, required this.toggleExtended});
+
+  final Color textColor;
+  final Function() toggleExtended;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    final textStyle = Theme.of(context).textTheme.headlineMedium;
+    return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          return SizedBox(
+            width: lerpDouble(LibraNav.minWidth, LibraNav.expandedWidth, animation.value),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRect(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(width: LibraNav.iconManualPadding),
+                      Align(
+                        heightFactor: 1.0,
+                        widthFactor: animation.value,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FadeTransition(
+                          opacity: animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
+                          child: Text("Libra Sheet", style: textStyle?.copyWith(color: textColor)),
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: toggleExtended,
+                        icon: Icon(
+                          animation.value == 1 ? Icons.first_page : Icons.last_page,
+                          color: textColor,
+                        ),
+                      ),
+                      SizedBox(width: lerpDouble(LibraNav.iconManualPadding, 0, animation.value)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 }
 
@@ -83,7 +149,6 @@ class _FooterContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
     final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
     final Animation<double> animation = NavigationRail.extendedAnimation(context);
 
@@ -92,22 +157,25 @@ class _FooterContent extends StatelessWidget {
 
     final cloudStatus = context.watch<GoogleDrive>().status();
     final cloudIcon = switch (cloudStatus) {
-      GoogleDriveSyncStatus.upToDate => const Icon(Icons.cloud_done, color: Colors.green),
-      GoogleDriveSyncStatus.driveAhead => const Icon(Icons.cloud_download, color: Colors.amber),
-      GoogleDriveSyncStatus.localAhead => const Icon(Icons.cloud_upload, color: Colors.amber),
-      GoogleDriveSyncStatus.noConnection => Icon(Icons.cloud_off, color: errorColor),
-      GoogleDriveSyncStatus.disabled => const SizedBox(),
+      GoogleDriveSyncStatus.upToDate => Icons.cloud_done,
+      GoogleDriveSyncStatus.driveAhead => Icons.cloud_download,
+      GoogleDriveSyncStatus.localAhead => Icons.cloud_upload,
+      GoogleDriveSyncStatus.noConnection => Icons.cloud_off,
+      GoogleDriveSyncStatus.disabled => Icons.cloud_off,
     };
     final cloudText = switch (cloudStatus) {
-      GoogleDriveSyncStatus.upToDate =>
-        Text("Up to date", style: textStyle?.copyWith(color: Colors.green)),
-      GoogleDriveSyncStatus.driveAhead =>
-        Text("Download pending", style: textStyle?.copyWith(color: Colors.amber)),
-      GoogleDriveSyncStatus.localAhead =>
-        Text("Upload pending", style: textStyle?.copyWith(color: Colors.amber)),
-      GoogleDriveSyncStatus.noConnection =>
-        Text("No connection", style: textStyle?.copyWith(color: errorColor)),
-      GoogleDriveSyncStatus.disabled => const SizedBox(),
+      GoogleDriveSyncStatus.upToDate => "Up to date",
+      GoogleDriveSyncStatus.driveAhead => "Download pending",
+      GoogleDriveSyncStatus.localAhead => "Upload pending",
+      GoogleDriveSyncStatus.noConnection => "No connection",
+      GoogleDriveSyncStatus.disabled => "",
+    };
+    final cloudColor = switch (cloudStatus) {
+      GoogleDriveSyncStatus.upToDate => Colors.green,
+      GoogleDriveSyncStatus.driveAhead => Colors.amber,
+      GoogleDriveSyncStatus.localAhead => Colors.amber,
+      GoogleDriveSyncStatus.noConnection => errorColor,
+      GoogleDriveSyncStatus.disabled => null,
     };
 
     return Expanded(
@@ -117,52 +185,23 @@ class _FooterContent extends StatelessWidget {
             animation: animation,
             builder: (BuildContext context, Widget? child) {
               return SizedBox(
-                width: lerpDouble(LibraNav.minWidth, LibraNav.minExtendedWidth, animation.value),
+                width: lerpDouble(LibraNav.minWidth, LibraNav.expandedWidth, animation.value),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (kDebugMode) ...[
-                      ClipRect(
-                        child: Row(
-                          children: [
-                            const SizedBox(width: LibraNav.iconPadding),
-                            const Icon(Icons.bug_report, color: Colors.yellow),
-                            const SizedBox(width: LibraNav.iconPadding),
-                            Align(
-                              heightFactor: 1.0,
-                              widthFactor: animation.value,
-                              alignment: AlignmentDirectional.centerStart,
-                              child: FadeTransition(
-                                opacity:
-                                    animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
-                                child: Text("Debug mode",
-                                    style: textStyle?.copyWith(color: Colors.yellow)),
-                              ),
-                            ),
-                          ],
-                        ),
+                      const _IconFooter(
+                        icon: Icons.bug_report,
+                        label: "Debug mode",
+                        color: Colors.yellow,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                     ],
-                    ClipRect(
-                      child: Row(
-                        children: [
-                          const SizedBox(width: LibraNav.iconPadding),
-                          cloudIcon,
-                          const SizedBox(width: LibraNav.iconPadding),
-                          Align(
-                            heightFactor: 1.0,
-                            widthFactor: animation.value,
-                            alignment: AlignmentDirectional.centerStart,
-                            child: FadeTransition(
-                              opacity:
-                                  animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
-                              child: cloudText,
-                            ),
-                          ),
-                        ],
-                      ),
+                    _IconFooter(
+                      icon: cloudIcon,
+                      label: cloudText,
+                      color: cloudColor,
                     ),
                     if (animation.value < 1)
                       SizedBox(height: lerpDouble(0, 30 + _DarkModeSwitch.height, animation.value)),
@@ -174,6 +213,48 @@ class _FooterContent extends StatelessWidget {
                 ),
               );
             }),
+      ),
+    );
+  }
+}
+
+class _IconFooter extends StatelessWidget {
+  const _IconFooter({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.color,
+    this.onPressed,
+  });
+
+  final IconData icon;
+  final Color? color;
+  final String label;
+  final Function()? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    return ClipRect(
+      child: Row(
+        children: [
+          const SizedBox(width: LibraNav.iconManualPadding),
+          IconButton(
+            onPressed: onPressed,
+            icon: Icon(icon, color: color),
+          ),
+          const SizedBox(width: LibraNav.iconManualPadding),
+          Align(
+            heightFactor: 1.0,
+            widthFactor: animation.value,
+            alignment: AlignmentDirectional.centerStart,
+            child: FadeTransition(
+              opacity: animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
+              child: Text(label, style: textStyle?.copyWith(color: color)),
+            ),
+          ),
+        ],
       ),
     );
   }
