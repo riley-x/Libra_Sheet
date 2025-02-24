@@ -43,7 +43,7 @@ class LibraNav extends StatefulWidget {
   static const minWidth = 80.0;
   static const iconWidth = 24.0;
   static const iconPadding = (minWidth - iconWidth) / 2;
-  static const iconButtonPadding = 8;
+  static const iconButtonPadding = 8.0;
   static const iconManualPadding = iconPadding - iconButtonPadding;
   // this is our choice
   static const expandedWidth = 220.0;
@@ -98,7 +98,7 @@ class _LeadingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    final animation = NavigationRail.extendedAnimation(context);
     final textStyle = Theme.of(context).textTheme.headlineMedium;
     return AnimatedBuilder(
         animation: animation,
@@ -150,7 +150,7 @@ class _FooterContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
-    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    final animation = NavigationRail.extendedAnimation(context);
 
     final errorColor =
         (isDark) ? Theme.of(context).colorScheme.error : const Color.fromARGB(255, 255, 200, 200);
@@ -196,19 +196,13 @@ class _FooterContent extends StatelessWidget {
                         label: "Debug mode",
                         color: Colors.yellow,
                       ),
-                      const SizedBox(height: 10),
                     ],
                     _IconFooter(
                       icon: cloudIcon,
                       label: cloudText,
                       color: cloudColor,
                     ),
-                    if (animation.value < 1)
-                      SizedBox(height: lerpDouble(0, 30 + _DarkModeSwitch.height, animation.value)),
-                    if (animation.value == 1) ...[
-                      const SizedBox(height: 30),
-                      _DarkModeSwitch(textColor: textColor),
-                    ],
+                    _DarkModeSwitch(textColor: textColor),
                   ],
                 ),
               );
@@ -266,24 +260,51 @@ class _DarkModeSwitch extends StatelessWidget {
   final Color textColor;
 
   /// From testing
-  static const height = 40.0;
+  // static const height = 40.0;
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.select<LibraAppState, bool>((it) => it.isDarkMode);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.dark_mode_outlined, color: textColor),
-        const SizedBox(width: 5),
-        Switch(
-          value: !isDarkMode,
-          onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
-          activeColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        ),
-        const SizedBox(width: 5),
-        Icon(Icons.light_mode, color: textColor),
-      ],
+    final animation = NavigationRail.extendedAnimation(context);
+    return ClipRect(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(width: LibraNav.iconManualPadding),
+          IconButton(
+            onPressed: animation.value == 0 ? context.read<LibraAppState>().toggleDarkMode : null,
+            icon: Icon(
+              (isDarkMode || animation.value > 0.1) ? Icons.dark_mode_outlined : Icons.light_mode,
+              color: textColor,
+            ),
+          ),
+          Align(
+            heightFactor: 1.0,
+            widthFactor: animation.value,
+            alignment: AlignmentDirectional.centerStart,
+            child: FadeTransition(
+              opacity: animation.drive(CurveTween(curve: const Interval(0.0, 1.0))),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Transform.scale(
+                    scale: 0.8,
+                    child: Switch(
+                      value: !isDarkMode,
+                      onChanged: (value) => context.read<LibraAppState>().toggleDarkMode(),
+                      activeColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  const SizedBox(width: LibraNav.iconButtonPadding),
+                  Icon(Icons.light_mode, color: textColor),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: LibraNav.iconManualPadding),
+        ],
+      ),
     );
   }
 }
