@@ -149,7 +149,7 @@ class _YearBlock extends StatelessWidget {
           onTap: () => state.selectYear(year),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
-            child: Text('$year', style: Theme.of(context).textTheme.headlineSmall),
+            child: Text('$year', style: Theme.of(context).textTheme.displaySmall),
           ),
         ),
         for (int start = 0; start < 12; start += 4)

@@ -166,7 +166,7 @@ class _CategorySection extends StatelessWidget {
             const SizedBox(width: 15),
             Text(
               (isExpense) ? 'Expense' : 'Income',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.displaySmall,
             ),
             const Spacer(),
             IconButton(

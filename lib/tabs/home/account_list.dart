@@ -43,7 +43,7 @@ class AccountList extends StatelessWidget {
           children: [
             Text(
               "${type.label} Accounts",
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.displaySmall,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -52,7 +52,7 @@ class AccountList extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: Text(
                   sum.dollarString(),
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
               ),
             ),

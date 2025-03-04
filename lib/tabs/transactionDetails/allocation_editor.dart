@@ -24,7 +24,7 @@ class AllocationEditor extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           (state.focusedAllocation == null) ? 'Add Allocation' : 'Edit Allocation',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.displaySmall,
         ),
         const SizedBox(height: 10),
         Form(

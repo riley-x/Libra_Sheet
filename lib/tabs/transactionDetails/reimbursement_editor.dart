@@ -24,7 +24,7 @@ class ReimbursementEditor extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           (state.focusedReimbursement == null) ? 'Add Reimbursement' : 'Edit Reimbursement',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.displaySmall,
         ),
         const SizedBox(height: 10),
         if (subTitle != null)

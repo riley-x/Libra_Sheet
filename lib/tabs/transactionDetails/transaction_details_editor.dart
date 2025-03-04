@@ -70,7 +70,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         'Details',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        style: Theme.of(context).textTheme.displaySmall,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -170,7 +170,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Allocations',
-                              style: Theme.of(context).textTheme.headlineSmall,
+                              style: Theme.of(context).textTheme.displaySmall,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -214,7 +214,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Reimbursements',
-                              style: Theme.of(context).textTheme.headlineSmall,
+                              style: Theme.of(context).textTheme.displaySmall,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),

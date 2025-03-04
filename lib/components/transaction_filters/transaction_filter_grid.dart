@@ -114,7 +114,7 @@ class _TransactionFilterGrid extends StatelessWidget {
                   ? title!
                   : Text(
                       "Transactions",
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: Theme.of(context).textTheme.displaySmall,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

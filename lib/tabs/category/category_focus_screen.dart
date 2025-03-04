@@ -267,7 +267,7 @@ class _HistoryChart extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Category History',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.displaySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
