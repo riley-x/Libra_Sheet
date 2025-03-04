@@ -104,6 +104,8 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<HomeTabState>();
+    final accountHistory = state.historyMap[widget.account.key];
+
     return ChangeNotifierProvider(
       create: (context) => TransactionFilterState(
         context.read(),
@@ -116,19 +118,22 @@ class _AccountScreenState extends State<AccountScreen> {
           children: [
             CommonBackBar(
               leftText: widget.account.name,
-              rightText:
-                  state.historyMap[widget.account.key]?.values.lastOrNull?.dollarString() ?? '',
+              rightText: accountHistory?.values.lastOrNull?.dollarString() ?? '',
               // Don't use account.balance because that can be stale after adding a transaction (still true?)
             ),
             Expanded(
               child: Row(
                 children: [
                   Expanded(
-                    child: TransactionFilterGrid(
-                      createProvider: false,
-                      fab: TransactionSpeedDial(initialAccount: widget.account),
-                      onSelect: (t) => toTransactionDetails(context, t),
-                      filterDescription: _filterDescription,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: TransactionFilterGrid(
+                        createProvider: false,
+                        fab: TransactionSpeedDial(initialAccount: widget.account),
+                        onSelect: (t) => toTransactionDetails(context, t),
+                        filterDescription: _filterDescription,
+                        monthEndBalances: accountHistory?.monthEndValues,
+                      ),
                     ),
                   ),
                   Container(
@@ -259,10 +264,8 @@ class _Graph extends StatelessWidget {
         theme: Theme.of(context),
         axisLoc: null,
         valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
-        min: ((account.type == AccountType.liability && data.hasPositive()) ||
-                (account.type != AccountType.liability && data.hasNegative()))
-            ? null
-            : 0,
+        min: (account.type != AccountType.liability && !data.hasNegative()) ? 0 : null,
+        max: (account.type == AccountType.liability && !data.hasPositive()) ? 0 : null,
       ),
       xAxis: MonthAxis(
         theme: Theme.of(context),
@@ -275,8 +278,7 @@ class _Graph extends StatelessWidget {
           name: "",
           color: account.color,
           data: data,
-          valueMapper: (i, item) => Offset(i.toDouble(),
-              (account.type == AccountType.liability ? -item : item).asDollarDouble()),
+          valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
           gradient: LinearGradient(
             colors: [
               account.color.withAlpha(10),

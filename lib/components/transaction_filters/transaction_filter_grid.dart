@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_list.dart';
+import 'package:libra_sheet/data/month.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filter_state.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.createProvider = true,
     this.filterDescription,
     this.quickFilter = false,
+    this.monthEndBalances,
   });
 
   final Widget? title;
@@ -45,6 +47,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final bool createProvider;
   final String? Function(TransactionFilters)? filterDescription;
   final bool quickFilter;
+  final Map<Month, int>? monthEndBalances;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +62,7 @@ class TransactionFilterGrid extends StatelessWidget {
       fab: fab,
       filterDescription: filterDescription,
       quickFilter: quickFilter,
+      monthEndBalances: monthEndBalances,
     );
     if (!createProvider) return grid;
     return ChangeNotifierProvider(
@@ -83,6 +87,7 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.fab,
     this.filterDescription,
     this.quickFilter = false,
+    required this.monthEndBalances,
   });
 
   final Widget? title;
@@ -93,6 +98,7 @@ class _TransactionFilterGrid extends StatelessWidget {
   final Widget? fab;
   final String? Function(TransactionFilters)? filterDescription;
   final bool quickFilter;
+  final Map<Month, int>? monthEndBalances;
 
   @override
   Widget build(BuildContext context) {
@@ -122,20 +128,32 @@ class _TransactionFilterGrid extends StatelessWidget {
                     ),
                 textAlign: TextAlign.right,
               ),
-            IconButton(
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) => TransactionFilterDialog(
-                        initialFilters: state.filters,
-                        onSave: state.setFilters,
-                      )),
-              icon: Icon(
-                Icons.filter_list,
-                color: (filterMessage != null)
-                    ? Colors.orange
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+            if (monthEndBalances != null)
+              Container(
+                width: 100,
+                padding: const EdgeInsets.only(right: 10), // match padding of list
+                alignment: Alignment.centerRight,
+                child: Text(
+                  "Resulting Balance",
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  textAlign: TextAlign.right,
+                ),
               ),
-            ),
+            if (monthEndBalances == null)
+              IconButton(
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => TransactionFilterDialog(
+                          initialFilters: state.filters,
+                          onSave: state.setFilters,
+                        )),
+                icon: Icon(
+                  Icons.filter_list,
+                  color: (filterMessage != null)
+                      ? Colors.orange
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
           ],
         ),
         if (quickFilter)
@@ -171,6 +189,7 @@ class _TransactionFilterGrid extends StatelessWidget {
               onTap: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
               onMultiselect: state.multiSelect,
               selected: state.selected,
+              monthEndBalances: monthEndBalances,
             ),
             floatingActionButton: fab,
           ),

@@ -2,6 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/theme/colorscheme.dart';
 
 final libraTextTheme = Typography.blackMountainView.copyWith(
+  displayLarge: const TextStyle(
+    fontFamily: "RobotoSlab",
+    fontSize: 26,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.75,
+  ),
+  displayMedium: const TextStyle(
+    fontFamily: "RobotoSlab",
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.5,
+  ),
+  displaySmall: const TextStyle(
+    fontFamily: "RobotoSlab",
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+  ),
   headlineLarge: const TextStyle(
     fontFamily: "RobotoSlab",
     fontSize: 26,
@@ -16,8 +33,9 @@ final libraTextTheme = Typography.blackMountainView.copyWith(
   ),
   headlineSmall: const TextStyle(
     fontFamily: "RobotoSlab",
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
+    height: 1.0,
   ),
   titleLarge: const TextStyle(
     fontSize: 20,
@@ -33,6 +51,23 @@ final libraTextTheme = Typography.blackMountainView.copyWith(
 );
 
 final libraDarkTextTheme = Typography.whiteMountainView.copyWith(
+  displayLarge: const TextStyle(
+    fontFamily: "RobotoSlab",
+    fontSize: 26,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.75,
+  ),
+  displayMedium: const TextStyle(
+    fontFamily: "RobotoSlab",
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.5,
+  ),
+  displaySmall: const TextStyle(
+    fontFamily: "RobotoSlab",
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+  ),
   headlineLarge: const TextStyle(
     fontFamily: "RobotoSlab",
     fontSize: 26,
@@ -47,8 +82,9 @@ final libraDarkTextTheme = Typography.whiteMountainView.copyWith(
   ),
   headlineSmall: const TextStyle(
     fontFamily: "RobotoSlab",
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
+    height: 1.0,
   ),
   titleLarge: const TextStyle(
     fontSize: 20,

@@ -1,4 +1,4 @@
-import 'package:libra_sheet/data/enums.dart';
+import 'package:libra_sheet/data/month.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/category.dart';
@@ -92,6 +92,8 @@ class Transaction {
     if (reimbursements == null) return _reimbTotal;
     return reimbursements!.fold(0, (cum, e) => cum + e.value);
   }
+
+  Month get month => Month(year: date.year, index: date.month);
 
   /// Returns the value after adjustments for reimbursements and allocations. Should be the same
   /// sign but smaller in magnitude than the original value.

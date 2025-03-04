@@ -3,6 +3,7 @@ import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/month.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
@@ -15,8 +16,13 @@ enum HomeChartMode {
 class AccountHistory {
   final Account account;
   final List<int> values;
+  final Map<Month, int> monthEndValues;
 
-  AccountHistory(this.account, this.values);
+  AccountHistory(this.account, this.values, List<DateTime> months)
+      : monthEndValues = {
+          for (int i = 0; i < values.length; i++)
+            Month(year: months[i].year, index: months[i].month): values[i],
+        };
 }
 
 class HomeTabState extends ChangeNotifier {
@@ -69,8 +75,9 @@ class HomeTabState extends ChangeNotifier {
       final values = rawValues.alignValues(monthList, cumulate: true);
 
       final list = (account.type == AccountType.liability) ? liabAccounts : assetAccounts;
-      list.add(AccountHistory(account, values));
-      historyMap[account.key] = AccountHistory(account, values);
+      final history = AccountHistory(account, values, monthList);
+      list.add(history);
+      historyMap[account.key] = history;
     }
 
     netWorthData = netWorthRaw.withAlignedTimes(monthList, cumulate: true);

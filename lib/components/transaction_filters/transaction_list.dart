@@ -6,6 +6,8 @@ import 'package:libra_sheet/components/cards/transaction_card.dart';
 import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/month.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 import 'package:provider/provider.dart';
 
@@ -18,11 +20,12 @@ class TransactionList extends StatelessWidget {
     this.onTap,
     this.onMultiselect,
     this.padding,
+    Map<Month, int>? monthEndBalances,
     super.key,
-  }) : listItems = _parseList(transactions);
+  }) : listItems = _parseList(transactions, monthEndBalances);
 
   final List<Transaction> transactions;
-  final List<_TransactionOrLabel> listItems;
+  final List<TransactionOrLabel> listItems;
   final int? maxRowsForName;
   final Map<int, Transaction>? selected;
   final Function(Transaction t, int index)? onTap;
@@ -76,7 +79,7 @@ class TransactionList extends StatelessWidget {
         if (item.label != null) {
           return _Label(item.label!);
         } else {
-          return TransactionCard(
+          final card = TransactionCard(
             trans: item.transaction!,
             selected: selected?.containsKey(item.transactionIndex) ?? false,
             maxRowsForName: maxRowsForName,
@@ -89,6 +92,23 @@ class TransactionList extends StatelessWidget {
               onSelect: () => _onSelect(item.transaction!, item.transactionIndex!, true),
             ),
           );
+
+          if (item.balance != null) {
+            return Row(
+              children: [
+                Expanded(child: card),
+                SizedBox(
+                  width: 100,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(item.balance!.dollarString()),
+                  ),
+                )
+              ],
+            );
+          } else {
+            return card;
+          }
         }
       },
     );
@@ -109,20 +129,39 @@ class _Label extends StatelessWidget {
   }
 }
 
-class _TransactionOrLabel {
+class TransactionOrLabel {
   final Transaction? transaction;
   final int? transactionIndex;
   final String? label;
+  final int? balance;
 
-  _TransactionOrLabel({this.transaction, this.transactionIndex, this.label});
+  TransactionOrLabel({this.transaction, this.transactionIndex, this.label, this.balance});
 }
 
-List<_TransactionOrLabel> _parseList(List<Transaction> transactions) {
-  final out = <_TransactionOrLabel>[];
+/// If [monthEndBalances] is not null, assumes [transactions] is a complete list, sorted in
+/// descending date order. Will calculate running balance data by subtracting values from the month
+/// end values.
+List<TransactionOrLabel> _parseList(
+    List<Transaction> transactions, Map<Month, int>? monthEndBalances) {
+  final out = <TransactionOrLabel>[];
+  if (transactions.isEmpty) return out;
+
+  var currentMonthRunningBalance = monthEndBalances?[transactions.first.month];
   for (final (i, t) in transactions.indexed) {
-    out.add(_TransactionOrLabel(transaction: t, transactionIndex: i));
+    out.add(TransactionOrLabel(
+      transaction: t,
+      transactionIndex: i,
+      balance: currentMonthRunningBalance,
+    ));
+    if (currentMonthRunningBalance != null) {
+      currentMonthRunningBalance = currentMonthRunningBalance - t.value;
+    }
     if (i < transactions.length - 1 && differentMonth(t.date, transactions[i + 1].date)) {
-      out.add(_TransactionOrLabel(label: transactions[i + 1].date.MMMMyyyy()));
+      currentMonthRunningBalance = monthEndBalances?[transactions[i + 1].month];
+      out.add(TransactionOrLabel(
+        label: transactions[i + 1].date.MMMMyyyy(),
+        balance: currentMonthRunningBalance,
+      ));
     }
   }
   return out;
