@@ -122,6 +122,8 @@ class ColumnSeries<T> extends Series<T> {
       return Text(
         mainGraph.yAxis.valToString(point.value),
         style: Theme.of(context).textTheme.bodyMedium,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     }
 
@@ -138,9 +140,12 @@ class ColumnSeries<T> extends Series<T> {
           ),
         ),
         const SizedBox(width: 5),
-        Text(
-          labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(point.value)}",
-          style: Theme.of(context).textTheme.bodyMedium,
+        Expanded(
+          child: Text(
+            labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(point.value)}",
+            style: Theme.of(context).textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

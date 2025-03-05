@@ -32,7 +32,10 @@ class IncomeExpenseTooltip extends StatelessWidget {
           Text(series.name, style: Theme.of(context).textTheme.bodyMedium);
 
       return (
-        Padding(padding: const EdgeInsets.only(right: 8), child: label),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 100, maxWidth: 200),
+          child: Padding(padding: const EdgeInsets.only(right: 14), child: label),
+        ),
         Text(mainGraph.yAxis.valToString(val), style: Theme.of(context).textTheme.bodyMedium),
       );
     }

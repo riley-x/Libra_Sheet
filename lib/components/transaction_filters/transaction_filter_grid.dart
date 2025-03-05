@@ -131,7 +131,7 @@ class _TransactionFilterGrid extends StatelessWidget {
             if (monthEndBalances != null)
               Container(
                 width: 100,
-                padding: const EdgeInsets.only(right: 10), // match padding of list
+                padding: const EdgeInsets.only(right: 14), // match padding of list
                 alignment: Alignment.centerRight,
                 child: Text(
                   "Resulting Balance",
@@ -184,7 +184,7 @@ class _TransactionFilterGrid extends StatelessWidget {
             body: TransactionList(
               transactions: state.transactions,
               padding: padding ??
-                  EdgeInsets.only(top: 10, left: 10, bottom: fab != null ? 80 : 10, right: 10),
+                  EdgeInsets.only(top: 10, left: 10, bottom: fab != null ? 80 : 10, right: 14),
               maxRowsForName: maxRowsForName,
               onTap: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,
               onMultiselect: state.multiSelect,

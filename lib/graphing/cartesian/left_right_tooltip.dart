@@ -35,10 +35,17 @@ class LeftRightTooltip extends StatelessWidget {
       if (val == null || val == 0) return null;
 
       var label = series.hoverBuilder(context, hoverLoc!, mainGraph, labelOnly: true) ??
-          Text(series.name, style: Theme.of(context).textTheme.bodyMedium);
+          Text(
+            series.name,
+            style: Theme.of(context).textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+          );
 
       return (
-        Padding(padding: const EdgeInsets.only(right: 14), child: label),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 100, maxWidth: 200),
+          child: Padding(padding: const EdgeInsets.only(right: 14), child: label),
+        ),
         Text(mainGraph.yAxis.valToString(val), style: Theme.of(context).textTheme.bodyMedium),
       );
     }

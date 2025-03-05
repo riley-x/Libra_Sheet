@@ -334,9 +334,12 @@ class StackLineSeries<T> extends LineSeries<T> {
           ),
         ),
         const SizedBox(width: 5),
-        Text(
-          labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(val)}",
-          style: Theme.of(context).textTheme.bodyMedium,
+        Expanded(
+          child: Text(
+            labelOnly ? name : "$name: ${mainGraph.yAxis.valToString(val)}",
+            style: Theme.of(context).textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

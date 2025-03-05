@@ -36,15 +36,20 @@ abstract class AnalyzeTabViewState {
 }
 
 class DoubleStackView implements AnalyzeTabViewState {
-  const DoubleStackView({required this.showSubcats});
+  const DoubleStackView({required this.showSubcats, this.showSeparated = false});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.doubleStack;
 
   final bool showSubcats;
+  final bool showSeparated;
 
   DoubleStackView withSubcats(bool value) {
-    return DoubleStackView(showSubcats: value);
+    return DoubleStackView(showSubcats: value, showSeparated: showSeparated);
+  }
+
+  DoubleStackView withSeparated(bool value) {
+    return DoubleStackView(showSubcats: showSubcats, showSeparated: value);
   }
 }
 

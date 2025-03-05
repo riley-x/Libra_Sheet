@@ -28,6 +28,7 @@ class CategoryStackChart extends StatelessWidget {
   final List<Series> extraSeriesBefore;
   final List<Series> extraSeries;
   final double? width;
+  final bool invertValues;
 
   /// If not null, will draw a dashed line behind the bars to indicate the average.
   final Color? averageColor;
@@ -45,6 +46,7 @@ class CategoryStackChart extends StatelessWidget {
     this.width,
     this.extraSeriesBefore = const [],
     this.extraSeries = const [],
+    this.invertValues = false,
   });
 
   @override
@@ -89,7 +91,7 @@ class CategoryStackChart extends StatelessWidget {
           width: width,
           fillColor: categoryHistory.category.color,
           data: categoryHistory.values.looseRange(range),
-          valueMapper: (i, item) => item.asDollarDouble(),
+          valueMapper: (i, item) => invertValues ? -item.asDollarDouble() : item.asDollarDouble(),
         );
 
         if (categoryHistory.category.type == ExpenseFilterType.expense) {
@@ -122,7 +124,7 @@ class CategoryStackChart extends StatelessWidget {
         ...extraSeriesBefore,
         if (averageColor != null)
           DashedHorizontalLine(
-            y: data.getDollarAverageMonthlyTotal(range),
+            y: data.getDollarAverageMonthlyTotal(range) * (invertValues ? -1 : 1),
             color: averageColor!,
             lineWidth: 1.5,
           ),

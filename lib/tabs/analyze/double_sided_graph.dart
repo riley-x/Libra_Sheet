@@ -38,40 +38,83 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
       value: viewState.showSubcats,
       onChanged: (bool? value) => state.setViewState(viewState.withSubcats(value == true)),
     ),
+
+    /// Show separated
+    const VerticalDivider(width: 30, thickness: 3, indent: 4, endIndent: 4),
+    Text('Show Separated', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    Checkbox(
+      value: viewState.showSeparated,
+      onChanged: (bool? value) => state.setViewState(viewState.withSeparated(value == true)),
+    ),
+
+    /// Total
     const Spacer(),
     Text('Total: ${total.dollarString()}'),
     const SizedBox(width: 10),
   ];
 
-  final graph = CategoryStackChart(
-    width: 0.7,
-    data: viewState.showSubcats ? state.combinedHistorySubCats : state.combinedHistory,
-    range: range,
-    onTap: (category, month) => onTap(category, month),
-    onRange: state.setTimeFrame,
-    xAxis: MonthAxis(
-      theme: Theme.of(context),
-      axisLoc: 0,
-      dates: state.combinedHistory.times.looseRange(range),
-      axisPainter: Paint()
-        ..color = Theme.of(context).colorScheme.onSurface
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..isAntiAlias = false,
-    ),
-    extraSeriesBefore: [
-      DashedHorizontalLine(
-        y: state.incomeData.getDollarAverageMonthlyTotal(range),
-        color: Colors.green,
-        lineWidth: 1.5,
+  final Widget graph;
+  if (viewState.showSeparated) {
+    final textStyle = theme.textTheme.displaySmall;
+    graph = Column(
+      children: [
+        const SizedBox(height: 4),
+        Text("Income", style: textStyle),
+        Expanded(
+          child: CategoryStackChart(
+            data: viewState.showSubcats ? state.incomeDataSubCats : state.incomeData,
+            range: range,
+            averageColor: Colors.green,
+            onTap: (category, month) => onTap(category, month),
+            onRange: state.setTimeFrame,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text("Expenses", style: textStyle),
+        Expanded(
+          child: CategoryStackChart(
+            data: viewState.showSubcats ? state.expenseDataSubCats : state.expenseData,
+            range: range,
+            averageColor: Colors.red.shade700,
+            onTap: (category, month) => onTap(category, month),
+            onRange: state.setTimeFrame,
+            invertValues: true,
+          ),
+        ),
+      ],
+    );
+  } else {
+    graph = CategoryStackChart(
+      width: 0.7,
+      data: viewState.showSubcats ? state.combinedHistorySubCats : state.combinedHistory,
+      range: range,
+      onTap: (category, month) => onTap(category, month),
+      onRange: state.setTimeFrame,
+      xAxis: MonthAxis(
+        theme: Theme.of(context),
+        axisLoc: 0,
+        dates: state.combinedHistory.times.looseRange(range),
+        axisPainter: Paint()
+          ..color = Theme.of(context).colorScheme.onSurface
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..isAntiAlias = false,
       ),
-      DashedHorizontalLine(
-        y: state.expenseData.getDollarAverageMonthlyTotal(range),
-        color: Colors.red.shade700,
-        lineWidth: 1.5,
-      ),
-    ],
-  );
+      extraSeriesBefore: [
+        DashedHorizontalLine(
+          y: state.incomeData.getDollarAverageMonthlyTotal(range),
+          color: Colors.green,
+          lineWidth: 1.5,
+        ),
+        DashedHorizontalLine(
+          y: state.expenseData.getDollarAverageMonthlyTotal(range),
+          color: Colors.red.shade700,
+          lineWidth: 1.5,
+        ),
+      ],
+    );
+  }
 
   return (graph, headerElements);
 }
