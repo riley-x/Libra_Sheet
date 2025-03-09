@@ -34,7 +34,7 @@ class LeftRightTooltip extends StatelessWidget {
       final val = series.hoverValue(hoverLoc!);
       if (val == null || val == 0) return null;
 
-      var label = series.hoverBuilder(context, hoverLoc!, mainGraph, labelOnly: true) ??
+      final label = series.hoverBuilder(context, hoverLoc!, mainGraph, labelOnly: true) ??
           Text(
             series.name,
             style: Theme.of(context).textTheme.bodyMedium,

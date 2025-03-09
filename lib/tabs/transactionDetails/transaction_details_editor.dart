@@ -315,8 +315,9 @@ class _CategoryLabel extends StatelessWidget {
               "    Ignore: don't count this transaction in your income or expenses.\n"
               "            Useful for things like transfers between accounts.\n\n"
               "    Other: for things that aren't really either income or expenses.\n"
-              "            For example, you can use this for monthly returns from\n"
-              "            stocks in your investment accounts.",
+              "            For example, you can use this to track market appreciation\n"
+              "            from stocks in your investment accounts. Net totals of\n"
+              "            \"Other\" transactions are summarized in the Analyze tab.",
           textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onInverseSurface,
                 fontSize: 14,

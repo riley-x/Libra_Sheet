@@ -146,6 +146,8 @@ class ViolinSeries<T> extends Series<T> {
       return Text(
         mainGraph.yAxis.valToString(point.value),
         style: Theme.of(context).textTheme.bodyMedium,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     }
 
@@ -161,9 +163,13 @@ class ViolinSeries<T> extends Series<T> {
           ),
         ),
         const SizedBox(width: 5),
-        Text(
-          labelOnly ? name : "$name: $label",
-          style: Theme.of(context).textTheme.bodyMedium,
+        Expanded(
+          child: Text(
+            labelOnly ? name : "$name: $label",
+            style: Theme.of(context).textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
       ],
     );

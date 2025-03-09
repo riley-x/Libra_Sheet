@@ -40,13 +40,13 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     ),
 
     /// Show separated
-    const VerticalDivider(width: 30, thickness: 3, indent: 4, endIndent: 4),
-    Text('Show Separated', style: theme.textTheme.bodyMedium),
-    const SizedBox(width: 10),
-    Checkbox(
-      value: viewState.showSeparated,
-      onChanged: (bool? value) => state.setViewState(viewState.withSeparated(value == true)),
-    ),
+    // const VerticalDivider(width: 30, thickness: 3, indent: 4, endIndent: 4),
+    // Text('Show Separated', style: theme.textTheme.bodyMedium),
+    // const SizedBox(width: 10),
+    // Checkbox(
+    //   value: viewState.showSeparated,
+    //   onChanged: (bool? value) => state.setViewState(viewState.withSeparated(value == true)),
+    // ),
 
     /// Total
     const Spacer(),

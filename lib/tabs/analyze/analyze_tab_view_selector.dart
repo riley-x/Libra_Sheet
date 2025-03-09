@@ -15,31 +15,30 @@ class AnalyzeTabViewSelector extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _Button(text: 'Net Totals', view: AnalyzeTabView.netIncome, width: 120, left: true),
-            _Button(text: 'Other', view: AnalyzeTabView.other, width: 120),
+            _Button(text: 'Net Income', view: AnalyzeTabView.netIncome, width: 120, left: true),
+            _Button(text: 'Net Other', view: AnalyzeTabView.other, width: 120),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _Button(text: 'Income Pie', view: AnalyzeTabView.incomeHeatmap, width: 120, left: true),
+            _Button(text: 'Expense Pie', view: AnalyzeTabView.expenseHeatmap, width: 120),
           ],
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _Button(
-                text: 'Expense Pie', view: AnalyzeTabView.expenseHeatmap, width: 120, left: true),
-            _Button(text: 'Income Pie', view: AnalyzeTabView.incomeHeatmap, width: 120),
-          ],
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Button(
-              text: 'Expense Flow',
-              view: AnalyzeTabView.expenseFlow,
+              text: 'Income Flow',
+              view: AnalyzeTabView.incomeFlow,
               width: 120,
               left: true,
               bottom: true,
             ),
             _Button(
-              text: 'Income Flow',
-              view: AnalyzeTabView.incomeFlow,
+              text: 'Expense Flow',
+              view: AnalyzeTabView.expenseFlow,
               width: 120,
               bottom: true,
             ),

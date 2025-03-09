@@ -7,6 +7,7 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/cartesian/cartesian_axes.dart';
 import 'package:libra_sheet/graphing/cartesian/discrete_cartesian_graph.dart';
+import 'package:libra_sheet/graphing/cartesian/left_right_tooltip.dart';
 import 'package:libra_sheet/graphing/cartesian/month_axis.dart';
 import 'package:libra_sheet/graphing/series/series.dart';
 import 'package:libra_sheet/graphing/series/violin_series.dart';
@@ -104,6 +105,7 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     onTap: (iSeries, series, iData) {
       onTap(history.categories[iSeries].category, dates[iData]);
     },
+    hoverTooltip: (mainGraph, hoverLoc) => LeftRightTooltip(mainGraph, hoverLoc, reverse: true),
   );
 
   return (graph, headerElements);

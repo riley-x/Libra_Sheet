@@ -27,6 +27,10 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
   }
 
   final headerElements = [
+    Text(
+      'Net value of transactions categorized as "Other"',
+      style: theme.textTheme.labelLarge,
+    ),
     const Spacer(),
     Text('Total: ${total.dollarString()}'),
     const SizedBox(width: 10),

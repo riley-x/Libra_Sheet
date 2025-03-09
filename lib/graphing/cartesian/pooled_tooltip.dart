@@ -13,7 +13,7 @@ class PooledTooltip extends StatelessWidget {
     this.reverse = false,
     this.includeTotal = true,
     this.total,
-    this.labelAlignment = Alignment.centerLeft,
+    this.labelAlignment = Alignment.center,
   });
   final DiscreteCartesianGraphPainter mainGraph;
   final int? hoverLoc;
