@@ -54,23 +54,34 @@ class DoubleStackView implements AnalyzeTabViewState {
 }
 
 class NetIncomeView implements AnalyzeTabViewState {
-  const NetIncomeView({this.includeOther = false});
+  const NetIncomeView({this.includeOther = false, this.cumulative = false});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.netIncome;
 
   final bool? includeOther;
+  final bool cumulative;
 
   NetIncomeView withOther(bool? value) {
-    return NetIncomeView(includeOther: value);
+    return NetIncomeView(includeOther: value, cumulative: cumulative);
+  }
+
+  NetIncomeView withCumulative(bool value) {
+    return NetIncomeView(includeOther: includeOther, cumulative: value);
   }
 }
 
 class OtherView implements AnalyzeTabViewState {
-  const OtherView();
+  const OtherView({this.cumulative = false});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.other;
+
+  final bool cumulative;
+
+  OtherView withCumulative(bool value) {
+    return OtherView(cumulative: value);
+  }
 }
 
 abstract class FlowsView implements AnalyzeTabViewState {

@@ -20,16 +20,18 @@ class RedGreenBarChart extends StatelessWidget {
   const RedGreenBarChart(
     this.data, {
     super.key,
+    this.showAverage = true,
     this.onSelect,
     this.onRange,
   });
 
+  final bool showAverage;
   final Function(int i, TimeIntValue)? onSelect;
   final Function(TimeFrame)? onRange;
 
   @override
   Widget build(BuildContext context) {
-    final average = getDollarAverage2(data, (it) => it.value);
+    final average = showAverage ? getDollarAverage2(data, (it) => it.value) : 0.0;
     final months = data.map((e) => e.time).toList();
     return DiscreteCartesianGraph(
       yAxis: CartesianAxis(
@@ -43,12 +45,13 @@ class RedGreenBarChart extends StatelessWidget {
         dates: months,
       ),
       data: SeriesCollection([
-        DashedHorizontalLine(
-          color: Theme.of(context).colorScheme.onSurface,
-          // color: average > 0 ? Colors.green : Colors.red,
-          y: average,
-          lineWidth: 1.5,
-        ),
+        if (showAverage)
+          DashedHorizontalLine(
+            color: Theme.of(context).colorScheme.onSurface,
+            // color: average > 0 ? Colors.green : Colors.red,
+            y: average,
+            lineWidth: 1.5,
+          ),
         ColumnSeries<TimeIntValue>(
           name: '',
           data: data,

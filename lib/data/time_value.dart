@@ -137,6 +137,20 @@ extension TimeValueList on List<TimeIntValue> {
   double dollarAverage() {
     return sum().asDollarDouble() / length;
   }
+
+  /// Cumulate [this] and returns a new list. Can optionally use [apply] to enable
+  /// a fluent cumulate that's conditionally applied.
+  List<TimeIntValue> cumulate([bool apply = true]) {
+    if (!apply) return this;
+
+    var cum = 0;
+    final out = <TimeIntValue>[];
+    for (final x in this) {
+      cum += x.value;
+      out.add(TimeIntValue(time: x.time, value: cum));
+    }
+    return out;
+  }
 }
 
 extension ListUtils<T> on List<T> {

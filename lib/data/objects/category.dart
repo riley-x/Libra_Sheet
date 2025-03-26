@@ -234,12 +234,19 @@ class CategoryHistory {
     return getMonthlyTotals(range).fold(0, (a, b) => a + b);
   }
 
-  List<int> getMonthlyTotals([(int, int)? range]) {
+  List<int> getMonthlyTotals([(int, int)? range, bool cumulative = false]) {
     range ??= (0, times.length);
     final out = List.filled(range.$2 - range.$1, 0);
     for (final cat in categories) {
       for (int i = range.$1; i < range.$2; i++) {
         out[i - range.$1] += cat.values[i];
+      }
+    }
+    if (cumulative) {
+      int cum = 0;
+      for (int i = 0; i < out.length; i++) {
+        cum += out[i];
+        out[i] = cum;
       }
     }
     return out;

@@ -34,6 +34,12 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
     //   onChanged: (bool? value) => state.setViewState(viewState.withOther(value)),
     //   tristate: true,
     // ),
+    Text('Cumulative', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    Checkbox(
+      value: viewState.cumulative,
+      onChanged: (bool? value) => state.setViewState(viewState.withCumulative(value == true)),
+    ),
     const Spacer(),
     Text('Total: ${total.dollarString()}'),
     const SizedBox(width: 10),
@@ -51,18 +57,19 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
       dates: dates,
     ),
     data: SeriesCollection([
-      DashedHorizontalLine(
-        color: viewState.includeOther == null ? Colors.blue : theme.colorScheme.onSurface,
-        y: average,
-        lineWidth: 0,
-      ),
+      if (!viewState.cumulative)
+        DashedHorizontalLine(
+          color: viewState.includeOther == null ? Colors.blue : theme.colorScheme.onSurface,
+          y: average,
+          lineWidth: 0,
+        ),
       if (viewState.includeOther != null) ...[
         LineSeries<int>(
           name: "Total Income",
           color: Colors.green,
           strokeWidth: 0.5,
           dash: const DashPainter(step: 2, span: 5),
-          data: state.incomeData.getMonthlyTotals(range),
+          data: state.incomeData.getMonthlyTotals(range, viewState.cumulative),
           valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
           gradient: LinearGradient(
             colors: [
@@ -81,7 +88,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
           color: Colors.red.shade700,
           strokeWidth: 0.5,
           dash: const DashPainter(step: 2, span: 5),
-          data: state.expenseData.getMonthlyTotals(range),
+          data: state.expenseData.getMonthlyTotals(range, viewState.cumulative),
           valueMapper: (i, item) => Offset(i.toDouble(), item.asDollarDouble()),
           gradient: LinearGradient(
             colors: [
@@ -98,7 +105,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
         StackColumnSeries<TimeIntValue>(
           name: 'Net Income',
           width: 0.6,
-          data: state.netIncome.looseRange(range),
+          data: state.netIncome.looseRange(range).cumulate(viewState.cumulative),
           valueMapper: (i, item) => item.value.asDollarDouble(),
           fillColorMapper: (i, item) => item.value > 0 ? Colors.green : Colors.red,
         ),
@@ -107,7 +114,7 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
         StackColumnSeries<TimeIntValue>(
           name: 'Net Other',
           width: 0.6,
-          data: state.netOther.looseRange(range),
+          data: state.netOther.looseRange(range).cumulate(viewState.cumulative),
           valueMapper: (i, item) => item.value.asDollarDouble(),
           fillColorMapper: (i, item) => Colors.blue.withAlpha(50), // match CategoryStackChart
           strokeColor: Colors.blue,
