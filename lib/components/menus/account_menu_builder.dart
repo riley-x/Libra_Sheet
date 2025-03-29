@@ -47,7 +47,7 @@ Widget accountMenuBuilder(
     maxWidth: 400, // prevent errors from [Flexible] below
     child: Row(
       children: [
-        if (indent) const SizedBox(width: 8),
+        if (indent) const SizedBox(width: 20),
         Container(
           width: 4,
           height: 30,
