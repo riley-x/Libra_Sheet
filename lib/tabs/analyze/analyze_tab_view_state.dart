@@ -1,6 +1,7 @@
 /// A view mode selectable in the [AnalyzeTabViewSelector]
 enum AnalyzeTabView {
   doubleStack,
+  sankey,
   netIncome,
   other,
   expenseFlow,
@@ -19,6 +20,8 @@ abstract class AnalyzeTabViewState {
     switch (view) {
       case AnalyzeTabView.doubleStack:
         return const DoubleStackView(showSubcats: false);
+      case AnalyzeTabView.sankey:
+        return const SankeyView();
       case AnalyzeTabView.netIncome:
         return const NetIncomeView(includeOther: false);
       case AnalyzeTabView.other:
@@ -51,6 +54,13 @@ class DoubleStackView implements AnalyzeTabViewState {
   DoubleStackView withSeparated(bool value) {
     return DoubleStackView(showSubcats: showSubcats, showSeparated: value);
   }
+}
+
+class SankeyView implements AnalyzeTabViewState {
+  const SankeyView();
+
+  @override
+  AnalyzeTabView get type => AnalyzeTabView.sankey;
 }
 
 class NetIncomeView implements AnalyzeTabViewState {

@@ -11,7 +11,8 @@ class AnalyzeTabViewSelector extends StatelessWidget {
     return const Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _Button(text: 'Income & Expenses', view: AnalyzeTabView.doubleStack, width: 240, top: true),
+        _Button(text: 'Category History', view: AnalyzeTabView.doubleStack, width: 240, top: true),
+        _Button(text: 'Category Flows', view: AnalyzeTabView.sankey, width: 240),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -30,14 +31,14 @@ class AnalyzeTabViewSelector extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _Button(
-              text: 'Income Flow',
+              text: 'Income Trends',
               view: AnalyzeTabView.incomeFlow,
               width: 120,
               left: true,
               bottom: true,
             ),
             _Button(
-              text: 'Expense Flow',
+              text: 'Expense Trends',
               view: AnalyzeTabView.expenseFlow,
               width: 120,
               bottom: true,
