@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
@@ -53,20 +55,52 @@ class SankeyPainter extends CustomPainter {
         final destTop = destTops[dest] ?? 0;
         final destCenter = destTop + flowWidth / 2;
         final sourceCenter = sourceTop + flowWidth / 2;
+        final destBottom = destTop + flowWidth;
+        final sourceBottom = sourceTop + flowWidth;
 
-        final path = Path()
-          ..moveToOffset(source.loc.topRight.translate(-1, sourceCenter))
-          ..cubicToOffset(
-            dest.loc.topLeft.translate(1, destCenter),
-            source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
-            dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
-          );
+        /// A single bezier with the right width works well generally, but has some weird artifacts
+        /// if it's too wide and stubby. Fallback in this case to a filled path...the double bezier
+        /// boundaries are wrong though and make the line look too narrow. Lookup bezier offseting.
+        /// Odd that flutter stroking makes these weird artifacts though, maybe not simple fix.
+        final Path path;
+        final Paint paint;
+        if (flowWidth < levelHoriPad) {
+          path = Path()
+            ..moveToOffset(source.loc.topRight.translate(-1, sourceCenter))
+            ..cubicToOffset(
+              dest.loc.topLeft.translate(1, destCenter),
+              source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
+              dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
+            );
+          paint = Paint()
+            ..color = flow.color.withAlpha(100)
+            ..strokeWidth = flowWidth
+            ..style = PaintingStyle.stroke;
+        } else {
+          path = Path()
+            ..moveToOffset(source.loc.topRight.translate(-1, sourceTop))
+            ..cubicToOffset(
+              dest.loc.topLeft.translate(1, destTop),
+              source.loc.topRight.translate(levelHoriPad / 2, sourceTop),
+              dest.loc.topLeft.translate(-levelHoriPad / 2, destTop),
+            )
+            ..lineToOffset(dest.loc.topLeft.translate(1, destBottom))
+            ..cubicToOffset(
+              source.loc.topRight.translate(-1, sourceBottom),
+              dest.loc.topLeft.translate(-levelHoriPad / 2, destBottom),
+              source.loc.topRight.translate(levelHoriPad / 2, sourceBottom),
+            )
+            ..close();
+          paint = Paint()
+            ..color = flow.color.withAlpha(100)
+            ..style = PaintingStyle.fill;
+        }
         drawFlows.add(SankeyLayoutFlow(
           flow: flow,
           source: source,
           destination: dest,
           path: path,
-          width: flowWidth,
+          paint: paint,
         ));
         sourceTop += flowWidth;
         destTops[dest] = destTop + flowWidth;
@@ -130,13 +164,7 @@ class SankeyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _layout(size);
     for (final flow in drawFlows) {
-      canvas.drawPath(
-        flow.path,
-        Paint()
-          ..color = flow.flow.color.withAlpha(100)
-          ..strokeWidth = flow.width
-          ..style = PaintingStyle.stroke,
-      );
+      canvas.drawPath(flow.path, flow.paint);
     }
     for (final node in drawNodes) {
       canvas.drawRect(
@@ -168,13 +196,13 @@ class SankeyLayoutFlow {
   final SankeyLayoutNode source;
   final SankeyLayoutNode destination;
   final Path path;
-  final double width;
+  final Paint paint;
 
   SankeyLayoutFlow({
     required this.flow,
     required this.source,
     required this.destination,
     required this.path,
-    required this.width,
+    required this.paint,
   });
 }
