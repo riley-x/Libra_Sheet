@@ -75,11 +75,14 @@ class SankeyPainter extends CustomPainter {
     for (final node in level) {
       sum += node.value;
     }
+    if (level.length == 1) {
+      return (height / sum, nodeVertDesiredMinPad);
+    }
 
     double padding = (level.length - 1) * nodeVertDesiredMinPad;
     double freeHeight = height - padding;
-    if (freeHeight < 0.8 * padding) {
-      padding = height * 0.1;
+    if (freeHeight < padding) {
+      padding = height * 0.5;
       freeHeight = height - padding;
     }
     return (freeHeight / sum, padding / (level.length - 1));

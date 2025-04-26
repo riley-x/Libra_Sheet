@@ -143,10 +143,10 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       final deficitsNode = SankeyNode(
         label: "Deficit",
         color: Colors.red,
-        value: incomeNode.value - expenseNode.value,
+        value: expenseNode.value - incomeNode.value,
       );
       deficitsNode.addDestination(expenseNode);
-      expensePane.add(deficitsNode);
+      incomePane.add(deficitsNode);
     }
 
     for (final cat in appState.categories.income.subCats) {
@@ -161,6 +161,14 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         if (subcatVal == 0) continue;
         final subcatNode =
             SankeyNode(label: subcat.name, color: subcat.color, value: subcatVal.asDollarDouble());
+        catNode.addSource(subcatNode);
+        incomeSubcats.add(subcatNode);
+      }
+
+      final leftoverVal = individualCatTotals[cat.key] ?? 0;
+      if (leftoverVal > 0 && leftoverVal != catVal) {
+        final subcatNode = SankeyNode(
+            label: "Other ${cat.name}", color: cat.color, value: leftoverVal.asDollarDouble());
         catNode.addSource(subcatNode);
         incomeSubcats.add(subcatNode);
       }
