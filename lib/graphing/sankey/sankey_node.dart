@@ -29,6 +29,11 @@ class SankeyNode {
   void addDestination(SankeyNode node, {Color? color, double? value}) {
     node.addSource(this, color: color, value: value);
   }
+
+  @override
+  String toString() {
+    return "SankeyNode($label): $value";
+  }
 }
 
 class SankeyFlow {

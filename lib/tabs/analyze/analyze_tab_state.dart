@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart' as fnd;
+import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
@@ -44,6 +46,8 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
   int numMonths = 0;
   Map<int, int> aggregatedCatTotals = {};
   Map<int, int> individualCatTotals = {};
+  int expenseTotal = 0;
+  int incomeTotal = 0;
 
   /// Sankey
   List<List<SankeyNode>> sankeyNodes = [];
@@ -98,8 +102,99 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
     numMonths = combinedHistory.times.looseRange(monthIndexRange).length;
     individualCatTotals = combinedHistorySubCats.getCategoryTotals(monthIndexRange, true);
     aggregatedCatTotals = combinedHistory.getCategoryTotals(monthIndexRange, true);
+    expenseTotal = expenseData.getTotal(monthIndexRange);
+    incomeTotal = incomeData.getTotal(monthIndexRange);
 
-    /// Sankey
+    _calculateSankey();
+  }
+
+  void _calculateSankey() {
+    sankeyNodes = [];
+    if (expenseTotal == 0 && incomeTotal == 0) return;
+
+    final incomeNode = SankeyNode(
+      label: "Total Income",
+      color: const Color.fromARGB(255, 17, 85, 37),
+      value: incomeTotal.asDollarDouble(),
+    );
+    final expenseNode = SankeyNode(
+      label: "Total Expense",
+      color: const Color.fromARGB(255, 132, 38, 26),
+      value: expenseTotal.abs().asDollarDouble(),
+    );
+    incomeNode.addDestination(expenseNode);
+
+    final incomeSubcats = <SankeyNode>[];
+    final incomeCats = <SankeyNode>[];
+    final incomePane = <SankeyNode>[incomeNode];
+    final expensePane = <SankeyNode>[expenseNode];
+    final expenseCats = <SankeyNode>[];
+    final expenseSubcats = <SankeyNode>[];
+
+    if (incomeNode.value > expenseNode.value) {
+      final savingsNode = SankeyNode(
+        label: "Savings",
+        color: Colors.green,
+        value: incomeNode.value - expenseNode.value,
+      );
+      savingsNode.addSource(incomeNode);
+      expensePane.add(savingsNode);
+    } else if (expenseNode.value > incomeNode.value) {
+      final deficitsNode = SankeyNode(
+        label: "Deficit",
+        color: Colors.red,
+        value: incomeNode.value - expenseNode.value,
+      );
+      deficitsNode.addDestination(expenseNode);
+      expensePane.add(deficitsNode);
+    }
+
+    for (final cat in appState.categories.income.subCats) {
+      final catVal = aggregatedCatTotals[cat.key] ?? 0;
+      if (catVal == 0) continue;
+      final catNode = SankeyNode(label: cat.name, color: cat.color, value: catVal.asDollarDouble());
+      catNode.addDestination(incomeNode);
+      incomeCats.add(catNode);
+
+      for (final subcat in cat.subCats) {
+        final subcatVal = individualCatTotals[subcat.key] ?? 0;
+        if (subcatVal == 0) continue;
+        final subcatNode =
+            SankeyNode(label: subcat.name, color: subcat.color, value: subcatVal.asDollarDouble());
+        catNode.addSource(subcatNode);
+        incomeSubcats.add(subcatNode);
+      }
+    }
+
+    for (final cat in appState.categories.expense.subCats) {
+      final catVal = aggregatedCatTotals[cat.key] ?? 0;
+      if (catVal == 0) continue;
+      final catNode = SankeyNode(label: cat.name, color: cat.color, value: catVal.asDollarDouble());
+      catNode.addSource(expenseNode);
+      expenseCats.add(catNode);
+
+      for (final subcat in cat.subCats) {
+        final subcatVal = individualCatTotals[subcat.key] ?? 0;
+        if (subcatVal == 0) continue;
+        final subcatNode =
+            SankeyNode(label: subcat.name, color: subcat.color, value: subcatVal.asDollarDouble());
+        catNode.addDestination(subcatNode);
+        expenseSubcats.add(subcatNode);
+      }
+    }
+
+    sankeyNodes = [
+      if (incomeSubcats.isNotEmpty) incomeSubcats,
+      incomeCats,
+      incomePane,
+      expensePane,
+      expenseCats,
+      if (expenseSubcats.isNotEmpty) expenseSubcats
+    ];
+
+    // for (final list in sankeyNodes) {
+    //   debugPrint("$list");
+    // }
   }
 
   /// Main view state defines which graph we're looking at as well as per-graph

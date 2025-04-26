@@ -5,7 +5,6 @@ import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
-import 'package:libra_sheet/data/time_value.dart';
 import 'package:libra_sheet/graphing/pie/pie_chart.dart';
 import 'package:libra_sheet/graphing/wrapper/category_heat_map.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
@@ -17,9 +16,7 @@ import 'package:libra_sheet/data/date_time_utils.dart';
     BuildContext context, AnalyzeTabState state, ThemeData theme, List<Category> categories) {
   final viewState = state.currentViewState as HeatmapView;
   final isExpense = viewState.type == AnalyzeTabView.expenseHeatmap;
-  final total = isExpense
-      ? state.expenseData.getTotal(state.monthIndexRange)
-      : state.incomeData.getTotal(state.monthIndexRange);
+  final total = isExpense ? state.expenseTotal : state.incomeTotal;
 
   void onTap(Category category) {
     final dateRange = state.timeFrame.getDateRange(state.combinedHistory.times);
