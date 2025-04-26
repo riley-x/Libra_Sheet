@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 
 class SankeyPainter extends CustomPainter {
@@ -8,6 +9,8 @@ class SankeyPainter extends CustomPainter {
   final double nodeWidth = 20;
   final double nodeVertDesiredMinPad = 5;
 
+  double levelHoriPad = 10;
+  Map<SankeyNode, SankeyLayoutNode> layouts = {};
   List<SankeyLayoutNode> drawNodes = [];
   List<SankeyLayoutFlow> drawFlows = [];
 
@@ -20,7 +23,7 @@ class SankeyPainter extends CustomPainter {
     final nLevels = data.length;
     if (nLevels <= 1) return;
 
-    final levelHoriPad = (size.width - nodeWidth * nLevels) / (nLevels - 1);
+    levelHoriPad = (size.width - nodeWidth * nLevels) / (nLevels - 1);
     if (levelHoriPad <= 0) return;
 
     var scale = double.maxFinite;
@@ -38,6 +41,37 @@ class SankeyPainter extends CustomPainter {
       final x = i * (nodeWidth + levelHoriPad);
       _layoutLayerJustified(level, x, size.height, scale);
     }
+
+    /// Flows
+    Map<SankeyLayoutNode, double> destTops = {};
+    for (final source in drawNodes) {
+      double sourceTop = 0;
+      for (final flow in source.node.outgoingFlows) {
+        final flowWidth = flow.value * scale;
+
+        final dest = layouts[flow.destination]!;
+        final destTop = destTops[dest] ?? 0;
+        final destCenter = destTop + flowWidth / 2;
+        final sourceCenter = sourceTop + flowWidth / 2;
+
+        final path = Path()
+          ..moveToOffset(source.loc.topRight.translate(-1, sourceCenter))
+          ..cubicToOffset(
+            dest.loc.topLeft.translate(1, destCenter),
+            source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
+            dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
+          );
+        drawFlows.add(SankeyLayoutFlow(
+          flow: flow,
+          source: source,
+          destination: dest,
+          path: path,
+          width: flowWidth,
+        ));
+        sourceTop += flowWidth;
+        destTops[dest] = destTop + flowWidth;
+      }
+    }
   }
 
   /// Spreads all nodes equally, as much as possible, filling the full height
@@ -45,10 +79,12 @@ class SankeyPainter extends CustomPainter {
     if (level.length == 1) {
       final node = level[0];
       final nodeHeight = node.value * scale;
-      drawNodes.add(SankeyLayoutNode(
+      final layoutNode = SankeyLayoutNode(
         node: node,
         loc: Rect.fromLTWH(x, (height - nodeHeight) / 2, nodeWidth, nodeHeight),
-      ));
+      );
+      drawNodes.add(layoutNode);
+      layouts[node] = layoutNode;
       return;
     }
 
@@ -60,10 +96,12 @@ class SankeyPainter extends CustomPainter {
     double y = 0;
     double vertPad = level.length > 1 ? (height - sum * scale) / (level.length - 1) : 0;
     for (final node in level) {
-      drawNodes.add(SankeyLayoutNode(
+      final layoutNode = SankeyLayoutNode(
         node: node,
         loc: Rect.fromLTWH(x, y, nodeWidth, node.value * scale),
-      ));
+      );
+      drawNodes.add(layoutNode);
+      layouts[node] = layoutNode;
       y += node.value * scale + vertPad;
     }
   }
@@ -91,6 +129,15 @@ class SankeyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _layout(size);
+    for (final flow in drawFlows) {
+      canvas.drawPath(
+        flow.path,
+        Paint()
+          ..color = flow.flow.color.withAlpha(100)
+          ..strokeWidth = flow.width
+          ..style = PaintingStyle.stroke,
+      );
+    }
     for (final node in drawNodes) {
       canvas.drawRect(
         node.loc,
@@ -120,6 +167,14 @@ class SankeyLayoutFlow {
   final SankeyFlow flow;
   final SankeyLayoutNode source;
   final SankeyLayoutNode destination;
+  final Path path;
+  final double width;
 
-  SankeyLayoutFlow({required this.flow, required this.source, required this.destination});
+  SankeyLayoutFlow({
+    required this.flow,
+    required this.source,
+    required this.destination,
+    required this.path,
+    required this.width,
+  });
 }

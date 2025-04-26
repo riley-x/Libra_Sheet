@@ -5,8 +5,8 @@ class SankeyNode {
   final Color color;
   final double value;
 
-  List<SankeyFlow> sources = [];
-  List<SankeyFlow> destinations = [];
+  List<SankeyFlow> incomingFlows = [];
+  List<SankeyFlow> outgoingFlows = [];
 
   SankeyNode({
     required this.label,
@@ -22,8 +22,8 @@ class SankeyNode {
       color: color ?? lesserNode.color,
       value: value ?? lesserNode.value,
     );
-    sources.add(flow);
-    node.destinations.add(flow);
+    incomingFlows.add(flow);
+    node.outgoingFlows.add(flow);
   }
 
   void addDestination(SankeyNode node, {Color? color, double? value}) {
@@ -32,7 +32,7 @@ class SankeyNode {
 
   @override
   String toString() {
-    return "SankeyNode($label): $value";
+    return "SankeyNode($label): $value ${incomingFlows.length}-${outgoingFlows.length}";
   }
 }
 
@@ -42,7 +42,7 @@ class SankeyFlow {
   final Color color;
   final double value;
 
-  SankeyFlow({
+  const SankeyFlow({
     required this.source,
     required this.destination,
     required this.color,
