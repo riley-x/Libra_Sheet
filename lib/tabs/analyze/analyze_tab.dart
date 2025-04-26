@@ -16,6 +16,7 @@ import 'package:libra_sheet/tabs/analyze/flows_graph.dart';
 import 'package:libra_sheet/tabs/analyze/heatmap_graph.dart';
 import 'package:libra_sheet/tabs/analyze/net_income_graph.dart';
 import 'package:libra_sheet/tabs/analyze/other_graph.dart';
+import 'package:libra_sheet/tabs/analyze/sankey_graph.dart';
 import 'package:provider/provider.dart';
 
 class AnalyzeTab extends StatelessWidget {
@@ -63,6 +64,8 @@ class _Charts extends StatelessWidget {
       case AnalyzeTabView.incomeHeatmap:
         final categories = [appState.categories.income, ...appState.categories.income.subCats];
         (graph, headerElements) = heatmapGraph(context, state, theme, categories);
+      case AnalyzeTabView.sankey:
+        (graph, headerElements) = sankeyGraph(context, state, theme);
     }
 
     return Column(

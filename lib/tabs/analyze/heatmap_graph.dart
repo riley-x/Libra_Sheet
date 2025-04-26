@@ -16,12 +16,10 @@ import 'package:libra_sheet/data/date_time_utils.dart';
 (Widget, List<Widget>) heatmapGraph(
     BuildContext context, AnalyzeTabState state, ThemeData theme, List<Category> categories) {
   final viewState = state.currentViewState as HeatmapView;
-  final range = state.timeFrame.getRange(state.incomeData.times);
-  final months = state.combinedHistory.times.looseRange(range).length;
-  final individualValues = state.combinedHistorySubCats.getCategoryTotals(range, true);
-  final aggregateValues = state.combinedHistory.getCategoryTotals(range, true);
   final isExpense = viewState.type == AnalyzeTabView.expenseHeatmap;
-  final total = isExpense ? state.expenseData.getTotal(range) : state.incomeData.getTotal(range);
+  final total = isExpense
+      ? state.expenseData.getTotal(state.monthIndexRange)
+      : state.incomeData.getTotal(state.monthIndexRange);
 
   void onTap(Category category) {
     final dateRange = state.timeFrame.getDateRange(state.combinedHistory.times);
@@ -83,22 +81,22 @@ import 'package:libra_sheet/data/date_time_utils.dart';
                 ? ([categories[0], ...categories.sublist(1).flattened()]) // 0 is super category
                 : categories,
             valueMapper: (category) => viewState.showSubcats
-                ? individualValues[category.key]?.asDollarDouble() ?? 0
-                : aggregateValues[category.key]?.asDollarDouble() ?? 0,
+                ? state.individualCatTotals[category.key]?.asDollarDouble() ?? 0
+                : state.aggregatedCatTotals[category.key]?.asDollarDouble() ?? 0,
             colorMapper: (category) => category.color,
             labelMapper: (category, value) => "${category.name}\n${formatPercent(value)}",
             onTap: (i, cat) => onTap(cat),
             defaultLabel: viewState.showAverages
-                ? "Average ${isExpense ? 'Expenses' : 'Income'}\n${formatDollar(total.abs().asDollarDouble() / months)}"
+                ? "Average ${isExpense ? 'Expenses' : 'Income'}\n${formatDollar(total.abs().asDollarDouble() / state.numMonths)}"
                 : "Total ${isExpense ? 'Expenses' : 'Income'}\n${total.abs().dollarString()}",
           )
         : CategoryHeatMap(
             categories: categories,
-            individualValues: individualValues,
-            aggregateValues: aggregateValues,
+            individualValues: state.individualCatTotals,
+            aggregateValues: state.aggregatedCatTotals,
             onSelect: onTap,
             showSubCategories: viewState.showSubcats,
-            averageDenominator: viewState.showAverages ? max(months, 1) : 1,
+            averageDenominator: viewState.showAverages ? max(state.numMonths, 1) : 1,
           ),
   );
 

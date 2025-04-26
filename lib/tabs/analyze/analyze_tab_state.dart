@@ -6,6 +6,7 @@ import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/time_value.dart';
+import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
 
 class AnalyzeTabState extends fnd.ChangeNotifier {
@@ -34,8 +35,18 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
   CategoryHistory expenseDataSubCats = CategoryHistory.empty;
   CategoryHistory combinedHistorySubCats = CategoryHistory.empty;
 
+  /// Monthly net totals
   List<TimeIntValue> netIncome = [];
   List<TimeIntValue> netOther = [];
+
+  /// Timeframe totals
+  (int, int) monthIndexRange = (0, 1);
+  int numMonths = 0;
+  Map<int, int> aggregatedCatTotals = {};
+  Map<int, int> individualCatTotals = {};
+
+  /// Sankey
+  List<List<SankeyNode>> sankeyNodes = [];
 
   Future<void> load() async {
     final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
@@ -76,7 +87,19 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
     netOther = rawHistory[Category.other.key]?.withAlignedTimes(appState.monthList) ??
         appState.monthList.map((e) => TimeIntValue(time: e, value: 0)).toList();
 
+    _recalculateTimeFrameData();
+
     notifyListeners();
+  }
+
+  void _recalculateTimeFrameData() {
+    /// Totals
+    monthIndexRange = timeFrame.getRange(incomeData.times);
+    numMonths = combinedHistory.times.looseRange(monthIndexRange).length;
+    individualCatTotals = combinedHistorySubCats.getCategoryTotals(monthIndexRange, true);
+    aggregatedCatTotals = combinedHistory.getCategoryTotals(monthIndexRange, true);
+
+    /// Sankey
   }
 
   /// Main view state defines which graph we're looking at as well as per-graph
@@ -112,7 +135,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
 
   void setTimeFrame(TimeFrame t) {
     timeFrame = t;
+    _recalculateTimeFrameData();
     notifyListeners();
-    // _loadTotals();
   }
 }
