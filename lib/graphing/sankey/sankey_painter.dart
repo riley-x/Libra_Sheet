@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 
@@ -10,17 +9,25 @@ class SankeyPainter extends CustomPainter {
 
   final double nodeWidth = 20;
   final double nodeVertDesiredMinPad = 5;
+  final double labelXOffset = 5;
 
+  Size previousSize = Size.zero;
   double levelHoriPad = 10;
   Map<SankeyNode, SankeyLayoutNode> layouts = {};
   List<SankeyLayoutNode> drawNodes = [];
   List<SankeyLayoutFlow> drawFlows = [];
+  List<SankeyLayoutLabel> drawLabels = [];
 
   SankeyPainter({super.repaint, required this.theme, required this.data});
 
   void _layout(Size size) {
+    if (previousSize == size) {
+      return;
+    }
+    previousSize = size;
     drawNodes = [];
     drawFlows = [];
+    drawLabels = [];
 
     final nLevels = data.length;
     if (nLevels <= 1) return;
@@ -28,6 +35,7 @@ class SankeyPainter extends CustomPainter {
     levelHoriPad = (size.width - nodeWidth * nLevels) / (nLevels - 1);
     if (levelHoriPad <= 0) return;
 
+    /// Scale
     var scale = double.maxFinite;
     var vertPad = nodeVertDesiredMinPad;
     for (final level in data) {
@@ -39,9 +47,16 @@ class SankeyPainter extends CustomPainter {
         scale = levelScale;
       }
     }
+
+    /// Nodes
     for (final (i, level) in data.indexed) {
       final x = i * (nodeWidth + levelHoriPad);
       _layoutLayerJustified(level, x, size.height, scale);
+    }
+
+    /// Node Labels
+    if (levelHoriPad > 20) {
+      _layoutLabels();
     }
 
     /// Flows
@@ -160,6 +175,56 @@ class SankeyPainter extends CustomPainter {
     return (freeHeight / sum, padding / (level.length - 1));
   }
 
+  void _layoutLabels() {
+    for (final node in drawNodes) {
+      final style = theme.textTheme.bodySmall;
+      final lineHeight = (style?.height ?? 1.2) * (style?.fontSize ?? 16);
+      if (node.loc.height < lineHeight) {
+        continue;
+      }
+
+      final isRightSide = node.node.labelAlignment.x > 0;
+
+      /// Single line == only label
+      /// Two lines == single line label + value
+      /// Else == two line label + value
+      final TextPainter labelPainter = TextPainter(
+        text: TextSpan(text: node.node.label, style: theme.textTheme.bodySmall),
+        textAlign: isRightSide ? TextAlign.left : TextAlign.right,
+        textDirection: TextDirection.ltr,
+        maxLines: node.loc.height < lineHeight * 3 ? 1 : 2,
+        ellipsis: '...',
+      );
+
+      final TextPainter? valuePainter = node.loc.height < lineHeight * 2
+          ? null
+          : TextPainter(
+              text:
+                  TextSpan(text: node.node.value.formatDollar(), style: theme.textTheme.bodySmall),
+              textAlign: isRightSide ? TextAlign.left : TextAlign.right,
+              textDirection: TextDirection.ltr,
+              maxLines: 1,
+              ellipsis: '...',
+            );
+      labelPainter.layout(maxWidth: levelHoriPad - 2 * labelXOffset);
+      valuePainter?.layout(maxWidth: levelHoriPad - 2 * labelXOffset);
+      final halfHeight = (labelPainter.height + (valuePainter?.height ?? 0)) / 2;
+      drawLabels.add(SankeyLayoutLabel(
+        node: node,
+        labelPainter: labelPainter,
+        valuePainter: valuePainter,
+        labelLoc: node.node.labelAlignment.withinRect(node.loc).translate(
+              isRightSide ? labelXOffset : -labelXOffset - labelPainter.width,
+              -halfHeight,
+            ),
+        valueLoc: node.node.labelAlignment.withinRect(node.loc).translate(
+              isRightSide ? labelXOffset : -labelXOffset - (valuePainter?.width ?? 0),
+              -halfHeight + labelPainter.height,
+            ),
+      ));
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     _layout(size);
@@ -173,6 +238,10 @@ class SankeyPainter extends CustomPainter {
           ..color = node.node.color
           ..style = PaintingStyle.fill,
       );
+    }
+    for (final label in drawLabels) {
+      label.labelPainter.paint(canvas, label.labelLoc);
+      label.valuePainter?.paint(canvas, label.valueLoc);
     }
   }
 
@@ -204,5 +273,21 @@ class SankeyLayoutFlow {
     required this.destination,
     required this.path,
     required this.paint,
+  });
+}
+
+class SankeyLayoutLabel {
+  final SankeyLayoutNode node;
+  final TextPainter labelPainter;
+  final TextPainter? valuePainter;
+  final Offset labelLoc;
+  final Offset valueLoc;
+
+  SankeyLayoutLabel({
+    required this.node,
+    required this.labelPainter,
+    required this.valuePainter,
+    required this.labelLoc,
+    required this.valueLoc,
   });
 }

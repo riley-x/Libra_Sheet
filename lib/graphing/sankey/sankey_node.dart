@@ -4,6 +4,7 @@ class SankeyNode {
   final String label;
   final Color color;
   final double value;
+  final Alignment labelAlignment;
 
   List<SankeyFlow> incomingFlows = [];
   List<SankeyFlow> outgoingFlows = [];
@@ -12,6 +13,7 @@ class SankeyNode {
     required this.label,
     required this.color,
     required this.value,
+    this.labelAlignment = Alignment.centerRight,
   });
 
   void addSource(SankeyNode node, {Color? color, double? value}) {

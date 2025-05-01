@@ -121,6 +121,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       label: "Total Expense",
       color: const Color.fromARGB(255, 132, 38, 26),
       value: expenseTotal.abs().asDollarDouble(),
+      labelAlignment: Alignment.centerLeft,
     );
     incomeNode.addDestination(expenseNode);
 
@@ -136,6 +137,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         label: "Savings",
         color: Colors.green,
         value: incomeNode.value - expenseNode.value,
+        labelAlignment: Alignment.centerLeft,
       );
       savingsNode.addSource(incomeNode);
       expensePane.add(savingsNode);
@@ -149,6 +151,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       incomePane.add(deficitsNode);
     }
 
+    /// Income
     for (final cat in appState.categories.income.subCats) {
       final catVal = aggregatedCatTotals[cat.key] ?? 0;
       if (catVal == 0) continue;
@@ -174,18 +177,28 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       }
     }
 
+    /// Expense
     for (final cat in appState.categories.expense.subCats) {
       final catVal = aggregatedCatTotals[cat.key] ?? 0;
       if (catVal == 0) continue;
-      final catNode = SankeyNode(label: cat.name, color: cat.color, value: catVal.asDollarDouble());
+      final catNode = SankeyNode(
+        label: cat.name,
+        color: cat.color,
+        value: catVal.asDollarDouble(),
+        labelAlignment: Alignment.centerLeft,
+      );
       catNode.addSource(expenseNode);
       expenseCats.add(catNode);
 
       for (final subcat in cat.subCats) {
         final subcatVal = individualCatTotals[subcat.key] ?? 0;
         if (subcatVal == 0) continue;
-        final subcatNode =
-            SankeyNode(label: subcat.name, color: subcat.color, value: subcatVal.asDollarDouble());
+        final subcatNode = SankeyNode(
+          label: subcat.name,
+          color: subcat.color,
+          value: subcatVal.asDollarDouble(),
+          labelAlignment: Alignment.centerLeft,
+        );
         catNode.addDestination(subcatNode);
         expenseSubcats.add(subcatNode);
       }
