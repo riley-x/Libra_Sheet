@@ -195,11 +195,14 @@ class _MiniChart extends StatelessWidget {
     final dates = state.combinedHistory.times;
 
     /// Show a highlight of the currently selected range
-    (int, int)? highlightRange = state.timeFrame.getRange(dates);
-    if (highlightRange == (0, dates.length)) {
+    (int, int) currentRange = state.timeFrame.getRange(dates);
+    (double, double)? highlightRange;
+    if (currentRange == (0, dates.length)) {
       highlightRange = null;
+    } else if (currentRange.$1 == currentRange.$2 - 1) {
+      highlightRange = (currentRange.$1.toDouble() - 0.5, currentRange.$2.toDouble() - 0.5);
     } else {
-      highlightRange = (highlightRange.$1, highlightRange.$2 - 1);
+      highlightRange = (currentRange.$1.toDouble(), currentRange.$2.toDouble() - 1);
     }
 
     return SizedBox(
@@ -228,9 +231,9 @@ class _MiniChart extends StatelessWidget {
               color: Colors.blue.withAlpha(80),
               data: [
                 Rect.fromLTRB(
-                  highlightRange.$1.toDouble(),
+                  highlightRange.$1,
                   double.infinity,
-                  highlightRange.$2.toDouble(),
+                  highlightRange.$2,
                   double.infinity,
                 ),
               ],

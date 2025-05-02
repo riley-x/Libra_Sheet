@@ -399,8 +399,9 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                 if (panStart != null && panEnd != null)
                   RepaintBoundary(
                     child: XRangeSelectionOverlay(
-                      xStart: panStart!.toDouble(),
-                      xEnd: panEnd!.toDouble(),
+                      xStart:
+                          (panStart == panEnd) ? panStart!.toDouble() - 0.5 : panStart!.toDouble(),
+                      xEnd: (panStart == panEnd) ? panEnd!.toDouble() + 0.5 : panEnd!.toDouble(),
                       coords: painter!.coordSpace!,
                     ),
                   ),
