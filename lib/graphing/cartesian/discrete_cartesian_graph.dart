@@ -350,7 +350,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       panStart = null;
       panEnd = null;
     });
-    if (start != null && end != null && start != end) {
+    if (start != null && end != null) {
       widget.onRange?.call(min(start, end), max(start, end));
     }
   }
@@ -399,9 +399,8 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                 if (panStart != null && panEnd != null)
                   RepaintBoundary(
                     child: XRangeSelectionOverlay(
-                      xStart:
-                          (panStart == panEnd) ? panStart!.toDouble() - 0.5 : panStart!.toDouble(),
-                      xEnd: (panStart == panEnd) ? panEnd!.toDouble() + 0.5 : panEnd!.toDouble(),
+                      xStart: min(panStart!, panEnd!).toDouble() - 0.5,
+                      xEnd: max(panStart!, panEnd!).toDouble() + 0.5,
                       coords: painter!.coordSpace!,
                     ),
                   ),
