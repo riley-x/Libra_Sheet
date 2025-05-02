@@ -199,10 +199,8 @@ class _MiniChart extends StatelessWidget {
     (double, double)? highlightRange;
     if (currentRange == (0, dates.length)) {
       highlightRange = null;
-    } else if (currentRange.$1 == currentRange.$2 - 1) {
-      highlightRange = (currentRange.$1.toDouble() - 0.5, currentRange.$2.toDouble() - 0.5);
     } else {
-      highlightRange = (currentRange.$1.toDouble(), currentRange.$2.toDouble() - 1);
+      highlightRange = (currentRange.$1.toDouble() - 0.5, currentRange.$2.toDouble() - 0.5);
     }
 
     return SizedBox(
