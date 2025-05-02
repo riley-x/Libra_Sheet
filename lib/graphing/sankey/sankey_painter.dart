@@ -54,11 +54,6 @@ class SankeyPainter extends CustomPainter {
       _layoutLayerJustified(level, x, size.height, scale);
     }
 
-    /// Node Labels
-    if (levelHoriPad > 20) {
-      _layoutLabels();
-    }
-
     /// Flows
     Map<SankeyLayoutNode, double> destTops = {};
     for (final source in drawNodes) {
@@ -79,7 +74,7 @@ class SankeyPainter extends CustomPainter {
         /// Odd that flutter stroking makes these weird artifacts though, maybe not simple fix.
         final Path path;
         final Paint paint;
-        if (flowWidth < levelHoriPad) {
+        if (flowWidth < 0.8 * levelHoriPad) {
           path = Path()
             ..moveToOffset(source.loc.topRight.translate(-1, sourceCenter))
             ..cubicToOffset(
@@ -145,13 +140,15 @@ class SankeyPainter extends CustomPainter {
     double y = 0;
     double vertPad = level.length > 1 ? (height - sum * scale) / (level.length - 1) : 0;
     for (final node in level) {
+      final nodeHeight = node.value * scale;
       final layoutNode = SankeyLayoutNode(
         node: node,
-        loc: Rect.fromLTWH(x, y, nodeWidth, node.value * scale),
+        loc: Rect.fromLTWH(x, y, nodeWidth, nodeHeight),
       );
       drawNodes.add(layoutNode);
       layouts[node] = layoutNode;
-      y += node.value * scale + vertPad;
+      _layoutLabel(layoutNode, verticalSpace: level.length > 1 ? nodeHeight + vertPad : height);
+      y += nodeHeight + vertPad;
     }
   }
 
@@ -175,54 +172,56 @@ class SankeyPainter extends CustomPainter {
     return (freeHeight / sum, padding / (level.length - 1));
   }
 
-  void _layoutLabels() {
-    for (final node in drawNodes) {
-      final style = theme.textTheme.bodySmall;
-      final lineHeight = (style?.height ?? 1.2) * (style?.fontSize ?? 16);
-      if (node.loc.height < lineHeight) {
-        continue;
-      }
-
-      final isRightSide = node.node.labelAlignment.x > 0;
-
-      /// Single line == only label
-      /// Two lines == single line label + value
-      /// Else == two line label + value
-      final TextPainter labelPainter = TextPainter(
-        text: TextSpan(text: node.node.label, style: theme.textTheme.bodySmall),
-        textAlign: isRightSide ? TextAlign.left : TextAlign.right,
-        textDirection: TextDirection.ltr,
-        maxLines: node.loc.height < lineHeight * 3 ? 1 : 2,
-        ellipsis: '...',
-      );
-
-      final TextPainter? valuePainter = node.loc.height < lineHeight * 2
-          ? null
-          : TextPainter(
-              text:
-                  TextSpan(text: node.node.value.formatDollar(), style: theme.textTheme.bodySmall),
-              textAlign: isRightSide ? TextAlign.left : TextAlign.right,
-              textDirection: TextDirection.ltr,
-              maxLines: 1,
-              ellipsis: '...',
-            );
-      labelPainter.layout(maxWidth: levelHoriPad - 2 * labelXOffset);
-      valuePainter?.layout(maxWidth: levelHoriPad - 2 * labelXOffset);
-      final halfHeight = (labelPainter.height + (valuePainter?.height ?? 0)) / 2;
-      drawLabels.add(SankeyLayoutLabel(
-        node: node,
-        labelPainter: labelPainter,
-        valuePainter: valuePainter,
-        labelLoc: node.node.labelAlignment.withinRect(node.loc).translate(
-              isRightSide ? labelXOffset : -labelXOffset - labelPainter.width,
-              -halfHeight,
-            ),
-        valueLoc: node.node.labelAlignment.withinRect(node.loc).translate(
-              isRightSide ? labelXOffset : -labelXOffset - (valuePainter?.width ?? 0),
-              -halfHeight + labelPainter.height,
-            ),
-      ));
+  void _layoutLabel(SankeyLayoutNode node, {double? verticalSpace}) {
+    if (levelHoriPad <= 20) {
+      return;
     }
+
+    final style = theme.textTheme.bodySmall;
+    final lineHeight = (style?.height ?? 1.2) * (style?.fontSize ?? 16);
+    verticalSpace ??= node.loc.height;
+    if (verticalSpace < lineHeight) {
+      return;
+    }
+
+    final isRightSide = node.node.labelAlignment.x > 0;
+
+    /// Single line == only label
+    /// Two lines == single line label + value
+    /// Else == two line label + value
+    final TextPainter labelPainter = TextPainter(
+      text: TextSpan(text: node.node.label, style: theme.textTheme.bodySmall),
+      textAlign: isRightSide ? TextAlign.left : TextAlign.right,
+      textDirection: TextDirection.ltr,
+      maxLines: verticalSpace < lineHeight * 3 ? 1 : 2,
+      ellipsis: '...',
+    );
+
+    final TextPainter? valuePainter = verticalSpace < lineHeight * 2
+        ? null
+        : TextPainter(
+            text: TextSpan(text: node.node.value.formatDollar(), style: theme.textTheme.bodySmall),
+            textAlign: isRightSide ? TextAlign.left : TextAlign.right,
+            textDirection: TextDirection.ltr,
+            maxLines: 1,
+            ellipsis: '...',
+          );
+    labelPainter.layout(maxWidth: levelHoriPad - 2 * labelXOffset);
+    valuePainter?.layout(maxWidth: levelHoriPad - 2 * labelXOffset);
+    final halfHeight = (labelPainter.height + (valuePainter?.height ?? 0)) / 2;
+    drawLabels.add(SankeyLayoutLabel(
+      node: node,
+      labelPainter: labelPainter,
+      valuePainter: valuePainter,
+      labelLoc: node.node.labelAlignment.withinRect(node.loc).translate(
+            isRightSide ? labelXOffset : -labelXOffset - labelPainter.width,
+            -halfHeight,
+          ),
+      valueLoc: node.node.labelAlignment.withinRect(node.loc).translate(
+            isRightSide ? labelXOffset : -labelXOffset - (valuePainter?.width ?? 0),
+            -halfHeight + labelPainter.height,
+          ),
+    ));
   }
 
   @override
@@ -247,7 +246,7 @@ class SankeyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(SankeyPainter oldDelegate) {
-    return oldDelegate.data != data;
+    return oldDelegate.data != data || oldDelegate.theme != theme;
   }
 }
 
