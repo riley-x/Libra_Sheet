@@ -21,7 +21,7 @@ abstract class AnalyzeTabViewState {
       case AnalyzeTabView.doubleStack:
         return const DoubleStackView(showSubcats: false);
       case AnalyzeTabView.sankey:
-        return const SankeyView();
+        return const SankeyView(showAverages: false);
       case AnalyzeTabView.netIncome:
         return const NetIncomeView(includeOther: false);
       case AnalyzeTabView.other:
@@ -57,10 +57,16 @@ class DoubleStackView implements AnalyzeTabViewState {
 }
 
 class SankeyView implements AnalyzeTabViewState {
-  const SankeyView();
+  const SankeyView({this.showAverages = false});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.sankey;
+
+  final bool showAverages;
+
+  SankeyView withAverages(bool value) {
+    return SankeyView(showAverages: value);
+  }
 }
 
 class NetIncomeView implements AnalyzeTabViewState {

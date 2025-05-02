@@ -3,9 +3,14 @@ import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 
+String _defaultToString(double value) {
+  return value.formatDollar();
+}
+
 class SankeyPainter extends CustomPainter {
   final ThemeData theme;
   final List<List<SankeyNode>> data;
+  final String? Function(double value) valueToString;
 
   final double nodeWidth = 20;
   final double nodeVertDesiredMinPad = 5;
@@ -18,7 +23,12 @@ class SankeyPainter extends CustomPainter {
   List<SankeyLayoutFlow> drawFlows = [];
   List<SankeyLayoutLabel> drawLabels = [];
 
-  SankeyPainter({super.repaint, required this.theme, required this.data});
+  SankeyPainter({
+    super.repaint,
+    required this.theme,
+    required this.data,
+    String? Function(double value)? valueToString,
+  }) : valueToString = valueToString ?? _defaultToString;
 
   void _layout(Size size) {
     if (previousSize == size) {
@@ -200,7 +210,7 @@ class SankeyPainter extends CustomPainter {
     final TextPainter? valuePainter = verticalSpace < lineHeight * 2
         ? null
         : TextPainter(
-            text: TextSpan(text: node.node.value.formatDollar(), style: theme.textTheme.bodySmall),
+            text: TextSpan(text: valueToString(node.node.value), style: theme.textTheme.bodySmall),
             textAlign: isRightSide ? TextAlign.left : TextAlign.right,
             textDirection: TextDirection.ltr,
             maxLines: 1,
@@ -246,7 +256,9 @@ class SankeyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(SankeyPainter oldDelegate) {
-    return oldDelegate.data != data || oldDelegate.theme != theme;
+    return oldDelegate.data != data ||
+        oldDelegate.theme != theme ||
+        oldDelegate.valueToString != valueToString;
   }
 }
 

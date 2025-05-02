@@ -4,8 +4,9 @@ import 'package:libra_sheet/graphing/sankey/sankey_painter.dart';
 
 class TieredSankeyPlot extends StatefulWidget {
   final List<List<SankeyNode>> nodes;
+  final String? Function(double value)? valueToString;
 
-  const TieredSankeyPlot({super.key, required this.nodes});
+  const TieredSankeyPlot({super.key, required this.nodes, this.valueToString});
 
   @override
   State<TieredSankeyPlot> createState() => _TieredSankeyPlotState();
@@ -20,6 +21,7 @@ class _TieredSankeyPlotState extends State<TieredSankeyPlot> {
     painter = SankeyPainter(
       theme: Theme.of(context),
       data: widget.nodes,
+      valueToString: widget.valueToString,
     );
   }
 
@@ -41,10 +43,8 @@ class _TieredSankeyPlotState extends State<TieredSankeyPlot> {
   @override
   void didUpdateWidget(TieredSankeyPlot oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.nodes != widget.nodes) {
-      _calculateNodes();
-      _initPainter();
-    }
+    _calculateNodes();
+    _initPainter();
   }
 
   @override
