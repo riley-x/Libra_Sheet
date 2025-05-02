@@ -138,6 +138,7 @@ class SankeyPainter extends CustomPainter {
         loc: Rect.fromLTWH(x, (height - nodeHeight) / 2, nodeWidth, nodeHeight),
       );
       drawNodes.add(layoutNode);
+      _layoutLabel(layoutNode, verticalSpace: height);
       layouts[node] = layoutNode;
       return;
     }
@@ -148,7 +149,7 @@ class SankeyPainter extends CustomPainter {
     }
 
     double y = 0;
-    double vertPad = level.length > 1 ? (height - sum * scale) / (level.length - 1) : 0;
+    double vertPad = (height - sum * scale) / (level.length - 1);
     for (final node in level) {
       final nodeHeight = node.value * scale;
       final layoutNode = SankeyLayoutNode(
@@ -157,7 +158,7 @@ class SankeyPainter extends CustomPainter {
       );
       drawNodes.add(layoutNode);
       layouts[node] = layoutNode;
-      _layoutLabel(layoutNode, verticalSpace: level.length > 1 ? nodeHeight + vertPad : height);
+      _layoutLabel(layoutNode, verticalSpace: nodeHeight + vertPad);
       y += nodeHeight + vertPad;
     }
   }

@@ -139,7 +139,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         value: incomeNode.value - expenseNode.value,
         labelAlignment: Alignment.centerLeft,
       );
-      savingsNode.addSource(incomeNode);
+      savingsNode.addSource(incomeNode, color: savingsNode.color);
       expensePane.add(savingsNode);
     } else if (expenseNode.value > incomeNode.value) {
       final deficitsNode = SankeyNode(
@@ -147,7 +147,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         color: Colors.red,
         value: expenseNode.value - incomeNode.value,
       );
-      deficitsNode.addDestination(expenseNode);
+      deficitsNode.addDestination(expenseNode, color: deficitsNode.color);
       incomePane.add(deficitsNode);
     }
 
@@ -156,7 +156,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       final catVal = aggregatedCatTotals[cat.key] ?? 0;
       if (catVal == 0) continue;
       final catNode = SankeyNode(label: cat.name, color: cat.color, value: catVal.asDollarDouble());
-      catNode.addDestination(incomeNode);
+      catNode.addDestination(incomeNode, color: catNode.color);
       incomeCats.add(catNode);
 
       for (final subcat in cat.subCats) {
@@ -164,7 +164,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         if (subcatVal == 0) continue;
         final subcatNode =
             SankeyNode(label: subcat.name, color: subcat.color, value: subcatVal.asDollarDouble());
-        catNode.addSource(subcatNode);
+        catNode.addSource(subcatNode, color: subcatNode.color);
         incomeSubcats.add(subcatNode);
       }
 
@@ -172,7 +172,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       if (leftoverVal > 0 && leftoverVal != catVal) {
         final subcatNode = SankeyNode(
             label: "Other ${cat.name}", color: cat.color, value: leftoverVal.asDollarDouble());
-        catNode.addSource(subcatNode);
+        catNode.addSource(subcatNode, color: subcatNode.color);
         incomeSubcats.add(subcatNode);
       }
     }
@@ -187,7 +187,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         value: catVal.asDollarDouble(),
         labelAlignment: Alignment.centerLeft,
       );
-      catNode.addSource(expenseNode);
+      catNode.addSource(expenseNode, color: catNode.color);
       expenseCats.add(catNode);
 
       for (final subcat in cat.subCats) {
@@ -199,7 +199,19 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
           value: subcatVal.asDollarDouble(),
           labelAlignment: Alignment.centerLeft,
         );
-        catNode.addDestination(subcatNode);
+        catNode.addDestination(subcatNode, color: subcatNode.color);
+        expenseSubcats.add(subcatNode);
+      }
+
+      final leftoverVal = individualCatTotals[cat.key] ?? 0;
+      if (leftoverVal > 0 && leftoverVal != catVal) {
+        final subcatNode = SankeyNode(
+          label: "Other ${cat.name}",
+          color: cat.color,
+          value: leftoverVal.asDollarDouble(),
+          labelAlignment: Alignment.centerLeft,
+        );
+        catNode.addDestination(subcatNode, color: subcatNode.color);
         expenseSubcats.add(subcatNode);
       }
     }
