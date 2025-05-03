@@ -16,7 +16,7 @@ class SankeyPainter extends CustomPainter {
   final double nodeVertDesiredMinPad = 5;
   final double labelXOffset = 5;
 
-  Size previousSize = Size.zero;
+  Size currentSize = Size.zero;
   double levelHoriPad = 10;
   Map<SankeyNode, SankeyLayoutNode> layouts = {};
   List<SankeyLayoutNode> drawNodes = [];
@@ -31,10 +31,10 @@ class SankeyPainter extends CustomPainter {
   }) : valueToString = valueToString ?? _defaultToString;
 
   void _layout(Size size) {
-    if (previousSize == size) {
+    if (currentSize == size) {
       return;
     }
-    previousSize = size;
+    currentSize = size;
     drawNodes = [];
     drawFlows = [];
     drawLabels = [];
@@ -78,25 +78,22 @@ class SankeyPainter extends CustomPainter {
         final destBottom = destTop + flowWidth;
         final sourceBottom = sourceTop + flowWidth;
 
-        /// A single bezier with the right width works well generally, but has some weird artifacts
-        /// if it's too wide and stubby. Fallback in this case to a filled path...the double bezier
-        /// boundaries are wrong though and make the line look too narrow. Lookup bezier offseting.
-        /// Odd that flutter stroking makes these weird artifacts though, maybe not simple fix.
         final Path path;
-        final Paint paint;
         if (flowWidth < 0.8 * levelHoriPad) {
-          path = Path()
-            ..moveToOffset(source.loc.topRight.translate(-1, sourceCenter))
-            ..cubicToOffset(
-              dest.loc.topLeft.translate(1, destCenter),
-              source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
-              dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
-            );
-          paint = Paint()
-            ..color = flow.color.withAlpha(100)
-            ..strokeWidth = flowWidth
-            ..style = PaintingStyle.stroke;
+          /// Use a closed path instead of just a simple bezier and drawing with a wide stroke width
+          /// to enable easy hit testing.
+          path = _generateOffsetPath(
+            source.loc.topRight.translate(-1, sourceCenter),
+            source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
+            dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
+            dest.loc.topLeft.translate(1, destCenter),
+            width: flowWidth,
+          );
         } else {
+          /// The above works well generally, but has some weird artifacts if it's too wide (same
+          /// with both the filled path and normal stroked drawing). Fallback in this case to a
+          /// filled path with double bezier boundaries. In general this is wrong though as it makes
+          /// the line look too narrow. Lookup bezier offseting.
           path = Path()
             ..moveToOffset(source.loc.topRight.translate(-1, sourceTop))
             ..cubicToOffset(
@@ -111,16 +108,15 @@ class SankeyPainter extends CustomPainter {
               source.loc.topRight.translate(levelHoriPad / 2, sourceBottom),
             )
             ..close();
-          paint = Paint()
-            ..color = flow.color.withAlpha(100)
-            ..style = PaintingStyle.fill;
         }
         drawFlows.add(SankeyLayoutFlow(
           flow: flow,
           source: source,
           destination: dest,
           path: path,
-          paint: paint,
+          paint: Paint()
+            ..color = flow.color.withAlpha(100)
+            ..style = PaintingStyle.fill,
         ));
         sourceTop += flowWidth;
         destTops[dest] = destTop + flowWidth;
@@ -261,6 +257,16 @@ class SankeyPainter extends CustomPainter {
         oldDelegate.theme != theme ||
         oldDelegate.valueToString != valueToString;
   }
+
+  SankeyNode? nodeHitTest(Offset loc) {
+    for (final node in drawNodes) {
+      if (node.loc.contains(loc)) return node.node;
+    }
+    for (final flow in drawFlows) {
+      if (flow.path.contains(loc)) return flow.flow.focusNode;
+    }
+    return null;
+  }
 }
 
 class SankeyLayoutNode {
@@ -302,4 +308,54 @@ class SankeyLayoutLabel {
     required this.labelLoc,
     required this.valueLoc,
   });
+}
+
+/// ChatGPT generated
+Path _generateOffsetPath(
+  Offset p0,
+  Offset p1,
+  Offset p2,
+  Offset p3, {
+  required double width,
+  int segments = 30,
+}) {
+  List<Offset> leftOffsets = [];
+  List<Offset> rightOffsets = [];
+
+  for (int i = 0; i <= segments; i++) {
+    double t = i / segments;
+
+    Offset pt = _cubicBezierPoint(p0, p1, p2, p3, t);
+    Offset tangent = _cubicBezierTangent(p0, p1, p2, p3, t);
+    Offset normal = _normalize(Offset(-tangent.dy, tangent.dx));
+
+    leftOffsets.add(pt + normal * (width / 2));
+    rightOffsets.add(pt - normal * (width / 2));
+  }
+
+  // Build the path for the filled outline
+  Path outlinePath = Path()..moveTo(leftOffsets.first.dx, leftOffsets.first.dy);
+  for (final pt in leftOffsets) {
+    outlinePath.lineTo(pt.dx, pt.dy);
+  }
+  for (final pt in rightOffsets.reversed) {
+    outlinePath.lineTo(pt.dx, pt.dy);
+  }
+  outlinePath.close();
+  return outlinePath;
+}
+
+Offset _cubicBezierPoint(Offset p0, Offset p1, Offset p2, Offset p3, double t) {
+  double mt = 1 - t;
+  return p0 * mt * mt * mt + p1 * 3 * mt * mt * t + p2 * 3 * mt * t * t + p3 * t * t * t;
+}
+
+Offset _cubicBezierTangent(Offset p0, Offset p1, Offset p2, Offset p3, double t) {
+  double mt = 1 - t;
+  return (p1 - p0) * (3 * mt * mt) + (p2 - p1) * (6 * mt * t) + (p3 - p2) * (3 * t * t);
+}
+
+Offset _normalize(Offset v) {
+  final length = v.distance;
+  return length == 0 ? Offset.zero : v / length;
 }

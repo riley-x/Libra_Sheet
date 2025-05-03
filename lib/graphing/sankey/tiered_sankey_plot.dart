@@ -1,12 +1,16 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/graphing/mouse_hover.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_painter.dart';
 
 class TieredSankeyPlot extends StatefulWidget {
   final List<List<SankeyNode>> nodes;
   final String? Function(double value)? valueToString;
+  final Function(SankeyNode node)? onTap;
 
-  const TieredSankeyPlot({super.key, required this.nodes, this.valueToString});
+  const TieredSankeyPlot({super.key, required this.nodes, this.valueToString, this.onTap});
 
   @override
   State<TieredSankeyPlot> createState() => _TieredSankeyPlotState();
@@ -14,6 +18,10 @@ class TieredSankeyPlot extends StatefulWidget {
 
 class _TieredSankeyPlotState extends State<TieredSankeyPlot> {
   SankeyPainter? painter;
+
+  /// Hover positions in pixel coordinates
+  Offset? hoverPixLoc;
+  SankeyNode? hoverNode;
 
   void _calculateNodes() {}
 
@@ -47,12 +55,69 @@ class _TieredSankeyPlotState extends State<TieredSankeyPlot> {
     _initPainter();
   }
 
+  void onTapUp(TapUpDetails details) {
+    if (widget.onTap == null) return;
+    final node = painter?.nodeHitTest(details.localPosition);
+    if (node != null) {
+      widget.onTap!(node);
+    }
+  }
+
+  void onHover(PointerHoverEvent event) {
+    if (painter == null || painter!.currentSize == Size.zero) return;
+    final node = painter?.nodeHitTest(event.localPosition);
+    setState(() {
+      hoverNode = node;
+      hoverPixLoc = event.localPosition;
+    });
+  }
+
+  void onExit(PointerExitEvent event) {
+    setState(() {
+      hoverNode = null;
+      hoverPixLoc = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        painter: painter,
-        size: Size.infinite,
+    return MouseRegion(
+      onHover: onHover,
+      onExit: onExit,
+      child: GestureDetector(
+        onTapUp: onTapUp,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            RepaintBoundary(
+              child: CustomPaint(
+                painter: painter,
+                size: Size.infinite,
+              ),
+            ),
+            if (painter != null &&
+                painter!.currentSize != Size.zero &&
+                hoverPixLoc != null &&
+                hoverNode != null)
+              RepaintBoundary(
+                child: MouseHover(
+                  loc: hoverPixLoc!,
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 4),
+                    constraints: const BoxConstraints(maxWidth: 300),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onInverseSurface.withAlpha(210),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      "${hoverNode!.label}\n${hoverNode!.value.formatDollar()}",
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
