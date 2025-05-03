@@ -110,7 +110,7 @@ class _TieredSankeyPlotState extends State<TieredSankeyPlot> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      "${hoverNode!.label}\n${hoverNode!.value.formatDollar()}",
+                      "${hoverNode!.label}\n${widget.valueToString?.call(hoverNode!.value) ?? hoverNode!.value.formatDollar()}",
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                   ),
