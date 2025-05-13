@@ -190,6 +190,18 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       }
     }
 
+    var leftoverVal = individualCatTotals[appState.categories.income.key] ?? 0;
+    if (leftoverVal > 0 && leftoverVal != incomeTotal) {
+      final subcatNode = SankeyNode(
+        label: "Uncategorized Income",
+        color: appState.categories.income.color,
+        value: leftoverVal.asDollarDouble(),
+        data: appState.categories.income,
+      );
+      incomeNode.addSource(subcatNode, focus: SankeyPriority.source);
+      incomeCats.add(subcatNode);
+    }
+
     /// Expense
     for (final cat in appState.categories.expense.subCats) {
       final catVal = aggregatedCatTotals[cat.key] ?? 0;
@@ -230,6 +242,18 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
         catNode.addDestination(subcatNode, focus: SankeyPriority.destination);
         expenseSubcats.add(subcatNode);
       }
+    }
+
+    leftoverVal = individualCatTotals[appState.categories.expense.key] ?? 0;
+    if (leftoverVal > 0 && leftoverVal != expenseTotal) {
+      final subcatNode = SankeyNode(
+        label: "Uncategorized Expenses",
+        color: appState.categories.expense.color,
+        value: leftoverVal.asDollarDouble(),
+        data: appState.categories.expense,
+      );
+      expenseNode.addDestination(subcatNode, focus: SankeyPriority.destination);
+      expenseCats.add(subcatNode);
     }
 
     sankeyNodes = [
