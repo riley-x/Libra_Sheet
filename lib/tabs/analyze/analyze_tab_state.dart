@@ -246,14 +246,15 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
 
     leftoverVal = individualCatTotals[appState.categories.expense.key] ?? 0;
     if (leftoverVal > 0 && leftoverVal != expenseTotal) {
-      final subcatNode = SankeyNode(
+      final uncatNode = SankeyNode(
         label: "Uncategorized Expenses",
         color: appState.categories.expense.color,
         value: leftoverVal.asDollarDouble(),
+        labelAlignment: Alignment.centerLeft,
         data: appState.categories.expense,
       );
-      expenseNode.addDestination(subcatNode, focus: SankeyPriority.destination);
-      expenseCats.add(subcatNode);
+      expenseNode.addDestination(uncatNode, focus: SankeyPriority.destination);
+      expenseCats.add(uncatNode);
     }
 
     sankeyNodes = [
