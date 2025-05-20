@@ -9,8 +9,10 @@ class TieredSankeyPlot extends StatefulWidget {
   final List<List<SankeyNode>> nodes;
   final String? Function(double value)? valueToString;
   final Function(SankeyNode node)? onTap;
+  final SankeyLayout? layout;
 
-  const TieredSankeyPlot({super.key, required this.nodes, this.valueToString, this.onTap});
+  const TieredSankeyPlot(
+      {super.key, required this.nodes, this.valueToString, this.onTap, this.layout});
 
   @override
   State<TieredSankeyPlot> createState() => _TieredSankeyPlotState();
@@ -30,6 +32,7 @@ class _TieredSankeyPlotState extends State<TieredSankeyPlot> {
       theme: Theme.of(context),
       data: widget.nodes,
       valueToString: widget.valueToString,
+      layout: widget.layout,
     );
   }
 

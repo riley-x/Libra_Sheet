@@ -57,15 +57,20 @@ class DoubleStackView implements AnalyzeTabViewState {
 }
 
 class SankeyView implements AnalyzeTabViewState {
-  const SankeyView({this.showAverages = false});
+  const SankeyView({this.showAverages = false, this.layoutTree = true});
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.sankey;
 
   final bool showAverages;
+  final bool layoutTree;
 
   SankeyView withAverages(bool value) {
-    return SankeyView(showAverages: value);
+    return SankeyView(showAverages: value, layoutTree: layoutTree);
+  }
+
+  SankeyView withLayoutTree(bool value) {
+    return SankeyView(showAverages: showAverages, layoutTree: value);
   }
 }
 

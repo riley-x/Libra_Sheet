@@ -4,6 +4,7 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filters.d
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
+import 'package:libra_sheet/graphing/sankey/sankey_painter.dart';
 import 'package:libra_sheet/graphing/sankey/tiered_sankey_plot.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_state.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
@@ -35,6 +36,7 @@ import 'package:libra_sheet/data/date_time_utils.dart';
     padding: const EdgeInsets.only(top: 8.0, bottom: 2.0),
     child: TieredSankeyPlot(
       nodes: state.sankeyNodes,
+      layout: viewState.layoutTree ? SankeyLayout.tree : SankeyLayout.justify,
       valueToString: (value) =>
           viewState.showAverages ? (value / state.numMonths).formatDollar() : value.formatDollar(),
       onTap: onTap,
@@ -47,6 +49,21 @@ import 'package:libra_sheet/data/date_time_utils.dart';
     Checkbox(
       value: viewState.showAverages,
       onChanged: (bool? value) => state.setViewState(viewState.withAverages(value == true)),
+    ),
+
+    ///
+    const VerticalDivider(width: 30, thickness: 3, indent: 4, endIndent: 4),
+    Text('View', style: theme.textTheme.bodyMedium),
+    const SizedBox(width: 10),
+    IconButton(
+      color: viewState.layoutTree ? theme.colorScheme.primary : null,
+      onPressed: () => state.setViewState(viewState.withLayoutTree(true)),
+      icon: const Icon(Icons.format_align_center),
+    ),
+    IconButton(
+      color: viewState.layoutTree ? null : theme.colorScheme.primary,
+      onPressed: () => state.setViewState(viewState.withLayoutTree(false)),
+      icon: const Icon(Icons.format_align_justify),
     ),
   ];
 

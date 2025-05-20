@@ -10,11 +10,14 @@ String _defaultToString(double value) {
   return value.formatDollar();
 }
 
+enum SankeyLayout { tree, justify }
+
 class SankeyPainter extends CustomPainter {
   final ThemeData theme;
   final List<List<SankeyNode>> data;
   late final SankeyTree? dataAsTree;
   final String? Function(double value) valueToString;
+  final SankeyLayout layout;
 
   final double nodeWidth = 20;
   final double nodeVertDesiredMinPad = 5;
@@ -31,8 +34,10 @@ class SankeyPainter extends CustomPainter {
     super.repaint,
     required this.theme,
     required this.data,
+    SankeyLayout? layout,
     String? Function(double value)? valueToString,
-  }) : valueToString = valueToString ?? _defaultToString {
+  })  : valueToString = valueToString ?? _defaultToString,
+        layout = layout ?? SankeyLayout.tree {
     try {
       final flattenedData = data.expand((level) => level).toList();
       dataAsTree = createTree(flattenedData, paddingFn: (layer) => 20);
@@ -58,67 +63,11 @@ class SankeyPainter extends CustomPainter {
     levelHoriPad = (size.width - nodeWidth * nLevels) / (nLevels - 1);
     if (levelHoriPad <= 0) return;
 
-    // double scale = _layoutJustified(size);
-    double scale = dataAsTree != null ? _layoutTree(size) : _layoutJustified(size);
-
-    /// Flows
-    Map<SankeyLayoutNode, double> destTops = {};
-    for (final source in drawNodes) {
-      double sourceTop = 0;
-      for (final flow in source.node.outgoingFlows) {
-        final flowWidth = flow.value * scale;
-
-        final dest = layouts[flow.destination]!;
-        final destTop = destTops[dest] ?? 0;
-        final destCenter = destTop + flowWidth / 2;
-        final sourceCenter = sourceTop + flowWidth / 2;
-        final destBottom = destTop + flowWidth;
-        final sourceBottom = sourceTop + flowWidth;
-
-        final Path path;
-        if (flowWidth < 0.8 * levelHoriPad) {
-          /// Use a closed path instead of just a simple bezier and drawing with a wide stroke width
-          /// to enable easy hit testing.
-          path = _generateOffsetPath(
-            source.loc.topRight.translate(-1, sourceCenter),
-            source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
-            dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
-            dest.loc.topLeft.translate(1, destCenter),
-            width: flowWidth,
-          );
-        } else {
-          /// The above works well generally, but has some weird artifacts if it's too wide (same
-          /// with both the filled path and normal stroked drawing). Fallback in this case to a
-          /// filled path with double bezier boundaries. In general this is wrong though as it makes
-          /// the line look too narrow. Lookup bezier offseting.
-          path = Path()
-            ..moveToOffset(source.loc.topRight.translate(-1, sourceTop))
-            ..cubicToOffset(
-              dest.loc.topLeft.translate(1, destTop),
-              source.loc.topRight.translate(levelHoriPad / 2, sourceTop),
-              dest.loc.topLeft.translate(-levelHoriPad / 2, destTop),
-            )
-            ..lineToOffset(dest.loc.topLeft.translate(1, destBottom))
-            ..cubicToOffset(
-              source.loc.topRight.translate(-1, sourceBottom),
-              dest.loc.topLeft.translate(-levelHoriPad / 2, destBottom),
-              source.loc.topRight.translate(levelHoriPad / 2, sourceBottom),
-            )
-            ..close();
-        }
-        drawFlows.add(SankeyLayoutFlow(
-          flow: flow,
-          source: source,
-          destination: dest,
-          path: path,
-          paint: Paint()
-            ..color = flow.color.withAlpha(100)
-            ..style = PaintingStyle.fill,
-        ));
-        sourceTop += flowWidth;
-        destTops[dest] = destTop + flowWidth;
-      }
-    }
+    double scale = switch (layout) {
+      SankeyLayout.tree => dataAsTree != null ? _layoutTree(size) : _layoutJustified(size),
+      SankeyLayout.justify => _layoutJustified(size),
+    };
+    _layoutFlow(scale);
   }
 
   /// Assumes a double-sided tree structure on the nodes, starting from a central root node, and
@@ -313,6 +262,66 @@ class SankeyPainter extends CustomPainter {
     ));
   }
 
+  void _layoutFlow(double valueScale) {
+    Map<SankeyLayoutNode, double> destTops = {};
+    for (final source in drawNodes) {
+      double sourceTop = 0;
+      for (final flow in source.node.outgoingFlows) {
+        final flowWidth = flow.value * valueScale;
+
+        final dest = layouts[flow.destination]!;
+        final destTop = destTops[dest] ?? 0;
+        final destCenter = destTop + flowWidth / 2;
+        final sourceCenter = sourceTop + flowWidth / 2;
+        final destBottom = destTop + flowWidth;
+        final sourceBottom = sourceTop + flowWidth;
+
+        final Path path;
+        if (flowWidth < 0.8 * levelHoriPad) {
+          /// Use a closed path instead of just a simple bezier and drawing with a wide stroke width
+          /// to enable easy hit testing.
+          path = _generateOffsetPath(
+            source.loc.topRight.translate(-1, sourceCenter),
+            source.loc.topRight.translate(levelHoriPad / 2, sourceCenter),
+            dest.loc.topLeft.translate(-levelHoriPad / 2, destCenter),
+            dest.loc.topLeft.translate(1, destCenter),
+            width: flowWidth,
+          );
+        } else {
+          /// The above works well generally, but has some weird artifacts if it's too wide (same
+          /// with both the filled path and normal stroked drawing). Fallback in this case to a
+          /// filled path with double bezier boundaries. In general this is wrong though as it makes
+          /// the line look too narrow. Lookup bezier offseting.
+          path = Path()
+            ..moveToOffset(source.loc.topRight.translate(-1, sourceTop))
+            ..cubicToOffset(
+              dest.loc.topLeft.translate(1, destTop),
+              source.loc.topRight.translate(levelHoriPad / 2, sourceTop),
+              dest.loc.topLeft.translate(-levelHoriPad / 2, destTop),
+            )
+            ..lineToOffset(dest.loc.topLeft.translate(1, destBottom))
+            ..cubicToOffset(
+              source.loc.topRight.translate(-1, sourceBottom),
+              dest.loc.topLeft.translate(-levelHoriPad / 2, destBottom),
+              source.loc.topRight.translate(levelHoriPad / 2, sourceBottom),
+            )
+            ..close();
+        }
+        drawFlows.add(SankeyLayoutFlow(
+          flow: flow,
+          source: source,
+          destination: dest,
+          path: path,
+          paint: Paint()
+            ..color = flow.color.withAlpha(100)
+            ..style = PaintingStyle.fill,
+        ));
+        sourceTop += flowWidth;
+        destTops[dest] = destTop + flowWidth;
+      }
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     _layout(size);
@@ -337,7 +346,8 @@ class SankeyPainter extends CustomPainter {
   bool shouldRepaint(SankeyPainter oldDelegate) {
     return oldDelegate.data != data ||
         oldDelegate.theme != theme ||
-        oldDelegate.valueToString != valueToString;
+        oldDelegate.valueToString != valueToString ||
+        oldDelegate.layout != layout;
   }
 
   SankeyNode? nodeHitTest(Offset loc) {
