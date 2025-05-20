@@ -40,7 +40,7 @@ class SankeyPainter extends CustomPainter {
         layout = layout ?? SankeyLayout.tree {
     try {
       final flattenedData = data.expand((level) => level).toList();
-      dataAsTree = createTree(flattenedData, paddingFn: (layer) => 20);
+      dataAsTree = createTree(flattenedData, paddingFn: (layer) => 15);
     } on SankeyTreeLayoutException catch (e) {
       debugPrint('SankeyTreeLayoutException: $e');
       dataAsTree = null;
@@ -77,8 +77,8 @@ class SankeyPainter extends CustomPainter {
     SankeyTree tree = dataAsTree!;
     final expectedPadding = max(tree.incomingBranch.totalPadding, tree.outgoingBranch.totalPadding);
     final double paddingScale;
-    if (expectedPadding > size.height * 0.3) {
-      paddingScale = size.height * 0.3 / expectedPadding;
+    if (expectedPadding > size.height * 0.5) {
+      paddingScale = size.height * 0.5 / expectedPadding;
     } else {
       paddingScale = 1;
     }
@@ -108,6 +108,7 @@ class SankeyPainter extends CustomPainter {
     double yMax, [
     bool skip = false,
   ]) {
+    print("${node.node.label} $yMin $yMax");
     final totalHeight = yMax - yMin;
     final nodeHeight = node.node.value * valueScale;
     if (!skip) {
@@ -122,18 +123,12 @@ class SankeyPainter extends CustomPainter {
       layouts[node.node] = layoutNode;
     }
 
-    final descendentHeight = nodeHeight + node.totalPadding * paddingScale;
+    var descendentHeight = nodeHeight + node.totalPadding * paddingScale;
     double yStart = yMin + (totalHeight - descendentHeight) / 2;
     for (final child in node.children) {
-      final yEnd = min(
-        yMax,
-        yStart +
-            child.node.value * valueScale +
-            child.totalPadding * paddingScale +
-            node.layerPerElemPadding * paddingScale,
-      );
+      final yEnd = yStart + child.node.value * valueScale + child.totalPadding * paddingScale;
       _layoutTreeNode(child, valueScale, paddingScale, xFn, yStart, yEnd);
-      yStart = yEnd + node.layerPerElemPadding * paddingScale / 2;
+      yStart = yEnd + node.layerPerElemPadding * paddingScale;
     }
   }
 
@@ -406,34 +401,6 @@ class SankeyLayoutLabel {
     required this.labelLoc,
     required this.valueLoc,
   });
-}
-
-class _LayerHeight {
-  double value;
-  double padding;
-
-  _LayerHeight({this.value = 0.0, this.padding = 0.0});
-
-  _LayerHeight.max(_LayerHeight h1, _LayerHeight h2)
-      : value = max(h1.value, h2.value),
-        padding = max(h1.padding, h2.padding);
-
-  void add(_LayerHeight other) {
-    value += other.value;
-    padding += other.padding;
-  }
-
-  void addValue(double value) {
-    this.value += value;
-  }
-
-  void addPadding(double padding) {
-    this.padding += padding;
-  }
-
-  double pixelHeight(double scale) {
-    return value * scale + padding;
-  }
 }
 
 /// ChatGPT generated

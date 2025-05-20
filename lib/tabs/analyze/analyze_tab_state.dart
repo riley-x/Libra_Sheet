@@ -123,12 +123,12 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
       value: expenseTotal.abs().asDollarDouble(),
       labelAlignment: Alignment.centerLeft,
     );
-    incomeNode.addDestination(expenseNode);
+    if (incomeTotal > 0 && expenseTotal.abs() > 0) incomeNode.addDestination(expenseNode);
 
     final incomeSubcats = <SankeyNode>[];
     final incomeCats = <SankeyNode>[];
-    final incomePane = <SankeyNode>[incomeNode];
-    final expensePane = <SankeyNode>[expenseNode];
+    final incomePane = <SankeyNode>[if (incomeTotal > 0) incomeNode];
+    final expensePane = <SankeyNode>[if (expenseTotal.abs() > 0) expenseNode];
     final expenseCats = <SankeyNode>[];
     final expenseSubcats = <SankeyNode>[];
 
@@ -259,10 +259,10 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
 
     sankeyNodes = [
       if (incomeSubcats.isNotEmpty) incomeSubcats,
-      incomeCats,
+      if (incomeCats.isNotEmpty) incomeCats,
       incomePane,
       expensePane,
-      expenseCats,
+      if (expenseCats.isNotEmpty) expenseCats,
       if (expenseSubcats.isNotEmpty) expenseSubcats
     ];
 
