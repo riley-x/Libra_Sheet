@@ -125,9 +125,15 @@ class SankeyPainter extends CustomPainter {
     final descendentHeight = nodeHeight + node.totalPadding * paddingScale;
     double yStart = yMin + (totalHeight - descendentHeight) / 2;
     for (final child in node.children) {
-      final yEnd = yStart + child.node.value * valueScale + child.totalPadding * paddingScale;
+      final yEnd = min(
+        yMax,
+        yStart +
+            child.node.value * valueScale +
+            child.totalPadding * paddingScale +
+            node.layerPerElemPadding * paddingScale,
+      );
       _layoutTreeNode(child, valueScale, paddingScale, xFn, yStart, yEnd);
-      yStart = yEnd + node.layerPerElemPadding * paddingScale;
+      yStart = yEnd + node.layerPerElemPadding * paddingScale / 2;
     }
   }
 
