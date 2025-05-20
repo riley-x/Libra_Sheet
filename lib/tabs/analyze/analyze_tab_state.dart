@@ -135,7 +135,7 @@ class AnalyzeTabState extends fnd.ChangeNotifier {
     if (incomeNode.value > expenseNode.value) {
       final savingsNode = SankeyNode(
         label: "Savings",
-        color: Colors.green,
+        color: const Color.fromARGB(255, 72, 230, 146),
         value: incomeNode.value - expenseNode.value,
         labelAlignment: Alignment.centerLeft,
       );

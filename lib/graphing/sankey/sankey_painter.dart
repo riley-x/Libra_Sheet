@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
+import 'package:libra_sheet/graphing/sankey/sankey_tree.dart';
 
 String _defaultToString(double value) {
   return value.formatDollar();
@@ -10,6 +13,7 @@ String _defaultToString(double value) {
 class SankeyPainter extends CustomPainter {
   final ThemeData theme;
   final List<List<SankeyNode>> data;
+  late final SankeyTree? dataAsTree;
   final String? Function(double value) valueToString;
 
   final double nodeWidth = 20;
@@ -28,7 +32,16 @@ class SankeyPainter extends CustomPainter {
     required this.theme,
     required this.data,
     String? Function(double value)? valueToString,
-  }) : valueToString = valueToString ?? _defaultToString;
+  }) : valueToString = valueToString ?? _defaultToString {
+    try {
+      final flattenedData = data.expand((level) => level).toList();
+      dataAsTree = createTree(flattenedData, paddingFn: (layer) => 20);
+    } on SankeyTreeLayoutException catch (e) {
+      debugPrint('SankeyTreeLayoutException: $e');
+      dataAsTree = null;
+    }
+    // print(dataAsTree);
+  }
 
   void _layout(Size size) {
     if (currentSize == size) {
@@ -45,24 +58,8 @@ class SankeyPainter extends CustomPainter {
     levelHoriPad = (size.width - nodeWidth * nLevels) / (nLevels - 1);
     if (levelHoriPad <= 0) return;
 
-    /// Scale
-    var scale = double.maxFinite;
-    var vertPad = nodeVertDesiredMinPad;
-    for (final level in data) {
-      final (levelScale, levelVertPad) = _getMaxValueScaleAndVertPad(level, size.height);
-      if (levelVertPad < vertPad) {
-        vertPad = levelVertPad;
-      }
-      if (levelScale < scale) {
-        scale = levelScale;
-      }
-    }
-
-    /// Nodes
-    for (final (i, level) in data.indexed) {
-      final x = i * (nodeWidth + levelHoriPad);
-      _layoutLayerJustified(level, x, size.height, scale);
-    }
+    // double scale = _layoutJustified(size);
+    double scale = dataAsTree != null ? _layoutTree(size) : _layoutJustified(size);
 
     /// Flows
     Map<SankeyLayoutNode, double> destTops = {};
@@ -124,7 +121,92 @@ class SankeyPainter extends CustomPainter {
     }
   }
 
+  /// Assumes a double-sided tree structure on the nodes, starting from a central root node, and
+  /// starts by positioning the leaf nodes equally spaced. Parent nodes are then placed centered
+  /// to their children.
+  double _layoutTree(Size size) {
+    SankeyTree tree = dataAsTree!;
+    final expectedPadding = max(tree.incomingBranch.totalPadding, tree.outgoingBranch.totalPadding);
+    final double paddingScale;
+    if (expectedPadding > size.height * 0.3) {
+      paddingScale = size.height * 0.3 / expectedPadding;
+    } else {
+      paddingScale = 1;
+    }
+    final valueScale = (size.height - expectedPadding * paddingScale) / tree.root.value;
+
+    double incomingX(int treeLayer) {
+      final absoluteLayer = tree.incomingBranch.maxDescendantLayer - treeLayer;
+      return absoluteLayer * (nodeWidth + levelHoriPad);
+    }
+
+    double outgoingX(int treeLayer) {
+      final absoluteLayer = treeLayer + tree.incomingBranch.maxDescendantLayer;
+      return absoluteLayer * (nodeWidth + levelHoriPad);
+    }
+
+    _layoutTreeNode(tree.incomingBranch, valueScale, paddingScale, incomingX, 0, size.height);
+    _layoutTreeNode(tree.outgoingBranch, valueScale, paddingScale, outgoingX, 0, size.height, true);
+    return valueScale;
+  }
+
+  void _layoutTreeNode(
+    SankeyTreeNode node,
+    double valueScale,
+    double paddingScale,
+    double Function(int treeLayer) xFn,
+    double yMin,
+    double yMax, [
+    bool skip = false,
+  ]) {
+    final totalHeight = yMax - yMin;
+    final nodeHeight = node.node.value * valueScale;
+    if (!skip) {
+      final x = xFn.call(node.layer);
+      final offset = (totalHeight - nodeHeight) / 2;
+      final layoutNode = SankeyLayoutNode(
+        node: node.node,
+        loc: Rect.fromLTWH(x, yMin + offset, nodeWidth, nodeHeight),
+      );
+      drawNodes.add(layoutNode);
+      _layoutLabel(layoutNode, verticalSpace: totalHeight);
+      layouts[node.node] = layoutNode;
+    }
+
+    final descendentHeight = nodeHeight + node.totalPadding * paddingScale;
+    double yStart = yMin + (totalHeight - descendentHeight) / 2;
+    for (final child in node.children) {
+      final yEnd = yStart + child.node.value * valueScale + child.totalPadding * paddingScale;
+      _layoutTreeNode(child, valueScale, paddingScale, xFn, yStart, yEnd);
+      yStart = yEnd + node.layerPerElemPadding * paddingScale;
+    }
+  }
+
   /// Spreads all nodes equally, as much as possible, filling the full height
+  /// @returns the scale needed; so that pixel height = scale * value.
+  double _layoutJustified(Size size) {
+    /// Scale
+    var scale = double.maxFinite;
+    var vertPad = nodeVertDesiredMinPad;
+    for (final level in data) {
+      final (levelScale, levelVertPad) = _getMaxValueScaleAndVertPad(level, size.height);
+      if (levelVertPad < vertPad) {
+        vertPad = levelVertPad;
+      }
+      if (levelScale < scale) {
+        scale = levelScale;
+      }
+    }
+
+    /// Nodes
+    for (final (i, level) in data.indexed) {
+      final x = i * (nodeWidth + levelHoriPad);
+      _layoutLayerJustified(level, x, size.height, scale);
+    }
+
+    return scale;
+  }
+
   void _layoutLayerJustified(List<SankeyNode> level, double x, double height, double scale) {
     if (level.length == 1) {
       final node = level[0];
@@ -308,6 +390,34 @@ class SankeyLayoutLabel {
     required this.labelLoc,
     required this.valueLoc,
   });
+}
+
+class _LayerHeight {
+  double value;
+  double padding;
+
+  _LayerHeight({this.value = 0.0, this.padding = 0.0});
+
+  _LayerHeight.max(_LayerHeight h1, _LayerHeight h2)
+      : value = max(h1.value, h2.value),
+        padding = max(h1.padding, h2.padding);
+
+  void add(_LayerHeight other) {
+    value += other.value;
+    padding += other.padding;
+  }
+
+  void addValue(double value) {
+    this.value += value;
+  }
+
+  void addPadding(double padding) {
+    this.padding += padding;
+  }
+
+  double pixelHeight(double scale) {
+    return value * scale + padding;
+  }
 }
 
 /// ChatGPT generated
