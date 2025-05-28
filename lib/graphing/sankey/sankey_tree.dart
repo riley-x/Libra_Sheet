@@ -4,8 +4,8 @@ import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 class SankeyTree {
   final SankeyTreeNode outgoingBranch;
   final SankeyTreeNode incomingBranch;
-  final List<List<SankeyTreeNode>> outgoingLayers = [];
-  final List<List<SankeyTreeNode>> incomingLayers = [];
+  final List<SankeyTreeLayer> outgoingLayers = [];
+  final List<SankeyTreeLayer> incomingLayers = [];
   final double Function(int layer) paddingFn;
 
   SankeyNode get root => incomingBranch.node;
@@ -26,10 +26,10 @@ class SankeyTree {
           outgoing: false,
         ) {
     for (int i = 0; i <= outgoingBranch.maxDescendantLayer; i++) {
-      outgoingLayers.add([]);
+      outgoingLayers.add(SankeyTreeLayer(i));
     }
     for (int i = 0; i <= incomingBranch.maxDescendantLayer; i++) {
-      incomingLayers.add([]);
+      incomingLayers.add(SankeyTreeLayer(i));
     }
     outgoingBranch.collateLayer(outgoingLayers);
     incomingBranch.collateLayer(incomingLayers);
@@ -42,31 +42,38 @@ class SankeyTree {
       final (layerVScale, layerPScale) = _getScale(layer, height, maxPadding);
       if (layerPScale < paddingScale) {
         paddingScale = layerPScale;
-        print("Updating paddingScale: ${layer.first.node.label} ${paddingScale}");
+        // print("Updating paddingScale: ${layer.layer} ${paddingScale}");
       }
       if (layerVScale < valueScale) {
         valueScale = layerVScale;
-        print("Updating valueScale: ${layer.first.node.label} ${valueScale}");
+        // print("Updating valueScale: ${layer.first.node.label} ${valueScale}");
       }
     }
     return (valueScale, paddingScale);
   }
 
   (double valueSacle, double paddingScale) _getScale(
-    List<SankeyTreeNode> layer,
+    SankeyTreeLayer layer,
     double height,
     double maxPadding,
   ) {
-    final iLayer = layer.first.layer;
-    final layerPadding = paddingFn.call(iLayer);
-
-    double totalPadding = 0;
+    double totalPadding = layer.padding;
     double totalValue = 0;
-    for (final node in layer) {
+    for (final node in layer.nodes) {
       totalPadding += node.totalPadding;
-      if (node != layer.last) totalPadding += layerPadding;
       totalValue += node.node.value;
     }
+
+    // final layerPadding = paddingFn.call(layer.layer);
+    // SankeyTreeNode? previous;
+    // for (final node in layer.nodes) {
+    //   if (_canSqueezeIntoSiblingPadding(layer.layer, previous, node)) {
+    //     print("Squeezing ${node.node.label}: ${totalPadding} - ${previous!.totalPadding / 2}");
+    //     node.offset = -0.5 * previous!.totalPadding - layerPadding;
+    //     totalPadding += node.offset;
+    //   }
+    //   previous = node;
+    // }
 
     double paddingScale;
     double valueScale;
@@ -77,15 +84,6 @@ class SankeyTree {
       paddingScale = 1;
       valueScale = (height - totalPadding) / totalValue;
     }
-
-    // SankeyTreeNode? previous;
-    // for (final node in layer) {
-    //   if (_canSqueezeIntoSiblingPadding(iLayer, previous, node)) {
-    //     totalPadding -= 0.5 * previous!.totalPadding;
-    //   }
-    //   previous = node;
-    // }
-
     return (valueScale, paddingScale);
   }
 
@@ -94,7 +92,6 @@ class SankeyTree {
     if (current.maxDescendantLayer != layer) return false;
     if (previous.totalPadding == 0) return false;
     // TODO
-    // print("${current.node.label}");
     return true;
   }
 
@@ -131,6 +128,7 @@ class SankeyTreeNode {
   final SankeyNode node;
   final SankeyTreeNode? parent;
   final List<SankeyTreeNode> children = [];
+  double offset = 0;
 
   SankeyTreeNode({
     required this.layer,
@@ -171,10 +169,15 @@ class SankeyTreeNode {
     this.totalPadding = totalPadding;
   }
 
-  void collateLayer(List<List<SankeyTreeNode>> agg) {
-    agg[layer].add(this);
+  void collateLayer(List<SankeyTreeLayer> agg) {
+    agg[layer].nodes.add(this);
     for (final child in children) {
       child.collateLayer(agg);
+      if (child != children.last) {
+        for (int i = layer + 1; i < agg.length; i++) {
+          agg[i].padding += childPadding;
+        }
+      }
     }
   }
 }
@@ -206,4 +209,12 @@ class SankeyTreeLayoutException implements Exception {
 
   @override
   String toString() => message;
+}
+
+class SankeyTreeLayer {
+  final int layer;
+  List<SankeyTreeNode> nodes = [];
+  double padding = 0;
+
+  SankeyTreeLayer(this.layer);
 }
