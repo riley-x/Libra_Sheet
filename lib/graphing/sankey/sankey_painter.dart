@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/graphing/extensions.dart';
@@ -104,11 +102,11 @@ class SankeyPainter extends CustomPainter {
   ]) {
     final totalHeight = yMax - yMin;
     final nodeHeight = node.node.value * valueScale;
-    if (node.layer == 0)
-      print("${node.node.label} $yMin $yMax $totalHeight $nodeHeight ${node.totalPadding}");
+    // if (node.layer == 0)
+    //   print("${node.node.label} $yMin $yMax $totalHeight $nodeHeight ${node.totalPadding}");
     if (!skip) {
       final x = xFn.call(node.layer);
-      final offset = (totalHeight - nodeHeight) / 2 + node.offset * paddingScale;
+      final offset = (totalHeight - nodeHeight) / 2;
       final layoutNode = SankeyLayoutNode(
         node: node.node,
         loc: Rect.fromLTWH(x, yMin + offset, nodeWidth, nodeHeight),

@@ -64,16 +64,6 @@ class SankeyTree {
       totalValue += node.node.value;
     }
 
-    SankeyTreeNode? previous;
-    for (final node in layer.nodes) {
-      if (_canSqueezeIntoSiblingPadding(layer.layer, previous, node)) {
-        print("Squeezing ${node.node.label}: ${totalPadding} - ${previous!.totalPadding / 2}");
-        node.offset = -0.5 * previous!.totalPadding;
-        totalPadding += node.offset;
-      }
-      previous = node;
-    }
-
     double paddingScale;
     double valueScale;
     if (totalPadding > maxPadding) {
@@ -84,15 +74,6 @@ class SankeyTree {
       valueScale = (height - totalPadding) / totalValue;
     }
     return (valueScale, paddingScale);
-  }
-
-  bool _canSqueezeIntoSiblingPadding(int layer, SankeyTreeNode? previous, SankeyTreeNode current) {
-    if (previous == null) return false;
-    if (current.maxDescendantLayer != layer) return false;
-    if (previous.totalPadding == 0) return false;
-    if (layer != 1) return false;
-    // TODO
-    return true;
   }
 
   @override
@@ -128,7 +109,6 @@ class SankeyTreeNode {
   final SankeyNode node;
   final SankeyTreeNode? parent;
   final List<SankeyTreeNode> children = [];
-  double offset = 0;
 
   SankeyTreeNode({
     required this.layer,
