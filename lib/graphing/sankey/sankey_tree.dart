@@ -64,16 +64,15 @@ class SankeyTree {
       totalValue += node.node.value;
     }
 
-    // final layerPadding = paddingFn.call(layer.layer);
-    // SankeyTreeNode? previous;
-    // for (final node in layer.nodes) {
-    //   if (_canSqueezeIntoSiblingPadding(layer.layer, previous, node)) {
-    //     print("Squeezing ${node.node.label}: ${totalPadding} - ${previous!.totalPadding / 2}");
-    //     node.offset = -0.5 * previous!.totalPadding - layerPadding;
-    //     totalPadding += node.offset;
-    //   }
-    //   previous = node;
-    // }
+    SankeyTreeNode? previous;
+    for (final node in layer.nodes) {
+      if (_canSqueezeIntoSiblingPadding(layer.layer, previous, node)) {
+        print("Squeezing ${node.node.label}: ${totalPadding} - ${previous!.totalPadding / 2}");
+        node.offset = -0.5 * previous!.totalPadding;
+        totalPadding += node.offset;
+      }
+      previous = node;
+    }
 
     double paddingScale;
     double valueScale;
@@ -91,6 +90,7 @@ class SankeyTree {
     if (previous == null) return false;
     if (current.maxDescendantLayer != layer) return false;
     if (previous.totalPadding == 0) return false;
+    if (layer != 1) return false;
     // TODO
     return true;
   }
@@ -214,6 +214,9 @@ class SankeyTreeLayoutException implements Exception {
 class SankeyTreeLayer {
   final int layer;
   List<SankeyTreeNode> nodes = [];
+
+  /// Total pixel padding desired between the [nodes] in the layer. This includes any inherited
+  /// spacings (so i.e. includes both padding between siblings and cousins).
   double padding = 0;
 
   SankeyTreeLayer(this.layer);

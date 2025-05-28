@@ -104,11 +104,11 @@ class SankeyPainter extends CustomPainter {
   ]) {
     final totalHeight = yMax - yMin;
     final nodeHeight = node.node.value * valueScale;
-    // if (node.layer == 1)
-    //   print("${node.node.label} $yMin $yMax $totalHeight $nodeHeight ${node.totalPadding}");
+    if (node.layer == 0)
+      print("${node.node.label} $yMin $yMax $totalHeight $nodeHeight ${node.totalPadding}");
     if (!skip) {
       final x = xFn.call(node.layer);
-      final offset = (totalHeight - nodeHeight) / 2;
+      final offset = (totalHeight - nodeHeight) / 2 + node.offset * paddingScale;
       final layoutNode = SankeyLayoutNode(
         node: node.node,
         loc: Rect.fromLTWH(x, yMin + offset, nodeWidth, nodeHeight),
