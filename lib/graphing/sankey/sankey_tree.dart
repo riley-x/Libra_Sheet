@@ -1,14 +1,16 @@
 import 'dart:math';
-
 import 'package:libra_sheet/graphing/sankey/sankey_node.dart';
 
 class SankeyTree {
   final SankeyTreeNode outgoingBranch;
   final SankeyTreeNode incomingBranch;
+  final List<List<SankeyTreeNode>> outgoingLayers = [];
+  final List<List<SankeyTreeNode>> incomingLayers = [];
+  final double Function(int layer) paddingFn;
 
   SankeyNode get root => incomingBranch.node;
 
-  SankeyTree(SankeyNode root, {required double Function(int layer) paddingFn})
+  SankeyTree(SankeyNode root, {required this.paddingFn})
       : outgoingBranch = SankeyTreeNode(
           layer: 0,
           node: root,
@@ -22,7 +24,79 @@ class SankeyTree {
           parent: null,
           paddingFn: paddingFn,
           outgoing: false,
-        );
+        ) {
+    for (int i = 0; i <= outgoingBranch.maxDescendantLayer; i++) {
+      outgoingLayers.add([]);
+    }
+    for (int i = 0; i <= incomingBranch.maxDescendantLayer; i++) {
+      incomingLayers.add([]);
+    }
+    outgoingBranch.collateLayer(outgoingLayers);
+    incomingBranch.collateLayer(incomingLayers);
+  }
+
+  (double valueSacle, double paddingScale) getScale(double height, double maxPadding) {
+    double valueScale = double.maxFinite;
+    double paddingScale = double.maxFinite;
+    for (final layer in outgoingLayers.skip(1).toList() + incomingLayers.skip(1).toList()) {
+      final (layerVScale, layerPScale) = _getScale(layer, height, maxPadding);
+      if (layerPScale < paddingScale) {
+        paddingScale = layerPScale;
+        print("Updating paddingScale: ${layer.first.node.label} ${paddingScale}");
+      }
+      if (layerVScale < valueScale) {
+        valueScale = layerVScale;
+        print("Updating valueScale: ${layer.first.node.label} ${valueScale}");
+      }
+    }
+    return (valueScale, paddingScale);
+  }
+
+  (double valueSacle, double paddingScale) _getScale(
+    List<SankeyTreeNode> layer,
+    double height,
+    double maxPadding,
+  ) {
+    final iLayer = layer.first.layer;
+    final layerPadding = paddingFn.call(iLayer);
+
+    double totalPadding = 0;
+    double totalValue = 0;
+    for (final node in layer) {
+      totalPadding += node.totalPadding;
+      if (node != layer.last) totalPadding += layerPadding;
+      totalValue += node.node.value;
+    }
+
+    double paddingScale;
+    double valueScale;
+    if (totalPadding > maxPadding) {
+      paddingScale = maxPadding / totalPadding;
+      valueScale = (height - maxPadding) / totalValue;
+    } else {
+      paddingScale = 1;
+      valueScale = (height - totalPadding) / totalValue;
+    }
+
+    // SankeyTreeNode? previous;
+    // for (final node in layer) {
+    //   if (_canSqueezeIntoSiblingPadding(iLayer, previous, node)) {
+    //     totalPadding -= 0.5 * previous!.totalPadding;
+    //   }
+    //   previous = node;
+    // }
+
+    return (valueScale, paddingScale);
+  }
+
+  bool _canSqueezeIntoSiblingPadding(int layer, SankeyTreeNode? previous, SankeyTreeNode current) {
+    if (previous == null) return false;
+    if (current.maxDescendantLayer != layer) return false;
+    if (previous.totalPadding == 0) return false;
+    // TODO
+    // print("${current.node.label}");
+    return true;
+  }
 
   @override
   String toString() {
@@ -52,7 +126,7 @@ class SankeyTree {
 class SankeyTreeNode {
   final int layer;
   late final int maxDescendantLayer;
-  final double layerPerElemPadding;
+  final double childPadding;
   late final double totalPadding;
   final SankeyNode node;
   final SankeyTreeNode? parent;
@@ -64,7 +138,7 @@ class SankeyTreeNode {
     required this.parent,
     required bool outgoing,
     required double Function(int layer) paddingFn,
-  }) : layerPerElemPadding = paddingFn.call(layer) {
+  }) : childPadding = paddingFn.call(layer + 1) {
     final flows = outgoing ? node.outgoingFlows : node.incomingFlows;
     var maxDescendantLayer = layer;
     var totalPadding = 0.0;
@@ -91,10 +165,17 @@ class SankeyTreeNode {
       children.add(childNode);
       maxDescendantLayer = max(maxDescendantLayer, childNode.maxDescendantLayer);
       totalPadding += childNode.totalPadding;
-      if (flow != flows.first) totalPadding += layerPerElemPadding;
+      if (flow != flows.first) totalPadding += childPadding;
     }
     this.maxDescendantLayer = maxDescendantLayer;
     this.totalPadding = totalPadding;
+  }
+
+  void collateLayer(List<List<SankeyTreeNode>> agg) {
+    agg[layer].add(this);
+    for (final child in children) {
+      child.collateLayer(agg);
+    }
   }
 }
 

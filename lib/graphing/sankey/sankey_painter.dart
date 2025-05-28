@@ -75,14 +75,8 @@ class SankeyPainter extends CustomPainter {
   /// to their children.
   double _layoutTree(Size size) {
     SankeyTree tree = dataAsTree!;
-    final expectedPadding = max(tree.incomingBranch.totalPadding, tree.outgoingBranch.totalPadding);
-    final double paddingScale;
-    if (expectedPadding > size.height * 0.5) {
-      paddingScale = size.height * 0.5 / expectedPadding;
-    } else {
-      paddingScale = 1;
-    }
-    final valueScale = (size.height - expectedPadding * paddingScale) / tree.root.value;
+
+    final (valueScale, paddingScale) = tree.getScale(size.height, size.height * 0.5);
 
     double incomingX(int treeLayer) {
       final absoluteLayer = tree.incomingBranch.maxDescendantLayer - treeLayer;
@@ -108,9 +102,9 @@ class SankeyPainter extends CustomPainter {
     double yMax, [
     bool skip = false,
   ]) {
-    print("${node.node.label} $yMin $yMax");
     final totalHeight = yMax - yMin;
     final nodeHeight = node.node.value * valueScale;
+    // print("${node.node.label} $yMin $yMax $totalHeight $nodeHeight");
     if (!skip) {
       final x = xFn.call(node.layer);
       final offset = (totalHeight - nodeHeight) / 2;
@@ -127,8 +121,13 @@ class SankeyPainter extends CustomPainter {
     double yStart = yMin + (totalHeight - descendentHeight) / 2;
     for (final child in node.children) {
       final yEnd = yStart + child.node.value * valueScale + child.totalPadding * paddingScale;
-      _layoutTreeNode(child, valueScale, paddingScale, xFn, yStart, yEnd);
-      yStart = yEnd + node.layerPerElemPadding * paddingScale;
+
+      // Include inter-child padding into full y-extent
+      final paddedStart = yStart - node.childPadding * paddingScale / 2;
+      final paddedEnd = yEnd + node.childPadding * paddingScale / 2;
+      _layoutTreeNode(child, valueScale, paddingScale, xFn, paddedStart, paddedEnd);
+
+      yStart = yEnd + node.childPadding * paddingScale;
     }
   }
 
@@ -217,9 +216,14 @@ class SankeyPainter extends CustomPainter {
     }
 
     final style = theme.textTheme.bodySmall;
-    final lineHeight = (style?.height ?? 1.2) * (style?.fontSize ?? 16);
+    final fontSize = style?.fontSize ?? 16;
+    final lineHeight = (style?.height ?? 1) * (style?.fontSize ?? 16);
     verticalSpace ??= node.loc.height;
-    if (verticalSpace < lineHeight) {
+
+    /// Note comparing to [fontSize] and not [lineHeight] here to allow squeezing single line labels
+    /// beneath the specified style.height (line spacing) down to actual height of characters
+    /// (fontSize).
+    if (verticalSpace < fontSize) {
       return;
     }
 
