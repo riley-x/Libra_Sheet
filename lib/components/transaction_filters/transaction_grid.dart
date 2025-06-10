@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
+import 'package:libra_sheet/components/keyboard_utils.dart' show isMultiselect;
 import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -38,9 +38,7 @@ class TransactionGrid extends StatelessWidget {
   void _onSelect(Transaction t, int index, bool onlyMulti) {
     if (HardwareKeyboard.instance.isShiftPressed) {
       onMultiselect?.call(t, index, true);
-    } else if (onlyMulti ||
-        (Platform.isMacOS && HardwareKeyboard.instance.isMetaPressed) ||
-        (Platform.isWindows && HardwareKeyboard.instance.isControlPressed)) {
+    } else if (onlyMulti || isMultiselect()) {
       onMultiselect?.call(t, index, false);
     } else {
       onTap?.call(t, index);
@@ -53,9 +51,7 @@ class TransactionGrid extends StatelessWidget {
       return Center(
         child: Text(
           "No transactions",
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
         ),
       );
     }
@@ -99,9 +95,9 @@ class TransactionGrid extends StatelessWidget {
                                 ? null
                                 : (it) => _onSelect(it, i, false),
                             contextMenu: TransactionContextMenu(
-                              onDuplicate: () => context
-                                  .read<TransactionService>()
-                                  .createDuplicate(transactions[i]),
+                              onDuplicate: () => context.read<TransactionService>().createDuplicate(
+                                transactions[i],
+                              ),
                               onSelect: () => _onSelect(transactions[i], i, true),
                             ),
                           ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
@@ -12,10 +13,18 @@ import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
+String _eol() {
+  return kIsWeb
+      ? '\n'
+      : Platform.isWindows
+      ? '\r\n'
+      : '\n';
+}
+
 final _monthFormat = DateFormat.yMMM();
 Future<String> createBalanceHistoryCsvString(List<Account> accounts, List<DateTime> months) async {
   String out = '';
-  final lineEnd = Platform.isWindows ? '\r\n' : '\n';
+  final lineEnd = _eol();
 
   /// Header
   out += 'Month';
@@ -49,7 +58,7 @@ Future<String> createTransactionHistoryCsvString({
   required Map<int, Category> categories,
   required Map<int, Tag> tags,
 }) async {
-  final converter = ListToCsvConverter(eol: Platform.isWindows ? '\r\n' : '\n');
+  final converter = ListToCsvConverter(eol: _eol());
   List<List<String>> out = [];
 
   /// Header
@@ -63,15 +72,13 @@ Future<String> createTransactionHistoryCsvString({
     'Tags',
     'Note',
     'Allocations',
-    'Reimbursements'
+    'Reimbursements',
   ]);
 
   /// Data
-  final transactions = await LibraDatabase.readThrow((db) => db.loadAllTransactionsForCsv(
-        accounts: accounts,
-        categories: categories,
-        tags: tags,
-      ));
+  final transactions = await LibraDatabase.readThrow(
+    (db) => db.loadAllTransactionsForCsv(accounts: accounts, categories: categories, tags: tags),
+  );
   for (final t in transactions) {
     out.add([
       t.t.key.toString(),

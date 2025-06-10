@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,6 @@ import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -162,6 +162,10 @@ class LibraDatabase {
   // DateTime.now().difference(_lastBackupTime).inSeconds > 10) backup();
 
   static Future<void> backup({String? tag}) async {
+    if (kIsWeb) {
+      return;
+    }
+
     _lastBackupTime = DateTime.now();
     final timestamp = _backupDateFormat.format(_lastBackupTime);
 
