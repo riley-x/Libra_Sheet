@@ -15,19 +15,14 @@ const _gdriveCredentialsReleasePrefKey = 'gdrive_credentials';
 const _gdriveCredentialsDebugPrefKey = 'gdrive_cred_debug';
 const _gdriveSyncActivePrefKey = 'gdrive_sync_active';
 
-const _gdriveCredentialsPrefKey =
-    (kDebugMode) ? _gdriveCredentialsDebugPrefKey : _gdriveCredentialsReleasePrefKey;
+const _gdriveCredentialsPrefKey = (kDebugMode)
+    ? _gdriveCredentialsDebugPrefKey
+    : _gdriveCredentialsReleasePrefKey;
 
 // ignore: constant_identifier_names
 const _driveFileProperty_lastModified = 'dbTime';
 
-enum GoogleDriveSyncStatus {
-  disabled,
-  noConnection,
-  localAhead,
-  driveAhead,
-  upToDate,
-}
+enum GoogleDriveSyncStatus { disabled, noConnection, localAhead, driveAhead, upToDate }
 
 /// Specifies behavior when a drive file is ahead of the local file.
 ///
@@ -39,10 +34,7 @@ class OverwriteFileCallback {
   final FutureOr<bool> Function()? confirmOverwrite;
   final Function()? onReplaced;
 
-  OverwriteFileCallback({
-    required this.confirmOverwrite,
-    required this.onReplaced,
-  });
+  OverwriteFileCallback({required this.confirmOverwrite, required this.onReplaced});
 }
 
 /// FYI can't use GoogleSignIn package, at least on Macs because it requires using an entitlement
@@ -101,6 +93,7 @@ class GoogleDrive extends ChangeNotifier {
   /// from the cloud.
   Future<void> init({required OverwriteFileCallback? overwriteFileCallback}) async {
     this.overwriteFileCallback = overwriteFileCallback;
+    if (kIsWeb) return;
 
     /// Initialize local update time with local file OS last modified time.
     /// Keep the default (1970) time when the database is empty (newly created) to always allow
@@ -134,6 +127,8 @@ class GoogleDrive extends ChangeNotifier {
   /// Cancel syncing. We don't remove the credentials so that we can easily re-enable syncing without
   /// going through the user consent flow again.
   void disable() {
+    if (kIsWeb) return;
+
     active = false;
     _saveActive(false);
     notifyListeners();
@@ -142,6 +137,8 @@ class GoogleDrive extends ChangeNotifier {
   /// Enable or re-enable syncing. If an active authorized client exists, will continue using that.
   /// Otherwise prompts for user consent.
   Future<void> enable() async {
+    if (kIsWeb) return;
+
     active = true;
     _saveActive(true);
     if (_api == null) await promptUserConsent();
@@ -177,9 +174,11 @@ class GoogleDrive extends ChangeNotifier {
     if (_api == null) return;
     try {
       driveFile = await _getMostRecentFile(_api!);
-      debugPrint("GoogleDrive::fetchDriveFile()\n"
-          "\tdrive:${driveFile?.id} @ ${getDriveTime()?.toLocal()}\n"
-          "\tlocal:${lastLocalUpdateTime.toLocal()}");
+      debugPrint(
+        "GoogleDrive::fetchDriveFile()\n"
+        "\tdrive:${driveFile?.id} @ ${getDriveTime()?.toLocal()}\n"
+        "\tlocal:${lastLocalUpdateTime.toLocal()}",
+      );
     } on ServerRequestFailedException catch (e) {
       /// Refresh tokens can stop working after 7 days if the client ID is not approved is one possible cause.
       /// https://developers.google.com/nest/device-access/reference/errors/authorization
@@ -192,6 +191,8 @@ class GoogleDrive extends ChangeNotifier {
   }
 
   Future<void> retrieveLocalUpdateTime() async {
+    if (kIsWeb) return;
+
     if (!await LibraDatabase.isEmpty()) {
       final localPath = LibraDatabase.databasePath;
       lastLocalUpdateTime = await io.File(localPath).lastModified();
@@ -206,9 +207,11 @@ class GoogleDrive extends ChangeNotifier {
 
   /// Launches the user consent prompt flow, retrieving an authorized [_httpClient].
   Future<void> promptUserConsent() async {
+    if (kIsWeb) return;
     try {
-      _httpClient =
-          await clientViaUserConsent(_desktopClientId, [DriveApi.driveFileScope], _prompt);
+      _httpClient = await clientViaUserConsent(_desktopClientId, [
+        DriveApi.driveFileScope,
+      ], _prompt);
       _saveCredentials(_httpClient!.credentials);
       _httpClient!.credentialUpdates.listen(_saveCredentials);
       _api = DriveApi(_httpClient!);
@@ -237,8 +240,7 @@ class GoogleDrive extends ChangeNotifier {
   /// WARNING! we have no way to check for divergent updates; the newer update will win and will
   /// replace the other, which may delete some changes if the history has diverged.
   Future<void> sync() async {
-    // await fetchDriveFile();
-    // return;
+    if (kIsWeb) return;
     try {
       await _sync();
     } catch (e) {
@@ -248,7 +250,7 @@ class GoogleDrive extends ChangeNotifier {
   }
 
   Future<void> _sync() async {
-    if (_api == null) return;
+    if (_api == null || kIsWeb) return;
 
     /// Refresh both the drive and local times. This is important to overwrite the in-memory
     /// placeholder time set by [logLocalUpdate].
@@ -260,9 +262,9 @@ class GoogleDrive extends ChangeNotifier {
     switch (status()) {
       case GoogleDriveSyncStatus.localAhead:
         if (driveFile == null || driveFile!.id == null) {
-          await createFile(_api!, localPath, "libra_sheet.db");
+          await _createFile(_api!, localPath, "libra_sheet.db");
         } else {
-          await updateFile(_api!, localPath, driveFile!.id!);
+          await _updateFile(_api!, localPath, driveFile!.id!);
         }
         // the returned [File] objects from the above functions don't have a lot of the metadata set
         // (and the $fields parameter didn't seem to work the same as in api.files.list), so just
@@ -271,7 +273,7 @@ class GoogleDrive extends ChangeNotifier {
       case GoogleDriveSyncStatus.driveAhead:
         // Replace local file with cloud file after user confirmation.
         if (await overwriteFileCallback?.confirmOverwrite?.call() ?? false) {
-          final tempFile = await downloadFile(_api!, driveFile!.id!, "${localPath}_temp");
+          final tempFile = await _downloadFile(_api!, driveFile!.id!, "${localPath}_temp");
 
           /// Note that the downloaded file's last modified time will be ahead of the drive time and
           /// what is set here. The only problem this causes is that on the next app load, we will
@@ -295,7 +297,7 @@ class GoogleDrive extends ChangeNotifier {
   /// Calls [sync] but with a short delay to debounce back-to-back updates. This function uses
   /// [lastLocalUpdateTime] to check if the current call stack has been superceded.
   Future<void> logLocalUpdate() async {
-    if (!active || !isAuthorized) return;
+    if (!active || !isAuthorized || kIsWeb) return;
 
     final now = DateTime.now();
     lastLocalUpdateTime = now;
@@ -330,7 +332,7 @@ Future<void> _prompt(String url) async {
 /// This uploads a local [localPath] to Google Drive with a new [name]. Note that this function will
 /// not replace any older file, since Google Drive doesn't use [name] as an identifier. It will
 /// just create a new file with a new id.
-Future<File> createFile(DriveApi api, String localPath, String name) async {
+Future<File> _createFile(DriveApi api, String localPath, String name) async {
   final localFile = io.File(localPath);
   final modifiedTime = await localFile.lastModified();
   final media = Media(localFile.openRead(), localFile.lengthSync());
@@ -346,7 +348,7 @@ Future<File> createFile(DriveApi api, String localPath, String name) async {
 ///
 /// https://pub.dev/documentation/googleapis/12.0.0/drive_v3/FilesResource/update.html
 /// https://developers.google.com/drive/api/reference/rest/v3/files/update
-Future<File> updateFile(DriveApi api, String localPath, String objectId) async {
+Future<File> _updateFile(DriveApi api, String localPath, String objectId) async {
   final localFile = io.File(localPath);
   final modifiedTime = await localFile.lastModified();
   final media = Media(localFile.openRead(), localFile.lengthSync());
@@ -359,7 +361,7 @@ Future<File> updateFile(DriveApi api, String localPath, String objectId) async {
 
 /// This will replace the local file at [filename] with the downloaded file. Pass the Google Drive
 /// [objectId] to identify the file.
-Future<io.File> downloadFile(DriveApi api, String objectId, String filename) async {
+Future<io.File> _downloadFile(DriveApi api, String objectId, String filename) async {
   final media = await api.files.get(objectId, downloadOptions: DownloadOptions.fullMedia) as Media;
   final file = io.File(filename);
   final stream = file.openWrite();
@@ -404,9 +406,11 @@ Future<File?> _getMostRecentFile(DriveApi api) async {
   if (response.files != null) {
     for (final file in response.files!) {
       final time = _getAppPropertyTime(file);
-      debugPrint('GoogleDrive::getMostRecentFile()\n'
-          '\t${file.id} @ ${file.modifiedTime}\n'
-          '\t${file.appProperties}');
+      debugPrint(
+        'GoogleDrive::getMostRecentFile()\n'
+        '\t${file.id} @ ${file.modifiedTime}\n'
+        '\t${file.appProperties}',
+      );
       if (mostRecentFile == null) {
         mostRecentFile = file;
         mostRecentTime = time;
