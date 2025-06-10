@@ -12,6 +12,7 @@ import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -70,11 +71,17 @@ class LibraDatabase {
 
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
-    if (Platform.isWindows || Platform.isLinux) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
+
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      databasePath = 'libra_sheet.db';
+    } else {
+      if (Platform.isWindows || Platform.isLinux) {
+        sqfliteFfiInit();
+        databaseFactory = databaseFactoryFfi;
+      }
+      databasePath = await _getDatabasePath();
     }
-    databasePath = await _getDatabasePath();
     debugPrint('LibraDatabase::init() path=$databasePath');
     await open();
   }
