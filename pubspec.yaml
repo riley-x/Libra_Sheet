@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.1.5 <4.0.0'
+  sdk: '>=3.8.1 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -48,7 +48,7 @@ dependencies:
   googleapis_auth: ^1.4.1
   url_launcher: ^6.2.2
   http: ^1.1.2
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.3
   vector_math: ^2.1.4
   dash_painter: ^1.0.2
 
