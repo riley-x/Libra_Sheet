@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
+import 'package:libra_sheet/debug.dart' show debugManualMethod;
 import 'package:provider/provider.dart';
 
 enum LibraNavDestination {
@@ -14,10 +15,7 @@ enum LibraNavDestination {
   transactions(icon: Icons.request_quote, label: 'Transactions'),
   settings(icon: Icons.settings, label: 'Settings');
 
-  const LibraNavDestination({
-    required this.icon,
-    required this.label,
-  });
+  const LibraNavDestination({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -25,17 +23,11 @@ enum LibraNavDestination {
 
 final libraNavDestinations = [
   for (var dest in LibraNavDestination.values)
-    NavigationRailDestination(
-      icon: Icon(dest.icon),
-      label: Text(dest.label),
-    )
+    NavigationRailDestination(icon: Icon(dest.icon), label: Text(dest.label)),
 ];
 
 class LibraNav extends StatefulWidget {
-  const LibraNav({
-    super.key,
-    this.onDestinationSelected,
-  });
+  const LibraNav({super.key, this.onDestinationSelected});
 
   final Function(int)? onDestinationSelected;
 
@@ -101,44 +93,45 @@ class _LeadingContent extends StatelessWidget {
     final animation = NavigationRail.extendedAnimation(context);
     final textStyle = Theme.of(context).textTheme.headlineMedium;
     return AnimatedBuilder(
-        animation: animation,
-        builder: (BuildContext context, Widget? child) {
-          return SizedBox(
-            width: lerpDouble(LibraNav.minWidth, LibraNav.expandedWidth, animation.value),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRect(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(width: LibraNav.iconManualPadding),
-                      Align(
-                        heightFactor: 1.0,
-                        widthFactor: animation.value,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: FadeTransition(
-                          opacity: animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
-                          child: Text("Libra Sheet", style: textStyle?.copyWith(color: textColor)),
-                        ),
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return SizedBox(
+          width: lerpDouble(LibraNav.minWidth, LibraNav.expandedWidth, animation.value),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRect(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: LibraNav.iconManualPadding),
+                    Align(
+                      heightFactor: 1.0,
+                      widthFactor: animation.value,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: FadeTransition(
+                        opacity: animation.drive(CurveTween(curve: const Interval(0.0, 0.25))),
+                        child: Text("Libra Sheet", style: textStyle?.copyWith(color: textColor)),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: toggleExtended,
-                        icon: Icon(
-                          animation.value == 1 ? Icons.first_page : Icons.last_page,
-                          color: textColor,
-                        ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: toggleExtended,
+                      icon: Icon(
+                        animation.value == 1 ? Icons.first_page : Icons.last_page,
+                        color: textColor,
                       ),
-                      SizedBox(width: lerpDouble(LibraNav.iconManualPadding, 0, animation.value)),
-                    ],
-                  ),
+                    ),
+                    SizedBox(width: lerpDouble(LibraNav.iconManualPadding, 0, animation.value)),
+                  ],
                 ),
-              ],
-            ),
-          );
-        });
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -152,8 +145,9 @@ class _FooterContent extends StatelessWidget {
     final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
     final animation = NavigationRail.extendedAnimation(context);
 
-    final errorColor =
-        (isDark) ? Theme.of(context).colorScheme.error : const Color.fromARGB(255, 255, 200, 200);
+    final errorColor = (isDark)
+        ? Theme.of(context).colorScheme.error
+        : const Color.fromARGB(255, 255, 200, 200);
 
     final cloudStatus = context.watch<GoogleDrive>().status();
     final cloudIcon = switch (cloudStatus) {
@@ -182,31 +176,29 @@ class _FooterContent extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
         child: AnimatedBuilder(
-            animation: animation,
-            builder: (BuildContext context, Widget? child) {
-              return SizedBox(
-                width: lerpDouble(LibraNav.minWidth, LibraNav.expandedWidth, animation.value),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (kDebugMode) ...[
-                      const _IconFooter(
-                        icon: Icons.bug_report,
-                        label: "Debug mode",
-                        color: Colors.yellow,
-                      ),
-                    ],
+          animation: animation,
+          builder: (BuildContext context, Widget? child) {
+            return SizedBox(
+              width: lerpDouble(LibraNav.minWidth, LibraNav.expandedWidth, animation.value),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (kDebugMode) ...[
                     _IconFooter(
-                      icon: cloudIcon,
-                      label: cloudText,
-                      color: cloudColor,
+                      icon: Icons.bug_report,
+                      label: "Debug mode",
+                      color: Colors.yellow,
+                      onPressed: () => debugManualMethod(context),
                     ),
-                    _DarkModeSwitch(textColor: textColor),
                   ],
-                ),
-              );
-            }),
+                  _IconFooter(icon: cloudIcon, label: cloudText, color: cloudColor),
+                  _DarkModeSwitch(textColor: textColor),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

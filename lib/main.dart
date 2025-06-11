@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show BrowserContextMenu;
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
 import 'package:libra_sheet/tabs/analyze/analyze_tab.dart';
@@ -41,6 +42,11 @@ Future<void> main() async {
     ),
   );
 
+  /// Web
+  if (kIsWeb) {
+    BrowserContextMenu.disableContextMenu();
+  }
+
   runApp(RestartWidget(LibraApp(state)));
 }
 
@@ -71,10 +77,7 @@ class _RestartWidgetState extends State<RestartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: key,
-      child: widget.child,
-    );
+    return KeyedSubtree(key: key, child: widget.child);
   }
 }
 
@@ -128,21 +131,21 @@ class _NavBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        key: context.read<LibraAppState>().scaffoldKey,
-        body: Row(
-          children: [
-            SafeArea(
-              child: LibraNav(
-                onDestinationSelected: context.read<LibraAppState>().setTab,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          key: context.read<LibraAppState>().scaffoldKey,
+          body: Row(
+            children: [
+              SafeArea(
+                child: LibraNav(onDestinationSelected: context.read<LibraAppState>().setTab),
               ),
-            ),
-            const Expanded(child: _Home()),
-          ],
-        ),
-      );
-    });
+              const Expanded(child: _Home()),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -181,7 +184,7 @@ class _Home extends StatelessWidget {
                 return NoAnimationRoute((context) => w);
               },
             ),
-          )
+          ),
       ],
     );
   }

@@ -116,8 +116,10 @@ class LibraAppState extends ChangeNotifier {
         month++;
       }
     }
-    debugPrint("LibraAppState::_loadMonths() Loaded ${monthList.length} months "
-        "between $earliestMonth and $latestMonth");
+    debugPrint(
+      "LibraAppState::_loadMonths() Loaded ${monthList.length} months "
+      "between $earliestMonth and $latestMonth",
+    );
   }
 
   //--------------------------------------------------------------------------------
@@ -195,7 +197,8 @@ class LibraAppState extends ChangeNotifier {
     return showConfirmationDialog(
       context: context,
       title: 'Google Drive Sync',
-      msg: 'A newer database file exists on Google Drive. Overwrite the current database file?'
+      msg:
+          'A newer database file exists on Google Drive. Overwrite the current database file?'
           '\n\nIf you want to replace the file on Google Drive instead, click "Cancel" for now. '
           'Delete the file on Google Drive then retry the sync.',
     );
@@ -221,7 +224,5 @@ class LibraAppState extends ChangeNotifier {
 
 List<DateTime> _getDefaultMonths() {
   final now = DateTime.now();
-  return [
-    for (int i = 11; i >= 0; i--) DateTime.utc(now.year, now.month - i, 1),
-  ];
+  return [for (int i = 11; i >= 0; i--) DateTime.utc(now.year, now.month - i, 1)];
 }

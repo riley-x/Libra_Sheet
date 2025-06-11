@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libra_sheet/components/cards/transaction_card.dart';
-import 'package:libra_sheet/components/keyboard_utils.dart' show isMultiselect;
+import 'package:libra_sheet/flutter_utils/keyboard_utils.dart' show isMultiselect;
 import 'package:libra_sheet/components/menus/transaction_context_menu.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';

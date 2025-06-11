@@ -47,11 +47,12 @@ class LibraDatabase {
   static Future<String> _getDatabasePath() async {
     if (_db != null) return _db!.path;
 
+    if (kIsWeb) return "libra_sheet.db";
+
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Mac: /Users/riley/Library/Containers/com.example.libraSheet/Data/Documents/libra_sheet.db
     // final path = join(await getDatabasesPath(), 'libra_sheet.db');
-
     final appDocumentsDir = await getApplicationDocumentsDirectory();
     if (kDebugMode) {
       return join(appDocumentsDir.path, "Libra Sheet", "Debug", "libra_sheet.db");
@@ -74,14 +75,13 @@ class LibraDatabase {
 
     if (kIsWeb) {
       databaseFactory = databaseFactoryFfiWeb;
-      databasePath = 'libra_sheet.db';
     } else {
       if (Platform.isWindows || Platform.isLinux) {
         sqfliteFfiInit();
         databaseFactory = databaseFactoryFfi;
       }
-      databasePath = await _getDatabasePath();
     }
+    databasePath = await _getDatabasePath();
     debugPrint('LibraDatabase::init() path=$databasePath');
     await open();
   }
