@@ -101,17 +101,19 @@ class GoogleDrive extends ChangeNotifier {
   Future<void> init({required OverwriteFileCallback? overwriteFileCallback}) async {
     this.overwriteFileCallback = overwriteFileCallback;
 
-    if (!kIsWeb) {
+    /// Load saved credentials
+    final prefs = await SharedPreferences.getInstance();
+    active = prefs.getBool(_gdriveSyncActivePrefKey) ?? false;
+
+    if (kIsWeb) {
+      googleSignIn(true);
+    } else {
       /// Initialize local update time with local file OS last modified time.
       /// Keep the default (1970) time when the database is empty (newly created) to always allow
       /// drive sync to override a new database file.
       if (!await LibraDatabase.isEmpty()) {
         lastLocalUpdateTime = await io.File(LibraDatabase.databasePath).lastModified();
       }
-
-      /// Load saved credentials
-      final prefs = await SharedPreferences.getInstance();
-      active = prefs.getBool(_gdriveSyncActivePrefKey) ?? false;
 
       final json = prefs.getString(_gdriveCredentialsPrefKey);
       if (json != null) {
@@ -122,8 +124,8 @@ class GoogleDrive extends ChangeNotifier {
         _httpClient!.credentialUpdates.listen(_saveCredentials);
         _api = DriveApi(_httpClient!);
       }
+      sync();
     }
-    sync();
   }
 
   Future<void> _saveActive(bool value) async {
@@ -206,19 +208,33 @@ class GoogleDrive extends ChangeNotifier {
   // Authorization
   //-------------------------------------------------------------------------------------
 
-  Future<void> googleSignIn() async {
-    final GoogleSignInAccount? account = await _googleSignIn.signIn();
+  Future<void> googleSignIn(bool startup) async {
+    final GoogleSignInAccount? account = startup
+        ? await _googleSignIn.signInSilently()
+        : await _googleSignIn.signIn();
     if (account == null) return;
     final GoogleSignInAuthentication auth = await account.authentication;
-    _baseClient = GoogleAuthClient(auth.accessToken!);
-    _api = DriveApi(_baseClient!);
+    if (auth.accessToken == null) {
+      if (startup) {
+        await _googleSignIn.disconnect(); // otherwise signIn skips cause already authn.
+        await googleSignIn(false);
+      } else {
+        return;
+      }
+    } else {
+      _baseClient = GoogleAuthClient(auth.accessToken!);
+      _api = DriveApi(_baseClient!);
+    }
+    if (startup) {
+      sync();
+    }
   }
 
   /// Launches the user consent prompt flow, retrieving an authorized [_api].
   Future<void> promptUserConsent() async {
     try {
       if (kIsWeb) {
-        await googleSignIn();
+        await googleSignIn(false);
       } else {
         _httpClient = await clientViaUserConsent(_desktopClientId, [
           DriveApi.driveFileScope,
@@ -272,13 +288,14 @@ class GoogleDrive extends ChangeNotifier {
     final localPath = LibraDatabase.databasePath;
     switch (status()) {
       case GoogleDriveSyncStatus.localAhead:
-        if (kIsWeb) {
-          return;
-        }
         if (driveFile == null || driveFile!.id == null) {
-          await _createFile(_api!, localPath, "libra_sheet.db");
+          kIsWeb
+              ? await _createFileFromWeb(_api!, "libra_sheet.db", lastLocalUpdateTime)
+              : await _createFile(_api!, localPath, "libra_sheet.db");
         } else {
-          await _updateFile(_api!, localPath, driveFile!.id!);
+          kIsWeb
+              ? await _updateFileFromWeb(_api!, driveFile!.id!, lastLocalUpdateTime)
+              : await _updateFile(_api!, localPath, driveFile!.id!);
         }
         // the returned [File] objects from the above functions don't have a lot of the metadata set
         // (and the $fields parameter didn't seem to work the same as in api.files.list), so just
@@ -321,10 +338,10 @@ class GoogleDrive extends ChangeNotifier {
   /// Calls [sync] but with a short delay to debounce back-to-back updates. This function uses
   /// [lastLocalUpdateTime] to check if the current call stack has been superceded.
   Future<void> logLocalUpdate() async {
-    if (!active || !isAuthorized) return;
-
     final now = DateTime.now();
     lastLocalUpdateTime = now;
+
+    if (!active || !isAuthorized) return;
     notifyListeners();
 
     await Future.delayed(const Duration(seconds: 10));
@@ -368,6 +385,17 @@ Future<File> _createFile(DriveApi api, String localPath, String name) async {
   return out;
 }
 
+Future<File> _createFileFromWeb(DriveApi api, String name, DateTime lastModified) async {
+  final bytes = await databaseFactoryFfiWeb.readDatabaseBytes(LibraDatabase.databasePath);
+  final media = Media(Stream.fromIterable([bytes]), bytes.length);
+  final driveFile = File()
+    ..name = name
+    ..appProperties = {_driveFileProperty_lastModified: lastModified.toUtc().toString()};
+  final out = await api.files.create(driveFile, uploadMedia: media);
+  debugPrint('_createFileFromWeb() uploaded ${bytes.length} bytes to id: ${out.id}');
+  return out;
+}
+
 /// Updates the drive file with id [objectId], replacing the content with the file at [localPath].
 ///
 /// https://pub.dev/documentation/googleapis/12.0.0/drive_v3/FilesResource/update.html
@@ -381,6 +409,15 @@ Future<File> _updateFile(DriveApi api, String localPath, String objectId) async 
   final out = await api.files.update(driveFile, objectId, uploadMedia: media);
   debugPrint('updateFile() uploaded $localPath to id: ${out.id}');
   return out;
+}
+
+Future<void> _updateFileFromWeb(DriveApi api, String objectId, DateTime lastModified) async {
+  final bytes = await databaseFactoryFfiWeb.readDatabaseBytes(LibraDatabase.databasePath);
+  final media = Media(Stream.fromIterable([bytes]), bytes.length);
+  final driveFile = File()
+    ..appProperties = {_driveFileProperty_lastModified: lastModified.toUtc().toString()};
+  final out = await api.files.update(driveFile, objectId, uploadMedia: media);
+  debugPrint('_updateFileFromWeb() uploaded ${bytes.length} bytes to id: ${out.id}');
 }
 
 /// This will replace the local file at [filename] with the downloaded file. Pass the Google Drive
