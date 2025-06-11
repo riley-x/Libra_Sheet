@@ -10,6 +10,19 @@
             "type": "dart"
         },
         {
+            "name": "Flutter Web (Fixed Port)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "deviceId": "edge",
+            "toolArgs": [
+                "--web-hostname",
+                "localhost",
+                "--web-port",
+                "7357"
+            ]
+        },
+        {
             "name": "libra_sheet (profile mode)",
             "request": "launch",
             "type": "dart",

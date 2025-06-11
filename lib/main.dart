@@ -38,6 +38,7 @@ Future<void> main() async {
   await GoogleDrive().init(
     overwriteFileCallback: OverwriteFileCallback(
       confirmOverwrite: state.userConfirmOverwrite,
+      onStart: () async {}, // TODO
       onReplaced: state.onDatabaseReplaced,
     ),
   );

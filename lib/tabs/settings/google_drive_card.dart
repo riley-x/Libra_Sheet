@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
 import 'package:libra_sheet/data/export/google_drive.dart';
@@ -165,15 +164,13 @@ class GoogleDriveSwitch extends StatelessWidget {
       value: drive.active,
       activeColor: Theme.of(context).colorScheme.surfaceTint,
       activeTrackColor: Theme.of(context).colorScheme.primaryContainer,
-      onChanged: kIsWeb
-          ? null
-          : (it) async {
-              if (drive.active) {
-                drive.disable();
-              } else {
-                await drive.enable();
-              }
-            },
+      onChanged: (it) async {
+        if (drive.active) {
+          drive.disable();
+        } else {
+          await drive.enable();
+        }
+      },
     );
   }
 }
@@ -200,7 +197,7 @@ class GoogleDriveTitle extends StatelessWidget {
               context: context,
               title: 'Google Drive Sync',
               msg:
-                  '${kIsWeb ? 'Google Drive syncing is not available on web.\n\n' : ''}Automatically backup your data onto Google Drive!\n\nOn the first sync, a file "libra_sheet.db" will be created in your "My Drive" folder. You can rename and move the file somewhere else though. Libra Sheet will automatically update that file anytime you make a change. \n\nLibra Sheet can not sync with any file that you manually upload to Google Drive.\n\nWarning: If you use Libra Sheet on multiple computers, make sure to not touch the database file until the sync is complete. The app uses the last modified time of the file to check the sync status, so you may accidentally overwrite the cloud file with a stale local file.',
+                  'Automatically backup your data onto Google Drive!\n\nOn the first sync, a file "libra_sheet.db" will be created in your "My Drive" folder. You can rename and move the file somewhere else though. Libra Sheet will automatically update that file anytime you make a change. \n\nLibra Sheet can not sync with any file that you manually upload to Google Drive.\n\nWarning: If you use Libra Sheet on multiple computers, make sure to not touch the database file until the sync is complete. The app uses the last modified time of the file to check the sync status, so you may accidentally overwrite the cloud file with a stale local file.',
               showCancel: false,
             );
           },
