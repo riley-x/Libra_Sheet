@@ -106,7 +106,7 @@ class GoogleDrive extends ChangeNotifier {
     active = prefs.getBool(_gdriveSyncActivePrefKey) ?? false;
 
     if (kIsWeb) {
-      googleSignIn(true);
+      if (active) googleSignIn(true);
     } else {
       /// Initialize local update time with local file OS last modified time.
       /// Keep the default (1970) time when the database is empty (newly created) to always allow
