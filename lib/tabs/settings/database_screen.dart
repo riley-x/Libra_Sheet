@@ -63,6 +63,8 @@ class DatabaseScreen extends StatelessWidget {
               content: Text('Restore Backup', style: Theme.of(context).textTheme.titleMedium),
               onTap: () async {
                 final state = context.read<LibraAppState>();
+                final messenger = ScaffoldMessenger.of(context);
+
                 final ok = await showConfirmationDialog(
                   context: context,
                   title: 'Upload Backup',
@@ -85,10 +87,17 @@ class DatabaseScreen extends StatelessWidget {
                 await state.onDatabaseReplaced();
 
                 if (!context.mounted) return;
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Backup uploaded successfully')));
+                Navigator.of(context, rootNavigator: true).pop();
+
+                // For some reason this doesn't show. Maybe because of the RestartWidget?
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: const Center(child: Text('Backup uploaded successfully')),
+                    width: 500.0,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 40),
