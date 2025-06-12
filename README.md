@@ -6,7 +6,7 @@ This is a Flutter app for tracking and categorizing your expenses. It is designe
 
 You can preview a web-based version at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/). This uses some dummy data so you can see all the different features. If you want to use it for yourself, just delete all the transactions (shift-select and batch delete). Be warned that all your data will be saved in the browser cookies; make sure to make backups!
 
-(The delete account doesn't work yet, just rename them).
+(Deleting accounts doesn't work yet. You can just rename them).
 
 ### Your accounts and net worth at a glance
 
