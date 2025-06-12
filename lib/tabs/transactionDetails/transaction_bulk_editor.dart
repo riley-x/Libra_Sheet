@@ -177,9 +177,7 @@ class BulkEditorState extends ChangeNotifier {
     if (!confirmed || !context.mounted) return;
 
     showLoadingScrim(context: context);
-    for (final old in parentState.selected.values) {
-      await parentState.service.delete(old);
-    }
+    parentState.service.deleteBulk(parentState.selected.values.toList());
     if (!context.mounted) return;
     Navigator.of(context, rootNavigator: true).pop();
   }

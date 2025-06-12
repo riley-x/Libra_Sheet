@@ -83,12 +83,14 @@ class TransactionService extends ChangeNotifier {
         account: old.account,
         note: old.note,
         allocations: old.allocations
-            ?.map((e) => Allocation(
-                  // Need key = 0 to create a new allocation entry in the database
-                  name: e.name,
-                  category: e.category,
-                  value: e.value,
-                ))
+            ?.map(
+              (e) => Allocation(
+                // Need key = 0 to create a new allocation entry in the database
+                name: e.name,
+                category: e.category,
+                value: e.value,
+              ),
+            )
             .toList(),
         tags: old.tags,
         // Don't copy reimbursements
@@ -104,6 +106,21 @@ class TransactionService extends ChangeNotifier {
     onUpdate();
   }
 
+  Future<void> deleteBulk(List<Transaction> transactions) async {
+    debugPrint("TransactionService::deleteBulk() ${transactions.length}");
+    const int batchSize = 20;
+    for (int i = 0; i < transactions.length; i += batchSize) {
+      final int end = (i + batchSize < transactions.length) ? i + batchSize : transactions.length;
+      final List<Transaction> batch = transactions.sublist(i, end);
+      await LibraDatabase.updateTransaction((txn) async {
+        for (final t in batch) {
+          await txn.deleteTransaction(t);
+        }
+      });
+    }
+    onUpdate();
+  }
+
   Future<void> loadRelations(Transaction t) async {
     await LibraDatabase.readTransaction(
       (txn) => txn.loadTransactionRelations(
@@ -116,7 +133,8 @@ class TransactionService extends ChangeNotifier {
   }
 
   Future<void> reloadReimbursements(Transaction t) async {
-    t.reimbursements = await LibraDatabase.read(
+    t.reimbursements =
+        await LibraDatabase.read(
           (db) => db.loadReimbursements(
             parent: t,
             accounts: appState.accounts.createAccountMap(),
