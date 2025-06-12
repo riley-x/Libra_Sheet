@@ -4,7 +4,8 @@ This is a Flutter app for tracking and categorizing your expenses. It is designe
 
 ## Preview
 
-You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/). This uses fake data so some things don't work, but it is a nice way to preview the UI.
+You can use a web-based version at [riley-x.github.io/Libra_Sheet](https://riley-x.github.io/Libra_Sheet/). 
+Be warned that your data is saved in the browser; make sure to make backups!
 
 ### Your accounts and net worth at a glance
 
@@ -12,11 +13,15 @@ You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://ri
 
 ### See where you spend your money
 
-![Categories screen](docs/screen_categories.png)
+![Sankey screen](docs/screen_sankey.png)
 
 ### And how it changes over time
 
 ![Cashflow screen](docs/screen_cashflow.png)
+
+### With multiple different visualizations
+
+![Categories screen](docs/screen_categories.png)
 
 ### Or view details for a specific category
 
@@ -33,4 +38,5 @@ You can preview a web-based sample at [riley-x.github.io/Libra_Sheet](https://ri
   * Imagine you paid $60 for dinner with a friend and they Venmo you back $30
   * Your real expense is only $30, and the Venmo transaction shouldn't count as income
 * Dark/light theme
-* Fully offline; no internet connection used. Everything is saved to a local SQLite file.
+* Fully offline; no internet connection necessary. Everything is saved to a local SQLite file.
+* Optional syncing with Google Drive
