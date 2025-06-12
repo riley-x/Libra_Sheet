@@ -5,7 +5,7 @@ import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart'
 import 'package:libra_sheet/components/dialogs/loading_scrim.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
-import 'package:libra_sheet/flutter_utils/html.dart' show triggerFileDownload, pickFile;
+import 'package:libra_sheet/flutter_utils/js_api.dart' show triggerFileDownload, pickFile;
 import 'package:libra_sheet/tabs/settings/google_drive_card.dart';
 import 'package:libra_sheet/tabs/settings/settings_card.dart';
 import 'package:provider/provider.dart';

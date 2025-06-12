@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:libra_sheet/components/dialogs/confirmation_dialog.dart';
+import 'package:libra_sheet/components/dialogs/loading_scrim.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/account_selection_menu.dart';
@@ -165,6 +167,22 @@ class BulkEditorState extends ChangeNotifier {
     /// Note this clears the selections anyways since the TransactionService updates.
     // parentState.clearSelections();
   }
+
+  void delete(BuildContext context) async {
+    final confirmed = await showConfirmationDialog(
+      context: context,
+      title: "Delete Transactions",
+      msg: "Are you sure you want to delete all selected transactions?",
+    );
+    if (!confirmed || !context.mounted) return;
+
+    showLoadingScrim(context: context);
+    for (final old in parentState.selected.values) {
+      await parentState.service.delete(old);
+    }
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+  }
 }
 
 /// This is the form that appears when multi-selecting transactions.
@@ -216,10 +234,7 @@ class _Form extends StatelessWidget {
         children: [
           /// Title
           const SizedBox(height: 10),
-          Text(
-            "Bulk Edit",
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          Text("Bulk Edit", style: Theme.of(context).textTheme.headlineMedium),
 
           /// Account
           const SizedBox(height: 15),
@@ -260,9 +275,17 @@ class _Form extends StatelessWidget {
           /// Buttons
           const SizedBox(height: 30),
           FormButtons(
-            onReset: () => context.read<TransactionFilterState>().clearSelections(),
+            onCancel: () => context.read<TransactionFilterState>().clearSelections(),
             onSave: () => context.read<BulkEditorState>().save(),
-            resetName: 'Clear',
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () => context.read<BulkEditorState>().delete(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+            child: const Text('Delete'),
           ),
 
           /// Error message
@@ -275,7 +298,7 @@ class _Form extends StatelessWidget {
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
                 textAlign: TextAlign.center,
               ),
-            )
+            ),
         ],
       ),
     );
@@ -373,7 +396,7 @@ class _CategoryField extends StatelessWidget {
       Category.ignore,
       Category.other,
       if (state.expenseType != ExpenseFilterType.all)
-        ...context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType)
+        ...context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
