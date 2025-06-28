@@ -102,20 +102,31 @@ class TransactionService extends ChangeNotifier {
 
   Future<void> delete(Transaction t) async {
     debugPrint("TransactionService::delete() $t");
-    await LibraDatabase.updateTransaction((txn) => txn.deleteTransaction(t));
-    onUpdate();
+    deleteBulk([t]);
   }
 
   Future<void> deleteBulk(List<Transaction> transactions) async {
     debugPrint("TransactionService::deleteBulk() ${transactions.length}");
-    const int batchSize = 20;
-    for (int i = 0; i < transactions.length; i += batchSize) {
-      final int end = (i + batchSize < transactions.length) ? i + batchSize : transactions.length;
-      final List<Transaction> batch = transactions.sublist(i, end);
+    final accounts = appState.accounts.createAccountMap();
+    final categories = appState.categories.createKeyMap();
+    final tags = appState.tags.createKeyMap();
+
+    for (final t in transactions) {
       await LibraDatabase.updateTransaction((txn) async {
-        for (final t in batch) {
-          await txn.deleteTransaction(t);
-        }
+        final reloaded = await txn.loadTransactionByKey(
+          t.key,
+          accounts: accounts,
+          categories: categories,
+          tags: tags,
+        );
+        if (reloaded == null) return;
+        await txn.loadTransactionRelations(
+          reloaded,
+          accounts: accounts,
+          categories: categories,
+          tags: tags,
+        );
+        await txn.deleteTransaction(reloaded);
       });
     }
     onUpdate();

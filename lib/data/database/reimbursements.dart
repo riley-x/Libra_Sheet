@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/transactions.dart';
 import 'package:libra_sheet/data/objects/account.dart';
@@ -17,7 +18,8 @@ const reimbExpense = _expense;
 const reimbIncome = _income;
 const reimbValue = _value;
 
-const createReimbursementsTableSql = "CREATE TABLE IF NOT EXISTS $reimbursementsTable ("
+const createReimbursementsTableSql =
+    "CREATE TABLE IF NOT EXISTS $reimbursementsTable ("
     "$_expense INTEGER NOT NULL, "
     "$_income INTEGER NOT NULL, "
     "$_value INTEGER NOT NULL, "
@@ -32,10 +34,7 @@ Map<String, dynamic> _toMap(lt.Transaction parent, Reimbursement r) {
 }
 
 extension ReimbursementsTransactionExtension on Transaction {
-  Future<int> _insert(
-    Reimbursement r, {
-    required lt.Transaction parent,
-  }) {
+  Future<int> _insert(Reimbursement r, {required lt.Transaction parent}) {
     return insert(
       reimbursementsTable,
       _toMap(parent, r),
@@ -43,10 +42,7 @@ extension ReimbursementsTransactionExtension on Transaction {
     );
   }
 
-  Future<int> _delete(
-    Reimbursement r, {
-    required lt.Transaction parent,
-  }) {
+  Future<int> _delete(Reimbursement r, {required lt.Transaction parent}) {
     final income = (parent.value > 0) ? parent.key : r.target.key;
     final expense = (parent.value > 0) ? r.target.key : parent.key;
     return delete(
@@ -57,10 +53,7 @@ extension ReimbursementsTransactionExtension on Transaction {
   }
 
   /// This updates [r.commitedValue]!
-  Future<void> addReimbursement(
-    Reimbursement r, {
-    required lt.Transaction parent,
-  }) async {
+  Future<void> addReimbursement(Reimbursement r, {required lt.Transaction parent}) async {
     assert(parent.key != 0);
     assert(r.target.key != 0);
     assert(r.value >= 0);
@@ -104,10 +97,7 @@ extension ReimbursementsTransactionExtension on Transaction {
     );
   }
 
-  Future<void> deleteReimbursement(
-    Reimbursement r, {
-    required lt.Transaction parent,
-  }) async {
+  Future<void> deleteReimbursement(Reimbursement r, {required lt.Transaction parent}) async {
     assert(parent.key != 0);
     assert(r.target.key != 0);
     assert(r.value >= 0);
@@ -117,9 +107,18 @@ extension ReimbursementsTransactionExtension on Transaction {
       throw StateError("deleteReimbursement() transactions have same sign");
     }
 
-    await _delete(r, parent: parent);
     final income = (parent.value > 0) ? parent : r.target;
     final expense = (parent.value > 0) ? r.target : parent;
+
+    if (kDebugMode) {
+      print(
+        "ReimbursementsTransactionExtension::deleteReimbursement\n\t"
+        "${income.category.name}:${r.value} "
+        "${expense.category.name}:${-r.value}",
+      );
+    }
+
+    await _delete(r, parent: parent);
 
     /// Add value back to both transactions' original category
     await updateCategoryHistory(
@@ -160,7 +159,8 @@ extension ReimbursementsDatabaseExtension on DatabaseExecutor {
   }) async {
     final parentColumn = (parent.value > 0) ? _income : _expense;
     final targetColumn = (parent.value > 0) ? _expense : _income;
-    final innerTable = '''
+    final innerTable =
+        '''
     (
       SELECT
         t.*,
@@ -179,12 +179,7 @@ extension ReimbursementsDatabaseExtension on DatabaseExecutor {
     return [
       for (final map in maps)
         Reimbursement(
-          target: transactionFromMap(
-            map,
-            accounts: accounts,
-            categories: categories,
-            tags: tags,
-          ),
+          target: transactionFromMap(map, accounts: accounts, categories: categories, tags: tags),
           value: map["reimb_value"] as int,
           commitedValue: map["reimb_value"] as int,
         ),

@@ -39,7 +39,8 @@ const transactionNote = _note;
 const transactionAccount = _account;
 const transactionCategory = _category;
 
-const createTransactionsTableSql = "CREATE TABLE IF NOT EXISTS $transactionsTable ("
+const createTransactionsTableSql =
+    "CREATE TABLE IF NOT EXISTS $transactionsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "$_name TEXT NOT NULL, "
     "$_date INTEGER NOT NULL, "
@@ -188,11 +189,7 @@ extension TransactionExtension on db.Transaction {
         delta: -t.value,
       );
     }
-    await delete(
-      transactionsTable,
-      where: "$_key = ?",
-      whereArgs: [t.key],
-    );
+    await delete(transactionsTable, where: "$_key = ?", whereArgs: [t.key]);
   }
 
   Future<void> updateTransaction(Transaction old, Transaction nu) async {
@@ -254,14 +251,26 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
 
     List<Transaction> out = [];
     for (final row in rows) {
-      out.add(transactionFromMap(
-        row,
-        accounts: accounts,
-        categories: categories,
-        tags: tags,
-      ));
+      out.add(transactionFromMap(row, accounts: accounts, categories: categories, tags: tags));
     }
     return out;
+  }
+
+  Future<Transaction?> loadTransactionByKey(
+    int key, {
+    required Map<int, Account> accounts,
+    required Map<int, Category> categories,
+    required Map<int, Tag> tags,
+  }) async {
+    final q = createTransactionQuery(tagWhere: "WHERE t.$_key = ?");
+    final args = [key];
+    final rows = await rawQuery(q, args);
+
+    for (final row in rows) {
+      final t = transactionFromMap(row, accounts: accounts, categories: categories, tags: tags);
+      if (t.key == key) return t;
+    }
+    return null;
   }
 
   /// Loads transactions given a list of [keys] but applies no other filtering.
@@ -279,12 +288,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
 
     Map<int, Transaction> out = {};
     for (final row in rows) {
-      final t = transactionFromMap(
-        row,
-        accounts: accounts,
-        categories: categories,
-        tags: tags,
-      );
+      final t = transactionFromMap(row, accounts: accounts, categories: categories, tags: tags);
       out[t.key] = t;
     }
     return out;
@@ -307,7 +311,8 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     /// as magic texts that hopefully never appear naturally.
     const colonReplacement = '#COLON';
     const commaReplacement = '#COMMA';
-    const q = '''
+    const q =
+        '''
         SELECT 
           t.*,
           GROUP_CONCAT(
@@ -366,11 +371,13 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
           }
 
           final categoryKey = int.tryParse(fields[1]) ?? 0;
-          allocs.add(CsvAllocation(
-            name: fields[0].replaceAll(commaReplacement, ',').replaceAll(colonReplacement, ':'),
-            category: categories[categoryKey]?.name ?? 'Unkown',
-            value: int.tryParse(fields[2]) ?? 0,
-          ));
+          allocs.add(
+            CsvAllocation(
+              name: fields[0].replaceAll(commaReplacement, ',').replaceAll(colonReplacement, ':'),
+              category: categories[categoryKey]?.name ?? 'Unkown',
+              value: int.tryParse(fields[2]) ?? 0,
+            ),
+          );
         }
       }
 
@@ -385,10 +392,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
             continue;
           }
 
-          reimbs.add((
-            int.tryParse(fields[0]) ?? 0,
-            int.tryParse(fields[1]) ?? 0,
-          ));
+          reimbs.add((int.tryParse(fields[0]) ?? 0, int.tryParse(fields[1]) ?? 0));
         }
       }
 
@@ -412,12 +416,7 @@ extension TransactionDatabaseExtension on db.DatabaseExecutor {
     /// Parse final list
     List<TransactionWithSoftRelations> out = [];
     for (final row in rows) {
-      final t = transactionFromMapSoft(
-        row,
-        accounts: accounts,
-        categories: categories,
-        tags: tags,
-      );
+      final t = transactionFromMapSoft(row, accounts: accounts, categories: categories, tags: tags);
       out.add(t);
     }
     return out;
