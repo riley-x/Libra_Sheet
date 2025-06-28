@@ -197,11 +197,13 @@ class TransactionDetailsState extends ChangeNotifier {
     for (final reimb in reimbursements) {
       final t = transactions[reimb.target.key];
       if (t == null) continue;
-      newReimbs.add(Reimbursement(
-        target: t,
-        value: reimb.value,
-        commitedValue: reimb.commitedValue, // TODO is this right?
-      ));
+      newReimbs.add(
+        Reimbursement(
+          target: t,
+          value: reimb.value,
+          commitedValue: reimb.commitedValue, // TODO is this right?
+        ),
+      );
       if (reimb == focusedReimbursement) {
         focusedReimbursement = newReimbs.last;
       }
@@ -267,6 +269,9 @@ class TransactionDetailsState extends ChangeNotifier {
       totalAdjustments += alloc.value;
     }
     for (final reimb in reimbursements) {
+      if (reimb.target.key == seed?.key) {
+        return "Cannot reimburse a transaction against itself.";
+      }
       if (reimb.target.value * value! > 0) {
         const maxNameLength = 30;
         var name = reimb.target.name;
@@ -349,6 +354,9 @@ class TransactionDetailsState extends ChangeNotifier {
 
     if (reimburseTarget == null) {
       return "Please select a target transaction.";
+    }
+    if (reimburseTarget!.key == seed?.key) {
+      return "Cannot reimburse a transaction with itself.";
     }
     if (_valToFilterType(reimburseTarget!.value) == expenseType) {
       return "Selected transaction must have the opposite sign.";

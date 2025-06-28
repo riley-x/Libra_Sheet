@@ -35,6 +35,7 @@ class TransactionFilterGrid extends StatelessWidget {
     this.filterDescription,
     this.quickFilter = false,
     this.monthEndBalances,
+    this.hiddenTransactions = const [],
   });
 
   final Widget? title;
@@ -48,6 +49,7 @@ class TransactionFilterGrid extends StatelessWidget {
   final String? Function(TransactionFilters)? filterDescription;
   final bool quickFilter;
   final Map<Month, int>? monthEndBalances;
+  final List<int> hiddenTransactions;
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +65,12 @@ class TransactionFilterGrid extends StatelessWidget {
       filterDescription: filterDescription,
       quickFilter: quickFilter,
       monthEndBalances: monthEndBalances,
+      hiddenTransactions: hiddenTransactions,
     );
     if (!createProvider) return grid;
     return ChangeNotifierProvider(
       key: ObjectKey(initialFilters),
-      create: (context) => TransactionFilterState(
-        context.read(),
-        initialFilters: initialFilters,
-      ),
+      create: (context) => TransactionFilterState(context.read(), initialFilters: initialFilters),
       child: grid,
     );
   }
@@ -88,6 +88,7 @@ class _TransactionFilterGrid extends StatelessWidget {
     this.filterDescription,
     this.quickFilter = false,
     required this.monthEndBalances,
+    required this.hiddenTransactions,
   });
 
   final Widget? title;
@@ -99,6 +100,7 @@ class _TransactionFilterGrid extends StatelessWidget {
   final String? Function(TransactionFilters)? filterDescription;
   final bool quickFilter;
   final Map<Month, int>? monthEndBalances;
+  final List<int> hiddenTransactions;
 
   @override
   Widget build(BuildContext context) {
@@ -123,9 +125,9 @@ class _TransactionFilterGrid extends StatelessWidget {
               Text(
                 filterMessage,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.orange,
-                      // fontStyle: FontStyle.italic,
-                    ),
+                  color: Colors.orange,
+                  // fontStyle: FontStyle.italic,
+                ),
                 textAlign: TextAlign.right,
               ),
             if (monthEndBalances != null)
@@ -142,11 +144,12 @@ class _TransactionFilterGrid extends StatelessWidget {
             if (monthEndBalances == null)
               IconButton(
                 onPressed: () => showDialog(
-                    context: context,
-                    builder: (context) => TransactionFilterDialog(
-                          initialFilters: state.filters,
-                          onSave: state.setFilters,
-                        )),
+                  context: context,
+                  builder: (context) => TransactionFilterDialog(
+                    initialFilters: state.filters,
+                    onSave: state.setFilters,
+                  ),
+                ),
                 icon: Icon(
                   Icons.filter_list,
                   color: (filterMessage != null)
@@ -182,8 +185,11 @@ class _TransactionFilterGrid extends StatelessWidget {
         Expanded(
           child: Scaffold(
             body: TransactionList(
-              transactions: state.transactions,
-              padding: padding ??
+              transactions: state.transactions
+                  .where((t) => !hiddenTransactions.contains(t.key))
+                  .toList(),
+              padding:
+                  padding ??
                   EdgeInsets.only(top: 10, left: 10, bottom: fab != null ? 80 : 10, right: 14),
               maxRowsForName: maxRowsForName,
               onTap: (onSelect != null) ? (t, i) => onSelect!.call(t) : null,

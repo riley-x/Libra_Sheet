@@ -54,11 +54,8 @@ class ReimbursementEditor extends StatelessWidget {
         const Divider(height: 1, thickness: 1),
         // const SizedBox(height: 5),
         const Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: _TransactionsList(),
-          ),
-        )
+          child: Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: _TransactionsList()),
+        ),
       ],
     );
   }
@@ -74,10 +71,7 @@ class _Form extends StatelessWidget {
       key: state.reimbursementFormKey,
       child: Table(
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        columnWidths: const {
-          0: IntrinsicColumnWidth(),
-          1: FixedColumnWidth(300),
-        },
+        columnWidths: const {0: IntrinsicColumnWidth(), 1: FixedColumnWidth(300)},
         children: [
           labelRow(
             context,
@@ -113,19 +107,16 @@ class _TransactionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expenseType =
-        context.select<TransactionDetailsState, ExpenseFilterType>((value) => value.expenseType);
+    final state = context.watch<TransactionDetailsState>();
     return TransactionFilterGrid(
-      initialFilters: switch (expenseType) {
+      initialFilters: switch (state.expenseType) {
         ExpenseFilterType.expense => TransactionFilters(minValue: 0),
         ExpenseFilterType.income => TransactionFilters(maxValue: 0),
-        ExpenseFilterType.all => null
+        ExpenseFilterType.all => null,
       },
+      hiddenTransactions: [for (final reimb in state.reimbursements) reimb.target.key],
       quickFilter: true,
-      title: Text(
-        'Select target transaction',
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
+      title: Text('Select target transaction', style: Theme.of(context).textTheme.titleMedium),
       onSelect: context.read<TransactionDetailsState>().setReimbursementTarget,
     );
   }
