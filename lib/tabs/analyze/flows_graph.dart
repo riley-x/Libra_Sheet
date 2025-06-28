@@ -16,8 +16,12 @@ import 'package:libra_sheet/tabs/analyze/analyze_tab_view_state.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 
 (Widget, List<Widget>) flowsGraph(
-    BuildContext context, AnalyzeTabState state, ThemeData theme, bool isExpense,
-    {bool alignCenter = false}) {
+  BuildContext context,
+  AnalyzeTabState state,
+  ThemeData theme,
+  bool isExpense, {
+  bool alignCenter = true,
+}) {
   final viewState = state.currentViewState as FlowsView;
   final range = state.timeFrame.getRange(state.incomeData.times);
   final dates = state.combinedHistory.times.looseRange(range);
@@ -25,7 +29,7 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
       ? (viewState.showSubcats ? state.expenseDataSubCats : state.expenseData)
       : (viewState.showSubcats ? state.incomeDataSubCats : state.incomeData);
   final total = history.getTotal(range).abs();
-  final spacing = total.asDollarDouble() * 0.001;
+  final spacing = total.asDollarDouble() * 0.01;
 
   final headerElements = <Widget>[
     // Text('Show Subcats', style: theme.textTheme.bodyMedium),
@@ -38,33 +42,38 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
     Text('Proportional', style: theme.textTheme.bodyMedium),
     const SizedBox(width: 10),
     Checkbox(
-      value: viewState.justified,
-      onChanged: (bool? value) => state.setViewState(viewState.withJustified(value == true)),
+      value: viewState.proportional,
+      onChanged: (bool? value) => state.setViewState(viewState.withProportional(value == true)),
     ),
   ];
 
-  List<Series> createSeries() {
-    final out = <Series>[];
+  List<(Category, Series)> createSeries() {
+    final out = <(Category, Series)>[];
     double total = 0;
     for (final categoryHistory in history.categories) {
       final values = categoryHistory.values.looseRange(range);
       final maxValue = values.max(abs: true).asDollarDouble();
       if (maxValue == 0) continue;
 
-      out.add(ViolinSeries<int>(
+      final series = ViolinSeries<int>(
         alignCenter: alignCenter,
         name: categoryHistory.category.name,
         color: categoryHistory.category.color,
         data: values,
         valueMapper: (i, val) => val.abs().asDollarDouble(),
         labelMapper: (i, val) => val.abs().dollarString(),
-        height: alignCenter ? (viewState.justified ? total + 0.5 : total + maxValue / 2) : total,
-        normalize: viewState.justified ? maxValue : 1,
-      ));
-      total += viewState.justified ? 1.05 : maxValue + spacing;
+        height: alignCenter
+            ? (!viewState.proportional ? total + 0.5 : total + maxValue / 2)
+            : total,
+        normalize: !viewState.proportional ? maxValue : 1,
+      );
+      out.add((categoryHistory.category, series));
+      total += !viewState.proportional ? 1.1 : maxValue + spacing;
     }
     return out;
   }
+
+  final series = createSeries();
 
   void onTap(Category category, DateTime month) {
     toCategoryScreen(
@@ -82,28 +91,19 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 
   final graph = DiscreteCartesianGraph(
     yAxis: CartesianAxis(
-        theme: theme,
-        axisLoc: null,
-        labels: [],
-        dataPadFrac: 0.01,
-        valToString: (val, [order]) => formatDollar(val, dollarSign: true, order: order)),
-    xAxis: MonthAxis(
       theme: theme,
       axisLoc: null,
-      dates: dates,
+      labels: [],
+      dataPadFrac: 0.01,
+      valToString: (val, [order]) => formatDollar(val, dollarSign: true, order: order),
     ),
-    data: SeriesCollection([
-      ...createSeries(),
-    ]),
+    xAxis: MonthAxis(theme: theme, axisLoc: null, dates: dates),
+    data: SeriesCollection([for (final (_, s) in series) s]),
     onRange: (xStart, xEnd) => state.setTimeFrame(
-      TimeFrame(
-        TimeFrameEnum.custom,
-        customStart: dates[xStart],
-        customEndInclusive: dates[xEnd],
-      ),
+      TimeFrame(TimeFrameEnum.custom, customStart: dates[xStart], customEndInclusive: dates[xEnd]),
     ),
-    onTap: (iSeries, series, iData) {
-      onTap(history.categories[iSeries].category, dates[iData]);
+    onTap: (iSeries, _, iData) {
+      onTap(series[iSeries].$1, dates[iData]);
     },
     hoverTooltip: (mainGraph, hoverLoc) => LeftRightTooltip(mainGraph, hoverLoc, reverse: true),
   );

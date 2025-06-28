@@ -97,10 +97,11 @@ class ViolinSeries<T> extends Series<T> {
 
     for (final point in _renderedPoints) {
       canvas.drawRect(
-          point.pixelPos,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.fill);
+        point.pixelPos,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.fill,
+      );
     }
   }
 
@@ -111,7 +112,11 @@ class ViolinSeries<T> extends Series<T> {
     const width = 1.0;
     if (alignCenter) {
       return BoundingBox(
-          xMin: x - width / 2, xMax: x + width / 2, yMin: height - y / 2, yMax: height + y / 2);
+        xMin: x - width / 2,
+        xMax: x + width / 2,
+        yMin: height - y / 2,
+        yMax: height + y / 2,
+      );
     } else {
       return BoundingBox(xMin: x - width / 2, xMax: x + width / 2, yMin: height, yMax: height + y);
     }
@@ -157,10 +162,7 @@ class ViolinSeries<T> extends Series<T> {
         Container(
           width: 10.0,
           height: 10.0,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
         Expanded(

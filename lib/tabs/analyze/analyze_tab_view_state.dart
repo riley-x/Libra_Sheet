@@ -7,7 +7,7 @@ enum AnalyzeTabView {
   expenseFlow,
   incomeFlow,
   expenseHeatmap,
-  incomeHeatmap
+  incomeHeatmap,
 }
 
 /// View-specific state for each [AnalyzeTabView]
@@ -107,28 +107,28 @@ class OtherView implements AnalyzeTabViewState {
 
 abstract class FlowsView implements AnalyzeTabViewState {
   final bool showSubcats;
-  final bool justified;
+  final bool proportional;
 
-  const FlowsView({this.showSubcats = false, this.justified = false});
+  const FlowsView({this.showSubcats = false, this.proportional = false});
 
   FlowsView withSubcats(bool value);
-  FlowsView withJustified(bool value);
+  FlowsView withProportional(bool value);
 }
 
 class ExpenseFlowsView extends FlowsView {
   @override
   AnalyzeTabView get type => AnalyzeTabView.expenseFlow;
 
-  const ExpenseFlowsView({super.showSubcats, super.justified});
+  const ExpenseFlowsView({super.showSubcats, super.proportional});
 
   @override
-  FlowsView withJustified(bool value) {
-    return ExpenseFlowsView(showSubcats: showSubcats, justified: value);
+  FlowsView withProportional(bool value) {
+    return ExpenseFlowsView(showSubcats: showSubcats, proportional: value);
   }
 
   @override
   FlowsView withSubcats(bool value) {
-    return ExpenseFlowsView(showSubcats: value, justified: justified);
+    return ExpenseFlowsView(showSubcats: value, proportional: proportional);
   }
 }
 
@@ -136,16 +136,16 @@ class IncomeFlowsView extends FlowsView {
   @override
   AnalyzeTabView get type => AnalyzeTabView.incomeFlow;
 
-  const IncomeFlowsView({super.showSubcats, super.justified});
+  const IncomeFlowsView({super.showSubcats, super.proportional});
 
   @override
-  FlowsView withJustified(bool value) {
-    return IncomeFlowsView(showSubcats: showSubcats, justified: value);
+  FlowsView withProportional(bool value) {
+    return IncomeFlowsView(showSubcats: showSubcats, proportional: value);
   }
 
   @override
   FlowsView withSubcats(bool value) {
-    return IncomeFlowsView(showSubcats: value, justified: justified);
+    return IncomeFlowsView(showSubcats: value, proportional: proportional);
   }
 }
 
@@ -162,8 +162,11 @@ abstract class HeatmapView extends AnalyzeTabViewState {
 }
 
 class ExpenseHeatmapView extends HeatmapView {
-  const ExpenseHeatmapView(
-      {required super.showSubcats, super.showAverages, required super.showPie});
+  const ExpenseHeatmapView({
+    required super.showSubcats,
+    super.showAverages,
+    required super.showPie,
+  });
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.expenseHeatmap;
