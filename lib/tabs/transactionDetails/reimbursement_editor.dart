@@ -5,6 +5,7 @@ import 'package:libra_sheet/components/transaction_filters/transaction_filter_gr
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
 import 'package:libra_sheet/data/enums.dart';
 import 'package:libra_sheet/components/table_form_utils.dart';
+import 'package:libra_sheet/data/objects/reimbursement.dart';
 import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:libra_sheet/tabs/transactionDetails/transaction_details_state.dart';
 import 'package:libra_sheet/tabs/transactionDetails/value_field.dart';
@@ -107,14 +108,21 @@ class _TransactionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<TransactionDetailsState>();
+    /// It's import to use select here, otherwise i.e. selecting a reimburse target
+    /// will recreate the filter state
+    final expenseType = context.select<TransactionDetailsState, ExpenseFilterType>(
+      (value) => value.expenseType,
+    );
+    final reimbursements = context.select<TransactionDetailsState, List<Reimbursement>>(
+      (value) => value.reimbursements,
+    );
     return TransactionFilterGrid(
-      initialFilters: switch (state.expenseType) {
+      initialFilters: switch (expenseType) {
         ExpenseFilterType.expense => TransactionFilters(minValue: 0),
         ExpenseFilterType.income => TransactionFilters(maxValue: 0),
         ExpenseFilterType.all => null,
       },
-      hiddenTransactions: [for (final reimb in state.reimbursements) reimb.target.key],
+      hiddenTransactions: [for (final r in reimbursements) r.target.key],
       quickFilter: true,
       title: Text('Select target transaction', style: Theme.of(context).textTheme.titleMedium),
       onSelect: context.read<TransactionDetailsState>().setReimbursementTarget,
