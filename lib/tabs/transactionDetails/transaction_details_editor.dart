@@ -175,7 +175,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                               context: context,
                               title: 'Allocations',
                               msg:
-                                  "An allocation assigns part of a transaction to another category.\n\n"
+                                  "An allocation assigns part of a transaction to another category or date.\n\n"
                                   "For example, a \$100 Amazon transaction might consist of \$60 of clothes and \$40 of household supplies. "
                                   "You should therefore set the main category of the transaction to \"Clothes\", and then create a \$40 allocation for \"Household\".",
                               showCancel: false,
