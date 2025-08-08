@@ -93,12 +93,14 @@ extension AllocationsTransactionExtension on Transaction {
     await _insertAllocation(parent: parent, allocation: alloc, listIndex: index);
 
     final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
+    // Remove from parent's category/timestamp
     await updateCategoryHistory(
       account: parent.account!.key,
       category: parent.category.key,
-      date: alloc.timestamp ?? parent.date,
+      date: parent.date,
       delta: -signedValue,
     );
+    // Add to alloc's category/timestamp
     await updateCategoryHistory(
       account: parent.account!.key,
       category: alloc.category!.key,
@@ -124,12 +126,14 @@ extension AllocationsTransactionExtension on Transaction {
     );
 
     final signedValue = (parent.value < 0) ? -alloc.value : alloc.value;
+    // Add back to parent's category/timestamp
     await updateCategoryHistory(
       account: parent.account!.key,
       category: parent.category.key,
-      date: alloc.timestamp ?? parent.date,
+      date: parent.date,
       delta: signedValue,
     );
+    // Remove from alloc's category/timestamp
     await updateCategoryHistory(
       account: parent.account!.key,
       category: alloc.category!.key,
