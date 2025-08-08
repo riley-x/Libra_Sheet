@@ -9,13 +9,16 @@ import 'package:libra_sheet/data/objects/transaction.dart' as lt;
 
 const allocationsTable = "allocations";
 
-const createAllocationsTableSql = "CREATE TABLE IF NOT EXISTS $allocationsTable ("
+const createAllocationsTableSql =
+    "CREATE TABLE IF NOT EXISTS $allocationsTable ("
     "$_key INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
     "$_name TEXT NOT NULL, "
     "$_transaction INTEGER NOT NULL, " // id into transaction table
     "$_category INTEGER NOT NULL, " // id into category table
     "$_value INTEGER NOT NULL, "
     "$_index INTEGER NOT NULL)";
+const addAllocationTimestampColumnSql =
+    "ALTER TABLE $allocationsTable ADD COLUMN $_timestamp INTEGER";
 
 const _key = "id";
 const _name = "name";
@@ -23,6 +26,10 @@ const _transaction = "transactionId";
 const _category = "categoryId";
 const _value = "value";
 const _index = "listIndex";
+
+/// The timestamp (millis from epoch) to which this allocation should apply.
+/// If null, defaults to the transaction's timestamp.
+const _timestamp = "timestamp";
 
 const allocationsKey = _key;
 const allocationsName = _name;
@@ -73,10 +80,7 @@ extension AllocationsTransactionExtension on Transaction {
   }
 
   /// This modifies the allocation's key in-place!
-  Future<void> addAllocation({
-    required lt.Transaction parent,
-    required int index,
-  }) async {
+  Future<void> addAllocation({required lt.Transaction parent, required int index}) async {
     if (parent.account == null) return;
     if (parent.allocations == null) return;
     if (index >= parent.allocations!.length) return;
@@ -100,10 +104,7 @@ extension AllocationsTransactionExtension on Transaction {
     );
   }
 
-  Future<void> deleteAllocation({
-    required lt.Transaction parent,
-    required int index,
-  }) async {
+  Future<void> deleteAllocation({required lt.Transaction parent, required int index}) async {
     if (parent.account == null) return;
     if (parent.allocations == null) return;
     if (index >= parent.allocations!.length) return;
@@ -150,8 +151,9 @@ extension AllocationsTransactionExtension on Transaction {
   }
 
   Future<void> unsetCategoryFromAllAllocations(Category cat) async {
-    final superKey =
-        cat.type == ExpenseFilterType.income ? Category.income.key : Category.expense.key;
+    final superKey = cat.type == ExpenseFilterType.income
+        ? Category.income.key
+        : Category.expense.key;
     await rawUpdate(
       "UPDATE $allocationsTable "
       "SET $_category = $superKey "
@@ -178,10 +180,7 @@ extension AllocationsDatabaseExtension on DatabaseExecutor {
   Future<Map<int, List<Allocation>>> loadAllAllocations(Map<int, Category> categories) async {
     final out = <int, List<Allocation>>{};
 
-    final maps = await query(
-      allocationsTable,
-      orderBy: "$_transaction, $_index",
-    );
+    final maps = await query(allocationsTable, orderBy: "$_transaction, $_index");
 
     int currentTransaction = -1;
     List<Allocation> currentList = [];

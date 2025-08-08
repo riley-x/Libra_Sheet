@@ -83,8 +83,7 @@ class TransactionDetailsState extends ChangeNotifier {
   int reimbursementValue = 0;
 
   /// Allocation editor
-  final MutableAllocation updatedAllocation = MutableAllocation();
-  // TODO replace these with the now non-const version of the class
+  final Allocation updatedAllocation = Allocation(name: '', category: null, value: 0);
 
   //---------------------------------------------------------------------------------------------
   // These variables are the UI state for the relevant fields. They are used to finalize the output
@@ -326,11 +325,11 @@ class TransactionDetailsState extends ChangeNotifier {
     if (allocationFormKey.currentState?.validate() ?? false) {
       allocationFormKey.currentState?.save();
       if (focusedAllocation == null) {
-        allocations.add(updatedAllocation.freeze());
+        allocations.add(updatedAllocation.copy());
       } else {
         for (int i = 0; i < allocations.length; i++) {
           if (allocations[i] == focusedAllocation) {
-            allocations[i] = updatedAllocation.freeze(allocations[i].key);
+            allocations[i] = updatedAllocation.copy(key: allocations[i].key);
             break;
           }
         }

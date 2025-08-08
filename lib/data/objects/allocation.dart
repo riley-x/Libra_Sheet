@@ -6,12 +6,14 @@ class Allocation {
   String name;
   Category? category;
   int value;
+  DateTime? timestamp;
 
   Allocation({
     this.key = 0,
     required this.name,
     required this.category,
     required this.value,
+    this.timestamp,
   });
 
   @override
@@ -19,46 +21,19 @@ class Allocation {
     return "Allocation($key, $name: $value ${category?.name})";
   }
 
-  int get signedValue => switch (category?.type) {
-        ExpenseFilterType.income => value,
-        ExpenseFilterType.expense => -value,
-        _ => value,
-      };
-}
-
-class MutableAllocation implements Allocation {
-  @override
-  int key;
-
-  @override
-  String name;
-
-  @override
-  Category? category;
-
-  @override
-  int value;
-
-  MutableAllocation({
-    this.key = 0,
-    this.name = '',
-    this.category,
-    this.value = 0,
-  });
-
-  @override
-  String toString() {
-    return "MAllocation($key, $name, $value, ${category?.name})";
+  Allocation copy({int? key}) {
+    return Allocation(
+      key: key ?? this.key,
+      name: name,
+      category: category,
+      value: value,
+      timestamp: timestamp,
+    );
   }
 
-  Allocation freeze([int? key]) {
-    return Allocation(key: key ?? this.key, name: name, category: category, value: value);
-  }
-
-  @override
   int get signedValue => switch (category?.type) {
-        ExpenseFilterType.income => value,
-        ExpenseFilterType.expense => -value,
-        _ => value,
-      };
+    ExpenseFilterType.income => value,
+    ExpenseFilterType.expense => -value,
+    _ => value,
+  };
 }

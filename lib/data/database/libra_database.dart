@@ -64,7 +64,7 @@ class LibraDatabase {
   static Future<void> open() async {
     _db = await openDatabase(
       databasePath,
-      version: 16,
+      version: 17,
       onCreate: _createDatabase,
       onUpgrade: _upgradeDatabase,
     );
@@ -191,6 +191,10 @@ class LibraDatabase {
     if (oldVersion <= 15 && newVersion >= 16) {
       await _upgrade15_16(db);
     }
+
+    if (oldVersion <= 16 && newVersion >= 17) {
+      await _upgrade16_17(db);
+    }
   }
 }
 
@@ -213,6 +217,9 @@ FutureOr<void> _createDatabase(Database db, int version) async {
   if (kIsWeb) {
     await _hydrateDummyData(db);
   }
+  if (version >= 17) {
+    await _upgrade16_17(db);
+  }
 }
 
 Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
@@ -232,6 +239,10 @@ Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
 
 Future<void> _upgrade15_16(Database db) async {
   await db.execute(upgradeAccountsTableSql_15_16);
+}
+
+Future<void> _upgrade16_17(Database db) async {
+  await db.execute(addAllocationTimestampColumnSql);
 }
 
 const _initAccounts = '''
