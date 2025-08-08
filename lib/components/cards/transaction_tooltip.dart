@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/two_element_row.dart';
 import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
+import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
 
 class TransactionTooltip extends StatelessWidget {
@@ -76,13 +77,10 @@ class TransactionTooltip extends StatelessWidget {
                             Container(color: alloc.category?.color, width: 4, height: 24),
                             const SizedBox(width: 6),
                           ],
-                          Expanded(
-                            child: Text(
-                                "${alloc.category?.name}: ${alloc.signedValue.dollarString()} (${alloc.name})"),
-                          ),
+                          Expanded(child: Text(_allocText(alloc))),
                         ],
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -106,7 +104,7 @@ class TransactionTooltip extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -115,4 +113,9 @@ class TransactionTooltip extends StatelessWidget {
       ),
     );
   }
+}
+
+String _allocText(Allocation alloc) {
+  String timestampText = alloc.timestamp == null ? "" : " (${alloc.timestamp!.MMddyy()})";
+  return "${alloc.category?.name}$timestampText: ${alloc.signedValue.dollarString()} (${alloc.name})";
 }
