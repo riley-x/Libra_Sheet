@@ -31,6 +31,11 @@ extension DateTimeUtils2 on DateTime {
   }
 }
 
+DateTime? fromTimestamp(int? x) {
+  if (x == null) return null;
+  return DateTime.fromMillisecondsSinceEpoch(x, isUtc: true);
+}
+
 DateTime startOfMonth(DateTime x) {
   return DateTime.utc(x.year, x.month, 1);
 }
