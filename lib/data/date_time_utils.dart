@@ -13,6 +13,11 @@ extension DateTimeUtils2 on DateTime {
   }
 
   // ignore: non_constant_identifier_names
+  String MMMyy() {
+    return DateFormat('MMMyy').format(this);
+  }
+
+  // ignore: non_constant_identifier_names
   String MMMMyyyy() {
     return DateFormat('MMMM yyyy').format(this);
   }

@@ -8,6 +8,7 @@ import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/tags.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/tag.dart';
@@ -25,10 +26,15 @@ const _note = "note";
 const _account = "account_id";
 const _category = "category_id";
 
+/// These are fields that we GROUP_CONCAT and display with the initial transaction load.
+/// I.e. they're available without loading the full allocation/reimbursements.
 const _allocCategoryKeys = "alloc_categories";
 const _allocValues = "alloc_values";
-const _allocNames = "alloc_names";
+const _allocTimestamps = "alloc_timestamps";
 const _reimbTotal = "reimb_total";
+
+/// This is just for filtering by text.
+const _allocNames = "alloc_names";
 
 /// Public alias column names
 const transactionKey = _key;
@@ -84,12 +90,14 @@ List<Tag> parseTags(String? string, Map<int, Tag>? tags) {
 List<SoftAllocation> parseAllocs(Map<String, dynamic> map, Map<int, Category>? categories) {
   String? categoryKeysStr = map[_allocCategoryKeys];
   String? valuesStr = map[_allocValues];
-  if (categoryKeysStr == null || valuesStr == null) return const [];
+  String? timestampsStr = map[_allocTimestamps];
+  if (categoryKeysStr == null || valuesStr == null || timestampsStr == null) return const [];
 
   final categoryKeys = categoryKeysStr.split(',');
   final values = valuesStr.split(',');
+  final timestamps = timestampsStr.split(',');
 
-  if (categoryKeys.length != values.length) {
+  if (categoryKeys.length != values.length || values.length != timestamps.length) {
     assert(false);
     return [];
   }
@@ -108,7 +116,9 @@ List<SoftAllocation> parseAllocs(Map<String, dynamic> map, Map<int, Category>? c
     assert(value != null);
     if (value == null) continue;
 
-    out.add(SoftAllocation(category: category, value: value));
+    final timestamp = int.tryParse(timestamps[i]);
+
+    out.add(SoftAllocation(category: category, value: value, timestamp: fromTimestamp(timestamp)));
   }
   return out;
 }
@@ -464,7 +474,8 @@ String createTransactionQuery({
         t.*,
         GROUP_CONCAT(a.$allocationsCategory) as $_allocCategoryKeys,
         GROUP_CONCAT(a.$allocationsValue) as $_allocValues,
-        GROUP_CONCAT(a.$allocationsName, 0x1E) as $_allocNames
+        GROUP_CONCAT(a.$allocationsName, 0x1E) as $_allocNames,
+        GROUP_CONCAT(COALESCE(a.$allocationsTimestamp, 'NULL')) as $_allocTimestamps
       FROM (
         SELECT 
           t.*,

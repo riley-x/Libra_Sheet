@@ -27,14 +27,14 @@ class Transaction {
     List<Tag>? tags,
     List<SoftAllocation> softAllocations = const [],
     int totalReimbusrements = 0,
-  })  : category = (category != Category.empty)
-            ? category
-            : (value > 0)
-                ? Category.income
-                : Category.expense,
-        tags = (tags == null) ? [] : tags,
-        _softAllocations = softAllocations,
-        _reimbTotal = totalReimbusrements;
+  }) : category = (category != Category.empty)
+           ? category
+           : (value > 0)
+           ? Category.income
+           : Category.expense,
+       tags = (tags == null) ? [] : tags,
+       _softAllocations = softAllocations,
+       _reimbTotal = totalReimbusrements;
 
   int key;
   final String name;
@@ -60,7 +60,8 @@ class Transaction {
         SoftAllocation(
           category: alloc.category ?? Category.empty,
           value: alloc.value,
-        )
+          timestamp: alloc.timestamp,
+        ),
     ];
   }
 
@@ -107,14 +108,16 @@ class Transaction {
 
   @override
   String toString() {
-    var out = "Transaction($key): $value $date"
+    var out =
+        "Transaction($key): $value $date"
         "\n\t$name"
         "\n\t$account"
         "\n\t$category";
     if (note.isNotEmpty) {
       out += "\n\t$note";
     }
-    out += "\n\ttags=${tags.length}"
+    out +=
+        "\n\ttags=${tags.length}"
         " alloc=${allocations?.length}"
         " reimb=${reimbursements?.length}";
     return out;
@@ -130,12 +133,17 @@ class Transaction {
 class SoftAllocation {
   final Category category;
   final int value;
+  final DateTime? timestamp;
 
-  SoftAllocation({required this.category, required this.value});
+  SoftAllocation({required this.category, required this.value, required this.timestamp});
 }
 
-final dummyTransaction =
-    Transaction(name: '___TEST___', date: DateTime(1987), value: 10000, category: Category.income);
+final dummyTransaction = Transaction(
+  name: '___TEST___',
+  date: DateTime(1987),
+  value: 10000,
+  category: Category.income,
+);
 
 class CsvAllocation {
   final String name;

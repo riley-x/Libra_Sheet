@@ -6,6 +6,7 @@ import 'package:libra_sheet/components/cards/transaction_tooltip.dart';
 import 'package:libra_sheet/components/widget_tooltip.dart';
 import 'package:libra_sheet/data/app_state/account_state.dart';
 import 'package:libra_sheet/data/app_state/transaction_service.dart';
+import 'package:libra_sheet/data/date_time_utils.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 import 'package:libra_sheet/data/objects/transaction.dart';
@@ -60,12 +61,12 @@ class TransactionCard extends StatelessWidget {
       borderColor: (isUncategorized && valueAfterReimb != 0)
           ? Theme.of(context).colorScheme.error
           : (isInvestment)
-              ? Theme.of(context).colorScheme.primary
-              : null,
+          ? Theme.of(context).colorScheme.primary
+          : null,
       fillColor: (selected)
           ? ((cs.brightness == Brightness.dark)
-              ? const Color.fromARGB(255, 95, 102, 109) // brighter than surfaceBright
-              : cs.primaryContainer)
+                ? const Color.fromARGB(255, 95, 102, 109) // brighter than surfaceBright
+                : cs.primaryContainer)
           : null,
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       onTap: () => onTap?.call(trans),
@@ -73,11 +74,7 @@ class TransactionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _TextElements(
-            trans: trans,
-            maxRowsForName: maxRowsForName,
-            rightContent: rightContent,
-          ),
+          _TextElements(trans: trans, maxRowsForName: maxRowsForName, rightContent: rightContent),
           if (showTags && trans.tags.isNotEmpty) ...[
             const SizedBox(height: 3),
             Wrap(
@@ -92,7 +89,7 @@ class TransactionCard extends StatelessWidget {
                   ),
               ],
             ),
-          ]
+          ],
         ],
       ),
     );
@@ -157,11 +154,7 @@ class _TextElements extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                trans.name,
-                maxLines: maxRowsForName,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(trans.name, maxLines: maxRowsForName, overflow: TextOverflow.ellipsis),
               Text(
                 subText,
                 maxLines: 1,
@@ -182,7 +175,7 @@ class _TextElements extends StatelessWidget {
                   const SizedBox(width: 10),
                 ],
                 for (final alloc in trans.softAllocations) ...[
-                  _AllocIndicator(alloc.value * sign, alloc.category),
+                  _AllocIndicator(alloc.value * sign, alloc.category, timestamp: alloc.timestamp),
                   const SizedBox(width: 10),
                 ],
                 if (adjValue != trans.value && adjValue != 0) ...[
@@ -196,10 +189,10 @@ class _TextElements extends StatelessWidget {
                     color: (trans.value == 0)
                         ? null
                         : (adjValue == 0)
-                            ? Theme.of(context).colorScheme.outline
-                            : (trans.value < 0)
-                                ? Colors.red
-                                : Colors.green,
+                        ? Theme.of(context).colorScheme.outline
+                        : (trans.value < 0)
+                        ? Colors.red
+                        : Colors.green,
                     fontStyle: (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
                         ? FontStyle.italic
                         : FontStyle.normal,
@@ -207,9 +200,7 @@ class _TextElements extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
-              _dtFormat.format(trans.date),
-            ),
+            Text(_dtFormat.format(trans.date)),
           ],
         ),
         if (rightContent != null) rightContent!,
@@ -219,13 +210,19 @@ class _TextElements extends StatelessWidget {
 }
 
 class _AllocIndicator extends StatelessWidget {
-  const _AllocIndicator(this.value, this.category, {super.key});
+  const _AllocIndicator(this.value, this.category, {super.key, this.timestamp});
 
   final int value;
   final Category category;
+  final DateTime? timestamp;
 
   @override
   Widget build(BuildContext context) {
+    var text = value.dollarString();
+    if (timestamp != null) {
+      text = "${timestamp!.MMMyy()} $text";
+    }
+
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: ShapeDecoration(
@@ -234,25 +231,28 @@ class _AllocIndicator extends StatelessWidget {
               ? BorderSide(
                   color: (category == Category.other)
                       ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.shade700)
+                      : Colors.grey.shade700,
+                )
               : BorderSide.none,
           borderRadius: BorderRadius.circular(8),
         ),
         color: (category.predefined)
             ? null
             : Color.alphaBlend(
-                category.color.withAlpha(200), Theme.of(context).colorScheme.surface),
+                category.color.withAlpha(200),
+                Theme.of(context).colorScheme.surface,
+              ),
       ),
       child: Center(
         child: Text(
-          value.dollarString(),
+          text,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: (category == Category.other)
-                    ? Theme.of(context).colorScheme.primary
-                    : (category.predefined)
-                        ? Colors.grey.shade700
-                        : adaptiveTextColor(category.color),
-              ),
+            color: (category == Category.other)
+                ? Theme.of(context).colorScheme.primary
+                : (category.predefined)
+                ? Colors.grey.shade700
+                : adaptiveTextColor(category.color),
+          ),
         ),
       ),
     );
@@ -296,23 +296,23 @@ class _NumberIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: BoxDecoration(
-          color: (isAlloc)
-              ? const Color.fromARGB(255, 221, 79, 145)
-              : const Color.fromARGB(255, 100, 65, 197),
-          borderRadius: BorderRadius.circular(4)
-          // border: Border.all(
-          //   color: Colors.white,
-          //   width: 5.0,
-          //   style: BorderStyle.solid,
-          // ),
-          ),
+        color: (isAlloc)
+            ? const Color.fromARGB(255, 221, 79, 145)
+            : const Color.fromARGB(255, 100, 65, 197),
+        borderRadius: BorderRadius.circular(4),
+        // border: Border.all(
+        //   color: Colors.white,
+        //   width: 5.0,
+        //   style: BorderStyle.solid,
+        // ),
+      ),
       child: Center(
         child: Text(
           (n < 10)
               ? '$n'
               : (isAlloc)
-                  ? 'A'
-                  : 'R',
+              ? 'A'
+              : 'R',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.white),
         ),
       ),
