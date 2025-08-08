@@ -541,11 +541,11 @@ String createTransactionQuery({
   final allocationArgs = [];
   void append(String transactionField, String allocationField, String condition, List args) {
     if (transactionFilter.isEmpty) {
-      transactionFilter = "(t.$transactionField $condition)";
-      allocationFilter = "(a.$allocationField $condition)";
+      transactionFilter = "($transactionField $condition)";
+      allocationFilter = "($allocationField $condition)";
     } else {
-      transactionFilter += " AND (t.$transactionField $condition)";
-      allocationFilter += " AND (a.$allocationField $condition)";
+      transactionFilter += " AND ($transactionField $condition)";
+      allocationFilter += " AND ($allocationField $condition)";
     }
     transactionArgs.addAll(args);
     allocationArgs.addAll(args);
@@ -553,10 +553,14 @@ String createTransactionQuery({
 
   /// Time
   if (filters.startTime != null) {
-    append(_date, allocationsTimestamp, ">= ?", [filters.startTime!.millisecondsSinceEpoch]);
+    append("t.$_date", "COALESCE(a.$allocationsTimestamp, t.$_date)", ">= ?", [
+      filters.startTime!.millisecondsSinceEpoch,
+    ]);
   }
   if (filters.endTime != null) {
-    append(_date, allocationsTimestamp, "<= ?", [filters.endTime!.millisecondsSinceEpoch]);
+    append("t.$_date", "COALESCE(a.$allocationsTimestamp, t.$_date)", "<= ?", [
+      filters.endTime!.millisecondsSinceEpoch,
+    ]);
   }
 
   /// Categories
