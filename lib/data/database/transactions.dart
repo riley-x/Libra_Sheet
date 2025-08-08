@@ -501,12 +501,12 @@ String createTransactionQuery({
   List args = [];
 
   /// Basic filters (innermost where clause) ///
-  String tagWhere = '';
+  String innerWhere = '';
   void addTagWhere(String query) {
-    if (tagWhere.isEmpty) {
-      tagWhere = "WHERE $query";
+    if (innerWhere.isEmpty) {
+      innerWhere = "WHERE ($query)";
     } else {
-      tagWhere += " AND $query";
+      innerWhere += " AND ($query)";
     }
   }
 
@@ -518,17 +518,86 @@ String createTransactionQuery({
     addTagWhere("t.$_value <= ?");
     args.add(filters.maxValue);
   }
-  if (filters.startTime != null) {
-    addTagWhere("t.$_date >= ?");
-    args.add(filters.startTime!.millisecondsSinceEpoch);
-  }
-  if (filters.endTime != null) {
-    addTagWhere("t.$_date <= ?");
-    args.add(filters.endTime!.millisecondsSinceEpoch);
-  }
   if (filters.accounts.isNotEmpty) {
     addTagWhere("t.$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
     args.addAll(filters.accounts.map((e) => e.key));
+  }
+
+  /// Datetime, Text, and Category. These need to handle allocations too ///
+  var transactionFilter = "";
+  var allocationFilter = "";
+  final transactionArgs = [];
+  final allocationArgs = [];
+  void append(String transactionField, String allocationField, String condition, List args) {
+    if (transactionFilter.isEmpty) {
+      transactionFilter = "(t.$transactionField $condition)";
+      allocationFilter = "(a.$allocationField $condition)";
+    } else {
+      transactionFilter += " AND (t.$transactionField $condition)";
+      allocationFilter += " AND (t.$allocationField $condition)";
+    }
+    transactionArgs.addAll(args);
+    allocationArgs.addAll(args);
+  }
+
+  /// Time
+  if (filters.startTime != null) {
+    append(_date, allocationsTimestamp, ">= ?", [filters.startTime!.millisecondsSinceEpoch]);
+  }
+  if (filters.endTime != null) {
+    append(_date, allocationsTimestamp, "<= ?", [filters.endTime!.millisecondsSinceEpoch]);
+  }
+
+  /// Categories
+  List<int> categories = filters.categories.activeKeys().toList();
+  if (categories.isNotEmpty) {
+    /// Include [Category.income] and [Category.expense] if the filter calls for [Category.empty].
+    if (categories.contains(Category.empty.key)) {
+      categories = List.of(categories) + [Category.income.key, Category.expense.key];
+    }
+    final categoryExpression = "in (${List.filled(categories.length, '?').join(',')})";
+    append(_category, allocationsCategory, categoryExpression, categories);
+  }
+
+  /// Name
+  if (filters.name != null && filters.name!.isNotEmpty) {
+    if (transactionFilter.isEmpty) {
+      transactionFilter = "(t.$_name LIKE ? OR t.$_note LIKE ?)";
+      allocationFilter = "(a.$allocationsName LIKE ?)";
+    } else {
+      transactionFilter += " AND (t.$_name LIKE ? OR t.$_note LIKE ?)";
+      allocationFilter += " AND (a.$allocationsName LIKE ?)";
+    }
+    final wc = "%${filters.name}%";
+    transactionArgs.add(wc);
+    transactionArgs.add(wc);
+    allocationArgs.add(wc);
+  }
+
+  final String? innerTable;
+  final String tagWhere;
+  if (transactionFilter.isNotEmpty || filters.hasAllocation == true) {
+    if (transactionFilter.isNotEmpty) {
+      addTagWhere("($transactionFilter) OR ($allocationFilter)");
+      args.addAll(transactionArgs);
+      args.addAll(allocationArgs);
+    }
+    final allocJoinMethod = filters.hasAllocation == true ? "INNER JOIN" : "LEFT OUTER JOIN";
+    innerTable =
+        '''
+      (
+        SELECT t.*
+        FROM 
+          $transactionsTable t
+        $allocJoinMethod
+          $allocationsTable a ON a.$allocationsTransaction = t.$_key
+        $innerWhere
+      )
+    ''';
+    tagWhere = '';
+  } else {
+    innerTable = null;
+    tagWhere = innerWhere;
   }
 
   /// Tags ///
@@ -542,53 +611,6 @@ String createTransactionQuery({
       args.add(tag.key);
     }
     tagHaving += " ELSE 0 END ) = 1";
-  }
-
-  /// Categories ///
-  /// These must be done together during the allocation group-by HAVING clause.
-  var allocHaving = '';
-  void addAllocHaving(String query) {
-    if (allocHaving.isEmpty) {
-      allocHaving = "HAVING $query";
-    } else {
-      allocHaving += " AND $query";
-    }
-  }
-
-  var categories = filters.categories.activeKeys();
-  if (categories.isNotEmpty) {
-    /// Include [Category.income] and [Category.expense] if the filter calls for [Category.empty].
-    if (categories.contains(Category.empty.key)) {
-      categories = List.of(categories) + [Category.income.key, Category.expense.key];
-    }
-
-    /// When transaction category is in the list
-    var q = "(t.$_category in (${List.filled(categories.length, '?').join(',')})";
-    args.addAll(categories);
-
-    /// When transaction has an allocation category in the list
-    q += " OR max(CASE a.$allocationsCategory";
-    for (final cat in categories) {
-      q += " WHEN ? THEN 1";
-      args.add(cat);
-    }
-    q += " ELSE 0 END) = 1)";
-
-    addAllocHaving(q);
-  }
-
-  /// Allocations ///
-  if (filters.hasAllocation == true) {
-    addAllocHaving("COUNT(a.$allocationsKey) > 0");
-  }
-
-  /// Text search ///
-  if (filters.name != null && filters.name!.isNotEmpty) {
-    addAllocHaving("(t.$_name LIKE ? OR t.$_note LIKE ? OR $_allocNames LIKE ?)");
-    final wc = "%${filters.name}%";
-    args.add(wc);
-    args.add(wc);
-    args.add(wc);
   }
 
   /// Reimbursements ///
@@ -606,9 +628,9 @@ String createTransactionQuery({
 
   /// Get query ///
   final q = createTransactionQuery(
+    innerTable: innerTable,
     tagWhere: tagWhere,
     tagHaving: tagHaving,
-    allocHaving: allocHaving,
     reimbHaving: reimbHaving,
     limit: limit,
   );

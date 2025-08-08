@@ -37,6 +37,7 @@ const allocationsName = _name;
 const allocationsTransaction = _transaction;
 const allocationsCategory = _category;
 const allocationsValue = _value;
+const allocationsTimestamp = _timestamp;
 
 Map<String, dynamic> _toMap(lt.Transaction parent, Allocation a, int listIndex) {
   assert(parent.key != 0 && a.category != null);
