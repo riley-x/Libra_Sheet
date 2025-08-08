@@ -107,10 +107,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                         labelRow(
                           context,
                           'Date',
-                          _DateField(
-                            initial: state.seed?.date,
-                            onSave: (it) => state.date = it,
-                          ),
+                          _DateField(initial: state.seed?.date, onSave: (it) => state.date = it),
                         ),
                         rowSpacing,
                         labelRow(
@@ -151,10 +148,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                           context,
                           'Tags',
                           ExcludeFocus(
-                            child: _TagSelector(
-                              tags: state.tags,
-                              onChanged: state.onTagChanged,
-                            ),
+                            child: _TagSelector(tags: state.tags, onChanged: state.onTagChanged),
                           ),
                         ),
                       ],
@@ -197,10 +191,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                     for (final alloc in state.allocations) ...[
                       const SizedBox(height: 6),
                       ExcludeFocus(
-                        child: AllocationCard(
-                          alloc,
-                          onTap: (it) => state.focusAllocation(it),
-                        ),
+                        child: AllocationCard(alloc, onTap: (it) => state.focusAllocation(it)),
                       ),
                     ],
 
@@ -273,7 +264,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                           state.errorMessage!,
                           style: TextStyle(color: Theme.of(context).colorScheme.error),
                         ),
-                      )
+                      ),
                   ],
                 ),
               ),
@@ -291,15 +282,16 @@ class _CategoryLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
+    final theme = Theme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
           message: "Create a rule matching this transaction upon saving.",
-          textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onInverseSurface,
-                fontSize: 14,
-              ),
+          textStyle: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onInverseSurface,
+            fontSize: 14,
+          ),
           child: ExcludeFocus(
             child: IconButton(
               onPressed: state.toggleSaveRule,
@@ -310,7 +302,8 @@ class _CategoryLabel extends StatelessWidget {
           ),
         ),
         Tooltip(
-          message: "There are two special categories, which can have both positive\n"
+          message:
+              "There are two special categories, which can have both positive\n"
               "and negative transactions:\n\n"
               "    Ignore: don't count this transaction in your income or expenses.\n"
               "            Useful for things like transfers between accounts.\n\n"
@@ -318,13 +311,15 @@ class _CategoryLabel extends StatelessWidget {
               "            For example, you can use this to track market appreciation\n"
               "            from stocks in your investment accounts. Net totals of\n"
               "            \"Other\" transactions are summarized in the Analyze tab.",
-          textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onInverseSurface,
-                fontSize: 14,
-              ),
-          child: Text(
-            'Category',
-            style: Theme.of(context).textTheme.titleSmall,
+          textStyle: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onInverseSurface,
+            fontSize: 14,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: theme.colorScheme.outline, width: 1)),
+            ),
+            child: Text('Category', style: theme.textTheme.titleSmall),
           ),
         ),
       ],
@@ -375,11 +370,7 @@ class _TagSelector extends StatelessWidget {
             runSpacing: 4,
             children: [
               for (final tag in tags)
-                LibraChip(
-                  tag.name,
-                  color: tag.color,
-                  onTap: () => onChanged?.call(tag, false),
-                ),
+                LibraChip(tag.name, color: tag.color, onTap: () => onChanged?.call(tag, false)),
             ],
           ),
         ),
@@ -434,9 +425,9 @@ class _ReimbursementRow extends StatelessWidget {
                 onTap: () => onEdit.call(reimbursement),
                 child: Text(
                   "Edit",
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
                 ),
               ),
             ],

@@ -13,21 +13,26 @@ TableRow labelRow(
   Widget? labelCustom,
 }) {
   var content = labelCustom;
+
   if (content == null) {
-    content = Text(
-      label,
-      style: Theme.of(context).textTheme.titleSmall,
-    );
-    if (tooltip != null) {
+    final theme = Theme.of(context);
+    content = Text(label, style: theme.textTheme.titleSmall);
+    if (tooltip != null || richTooltip != null) {
       content = Tooltip(
         message: tooltip,
         // POSSIBLE BUG? This doesn't work, maybe because inside the table/tablerow/tablecell?
         richMessage: richTooltip,
-        textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onInverseSurface,
-              fontSize: 14,
-            ),
-        child: content,
+        textStyle: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onInverseSurface,
+          fontSize: 14,
+        ),
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: theme.colorScheme.outline, width: 1)),
+          ),
+          child: content,
+        ),
       );
     }
   }
@@ -38,10 +43,7 @@ TableRow labelRow(
         verticalAlignment: labelAlign,
         child: Align(
           alignment: Alignment.topRight,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: content,
-          ),
+          child: Padding(padding: const EdgeInsets.only(right: 20), child: content),
         ),
       ),
       right,
@@ -49,11 +51,4 @@ TableRow labelRow(
   );
 }
 
-const rowSpacing = TableRow(children: [
-  SizedBox(
-    height: 8,
-  ),
-  SizedBox(
-    height: 8,
-  )
-]);
+const rowSpacing = TableRow(children: [SizedBox(height: 8), SizedBox(height: 8)]);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/libra_text_field.dart';
 import 'package:libra_sheet/components/menus/category_selection_menu.dart';
 import 'package:libra_sheet/components/form_buttons.dart';
@@ -16,8 +17,9 @@ class AllocationEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
-    var categories =
-        context.watch<LibraAppState>().categories.flattenedCategories(state.expenseType);
+    var categories = context.watch<LibraAppState>().categories.flattenedCategories(
+      state.expenseType,
+    );
     categories = [Category.ignore, Category.other] + categories;
     return Column(
       children: [
@@ -31,10 +33,7 @@ class AllocationEditor extends StatelessWidget {
           key: state.allocationFormKey,
           child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FixedColumnWidth(250),
-            },
+            columnWidths: const {0: IntrinsicColumnWidth(), 1: FixedColumnWidth(250)},
             children: [
               labelRow(
                 context,
@@ -44,6 +43,14 @@ class AllocationEditor extends StatelessWidget {
                   validator: (it) => null,
                   onSave: (it) => state.updatedAllocation.name = it ?? '',
                 ),
+              ),
+              rowSpacing,
+              labelRow(
+                context,
+                'Date',
+                _DateField(initial: null, onSave: (it) => state.updatedAllocation.timestamp = it),
+                tooltip:
+                    "Optional. If set, allocates this amount to a different date than the parent transaction's.",
               ),
               rowSpacing,
               labelRow(
@@ -79,8 +86,37 @@ class AllocationEditor extends StatelessWidget {
           // onReset: state.resetAllocation,
           onSave: state.saveAllocation,
           onCancel: state.clearFocus,
-        )
+        ),
       ],
+    );
+  }
+}
+
+final _dateFormat = DateFormat('MM/dd/yy');
+
+class _DateField extends StatelessWidget {
+  const _DateField({this.initial, this.onSave});
+
+  final DateTime? initial;
+  final Function(DateTime)? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return LibraTextFormField(
+      initial: (initial == null) ? '' : _dateFormat.format(initial!),
+      hint: 'MM/DD/YY',
+      validator: (String? value) {
+        if (value == null || value.isEmpty) return null;
+        try {
+          _dateFormat.parse(value, true);
+          return null;
+        } on FormatException {
+          return ''; // No message to not take up sapce
+        }
+      },
+      onSave: (it) {
+        if (it != null && it.isNotEmpty) onSave?.call(_dateFormat.parse(it, true));
+      },
     );
   }
 }
