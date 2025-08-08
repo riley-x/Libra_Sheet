@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:libra_sheet/components/cards/color_indicator_card.dart';
 import 'package:libra_sheet/data/objects/allocation.dart';
 import 'package:libra_sheet/data/int_dollar.dart';
 import 'package:libra_sheet/data/objects/category.dart';
 
+final _dtFormat = DateFormat("M/d/yy");
+
 class AllocationCard extends StatelessWidget {
   final Allocation allocation;
   final Function(Allocation)? onTap;
 
-  const AllocationCard(
-    this.allocation, {
-    this.onTap,
-    super.key,
-  });
+  const AllocationCard(this.allocation, {this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +26,8 @@ class AllocationCard extends StatelessWidget {
       borderColor: (isUncategorized)
           ? Theme.of(context).colorScheme.error
           : (isInvestment)
-              ? Theme.of(context).colorScheme.primary
-              : null,
+          ? Theme.of(context).colorScheme.primary
+          : null,
       onTap: onTap == null ? null : () => onTap!.call(allocation),
       child: Row(
         children: [
@@ -36,11 +35,7 @@ class AllocationCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  allocation.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(allocation.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                 Text(
                   allocation.category?.name ?? '',
                   style: Theme.of(context).textTheme.labelLarge,
@@ -51,9 +46,12 @@ class AllocationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 15),
-          Text(
-            allocation.value.dollarString(),
-            style: Theme.of(context).textTheme.bodyMedium,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(allocation.value.dollarString(), style: Theme.of(context).textTheme.bodyMedium),
+              if (allocation.timestamp != null) Text(_dtFormat.format(allocation.timestamp!)),
+            ],
           ),
         ],
       ),
