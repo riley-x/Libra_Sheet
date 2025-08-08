@@ -534,7 +534,7 @@ String createTransactionQuery({
       allocationFilter = "(a.$allocationField $condition)";
     } else {
       transactionFilter += " AND (t.$transactionField $condition)";
-      allocationFilter += " AND (t.$allocationField $condition)";
+      allocationFilter += " AND (a.$allocationField $condition)";
     }
     transactionArgs.addAll(args);
     allocationArgs.addAll(args);
@@ -559,20 +559,21 @@ String createTransactionQuery({
     append(_category, allocationsCategory, categoryExpression, categories);
   }
 
-  /// Name
-  if (filters.name != null && filters.name!.isNotEmpty) {
-    if (transactionFilter.isEmpty) {
-      transactionFilter = "(t.$_name LIKE ? OR t.$_note LIKE ?)";
-      allocationFilter = "(a.$allocationsName LIKE ?)";
-    } else {
-      transactionFilter += " AND (t.$_name LIKE ? OR t.$_note LIKE ?)";
-      allocationFilter += " AND (a.$allocationsName LIKE ?)";
-    }
-    final wc = "%${filters.name}%";
-    transactionArgs.add(wc);
-    transactionArgs.add(wc);
-    allocationArgs.add(wc);
-  }
+  /// Text search. This would require matching both name AND category/date on the alloc.
+  /// But we can be looser than that (see allocHaving).
+  // if (filters.name != null && filters.name!.isNotEmpty) {
+  //   if (transactionFilter.isEmpty) {
+  //     transactionFilter = "(t.$_name LIKE ? OR t.$_note LIKE ?)";
+  //     allocationFilter = "(a.$allocationsName LIKE ?)";
+  //   } else {
+  //     transactionFilter += " AND (t.$_name LIKE ? OR t.$_note LIKE ?)";
+  //     allocationFilter += " AND (a.$allocationsName LIKE ?)";
+  //   }
+  //   final wc = "%${filters.name}%";
+  //   transactionArgs.add(wc);
+  //   transactionArgs.add(wc);
+  //   allocationArgs.add(wc);
+  // }
 
   final String? innerTable;
   final String tagWhere;
@@ -613,6 +614,18 @@ String createTransactionQuery({
     tagHaving += " ELSE 0 END ) = 1";
   }
 
+  /// Text search ///
+  /// Note we allow searching among all allocations even if they don't match the
+  /// categories or dates specified.
+  var allocHaving = '';
+  if (filters.name != null && filters.name!.isNotEmpty) {
+    allocHaving = "HAVING (t.$_name LIKE ? OR t.$_note LIKE ? OR $_allocNames LIKE ?)";
+    final wc = "%${filters.name}%";
+    args.add(wc);
+    args.add(wc);
+    args.add(wc);
+  }
+
   /// Reimbursements ///
   var reimbHaving = '';
   if (filters.hasReimbursement == true) {
@@ -631,6 +644,7 @@ String createTransactionQuery({
     innerTable: innerTable,
     tagWhere: tagWhere,
     tagHaving: tagHaving,
+    allocHaving: allocHaving,
     reimbHaving: reimbHaving,
     limit: limit,
   );
