@@ -96,13 +96,13 @@ extension AllocationsTransactionExtension on Transaction {
     await updateCategoryHistory(
       account: parent.account!.key,
       category: parent.category.key,
-      date: parent.date,
+      date: alloc.timestamp ?? parent.date,
       delta: -signedValue,
     );
     await updateCategoryHistory(
       account: parent.account!.key,
       category: alloc.category!.key,
-      date: parent.date,
+      date: alloc.timestamp ?? parent.date,
       delta: signedValue,
     );
   }
@@ -127,13 +127,13 @@ extension AllocationsTransactionExtension on Transaction {
     await updateCategoryHistory(
       account: parent.account!.key,
       category: parent.category.key,
-      date: parent.date,
+      date: alloc.timestamp ?? parent.date,
       delta: signedValue,
     );
     await updateCategoryHistory(
       account: parent.account!.key,
       category: alloc.category!.key,
-      date: parent.date,
+      date: alloc.timestamp ?? parent.date,
       delta: -signedValue,
     );
   }
