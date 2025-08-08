@@ -48,7 +48,10 @@ class AllocationEditor extends StatelessWidget {
               labelRow(
                 context,
                 'Date',
-                _DateField(initial: null, onSave: (it) => state.updatedAllocation.timestamp = it),
+                _DateField(
+                  initial: state.focusedAllocation?.timestamp,
+                  onSave: (it) => state.updatedAllocation.timestamp = it,
+                ),
                 tooltip:
                     "Optional. If set, allocates this amount to a different date than the parent transaction's.",
               ),

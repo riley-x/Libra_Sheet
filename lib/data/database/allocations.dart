@@ -45,6 +45,7 @@ Map<String, dynamic> _toMap(lt.Transaction parent, Allocation a, int listIndex) 
     _category: a.category?.key ?? 0,
     _value: a.value,
     _index: listIndex,
+    _timestamp: a.timestamp,
   };
   if (a.key != 0) {
     map[_key] = a.key;
@@ -58,6 +59,7 @@ Allocation _fromMap(Map<int, Category> categories, Map<String, dynamic> map) {
     name: map[_name],
     category: categories[map[_category]] ?? Category.empty,
     value: map[_value],
+    timestamp: map[_timestamp],
   );
 }
 
