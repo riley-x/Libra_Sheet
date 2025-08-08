@@ -33,7 +33,7 @@ const _allocValues = "alloc_values";
 const _allocTimestamps = "alloc_timestamps";
 const _reimbTotal = "reimb_total";
 
-/// This is just for filtering by text.
+/// This is just for filtering by text in the alloc HAVING clause.
 const _allocNames = "alloc_names";
 
 /// Public alias column names
