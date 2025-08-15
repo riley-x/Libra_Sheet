@@ -44,8 +44,17 @@ jobs:
             "dist/Libra Sheet.dmg" \
             "build/macos/Build/Products/Release/Libra Sheet.app"
 
-      - name: Upload DMG artifact
-        uses: actions/upload-artifact@v4
+      # - name: Upload DMG artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: LibraSheet-macos-dmg
+      #     path: "dist/Libra Sheet.dmg"
+
+      - name: Upload DMG to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: LibraSheet-macos-dmg
-          path: "dist/Libra Sheet.dmg"
+          tag_name: nightly
+          name: Latest macOS Build
+          files: "dist/Libra Sheet.dmg"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
