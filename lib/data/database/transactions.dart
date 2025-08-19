@@ -513,7 +513,7 @@ String createTransactionQuery({
 
   /// Basic filters (innermost where clause) ///
   String innerWhere = '';
-  void addTagWhere(String query) {
+  void addInnerWhere(String query) {
     if (innerWhere.isEmpty) {
       innerWhere = "WHERE ($query)";
     } else {
@@ -522,15 +522,15 @@ String createTransactionQuery({
   }
 
   if (filters.minValue != null) {
-    addTagWhere("t.$_value >= ?");
+    addInnerWhere("t.$_value >= ?");
     args.add(filters.minValue);
   }
   if (filters.maxValue != null) {
-    addTagWhere("t.$_value <= ?");
+    addInnerWhere("t.$_value <= ?");
     args.add(filters.maxValue);
   }
   if (filters.accounts.isNotEmpty) {
-    addTagWhere("t.$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
+    addInnerWhere("t.$_account in (${List.filled(filters.accounts.length, '?').join(',')})");
     args.addAll(filters.accounts.map((e) => e.key));
   }
 
@@ -594,7 +594,7 @@ String createTransactionQuery({
   final String tagWhere;
   if (transactionFilter.isNotEmpty || filters.hasAllocation == true) {
     if (transactionFilter.isNotEmpty) {
-      addTagWhere("($transactionFilter) OR ($allocationFilter)");
+      addInnerWhere("($transactionFilter) OR ($allocationFilter)");
       args.addAll(transactionArgs);
       args.addAll(allocationArgs);
     }
@@ -602,12 +602,13 @@ String createTransactionQuery({
     innerTable =
         '''
       (
-        SELECT t.*
-        FROM 
-          $transactionsTable t
-        $allocJoinMethod
-          $allocationsTable a ON a.$allocationsTransaction = t.$_key
-        $innerWhere
+      SELECT t.*
+      FROM 
+        $transactionsTable t
+      $allocJoinMethod
+        $allocationsTable a ON a.$allocationsTransaction = t.$_key
+      $innerWhere
+      GROUP BY t.$_key
       )
     ''';
     tagWhere = '';
