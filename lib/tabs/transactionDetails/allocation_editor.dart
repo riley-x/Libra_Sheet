@@ -17,10 +17,8 @@ class AllocationEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<TransactionDetailsState>();
-    var categories = context.watch<LibraAppState>().categories.flattenedCategories(
-      state.expenseType,
-    );
-    categories = [Category.ignore, Category.other] + categories;
+    var categories = context.watch<LibraAppState>().categories.parentCategories(state.expenseType);
+    categories += [Category.ignore, Category.other];
     return Column(
       children: [
         const SizedBox(height: 10),
@@ -70,7 +68,7 @@ class AllocationEditor extends StatelessWidget {
               labelRow(
                 context,
                 'Category',
-                CategorySelectionFormField(
+                CategorySelectionFormFieldV2(
                   height: 35,
                   initial: state.focusedAllocation?.category,
                   categories: categories,
