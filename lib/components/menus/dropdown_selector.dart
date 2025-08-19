@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libra_sheet/components/menus/custom_submenu_button.dart';
 
 /// Dropdown button for selecting an object of class [T].
 class DropdownSelector<T> extends StatefulWidget {
@@ -45,8 +46,10 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedWidget =
-        (widget.selectedBuilder ?? widget.builder).call(context, widget.selected);
+    final selectedWidget = (widget.selectedBuilder ?? widget.builder).call(
+      context,
+      widget.selected,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -68,10 +71,11 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
           final subItems = widget.subItems?.call(x);
           Widget button;
           if (subItems != null && subItems.isNotEmpty) {
-            button = SubmenuButton(
+            button = CustomSubmenuButton(
+              onSelect: () => widget.onSelected?.call(x),
               menuChildren: [
                 for (final child in subItems)
-                  MenuItemButton(
+                  CustomMenuItemButton(
                     onPressed: () => widget.onSelected?.call(child),
                     child: build(child),
                   ),
@@ -79,7 +83,7 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
               child: build(x, rightMargin: 32), // for right arrow icon
             );
           } else {
-            button = MenuItemButton(
+            button = CustomMenuItemButton(
               focusNode: (i == 0) ? _firstFocus : null,
               onPressed: () => widget.onSelected?.call(x),
               child: build(x),
@@ -97,7 +101,7 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
           );
         }
 
-        return MenuAnchor(
+        return CustomMenuAnchor(
           controller: _menuController,
           crossAxisUnconstrained: false,
           menuChildren: menuChildren,
@@ -155,9 +159,10 @@ class LibraDropdownFormField<T> extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: borderRadius ?? BorderRadius.circular(4),
             border: Border.all(
-                color: (state.hasError)
-                    ? Theme.of(context).colorScheme.error
-                    : Theme.of(context).colorScheme.outline),
+              color: (state.hasError)
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.outline,
+            ),
           ),
           child: DropdownSelector<T?>(
             selected: state.value,

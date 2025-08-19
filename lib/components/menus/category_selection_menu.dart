@@ -66,12 +66,8 @@ class CategorySelectionFormField extends StatelessWidget {
       child: LibraDropdownFormField<Category?>(
         initial: initial,
         items: categories,
-        builder: (context, cat) => categoryMenuBuilder(
-          context,
-          cat,
-          superAsNone: superAsNone,
-          nullText: nullText,
-        ),
+        builder: (context, cat) =>
+            categoryMenuBuilder(context, cat, superAsNone: superAsNone, nullText: nullText),
         selectedBuilder: (context, cat) => categoryMenuBuilder(
           context,
           cat,
@@ -136,10 +132,7 @@ class CategorySelectionFormFieldV2 extends StatelessWidget {
         validator: validator,
         subItems: (item) {
           if (item != null && item.subCats.isNotEmpty) {
-            return [
-              ...item.subCats,
-              item,
-            ];
+            return item.subCats;
           }
           return null;
         },
