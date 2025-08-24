@@ -83,7 +83,6 @@ class DatabaseScreen extends StatelessWidget {
                 try {
                   final bytes = await file.readAsBytes();
                   await LibraDatabase.close();
-                  await databaseFactoryFfiWeb.deleteDatabase(LibraDatabase.databasePath);
                   await databaseFactoryFfiWeb.writeDatabaseBytes(LibraDatabase.databasePath, bytes);
                   await LibraDatabase.open();
                   await state.onDatabaseReplaced();

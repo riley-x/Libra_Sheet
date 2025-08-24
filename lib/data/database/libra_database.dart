@@ -49,6 +49,12 @@ class LibraDatabase {
   // Database setup
   //-------------------------------------------------------------------------------------
   static Future<String> _getDatabasePath() async {
+    /// For some reason, on Microsoft Edge github pages, on open this gets mapped to
+    /// /https:/riley-x.github.io/libra_sheet.db
+    /// But then databaseFactoryFfiWeb.writeDatabaseBytes() creates a separate DB at
+    /// https://riley-x.github.io/libra_sheet.db
+    /// Doesn't happen on Firefox or Edge local debug because both map to just "/libra_sheet.db"
+    /// Seems like some bug with sqflite that injects the hostname and then mangles the path.
     if (kIsWeb) return "/libra_sheet.db";
 
     if (_db != null) return _db!.path;
