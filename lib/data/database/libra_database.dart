@@ -49,7 +49,7 @@ class LibraDatabase {
   // Database setup
   //-------------------------------------------------------------------------------------
   static Future<String> _getDatabasePath() async {
-    if (kIsWeb) return "libra_sheet.db";
+    if (kIsWeb) return "/libra_sheet.db";
 
     if (_db != null) return _db!.path;
 
