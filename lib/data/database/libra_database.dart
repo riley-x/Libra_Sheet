@@ -49,9 +49,9 @@ class LibraDatabase {
   // Database setup
   //-------------------------------------------------------------------------------------
   static Future<String> _getDatabasePath() async {
-    if (_db != null) return _db!.path;
-
     if (kIsWeb) return "libra_sheet.db";
+
+    if (_db != null) return _db!.path;
 
     /// Windows: C:\Users\riley\Documents\Projects\libra_sheet\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
     /// Windows exe: C:\Users\riley\Documents\Projects\libra_sheet\build\windows\runner\Release\.dart_tool\sqflite_common_ffi\databases\libra_sheet.db
