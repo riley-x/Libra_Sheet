@@ -69,7 +69,7 @@ class DatabaseScreen extends StatelessWidget {
                   context: context,
                   title: 'Upload Backup',
                   msg:
-                      'Uploading a backup will override everything currently stored.'
+                      'Uploading a backup will override everything currently stored. '
                       'Are you sure you wish to continue?',
                 );
                 if (!ok) return;
@@ -80,11 +80,22 @@ class DatabaseScreen extends StatelessWidget {
                 if (!context.mounted) return;
                 showLoadingScrim(context: context);
 
-                final bytes = await file.readAsBytes();
-                await LibraDatabase.close();
-                await databaseFactoryFfiWeb.writeDatabaseBytes(LibraDatabase.databasePath, bytes);
-                await LibraDatabase.open();
-                await state.onDatabaseReplaced();
+                try {
+                  final bytes = await file.readAsBytes();
+                  await LibraDatabase.close();
+                  await databaseFactoryFfiWeb.deleteDatabase(LibraDatabase.databasePath);
+                  await databaseFactoryFfiWeb.writeDatabaseBytes(LibraDatabase.databasePath, bytes);
+                  await LibraDatabase.open();
+                  await state.onDatabaseReplaced();
+                } catch (e) {
+                  debugPrint('Database restore failed: $e');
+                  // Re-open database if an error occurred to ensure app can continue
+                  if (!LibraDatabase.isOpen()) {
+                    await LibraDatabase.open();
+                    await state.onDatabaseReplaced();
+                  }
+                  rethrow;
+                }
 
                 if (!context.mounted) return;
                 Navigator.of(context, rootNavigator: true).pop();

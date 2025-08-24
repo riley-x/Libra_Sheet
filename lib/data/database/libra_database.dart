@@ -36,6 +36,10 @@ class LibraDatabase {
   static Database? _db;
   static Function(dynamic)? errorCallback;
 
+  static bool isOpen() {
+    return _db != null;
+  }
+
   static Future<bool> isEmpty() async {
     if (_db == null) return true;
     return await _db!.countAccounts() == 0;
