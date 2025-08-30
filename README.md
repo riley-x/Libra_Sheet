@@ -18,11 +18,11 @@ You can preview a web-based version at [riley-x.github.io/Libra_Sheet](https://r
 
 ### And how it changes over time
 
-![Cashflow screen](docs/screen_cashflow.png)
+![Cashflow screen](docs/screen_expense_history.png)
 
-### With multiple different visualizations
+<!-- ### With multiple different visualizations
 
-![Categories screen](docs/screen_categories.png)
+![Categories screen](docs/screen_categories.png) -->
 
 ### Or view details for a specific category
 
