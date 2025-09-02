@@ -40,11 +40,7 @@ class DiscreteCartesianGraphPainter<T> extends CustomPainter {
     if (size == currentSize) return;
 
     currentSize = size;
-    coordSpace = CartesianCoordinateSpace.fromAxes(
-      canvasSize: size,
-      xAxis: xAxis,
-      yAxis: yAxis,
-    );
+    coordSpace = CartesianCoordinateSpace.fromAxes(canvasSize: size, xAxis: xAxis, yAxis: yAxis);
     coordSpace!.autoRange(xAxis: xAxis, yAxis: yAxis, data: data);
 
     // TODO these are hard coded for bottom and left aligned labels
@@ -203,6 +199,7 @@ class DiscreteCartesianGraph extends StatefulWidget {
   final Function(int iSeries, Series series, int iData)? onTap;
   final Function(int xStart, int xEnd)? onRange;
   final Widget? Function(DiscreteCartesianGraphPainter, int?)? hoverTooltip;
+  final bool allowSingleXValueRangeSelection;
 
   const DiscreteCartesianGraph({
     super.key,
@@ -212,6 +209,7 @@ class DiscreteCartesianGraph extends StatefulWidget {
     this.onTap,
     this.onRange,
     this.hoverTooltip,
+    this.allowSingleXValueRangeSelection = true,
   });
 
   @override
@@ -286,7 +284,8 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
     final userX = _getXLoc(event.localPosition);
     setState(() {
       hoverLocX = userX;
-      hoverLocY = (event.localPosition.dy > painter!.coordSpace!.yAxis.pixelMin ||
+      hoverLocY =
+          (event.localPosition.dy > painter!.coordSpace!.yAxis.pixelMin ||
               event.localPosition.dy < painter!.coordSpace!.yAxis.pixelMax)
           ? null
           : painter!.coordSpace!.yAxis.pixelToUser(event.localPosition.dy);
@@ -350,7 +349,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
       panStart = null;
       panEnd = null;
     });
-    if (start != null && end != null) {
+    if (start != null && end != null && (widget.allowSingleXValueRangeSelection || start != end)) {
       widget.onRange?.call(min(start, end), max(start, end));
     }
   }
@@ -364,7 +363,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
 
   @override
   Widget build(BuildContext context) {
-    // print(MediaQuery.of(context).devicePixelRatio);
+    final selectionOverlayPadding = widget.allowSingleXValueRangeSelection ? 0.5 : 0;
     return MouseRegion(
       onHover: onHover,
       onExit: onExit,
@@ -380,10 +379,7 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
             fit: StackFit.expand,
             children: [
               RepaintBoundary(
-                child: CustomPaint(
-                  painter: painter,
-                  size: Size.infinite,
-                ),
+                child: CustomPaint(painter: painter, size: Size.infinite),
               ),
               if (painter != null && painter!.coordSpace != null) ...[
                 RepaintBoundary(
@@ -399,8 +395,8 @@ class _DiscreteCartesianGraphState extends State<DiscreteCartesianGraph> {
                 if (panStart != null && panEnd != null)
                   RepaintBoundary(
                     child: XRangeSelectionOverlay(
-                      xStart: min(panStart!, panEnd!).toDouble() - 0.5,
-                      xEnd: max(panStart!, panEnd!).toDouble() + 0.5,
+                      xStart: min(panStart!, panEnd!).toDouble() - selectionOverlayPadding,
+                      xEnd: max(panStart!, panEnd!).toDouble() + selectionOverlayPadding,
                       coords: painter!.coordSpace!,
                     ),
                   ),

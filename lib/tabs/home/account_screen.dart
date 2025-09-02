@@ -48,9 +48,9 @@ class _AccountScreenState extends State<AccountScreen> {
 
     /// Load all category histories
     final appState = context.read<LibraAppState>();
-    final rawHistory = await LibraDatabase.read((db) => db.getCategoryHistory(
-          accounts: [widget.account.key],
-        ));
+    final rawHistory = await LibraDatabase.read(
+      (db) => db.getCategoryHistory(accounts: [widget.account.key]),
+    );
     if (!mounted || rawHistory == null) return; // across async await
 
     /// Output list
@@ -97,7 +97,9 @@ class _AccountScreenState extends State<AccountScreen> {
         !filters.categories.isEmpty ||
         filters.tags.isNotEmpty ||
         filters.accounts.length != 1 ||
-        filters.accounts.first != widget.account) return "Modified";
+        filters.accounts.first != widget.account) {
+      return "Modified";
+    }
     return null;
   }
 
@@ -107,10 +109,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final accountHistory = state.historyMap[widget.account.key];
 
     return ChangeNotifierProvider(
-      create: (context) => TransactionFilterState(
-        context.read(),
-        initialFilters: initialFilters,
-      ),
+      create: (context) => TransactionFilterState(context.read(), initialFilters: initialFilters),
       builder: (context, child) {
         final transactionState = context.watch<TransactionFilterState>();
         return Column(
@@ -136,10 +135,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    width: 1,
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
+                  Container(width: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   Expanded(
                     child: (transactionState.selected.isEmpty)
                         ? _Graphs(widget.account, categoryHistory, this)
@@ -204,8 +200,8 @@ class _Graphs extends StatelessWidget {
               Text(
                 'Show\nIgnored',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               Transform.scale(
@@ -224,7 +220,7 @@ class _Graphs extends StatelessWidget {
             padding: const EdgeInsets.only(left: 4, right: 8, bottom: 4),
             child: _CategoryChart(account, categoryHistory),
           ),
-        )
+        ),
       ],
     );
   }
@@ -292,16 +288,15 @@ class _Graph extends StatelessWidget {
           ),
         ),
       ]),
-      hoverTooltip: (painter, loc) => PooledTooltip(
-        painter,
-        loc,
-        labelAlignment: Alignment.center,
+      hoverTooltip: (painter, loc) => PooledTooltip(painter, loc, labelAlignment: Alignment.center),
+      onRange: (xStart, xEnd) => state.setTimeFrame(
+        TimeFrame(
+          TimeFrameEnum.custom,
+          customStart: months[xStart],
+          customEndInclusive: months[xEnd],
+        ),
       ),
-      onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
-        TimeFrameEnum.custom,
-        customStart: months[xStart],
-        customEndInclusive: months[xEnd],
-      )),
+      allowSingleXValueRangeSelection: false,
     );
   }
 }

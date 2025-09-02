@@ -18,9 +18,7 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 class HomeCharts extends StatelessWidget {
-  const HomeCharts({
-    super.key,
-  });
+  const HomeCharts({super.key});
 
   static const minNetWorthHeight = 500.0;
   static const minPieHeight = 400.0;
@@ -68,7 +66,7 @@ class _NetWorthTitle extends StatelessWidget {
             (data.lastOrNull?.value ?? 0).dollarString(),
             style: Theme.of(context).textTheme.headlineMedium,
             maxLines: 1,
-          )
+          ),
         ],
       ),
     );
@@ -97,7 +95,7 @@ class _HomeChartSelectors extends StatelessWidget {
             // SizedBox(height: 5),
             _TimeFrameSelector(),
           ],
-        )
+        ),
       ],
     );
   }
@@ -113,18 +111,9 @@ class _ModeSelector extends StatelessWidget {
     return SegmentedButton<HomeChartMode>(
       showSelectedIcon: false,
       segments: const [
-        ButtonSegment(
-          value: HomeChartMode.stacked,
-          icon: Icon(Icons.area_chart),
-        ),
-        ButtonSegment(
-          value: HomeChartMode.netWorth,
-          icon: Icon(Icons.show_chart),
-        ),
-        ButtonSegment(
-          value: HomeChartMode.pies,
-          icon: Icon(Icons.pie_chart),
-        ),
+        ButtonSegment(value: HomeChartMode.stacked, icon: Icon(Icons.area_chart)),
+        ButtonSegment(value: HomeChartMode.netWorth, icon: Icon(Icons.show_chart)),
+        ButtonSegment(value: HomeChartMode.pies, icon: Icon(Icons.pie_chart)),
       ],
       selected: {state.mode},
       onSelectionChanged: (newSelection) => state.setMode(newSelection.first),
@@ -154,53 +143,47 @@ class _PieCharts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      /// Left/right split
-      if (constraints.maxWidth > 2 * HomeCharts.minPieHeight + 16 &&
-          constraints.maxWidth > constraints.maxHeight) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            const Expanded(child: _AssetsPie(null)),
-            Container(
-              width: 1,
-              height: constraints.maxHeight,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 10),
-            const Expanded(child: _LiabilitiesPie(null)),
-          ],
-        );
-      }
-
-      /// Top/bottom split
-      else if (constraints.maxHeight > 2 * HomeCharts.minPieHeight) {
-        return Column(
-          children: [
-            const Expanded(child: _AssetsPie(null)),
-            Container(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const Expanded(child: _LiabilitiesPie(null)),
-          ],
-        );
-      }
-
-      /// Top/bottom fixed height with scroll
-      else {
-        return ListView(
-          children: [
-            const Center(child: _AssetsPie(HomeCharts.minPieHeight)),
-            Container(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const Center(child: _LiabilitiesPie(HomeCharts.minPieHeight)),
-          ],
-        );
-      }
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        /// Left/right split
+        if (constraints.maxWidth > 2 * HomeCharts.minPieHeight + 16 &&
+            constraints.maxWidth > constraints.maxHeight) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const Expanded(child: _AssetsPie(null)),
+              Container(
+                width: 1,
+                height: constraints.maxHeight,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              const SizedBox(height: 10),
+              const Expanded(child: _LiabilitiesPie(null)),
+            ],
+          );
+        }
+        /// Top/bottom split
+        else if (constraints.maxHeight > 2 * HomeCharts.minPieHeight) {
+          return Column(
+            children: [
+              const Expanded(child: _AssetsPie(null)),
+              Container(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+              const Expanded(child: _LiabilitiesPie(null)),
+            ],
+          );
+        }
+        /// Top/bottom fixed height with scroll
+        else {
+          return ListView(
+            children: [
+              const Center(child: _AssetsPie(HomeCharts.minPieHeight)),
+              Container(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+              const Center(child: _LiabilitiesPie(HomeCharts.minPieHeight)),
+            ],
+          );
+        }
+      },
+    );
   }
 }
 
@@ -227,12 +210,7 @@ class _NetWorthGraph extends StatelessWidget {
           valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
           min: 0,
         ),
-        xAxis: MonthAxis(
-          theme: Theme.of(context),
-          axisLoc: 0,
-          dates: months,
-          pad: 0,
-        ),
+        xAxis: MonthAxis(theme: Theme.of(context), axisLoc: 0, dates: months, pad: 0),
         data: SeriesCollection([
           LineSeries<TimeIntValue>(
             name: "Net Worth",
@@ -248,11 +226,14 @@ class _NetWorthGraph extends StatelessWidget {
             ),
           ),
         ]),
-        onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
-          TimeFrameEnum.custom,
-          customStart: months[xStart],
-          customEndInclusive: months[xEnd],
-        )),
+        onRange: (xStart, xEnd) => state.setTimeFrame(
+          TimeFrame(
+            TimeFrameEnum.custom,
+            customStart: months[xStart],
+            customEndInclusive: months[xEnd],
+          ),
+        ),
+        allowSingleXValueRangeSelection: false,
       ),
     );
   }
@@ -264,8 +245,11 @@ class _AssetsPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accounts =
-        context.watch<AccountState>().list.where((it) => it.type != AccountType.liability).toList();
+    final accounts = context
+        .watch<AccountState>()
+        .list
+        .where((it) => it.type != AccountType.liability)
+        .toList();
     final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
@@ -291,8 +275,11 @@ class _LiabilitiesPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accounts =
-        context.watch<AccountState>().list.where((it) => it.type == AccountType.liability).toList();
+    final accounts = context
+        .watch<AccountState>()
+        .list
+        .where((it) => it.type == AccountType.liability)
+        .toList();
     final total = accounts.fold(0, (cum, acc) => cum + acc.balance);
     return ChartWithTitle(
       height: height,
@@ -327,12 +314,7 @@ class _StackedChart extends StatelessWidget {
           axisLoc: null,
           valToString: (val, [order]) => formatDollar(val, dollarSign: order == null, order: order),
         ),
-        xAxis: MonthAxis(
-          theme: Theme.of(context),
-          axisLoc: 0,
-          dates: months,
-          pad: 0,
-        ),
+        xAxis: MonthAxis(theme: Theme.of(context), axisLoc: 0, dates: months, pad: 0),
         data: SeriesCollection([
           for (final accHistory in state.liabAccounts + state.assetAccounts)
             StackLineSeries<int>(
@@ -343,11 +325,14 @@ class _StackedChart extends StatelessWidget {
               fillColor: accHistory.account.color.withAlpha(128),
             ),
         ]),
-        onRange: (xStart, xEnd) => state.setTimeFrame(TimeFrame(
-          TimeFrameEnum.custom,
-          customStart: months[xStart],
-          customEndInclusive: months[xEnd],
-        )),
+        onRange: (xStart, xEnd) => state.setTimeFrame(
+          TimeFrame(
+            TimeFrameEnum.custom,
+            customStart: months[xStart],
+            customEndInclusive: months[xEnd],
+          ),
+        ),
+        allowSingleXValueRangeSelection: false,
       ),
     );
   }
