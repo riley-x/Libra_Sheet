@@ -1,3 +1,5 @@
+import 'package:libra_sheet/data/enums.dart';
+
 /// A view mode selectable in the [AnalyzeTabViewSelector]
 enum AnalyzeTabView {
   doubleStack,
@@ -39,21 +41,36 @@ abstract class AnalyzeTabViewState {
 }
 
 class DoubleStackView implements AnalyzeTabViewState {
-  const DoubleStackView({required this.showSubcats, this.showSeparated = false});
+  const DoubleStackView({
+    required this.showSubcats,
+    this.showSeparated = false,
+    this.filterType = ExpenseFilterType.all,
+  });
 
   @override
   AnalyzeTabView get type => AnalyzeTabView.doubleStack;
 
   final bool showSubcats;
   final bool showSeparated;
+  final ExpenseFilterType filterType;
 
   DoubleStackView withSubcats(bool value) {
-    return DoubleStackView(showSubcats: value, showSeparated: showSeparated);
+    return DoubleStackView(
+      showSubcats: value,
+      showSeparated: showSeparated,
+      filterType: filterType,
+    );
   }
 
   DoubleStackView withSeparated(bool value) {
-    return DoubleStackView(showSubcats: showSubcats, showSeparated: value);
+    return DoubleStackView(showSubcats: showSubcats, showSeparated: value, filterType: filterType);
   }
+
+  DoubleStackView withType(ExpenseFilterType filterType) => DoubleStackView(
+    showSubcats: showSubcats,
+    showSeparated: showSeparated,
+    filterType: filterType,
+  );
 }
 
 class SankeyView implements AnalyzeTabViewState {
