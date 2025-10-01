@@ -127,6 +127,52 @@ class _DropdownSelectorState<T> extends State<DropdownSelector<T>> {
   }
 }
 
+class BorderedDropdownSelector<T> extends StatelessWidget {
+  const BorderedDropdownSelector({
+    super.key,
+    required this.selected,
+    required this.items,
+    this.subItems,
+    this.borderRadius,
+    this.hasError = false,
+    required this.builder,
+    this.selectedBuilder,
+    this.onSelected,
+  });
+
+  final T selected;
+  final List<T> items; // this should be nullable because FormField uses T? too
+  final Iterable<T>? Function(T item)? subItems;
+  final BorderRadius? borderRadius;
+  final bool hasError;
+  final Widget Function(BuildContext, T) builder;
+  final Widget Function(BuildContext, T)? selectedBuilder;
+  final Function(T)? onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius ?? BorderRadius.circular(4),
+        border: Border.all(
+          color: (hasError)
+              ? Theme.of(context).colorScheme.error
+              : Theme.of(context).colorScheme.outline,
+        ),
+      ),
+      child: DropdownSelector<T>(
+        selected: selected,
+        items: items,
+        subItems: subItems,
+        builder: builder,
+        selectedBuilder: selectedBuilder,
+        borderRadius: borderRadius ?? BorderRadius.circular(4),
+        onSelected: onSelected,
+      ),
+    );
+  }
+}
+
 class LibraDropdownFormField<T> extends StatelessWidget {
   const LibraDropdownFormField({
     super.key,

@@ -38,16 +38,6 @@ class TransactionDetailsEditor extends StatelessWidget {
     final state = context.watch<TransactionDetailsState>();
     var categories = context.watch<LibraAppState>().categories.parentCategories(state.expenseType);
     categories += [Category.ignore, Category.other];
-    // the transaction constructor will convert Category.empty into the correct super category
-    // however we must manually convert the initial category to [Category.empty] so that there isn't
-    // a duplicate.
-    Category? initialCategory() {
-      if (state.seed == null) return null;
-      if (state.seed!.category == Category.income || state.seed!.category == Category.expense) {
-        return Category.empty;
-      }
-      return state.seed!.category;
-    }
 
     /// WARNING!
     /// Form rebuilds every FormField descendant on every change of one of the fields (i.e. it calls
@@ -123,11 +113,11 @@ class TransactionDetailsEditor extends StatelessWidget {
                         labelRow(
                           context,
                           '', // not used
-                          CategorySelectionFormFieldV2(
+                          CategorySelectionDropDownV2(
                             height: 35,
-                            initial: initialCategory(),
+                            selected: state.category,
                             categories: categories,
-                            onSave: (it) => state.category = it,
+                            onSelected: state.onCategorySelected,
                           ),
                           labelCustom: const _CategoryLabel(),
                         ),

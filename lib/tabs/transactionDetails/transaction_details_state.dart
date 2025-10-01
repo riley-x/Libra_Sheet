@@ -76,14 +76,13 @@ class TransactionDetailsState extends ChangeNotifier {
   String? name;
   DateTime? date;
   int? value;
-  Category? category;
   String? note;
 
   /// Reimbursement editor
   int reimbursementValue = 0;
 
   /// Allocation editor
-  final Allocation updatedAllocation = Allocation(name: '', category: null, value: 0);
+  Allocation updatedAllocation = Allocation(name: '', category: null, value: 0);
 
   //---------------------------------------------------------------------------------------------
   // These variables are the UI state for the relevant fields. They are used to finalize the output
@@ -94,7 +93,9 @@ class TransactionDetailsState extends ChangeNotifier {
   /// filter state of the reimbursement targets. It is set on each [onValueChanged].
   ExpenseFilterType expenseType = ExpenseFilterType.all;
   TransactionDetailActiveFocus focus = TransactionDetailActiveFocus.none;
+  Category? category;
   String? errorMessage;
+  String? allocationErrorMessage;
   String? reimbursementError;
   bool saveAsRule = false;
 
@@ -117,8 +118,22 @@ class TransactionDetailsState extends ChangeNotifier {
       tags.insertAll(0, seed?.tags ?? const []);
       allocations.insertAll(0, seed?.allocations ?? const []);
       reimbursements.insertAll(0, seed?.reimbursements ?? const []);
+
+      category = _initialCategory();
+
       notifyListeners();
     }
+  }
+
+  // the transaction constructor will convert Category.empty into the correct super category
+  // however we must manually convert the initial category to [Category.empty] so that there isn't
+  // a duplicate.
+  Category? _initialCategory() {
+    if (seed == null) return null;
+    if (seed!.category == Category.income || seed!.category == Category.expense) {
+      return Category.empty;
+    }
+    return seed!.category;
   }
 
   void replaceSeed(Transaction? t) {
@@ -131,6 +146,7 @@ class TransactionDetailsState extends ChangeNotifier {
     /// Reset manual state elements
     saveAsRule = false;
     errorMessage = null;
+    allocationErrorMessage = null;
     reimbursementError = null;
     reimburseTarget = null;
     tags.clear();
@@ -320,22 +336,42 @@ class TransactionDetailsState extends ChangeNotifier {
     }
   }
 
+  String? _validateAllocation() {
+    if (!(allocationFormKey.currentState?.validate() ?? false)) {
+      return '';
+    }
+    allocationFormKey.currentState?.save();
+
+    if (updatedAllocation.category == null) {
+      if (updatedAllocation.timestamp != null && category != null) {
+        updatedAllocation.category = category;
+      } else {
+        return 'Category must be selected';
+      }
+    }
+    return null;
+  }
+
   /// Save a single allocation from the allocation editor in [allocations]
   void saveAllocation() {
-    if (allocationFormKey.currentState?.validate() ?? false) {
-      allocationFormKey.currentState?.save();
-      if (focusedAllocation == null) {
-        allocations.add(updatedAllocation.copy());
-      } else {
-        for (int i = 0; i < allocations.length; i++) {
-          if (allocations[i] == focusedAllocation) {
-            allocations[i] = updatedAllocation.copy(key: allocations[i].key);
-            break;
-          }
+    String? errorMsg = _validateAllocation();
+    if (errorMsg != null) {
+      allocationErrorMessage = errorMsg;
+      notifyListeners();
+      return;
+    }
+
+    if (focusedAllocation == null) {
+      allocations.add(updatedAllocation.copy());
+    } else {
+      for (int i = 0; i < allocations.length; i++) {
+        if (allocations[i] == focusedAllocation) {
+          allocations[i] = updatedAllocation.copy(key: allocations[i].key);
+          break;
         }
       }
-      clearFocus();
     }
+    clearFocus();
   }
 
   /// Validates the form for the reimbursement editor only. Returns an error message, or null on
@@ -417,6 +453,8 @@ class TransactionDetailsState extends ChangeNotifier {
   //---------------------------------------------------------------------------------------------
   void clearFocus() {
     focusedAllocation = null;
+    updatedAllocation = Allocation(name: '', category: null, value: 0);
+    allocationErrorMessage = null;
     focusedReimbursement = null;
     reimburseTarget = null;
     focus = TransactionDetailActiveFocus.none;
@@ -424,9 +462,10 @@ class TransactionDetailsState extends ChangeNotifier {
   }
 
   void focusAllocation(Allocation? alloc) {
-    if (focus == TransactionDetailActiveFocus.reimbursement) {
-      focusedReimbursement = null;
+    if (focus == TransactionDetailActiveFocus.allocation) {
+      return;
     }
+    clearFocus();
     focusedAllocation = alloc;
     focus = TransactionDetailActiveFocus.allocation;
     resetAllocation();
@@ -436,9 +475,10 @@ class TransactionDetailsState extends ChangeNotifier {
   }
 
   void focusReimbursement(Reimbursement? it) {
-    if (focus == TransactionDetailActiveFocus.allocation) {
-      focusedAllocation = null;
+    if (focus == TransactionDetailActiveFocus.reimbursement) {
+      return;
     }
+    clearFocus();
     focusedReimbursement = it;
     reimburseTarget = it?.target;
     focus = TransactionDetailActiveFocus.reimbursement;
@@ -465,6 +505,13 @@ class TransactionDetailsState extends ChangeNotifier {
     var newType = _valToFilterType(val);
     if (newType != expenseType) {
       expenseType = newType;
+      notifyListeners();
+    }
+  }
+
+  void onCategorySelected(Category? cat) {
+    if (category != cat) {
+      category = cat;
       notifyListeners();
     }
   }

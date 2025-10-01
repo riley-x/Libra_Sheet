@@ -140,3 +140,60 @@ class CategorySelectionFormFieldV2 extends StatelessWidget {
     );
   }
 }
+
+/// Doesn't wrap with FormField which is annoying and hard to see state
+class CategorySelectionDropDownV2 extends StatelessWidget {
+  const CategorySelectionDropDownV2({
+    super.key,
+    required this.categories,
+    this.selected,
+    this.onSelected,
+    this.borderRadius,
+    this.height,
+    this.superAsNone = false,
+    this.nullText,
+    this.hasError = false,
+  });
+
+  final List<Category?> categories;
+  final Category? selected;
+  final Function(Category?)? onSelected;
+  final BorderRadius? borderRadius;
+  final double? height;
+  final bool superAsNone;
+  final String? nullText;
+  final bool hasError;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: BorderedDropdownSelector<Category?>(
+        selected: selected,
+        items: categories,
+        subItems: (item) {
+          if (item != null && item.subCats.isNotEmpty) {
+            return item.subCats;
+          }
+          return null;
+        },
+        borderRadius: borderRadius,
+        hasError: hasError,
+        builder: (context, cat) => categoryMenuBuilder(
+          context,
+          cat,
+          indentSubcats: false,
+          superAsNone: superAsNone,
+          nullText: nullText,
+        ),
+        selectedBuilder: (context, cat) => categoryMenuBuilder(
+          context,
+          cat,
+          superAsNone: superAsNone,
+          selected: true,
+          nullText: nullText,
+        ),
+      ),
+    );
+  }
+}

@@ -15,7 +15,6 @@
 
 ## Refactor
 - Undo make AccountState an independent ChangeNotifier; huge hassle, need to watch the state everywhere you use an account. Alternative is to always fetch the account object from the AccountState instead of making it linked in other objects, to force the watch.
-- Remove MutableAllocation
 
 
 ## Low priority features

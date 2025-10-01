@@ -74,6 +74,7 @@ class AllocationEditor extends StatelessWidget {
                   categories: categories,
                   onSave: (it) => state.updatedAllocation.category = it,
                   borderRadius: BorderRadius.circular(4),
+                  validator: (cat) => null, // can be empty if only allocating by date
                 ),
               ),
             ],
@@ -88,6 +89,15 @@ class AllocationEditor extends StatelessWidget {
           onSave: state.saveAllocation,
           onCancel: state.clearFocus,
         ),
+        const SizedBox(height: 10),
+        if (state.allocationErrorMessage != null)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Text(
+              state.allocationErrorMessage!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
       ],
     );
   }
