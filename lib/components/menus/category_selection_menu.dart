@@ -170,6 +170,7 @@ class CategorySelectionDropDownV2 extends StatelessWidget {
       height: height,
       child: BorderedDropdownSelector<Category?>(
         selected: selected,
+        onSelected: onSelected,
         items: categories,
         subItems: (item) {
           if (item != null && item.subCats.isNotEmpty) {
