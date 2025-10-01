@@ -11,6 +11,7 @@ class ValueField extends StatelessWidget {
     this.onSave,
     this.onChanged,
     this.positiveOnly = false,
+    this.allowNull = false,
     this.controller,
     this.hint,
     this.validator,
@@ -21,6 +22,7 @@ class ValueField extends StatelessWidget {
   final Function(int?)? onChanged;
   final Key? formFieldKey;
   final bool positiveOnly;
+  final bool allowNull;
   final TextEditingController? controller;
   final String? hint;
   final String? Function(String?)? validator;
@@ -32,12 +34,13 @@ class ValueField extends StatelessWidget {
       controller: controller,
       hint: hint,
       initial: initial?.dollarString(dollarSign: false),
-      validator: validator ??
+      validator:
+          validator ??
           (String? text) {
-            if (text == null || text.isEmpty) return ''; // No message to not take up space
+            if (text == null || text.isEmpty) return allowNull ? null : 'Please enter a value';
             final val = text.toIntDollar();
-            if (val == null) return ''; // No message to not take up space
-            if (positiveOnly && val < 0) return '';
+            if (val == null) return 'Not a valid value';
+            if (positiveOnly && val < 0) return 'Must be positive';
             return null;
           },
       onChanged: (onChanged == null) ? null : (it) => onChanged!.call(it?.toIntDollar()),

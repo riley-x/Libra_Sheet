@@ -54,6 +54,7 @@ class TransactionDetailsState extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> allocationFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> reimbursementFormKey = GlobalKey<FormState>();
+  final TextEditingController valueController = TextEditingController();
   final TextEditingController reimbursementValueController = TextEditingController();
 
   //---------------------------------------------------------------------------------------------
@@ -120,6 +121,7 @@ class TransactionDetailsState extends ChangeNotifier {
       reimbursements.insertAll(0, seed?.reimbursements ?? const []);
 
       category = _initialCategory();
+      valueController.text = seed?.value.dollarString(dollarSign: false) ?? '';
 
       notifyListeners();
     }
@@ -342,6 +344,20 @@ class TransactionDetailsState extends ChangeNotifier {
     }
     allocationFormKey.currentState?.save();
 
+    /// Check if value is empty. Allow when changing date -> default to transaction's value
+    /// TODO maybe should set to everything minus current allocations/reimbursements...
+    if (updatedAllocation.value == 0) {
+      if (updatedAllocation.timestamp == null) {
+        return 'Value must be set';
+      }
+      final currentValue = valueController.text.toIntDollar();
+      if (currentValue == null) {
+        return 'Value must be set';
+      }
+      updatedAllocation.value = currentValue.abs();
+    }
+
+    /// Check if category is empty. Allow when changing date -> default to transaction's category
     if (updatedAllocation.category == null) {
       if (updatedAllocation.timestamp != null && category != null) {
         updatedAllocation.category = category;

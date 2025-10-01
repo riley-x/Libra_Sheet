@@ -79,9 +79,9 @@ class _FocusTextFieldState extends State<FocusTextField> {
           errorStyle: const TextStyle(height: 0),
           border: const OutlineInputBorder(), // this sets the shape, but the color is not used
           hintText: widget.hint,
-          hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+          hintStyle: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
           labelText: widget.label,
           contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           isDense: true,
@@ -133,8 +133,12 @@ class LibraTextFormField extends StatelessWidget {
       maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hint,
+        isCollapsed: true, // this doesn't work?
         // hintStyle: Theme.of(context).textTheme.bodySmall,
-        errorStyle: const TextStyle(height: 0), // remove space used by error message
+        errorStyle: const TextStyle(
+          height: 0,
+          fontSize: 0,
+        ), // remove space used by error message. This still leaves like a pixel of space
         border: const OutlineInputBorder(), // this sets the shape, but the color is not used
         contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         isDense: true,

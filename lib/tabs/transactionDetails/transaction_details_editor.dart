@@ -104,7 +104,7 @@ class TransactionDetailsEditor extends StatelessWidget {
                           context,
                           'Value',
                           ValueField(
-                            initial: state.seed?.value,
+                            controller: state.valueController,
                             onSave: (it) => state.value = it,
                             onChanged: state.onValueChanged,
                           ),
