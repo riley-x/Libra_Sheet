@@ -207,7 +207,7 @@ class _TextElements extends StatelessWidget {
                     fontStyle: (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
                         ? FontStyle.italic
                         : FontStyle.normal,
-                    decoration: trans.category == Category.ignore
+                    decoration: (adjValue == 0 || trans.category == Category.ignore)
                         ? null
                         : (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
                         ? TextDecoration.lineThrough
