@@ -162,10 +162,18 @@ class _TextElements extends StatelessWidget {
         allocations.add(const SizedBox(width: 10));
       }
     }
-    if (adjValue != trans.value && adjValue != 0) {
+    if (adjValue != trans.value && adjValue != 0 && trans.category != Category.ignore) {
       allocations.add(_AllocIndicator(adjValue, trans.category));
       allocations.add(const SizedBox(width: 10));
     }
+
+    final valueTextColor = (trans.value == 0)
+        ? null
+        : (adjValue == 0 || trans.category == Category.ignore)
+        ? Theme.of(context).colorScheme.outline
+        : (trans.value < 0)
+        ? Colors.red
+        : Colors.green;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,16 +203,16 @@ class _TextElements extends StatelessWidget {
                   trans.value.dollarString(),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     // decoration: (adjValue == 0) ? TextDecoration.lineThrough : null,
-                    color: (trans.value == 0)
-                        ? null
-                        : (adjValue == 0)
-                        ? Theme.of(context).colorScheme.outline
-                        : (trans.value < 0)
-                        ? Colors.red
-                        : Colors.green,
+                    color: valueTextColor,
                     fontStyle: (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
                         ? FontStyle.italic
                         : FontStyle.normal,
+                    decoration: trans.category == Category.ignore
+                        ? null
+                        : (trans.totalReimbusrements > 0 || trans.nAllocations > 0)
+                        ? TextDecoration.lineThrough
+                        : null,
+                    decorationColor: valueTextColor,
                   ),
                 ),
               ],
