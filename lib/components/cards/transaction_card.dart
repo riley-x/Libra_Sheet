@@ -146,6 +146,26 @@ class _TextElements extends StatelessWidget {
 
     final adjValue = trans.adjustedValue();
     final sign = (trans.value < 0) ? -1 : 1;
+    final allocations = [];
+    if (trans.totalReimbusrements != 0 && adjValue != 0) {
+      allocations.add(_AllocIndicator(trans.totalReimbusrements * sign, Category.ignore));
+      allocations.add(const SizedBox(width: 10));
+    }
+    if (trans.softAllocations.length > 3) {
+      allocations.add(_Indicator("${trans.softAllocations.length} alloc."));
+      allocations.add(const SizedBox(width: 10));
+    } else {
+      for (final alloc in trans.softAllocations) {
+        allocations.add(
+          _AllocIndicator(alloc.value * sign, alloc.category, timestamp: alloc.timestamp),
+        );
+        allocations.add(const SizedBox(width: 10));
+      }
+    }
+    if (adjValue != trans.value && adjValue != 0) {
+      allocations.add(_AllocIndicator(adjValue, trans.category));
+      allocations.add(const SizedBox(width: 10));
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,18 +190,7 @@ class _TextElements extends StatelessWidget {
           children: [
             Row(
               children: [
-                if (trans.totalReimbusrements != 0 && adjValue != 0) ...[
-                  _AllocIndicator(trans.totalReimbusrements * sign, Category.ignore),
-                  const SizedBox(width: 10),
-                ],
-                for (final alloc in trans.softAllocations) ...[
-                  _AllocIndicator(alloc.value * sign, alloc.category, timestamp: alloc.timestamp),
-                  const SizedBox(width: 10),
-                ],
-                if (adjValue != trans.value && adjValue != 0) ...[
-                  _AllocIndicator(adjValue, trans.category),
-                  const SizedBox(width: 10),
-                ],
+                ...allocations,
                 Text(
                   trans.value.dollarString(),
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -210,7 +219,7 @@ class _TextElements extends StatelessWidget {
 }
 
 class _AllocIndicator extends StatelessWidget {
-  const _AllocIndicator(this.value, this.category, {super.key, this.timestamp});
+  const _AllocIndicator(this.value, this.category, {this.timestamp});
 
   final int value;
   final Category category;
@@ -259,61 +268,27 @@ class _AllocIndicator extends StatelessWidget {
   }
 }
 
-class _ReimbIndicator extends StatelessWidget {
-  const _ReimbIndicator(this.value, {super.key});
+class _Indicator extends StatelessWidget {
+  const _Indicator(this.text);
 
-  final int value;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    final color = Colors.grey.shade700;
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: color),
+          side: BorderSide(color: colorScheme.onSurface),
           borderRadius: BorderRadius.circular(8),
         ),
+        color: null,
       ),
       child: Center(
         child: Text(
-          value.dollarString(),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
-        ),
-      ),
-    );
-  }
-}
-
-class _NumberIndicator extends StatelessWidget {
-  const _NumberIndicator(this.n, this.isAlloc);
-
-  final int n;
-  final bool isAlloc;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(left: 3, right: 3, bottom: 1),
-      decoration: BoxDecoration(
-        color: (isAlloc)
-            ? const Color.fromARGB(255, 221, 79, 145)
-            : const Color.fromARGB(255, 100, 65, 197),
-        borderRadius: BorderRadius.circular(4),
-        // border: Border.all(
-        //   color: Colors.white,
-        //   width: 5.0,
-        //   style: BorderStyle.solid,
-        // ),
-      ),
-      child: Center(
-        child: Text(
-          (n < 10)
-              ? '$n'
-              : (isAlloc)
-              ? 'A'
-              : 'R',
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.white),
+          text,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurface),
         ),
       ),
     );
