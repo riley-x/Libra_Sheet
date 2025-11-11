@@ -10,12 +10,7 @@ import 'package:libra_sheet/tabs/navigation/libra_navigation.dart';
 import 'package:provider/provider.dart';
 
 class AccountCard extends StatelessWidget {
-  const AccountCard({
-    super.key,
-    required this.account,
-    this.onTap,
-    this.padding,
-  });
+  const AccountCard({super.key, required this.account, this.onTap, this.padding});
 
   final Account account;
   final Function(Account)? onTap;
@@ -95,55 +90,89 @@ class AccountCard extends StatelessWidget {
         onSecondaryTapUp: (it) => _onSecondaryTapUp(context, it),
         child: Padding(
           padding: padding ?? const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Row(
+          child: account.balance == 0 && account.lastTransaction != null
+              ? _ZeroBalanceCard(account: account)
+              : _NormalCard(account: account, lastUpdatedColor: lastUpdatedColor),
+        ),
+      ),
+    );
+  }
+}
+
+class _NormalCard extends StatelessWidget {
+  const _NormalCard({required this.account, required this.lastUpdatedColor});
+
+  final Account account;
+  final Color lastUpdatedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(width: 4, height: 40, color: account.color),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 4,
-                height: 40,
-                color: account.color,
+              Text(
+                account.name,
+                style: theme.textTheme.titleMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: theme.textTheme.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      account.description,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    account.balance.dollarString(),
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  Text(
-                    account.lastUpdated != null
-                        ? "Updated: ${DateFormat.MMMd().format(account.lastUpdated!)}"
-                        : "",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: lastUpdatedColor,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
+              Text(
+                account.description,
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-      ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(account.balance.dollarString(), style: theme.textTheme.titleMedium),
+            Text(
+              account.lastUpdated != null
+                  ? "Updated: ${DateFormat.MMMd().format(account.lastUpdated!)}"
+                  : "",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: lastUpdatedColor,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ZeroBalanceCard extends StatelessWidget {
+  const _ZeroBalanceCard({required this.account});
+
+  final Account account;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(width: 4, height: 22, color: account.color),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            account.name,
+            style: theme.textTheme.titleMedium,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Text(account.balance.dollarString(), style: theme.textTheme.titleMedium),
+      ],
     );
   }
 }
