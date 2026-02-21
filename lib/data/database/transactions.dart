@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/transaction_filters/transaction_filters.dart';
+import 'package:libra_sheet/data/database/account_balance_history.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
@@ -162,6 +163,7 @@ extension TransactionExtension on db.Transaction {
       date: t.date,
       delta: t.value,
     );
+    await updateAccountBalanceHistory(account: t.account!.key, date: t.date, delta: t.value);
 
     for (final tag in t.tags) {
       await insertTagJoin(t, tag);
@@ -198,6 +200,7 @@ extension TransactionExtension on db.Transaction {
         date: t.date,
         delta: -t.value,
       );
+      await updateAccountBalanceHistory(account: t.account!.key, date: t.date, delta: -t.value);
     }
     await delete(transactionsTable, where: "$_key = ?", whereArgs: [t.key]);
   }

@@ -53,7 +53,7 @@ extension AccountBalanceHistoryExtensionT on Transaction {
 //----------------------------------------------------------------------------------
 extension AccountBalanceHistoryExtension on DatabaseExecutor {
   /// Returns a map of the monthly balance delta for each account.
-  Future<Map<int, List<TimeIntValue>>> getAllHistory() async {
+  Future<Map<int, List<TimeIntValue>>> getAccountBalanceHistories() async {
     final maps = await query(
       accountBalanceHistoryTable,
       columns: [_date, _account, _value],
@@ -73,6 +73,26 @@ extension AccountBalanceHistoryExtension on DatabaseExecutor {
       );
     }
     return out;
+  }
+
+  /// Returns the monthly net worth change across all accounts.
+  /// This sums the balance deltas for all accounts by month.
+  Future<List<TimeIntValue>> getNetWorthHistory() async {
+    final List<Map<String, dynamic>> maps = await query(
+      accountBalanceHistoryTable,
+      columns: [_date, "SUM($_value) as $_value"],
+      where: "$_value != 0",
+      groupBy: _date,
+      orderBy: _date,
+    );
+
+    return List.generate(
+      maps.length,
+      (i) => TimeIntValue(
+        time: DateTime.fromMillisecondsSinceEpoch(maps[i][_date], isUtc: true),
+        value: maps[i][_value],
+      ),
+    );
   }
 }
 

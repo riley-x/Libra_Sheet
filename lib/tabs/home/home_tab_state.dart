@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:libra_sheet/components/buttons/time_frame_selector.dart';
 import 'package:libra_sheet/data/app_state/libra_app_state.dart';
-import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/account_balance_history.dart';
 import 'package:libra_sheet/data/database/libra_database.dart';
 import 'package:libra_sheet/data/month.dart';
 import 'package:libra_sheet/data/objects/account.dart';
 import 'package:libra_sheet/data/time_value.dart';
 
-enum HomeChartMode {
-  netWorth,
-  stacked,
-  pies,
-}
+enum HomeChartMode { netWorth, stacked, pies }
 
 class AccountHistory {
   final Account account;
@@ -19,10 +15,10 @@ class AccountHistory {
   final Map<Month, int> monthEndValues;
 
   AccountHistory(this.account, this.values, List<DateTime> months)
-      : monthEndValues = {
-          for (int i = 0; i < values.length; i++)
-            Month(year: months[i].year, index: months[i].month): values[i],
-        };
+    : monthEndValues = {
+        for (int i = 0; i < values.length; i++)
+          Month(year: months[i].year, index: months[i].month): values[i],
+      };
 }
 
 class HomeTabState extends ChangeNotifier {
@@ -59,8 +55,9 @@ class HomeTabState extends ChangeNotifier {
   Map<int, AccountHistory> historyMap = {};
 
   Future<void> load() async {
-    final netWorthRaw = await LibraDatabase.read((db) => db.getMonthlyNet()) ?? [];
-    final accountHistoryRaw = await LibraDatabase.read((db) => db.getMonthlyNetAllAccounts()) ?? {};
+    final netWorthRaw = await LibraDatabase.read((db) => db.getNetWorthHistory()) ?? [];
+    final accountHistoryRaw =
+        await LibraDatabase.read((db) => db.getAccountBalanceHistories()) ?? {};
     if (_disposed) return; // can happen due to async gap
 
     monthList = List.from(appState.monthList);
