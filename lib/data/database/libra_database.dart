@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:libra_sheet/data/database/accounts.dart';
+import 'package:libra_sheet/data/database/account_balance_history.dart';
 import 'package:libra_sheet/data/database/allocations.dart';
 import 'package:libra_sheet/data/database/categories.dart';
 import 'package:libra_sheet/data/database/category_history.dart';
+import 'package:libra_sheet/data/database/migrations/migration_17_18.dart';
 import 'package:libra_sheet/data/database/reimbursements.dart';
 import 'package:libra_sheet/data/database/rules.dart';
 import 'package:libra_sheet/data/database/tags.dart';
@@ -74,9 +76,12 @@ class LibraDatabase {
   static Future<void> open() async {
     _db = await openDatabase(
       databasePath,
-      version: 17,
+      version: 18,
       onCreate: _createDatabase,
       onUpgrade: _upgradeDatabase,
+      onDowngrade: (db, oldVersion, newVersion) async {
+        throw StateError('Database downgrade is not supported: $oldVersion -> $newVersion');
+      },
     );
   }
 
@@ -205,6 +210,10 @@ class LibraDatabase {
     if (oldVersion <= 16 && newVersion >= 17) {
       await _upgrade16_17(db);
     }
+
+    if (oldVersion <= 17 && newVersion >= 18) {
+      await _upgrade17_18(db);
+    }
   }
 }
 
@@ -230,6 +239,9 @@ FutureOr<void> _createDatabase(Database db, int version) async {
   if (version >= 17) {
     await _upgrade16_17(db);
   }
+  if (version >= 18) {
+    await _upgrade17_18(db, false);
+  }
 }
 
 Future<void> _upgrade14_15(Database db, int oldVersion, int newVersion) async {
@@ -253,6 +265,13 @@ Future<void> _upgrade15_16(Database db) async {
 
 Future<void> _upgrade16_17(Database db) async {
   await db.execute(addAllocationTimestampColumnSql);
+}
+
+Future<void> _upgrade17_18(Database db, [bool populate = true]) async {
+  await db.execute(createAccountBalanceHistoryTableSql);
+  if (populate) {
+    await populateAccountBalanceHistory(db);
+  }
 }
 
 const _initAccounts = '''
